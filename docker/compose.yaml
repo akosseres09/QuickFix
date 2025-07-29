@@ -1,0 +1,33 @@
+services:
+  web:
+    container_name: web
+    build:
+      context: ./backend
+    volumes:
+      - ${BACKEND_PATH}:/var/www/html
+    ports:
+      - "80:80"
+    configs:
+      - source: apache_config
+        target: /etc/apache2/sites-available/000-default.conf
+    depends_on:
+      - db
+
+  db:
+    container_name: db
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/mysql
+
+volumes:
+  pgdata:
+    driver: local
+configs:
+  apache_config:
+    file: ${APACHE_CONFIG_PATH}
