@@ -28,12 +28,25 @@ class User extends ActiveRecord implements IdentityInterface
     const STATUS_DELETED = 0;
     const STATUS_INACTIVE = 9;
     const STATUS_ACTIVE = 10;
+    const LOGIN_SCENARIO = 'login';
+    const SIGNUP_SCENARIO = 'signup';
 
+    public function fields(): array
+    {
+        $fields = parent::fields();
+
+        if ($this->getScenario() === self::SCENARIO_DEFAULT) {
+            unset($fields['password_hash']);
+        }
+
+        unset($fields['password_reset_token'], $fields['auth_key'], $fields['verification_token']);
+        return $fields;
+    }
 
     /**
      * {@inheritdoc}
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return '{{%user}}';
     }
@@ -41,7 +54,7 @@ class User extends ActiveRecord implements IdentityInterface
     /**
      * {@inheritdoc}
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         return [
             TimestampBehavior::class,
@@ -51,7 +64,7 @@ class User extends ActiveRecord implements IdentityInterface
     /**
      * {@inheritdoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             ['status', 'default', 'value' => self::STATUS_INACTIVE],
