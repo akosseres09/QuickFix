@@ -1,6 +1,6 @@
 services:
   web:
-    container_name: web
+    container_name: backend
     build:
       context: ./backend
     volumes:
@@ -24,6 +24,18 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/mysql
+
+  frontend:
+    container_name: frontend
+    build:
+      context: ./frontend
+    ports:
+      - "4200:4200"
+    volumes:
+      - ${FRONTEND_PATH}:/app
+    depends_on:
+      - db
+      - web
 
 volumes:
   pgdata:
