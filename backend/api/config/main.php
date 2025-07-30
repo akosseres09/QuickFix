@@ -39,7 +39,6 @@ return [
                     'class' => 'yii\rest\UrlRule',
                     // The controller paths are now simpler, without the 'v1/' prefix
                     'controller' => ['user'], // Add your controllers here
-                    'pluralize' => false,
                 ],
             ],
         ],
