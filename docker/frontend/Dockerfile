@@ -3,7 +3,7 @@
 FROM node:20-alpine
 
 # Install Angular CLI globally
-RUN npm install -g @angular/cli
+RUN npm install -g @angular/cli@19
 
 # Workdir where Angular app will be created
 WORKDIR /app
@@ -16,4 +16,4 @@ RUN chmod +x /entrypoint.sh
 USER node
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["ng", "serve", "--host", "0.0.0.0"]
+CMD ["ng", "serve", "--poll=2000", "--host", "0.0.0.0"]
