@@ -1,0 +1,80 @@
+<!-- Login Card -->
+<div
+    class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg dark:bg-slate-800 m-4"
+>
+    <!-- Header -->
+    <div class="text-center">
+        <h1 class="text-3xl font-bold text-slate-900 dark:text-white">
+            Welcome Back
+        </h1>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+            Please sign in to continue.
+        </p>
+    </div>
+
+    <form class="space-y-4">
+        <mat-form-field class="w-full" appearance="outline">
+            <mat-label>Email Address</mat-label>
+            <mat-icon matPrefix class="!text-light-text dark:!text-inherit"
+                >email</mat-icon
+            >
+            <input
+                class="focus:border-dark-primary"
+                matInput
+                type="email"
+                autocomplete="email"
+                required
+                placeholder="pat@example.com"
+            />
+        </mat-form-field>
+
+        <mat-form-field class="w-full" color="accent" appearance="outline">
+            <mat-label>Password</mat-label>
+            <mat-icon matPrefix class="!text-light-text dark:!text-inherit"
+                >lock</mat-icon
+            >
+            <input
+                matInput
+                type="password"
+                autocomplete="current-password"
+                required
+            />
+            <mat-icon
+                class="cursor-pointer !text-light-text dark:!text-inherit"
+                (click)="togglePwVisibility($event)"
+                matSuffix
+                >{{ pwVisible ? "visibility_off" : "visibility" }}</mat-icon
+            >
+        </mat-form-field>
+
+        <div>
+            <button
+                type="submit"
+                mat-raised-button
+                color="primary"
+                class="w-full !py-3 !transition-colors !duration-300 !text-dark-text !bg-light-primary"
+            >
+                Sign In
+            </button>
+        </div>
+    </form>
+
+    <!-- Footer -->
+    <div class="text-center text-sm flex flex-col gap-2">
+        <p>
+            Don't have an account?
+            <a
+                routerLink="/auth/signup"
+                class="font-medium text-light-accent dark:text-dark-primary hover:text-light-accent-hover dark:hover:text-dark-primary-hover"
+                >Sign up</a
+            >
+        </p>
+        <div class="text-sm">
+            <a
+                routerLink="/auth/forgot-password"
+                class="font-medium text-light-accent dark:text-dark-primary hover:text-light-accent-hover dark:hover:text-dark-primary-hover"
+                >Forgot password?</a
+            >
+        </div>
+    </div>
+</div>
