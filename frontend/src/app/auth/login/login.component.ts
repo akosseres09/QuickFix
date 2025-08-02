@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import {
+    MatError,
     MatFormField,
     MatInput,
     MatLabel,
@@ -9,7 +10,13 @@ import {
     MatSuffix,
 } from '@angular/material/input';
 import { RouterLink } from '@angular/router';
-import { ThemeService } from '../../shared/services/theme.service';
+import {
+    FormBuilder,
+    FormControl,
+    FormGroup,
+    ReactiveFormsModule,
+    Validators,
+} from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -22,7 +29,9 @@ import { CommonModule } from '@angular/common';
         MatIcon,
         MatPrefix,
         MatSuffix,
+        MatError,
         RouterLink,
+        ReactiveFormsModule,
         CommonModule,
     ],
     templateUrl: './login.component.html',
@@ -30,15 +39,18 @@ import { CommonModule } from '@angular/common';
 })
 export class LoginComponent implements OnInit {
     pwVisible = false;
-    theme: 'light' | 'dark' = 'light';
+    loginForm: FormGroup;
 
-    constructor(private themeService: ThemeService) {}
-
-    ngOnInit(): void {
-        this.theme = this.themeService.getTheme();
+    constructor(private fb: FormBuilder) {
+        this.loginForm = this.fb.group({
+            email: ['', [Validators.required, Validators.email]],
+            password: ['', [Validators.required, Validators.minLength(6)]],
+        });
     }
 
-    togglePwVisibility(event: MouseEvent) {
+    ngOnInit(): void {}
+
+    togglePwVisibility(event: MouseEvent): void {
         const input = (event.target as HTMLElement)
             .closest('mat-form-field')
             ?.querySelector('input');
@@ -50,5 +62,16 @@ export class LoginComponent implements OnInit {
             );
             this.pwVisible = !this.pwVisible;
         }
+    }
+
+    getControl(controlName: string) {
+        return this.loginForm.get(controlName);
+    }
+
+    onSubmit(): void {
+        if (!this.loginForm.valid) return;
+
+        const { email, password } = this.loginForm.value;
+        console.log('Login attempt:', { email, password });
     }
 }

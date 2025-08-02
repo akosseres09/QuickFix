@@ -12,20 +12,34 @@
         </p>
     </div>
 
-    <form class="space-y-4">
+    <form class="space-y-4" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
         <mat-form-field class="w-full" appearance="outline">
             <mat-label>Email Address</mat-label>
             <mat-icon matPrefix class="!text-light-text dark:!text-inherit"
                 >email</mat-icon
             >
             <input
-                class="focus:border-dark-primary"
+                formControlName="email"
+                class="focus:border-dark-primary foe"
                 matInput
                 type="email"
                 autocomplete="email"
                 required
                 placeholder="pat@example.com"
             />
+            <mat-error
+                *ngIf="
+                    getControl('email')?.invalid && getControl('email')?.touched
+                "
+            >
+                <!-- You can also check for specific errors -->
+                <span *ngIf="getControl('email')?.hasError('required')"
+                    >Email is required.</span
+                >
+                <span *ngIf="getControl('email')?.hasError('email')"
+                    >Provide a valid email address.</span
+                >
+            </mat-error>
         </mat-form-field>
 
         <mat-form-field class="w-full" color="accent" appearance="outline">
@@ -34,6 +48,7 @@
                 >lock</mat-icon
             >
             <input
+                formControlName="password"
                 matInput
                 type="password"
                 autocomplete="current-password"
@@ -45,6 +60,20 @@
                 matSuffix
                 >{{ pwVisible ? "visibility_off" : "visibility" }}</mat-icon
             >
+            <mat-error
+                *ngIf="
+                    getControl('password')?.invalid &&
+                    getControl('password')?.touched
+                "
+            >
+                <!-- You can also check for specific errors -->
+                <span *ngIf="getControl('password')?.hasError('required')"
+                    >Password is required.</span
+                >
+                <span *ngIf="getControl('password')?.hasError('minlength')"
+                    >Password must be at least 6 characters.</span
+                >
+            </mat-error>
         </mat-form-field>
 
         <div>
@@ -71,7 +100,7 @@
         </p>
         <div class="text-sm">
             <a
-                routerLink="/auth/forgot-password"
+                routerLink="/auth/reset-password"
                 class="font-medium text-light-accent dark:text-dark-primary hover:text-light-accent-hover dark:hover:text-dark-primary-hover"
                 >Forgot password?</a
             >

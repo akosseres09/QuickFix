@@ -17,6 +17,7 @@ export const routes: Routes = [
                     import('./auth/login/login.component').then(
                         (c) => c.LoginComponent
                     ),
+                title: 'Ticketing - Login',
             },
             {
                 path: 'signup',
@@ -24,13 +25,7 @@ export const routes: Routes = [
                     import('./auth/signup/signup.component').then(
                         (c) => c.SignupComponent
                     ),
-            },
-            {
-                path: 'not-found',
-                loadComponent: () =>
-                    import('./auth/not-found/not-found.component').then(
-                        (c) => c.NotFoundComponent
-                    ),
+                title: 'Ticketing - Signup',
             },
             {
                 path: 'reset-password',
@@ -38,6 +33,15 @@ export const routes: Routes = [
                     import(
                         './auth/reset-password/reset-password.component'
                     ).then((c) => c.ResetPasswordComponent),
+                title: 'Ticketing - Reset Password',
+            },
+            {
+                path: 'not-found',
+                loadComponent: () =>
+                    import('./auth/not-found/not-found.component').then(
+                        (c) => c.NotFoundComponent
+                    ),
+                title: 'Ticketing - Not Found',
             },
             {
                 path: '**',
