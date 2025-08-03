@@ -36,6 +36,7 @@ import { CommonModule } from '@angular/common';
     ],
     templateUrl: './login.component.html',
     styleUrl: './login.component.css',
+    standalone: true,
 })
 export class LoginComponent implements OnInit {
     pwVisible = false;

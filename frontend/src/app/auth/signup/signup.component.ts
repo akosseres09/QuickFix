@@ -1,11 +1,5 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
-import {
-    FormBuilder,
-    FormGroup,
-    ReactiveFormsModule,
-    Validators,
-} from '@angular/forms';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import {
@@ -16,7 +10,10 @@ import {
     MatPrefix,
     MatSuffix,
 } from '@angular/material/input';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { AuthService } from '../../shared/services/auth/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-signup',
@@ -35,33 +32,38 @@ import { RouterLink } from '@angular/router';
     ],
     templateUrl: './signup.component.html',
     styleUrl: './signup.component.css',
+    standalone: true,
 })
-export class SignupComponent implements OnInit {
+export class SignupComponent implements OnInit, OnDestroy {
     pwVisible = false;
     rePwVisible = false;
     signupForm: FormGroup;
+    signupSub?: Subscription;
+    signupErrors?: Array<string>;
 
-    constructor(private fb: FormBuilder) {
+    constructor(
+        private router: Router,
+        private fb: FormBuilder,
+        private authService: AuthService
+    ) {
         this.signupForm = this.fb.group(
             {
                 username: ['', [Validators.required, Validators.minLength(5)]],
                 email: ['', [Validators.required, Validators.email]],
                 password: ['', [Validators.required, Validators.minLength(6)]],
-                rePassword: [
-                    '',
-                    [Validators.required, Validators.minLength(6)],
-                ],
+                rePassword: ['', [Validators.required, Validators.minLength(6)]],
             },
             {
-                validators: this.passwordMatchValidator(
-                    'password',
-                    'rePassword'
-                ),
+                validators: this.passwordMatchValidator('password', 'rePassword'),
             }
         );
     }
 
     ngOnInit(): void {}
+
+    ngOnDestroy() {
+        this.signupSub?.unsubscribe();
+    }
 
     togglePwVisibility(event: MouseEvent): void {
         const input = (event.target as HTMLElement)
@@ -89,7 +91,16 @@ export class SignupComponent implements OnInit {
     onSubmit(): void {
         if (!this.signupForm.valid) return;
 
-        console.log('Signup attempt:', this.signupForm.value);
+        this.signupSub = this.authService.signup(this.signupForm.value).subscribe({
+            next: (result) => {
+                this.signupErrors = [];
+                this.router.navigateByUrl('/auth/verify');
+            },
+            error: (error) => {
+                const errorObj = error.error.error.details.error as Array<string>;
+                this.signupErrors = Object.values(errorObj).flat();
+            },
+        });
     }
 
     passwordMatchValidator(controlName: string, mactchingControlName: string) {

@@ -1,4 +1,12 @@
 <?php
+
+$params = array_merge(
+    require __DIR__ . '/../../common/config/params.php',
+    require __DIR__ . '/../../common/config/params-local.php',
+    require __DIR__ . '/params.php',
+    require __DIR__ . '/params-local.php'
+);
+
 return [
     'id' => 'app-api',
     'basePath' => dirname(__DIR__),
@@ -38,9 +46,16 @@ return [
                 [
                     'class' => 'yii\rest\UrlRule',
                     // The controller paths are now simpler, without the 'v1/' prefix
-                    'controller' => ['user'], // Add your controllers here
+                    'controller' => ['user', 'auth'], // Add your controllers here
+                    'pluralize' => false
                 ],
+                    'auth/login' => 'auth/login',
+                    'auth/signup' => 'auth/signup',
+                    'auth/logout' => 'auth/logout',
+                    'auth/verify' => 'auth/verify'
+
             ],
         ],
     ],
+    'params' => $params
 ];

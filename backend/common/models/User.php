@@ -21,6 +21,8 @@ use yii\web\IdentityInterface;
  * @property integer $status
  * @property integer $created_at
  * @property integer $updated_at
+ * @property integer $deleted_at
+ * @property integer $is_admin
  * @property string $password write-only password
  */
 class User extends ActiveRecord implements IdentityInterface
@@ -28,6 +30,8 @@ class User extends ActiveRecord implements IdentityInterface
     const STATUS_DELETED = 0;
     const STATUS_INACTIVE = 9;
     const STATUS_ACTIVE = 10;
+    const ADMIN = 1;
+    const USER = 0;
     const LOGIN_SCENARIO = 'login';
     const SIGNUP_SCENARIO = 'signup';
 
@@ -67,8 +71,16 @@ class User extends ActiveRecord implements IdentityInterface
     public function rules(): array
     {
         return [
+            [['username', 'password_reset_token','auth_key','email'], 'unique'],
+            [['auth_key', 'username', 'password_hash','email'], 'required'],
+            [['auth_key'], 'string', 'max' => 32],
+            [['email'], 'email'],
+            [['email', 'password_hash', 'username', 'password_reset_token', 'verification_token'],'string', 'max' => 255],
+            ['is_admin', 'default', 'value' => self::USER],
+            ['is_admin', 'in', 'range' => [self::USER, self::ADMIN]],
             ['status', 'default', 'value' => self::STATUS_INACTIVE],
-            ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_INACTIVE, self::STATUS_DELETED]],
+            ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_INACTIVE]],
+            [['created_at', 'updated_at', 'deleted_at'], 'integer']
         ];
     }
 
@@ -77,7 +89,7 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public static function findIdentity($id)
     {
-        return static::findOne(['id' => $id, 'status' => self::STATUS_ACTIVE]);
+        return static::findOne(['id' => $id, 'status' => self::STATUS_ACTIVE, 'deleted_at' => null]);
     }
 
     /**

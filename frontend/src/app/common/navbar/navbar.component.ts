@@ -9,7 +9,7 @@ import {
 import { MatIcon } from '@angular/material/icon';
 import { RouterLink, RouterModule } from '@angular/router';
 import { User } from '../../shared/model/User';
-import { ThemeService } from '../../shared/services/theme.service';
+import { ThemeService } from '../../shared/services/theme/theme.service';
 
 @Component({
     selector: 'app-navbar',
@@ -24,6 +24,7 @@ import { ThemeService } from '../../shared/services/theme.service';
     ],
     templateUrl: './navbar.component.html',
     styleUrl: './navbar.component.css',
+    standalone: true,
 })
 export class NavbarComponent implements OnInit, AfterViewInit {
     isMenuOpen = false;

@@ -14,33 +14,33 @@ export const routes: Routes = [
             {
                 path: 'login',
                 loadComponent: () =>
-                    import('./auth/login/login.component').then(
-                        (c) => c.LoginComponent
-                    ),
+                    import('./auth/login/login.component').then((c) => c.LoginComponent),
                 title: 'Ticketing - Login',
             },
             {
                 path: 'signup',
                 loadComponent: () =>
-                    import('./auth/signup/signup.component').then(
-                        (c) => c.SignupComponent
-                    ),
+                    import('./auth/signup/signup.component').then((c) => c.SignupComponent),
                 title: 'Ticketing - Signup',
             },
             {
                 path: 'reset-password',
                 loadComponent: () =>
-                    import(
-                        './auth/reset-password/reset-password.component'
-                    ).then((c) => c.ResetPasswordComponent),
+                    import('./auth/reset-password/reset-password.component').then(
+                        (c) => c.ResetPasswordComponent
+                    ),
                 title: 'Ticketing - Reset Password',
+            },
+            {
+                path: 'verify',
+                loadComponent: () =>
+                    import('./auth/verify/verify.component').then((c) => c.VerifyComponent),
+                title: 'Ticketing - Verify Account',
             },
             {
                 path: 'not-found',
                 loadComponent: () =>
-                    import('./auth/not-found/not-found.component').then(
-                        (c) => c.NotFoundComponent
-                    ),
+                    import('./auth/not-found/not-found.component').then((c) => c.NotFoundComponent),
                 title: 'Ticketing - Not Found',
             },
             {

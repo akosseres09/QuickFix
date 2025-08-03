@@ -5,11 +5,18 @@
     <!-- Header -->
     <div class="text-center">
         <h1 class="text-3xl font-bold text-slate-900 dark:text-white">
-            Welcome Back
+            Account Creation
         </h1>
         <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
-            Please sign in to continue.
+            Simple and easy
         </p>
+    </div>
+    <div class="flex flex-col items-center" *ngIf="signupErrors" >
+        @for (error of signupErrors; track $index) {
+            <mat-error>
+                {{error}}
+            </mat-error>
+        }
     </div>
 
     <form class="space-y-4" [formGroup]="signupForm" (ngSubmit)="onSubmit()">
@@ -142,7 +149,7 @@
                 color="primary"
                 class="w-full !py-3 !transition-colors !duration-300 !text-dark-text !bg-light-primary"
             >
-                Sign In
+                Sign Up
             </button>
         </div>
     </form>
