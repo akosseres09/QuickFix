@@ -49,10 +49,11 @@ return [
                     'controller' => ['user', 'auth'], // Add your controllers here
                     'pluralize' => false
                 ],
-                    'auth/login' => 'auth/login',
-                    'auth/signup' => 'auth/signup',
-                    'auth/logout' => 'auth/logout',
-                    'auth/verify' => 'auth/verify'
+                'auth/login' => 'auth/login',
+                'auth/signup' => 'auth/signup',
+                'auth/logout' => 'auth/logout',
+                'auth/verify' => 'auth/verify',
+                'auth/resend-verification-email' => 'auth/resend-verification-email',
 
             ],
         ],

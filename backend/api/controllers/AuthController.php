@@ -3,17 +3,21 @@
 namespace api\controllers;
 
 
+use Yii;
 use api\components\ResponseMaker;
+use common\components\traits\EmailSenderTrait;
 use common\models\SignupForm;
-use frontend\models\VerifyEmailForm;
-use yii\base\InvalidArgumentException;
+use common\models\User;
 use yii\filters\Cors;
 use yii\rest\Controller;
 use yii\web\BadRequestHttpException;
+use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
 class AuthController extends Controller
 {
+
+    use EmailSenderTrait;
 
     public function behaviors(): array
     {
@@ -55,13 +59,13 @@ class AuthController extends Controller
         return ['message' => 'Logout successful'];
     }
 
-    public function actionSignup(): array {
+    public function actionSignup(): array
+    {
 
         $form = new SignupForm();
         if ($form->load(\Yii::$app->request->getBodyParams(), '') && $form->signup()) {
-            \Yii::$app->response->statusCode = 200;
             return  ResponseMaker::asSuccess([
-               'success' => true
+                'success' => true
             ]);
         }
 
@@ -76,23 +80,80 @@ class AuthController extends Controller
     public function actionVerify(): array
     {
         $token = \Yii::$app->request->post('token');
-        try {
-            $model = new VerifyEmailForm($token);
-        } catch (InvalidArgumentException $e) {
-            throw new BadRequestHttpException($e->getMessage());
+
+        $user = User::findByVerificationToken($token);
+
+        if (!$user) {
+            throw new NotFoundHttpException('Invalid verification token.');
         }
 
-        if ($model->verifyEmail()) {
+        if ($user->isEmailTokenExpired()) {
+            throw new BadRequestHttpException('Verification token has expired.');
+        }
+
+        $user->removeEmailVerifyToken();
+        $user->status = User::STATUS_ACTIVE;
+
+        if ($user->save()) {
             return ResponseMaker::asSuccess([
-                'success' => true
+                'success' => true,
+                'message' => 'User verified successfully.'
             ]);
         }
 
-        return ResponseMaker::asError('Unable to verify your account!');
+        throw new BadRequestHttpException('Failed to verify user.', 430);
     }
 
-    public function actionResetPassword(): array {
+    public function actionResendVerificationEmail(): array
+    {
+
+        $email = \Yii::$app->request->post('email');
+
+        if (!$email) {
+            throw new BadRequestHttpException('Email is required to resend verification email.');
+        }
+
+        $user = User::find()->byEmail($email)->inactive()->one();
+
+        if (!$user) {
+            throw new NotFoundHttpException('No user found to email!', 410);
+        }
+
+        $user->generateEmailVerificationToken();
+        $user->setEmailTokenExpireDate();
+
+        if ($user->save() && $this->sendEmail($user)) {
+            return ResponseMaker::asSuccess([
+                'success' => true,
+                'message' => 'Verification email sent successfully.'
+            ]);
+        }
+
+        throw new BadRequestHttpException('Failed to resend verification email.', 430);
+    }
+
+    public function actionResetPassword(): array
+    {
+        $token = \Yii::$app->request->post('token');
+
+        if (!$token) {
+            throw new BadRequestHttpException('Token is required for password reset.');
+        }
+
+        $user = User::findByPasswordResetToken($token);
+
+        if (!$user) {
+            throw new NotFoundHttpException('Invalid password reset token.', 410);
+        }
+
+        $newPassword = \Yii::$app->request->post('newPassword');
+
+        if (!$newPassword) {
+            throw new BadRequestHttpException('New password is required.', 400);
+        }
+
+        $user->setPassword($newPassword);
+
         return [];
     }
-
 }

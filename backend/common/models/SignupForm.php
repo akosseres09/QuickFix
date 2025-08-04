@@ -11,6 +11,8 @@ use yii\db\Exception;
  */
 class SignupForm extends Model
 {
+    use \common\components\traits\EmailSenderTrait;
+
     public $username;
     public $email;
     public $password;
@@ -46,15 +48,16 @@ class SignupForm extends Model
         if (!$this->validate()) {
             return null;
         }
-        
+
         $user = new User();
         $user->username = $this->username;
         $user->email = $this->email;
         $user->setPassword($this->password);
         $user->generateAuthKey();
         $user->generateEmailVerificationToken();
+        $user->email_verification_token_expires_at = time() + 3600;
 
-        return $user->save() && $this->sendEmail($user);
+        return $user->save() && $this->sendVerificationEmail($user);
     }
 
     /**
@@ -62,17 +65,8 @@ class SignupForm extends Model
      * @param User $user user model to with email should be send
      * @return bool whether the email was sent
      */
-    protected function sendEmail(User $user): bool
+    protected function sendVerificationEmail(User $user): bool
     {
-        return Yii::$app
-            ->mailer
-            ->compose(
-                ['html' => 'emailVerify-html', 'text' => 'emailVerify-text'],
-                ['user' => $user]
-            )
-            ->setFrom([Yii::$app->params['supportEmail'] => Yii::$app->name . ' robot'])
-            ->setTo($this->email)
-            ->setSubject('Account registration at ' . Yii::$app->name)
-            ->send();
+        return $this->sendEmail($user);
     }
 }
