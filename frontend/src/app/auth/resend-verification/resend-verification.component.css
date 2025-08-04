@@ -1,0 +1,10 @@
+html[data-theme='light'] :host mat-error {
+    color: red !important;
+}
+html[data-theme='light'] :host .mat-input-invalid .mat-input-placeholder {
+    color: red !important;
+}
+
+html[data-theme='light'] :host .mat-input-invalid .mat-input-ripple {
+    background-color: red !important;
+}

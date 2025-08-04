@@ -1,23 +1,15 @@
 <!-- Login Card -->
-<div
-    class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg dark:bg-slate-800 m-4"
->
+<div class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg dark:bg-slate-800 m-4">
     <!-- Header -->
     <div class="text-center">
-        <h1 class="text-3xl font-bold text-slate-900 dark:text-white">
-            Welcome Back
-        </h1>
-        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
-            Please sign in to continue.
-        </p>
+        <h1 class="text-3xl font-bold text-slate-900 dark:text-white">Welcome Back</h1>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Please sign in to continue.</p>
     </div>
 
     <form class="space-y-4" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
         <mat-form-field class="w-full" appearance="outline">
             <mat-label>Email Address</mat-label>
-            <mat-icon matPrefix class="!text-light-text dark:!text-inherit"
-                >email</mat-icon
-            >
+            <mat-icon matPrefix class="!text-light-text dark:!text-inherit">email</mat-icon>
             <input
                 formControlName="email"
                 class="focus:border-dark-primary foe"
@@ -27,15 +19,9 @@
                 required
                 placeholder="pat@example.com"
             />
-            <mat-error
-                *ngIf="
-                    getControl('email')?.invalid && getControl('email')?.touched
-                "
-            >
+            <mat-error *ngIf="getControl('email')?.invalid">
                 <!-- You can also check for specific errors -->
-                <span *ngIf="getControl('email')?.hasError('required')"
-                    >Email is required.</span
-                >
+                <span *ngIf="getControl('email')?.hasError('required')">Email is required.</span>
                 <span *ngIf="getControl('email')?.hasError('email')"
                     >Provide a valid email address.</span
                 >
@@ -44,9 +30,7 @@
 
         <mat-form-field class="w-full" color="accent" appearance="outline">
             <mat-label>Password</mat-label>
-            <mat-icon matPrefix class="!text-light-text dark:!text-inherit"
-                >lock</mat-icon
-            >
+            <mat-icon matPrefix class="!text-light-text dark:!text-inherit">lock</mat-icon>
             <input
                 formControlName="password"
                 matInput
@@ -58,14 +42,9 @@
                 class="cursor-pointer !text-light-text dark:!text-inherit"
                 (click)="togglePwVisibility($event)"
                 matSuffix
-                >{{ pwVisible ? "visibility_off" : "visibility" }}</mat-icon
+                >{{ pwVisible ? 'visibility_off' : 'visibility' }}</mat-icon
             >
-            <mat-error
-                *ngIf="
-                    getControl('password')?.invalid &&
-                    getControl('password')?.touched
-                "
-            >
+            <mat-error *ngIf="getControl('password')?.invalid">
                 <!-- You can also check for specific errors -->
                 <span *ngIf="getControl('password')?.hasError('required')"
                     >Password is required.</span
@@ -90,6 +69,14 @@
 
     <!-- Footer -->
     <div class="text-center text-sm flex flex-col gap-2">
+        <div class="text-sm">
+            Forgot password?
+            <a
+                routerLink="/auth/reset-password"
+                class="font-medium text-light-accent dark:text-dark-primary hover:text-light-accent-hover dark:hover:text-dark-primary-hover"
+                >Reset</a
+            >
+        </div>
         <p>
             Don't have an account?
             <a
@@ -98,12 +85,5 @@
                 >Sign up</a
             >
         </p>
-        <div class="text-sm">
-            <a
-                routerLink="/auth/reset-password"
-                class="font-medium text-light-accent dark:text-dark-primary hover:text-light-accent-hover dark:hover:text-dark-primary-hover"
-                >Forgot password?</a
-            >
-        </div>
     </div>
 </div>

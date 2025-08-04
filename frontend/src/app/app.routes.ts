@@ -38,6 +38,14 @@ export const routes: Routes = [
                 title: 'Ticketing - Verify Account',
             },
             {
+                path: 'resend-verification',
+                loadComponent: () =>
+                    import('./auth/resend-verification/resend-verification.component').then(
+                        (c) => c.ResendVerificationComponent
+                    ),
+                title: 'Ticketing - Resend Verification',
+            },
+            {
                 path: 'not-found',
                 loadComponent: () =>
                     import('./auth/not-found/not-found.component').then((c) => c.NotFoundComponent),

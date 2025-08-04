@@ -1,7 +1,7 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../shared/services/auth/auth.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { MatError, MatFormField, MatInput, MatLabel, MatPrefix } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
@@ -21,6 +21,7 @@ import { SnackbarService } from '../../shared/services/snackbar/snackbar.service
         ReactiveFormsModule,
         MatIcon,
         CommonModule,
+        RouterLink,
     ],
     templateUrl: './verify.component.html',
     styleUrl: './verify.component.css',
@@ -29,6 +30,8 @@ import { SnackbarService } from '../../shared/services/snackbar/snackbar.service
 export class VerifyComponent implements OnInit, OnDestroy {
     verifyForm: FormGroup;
     verifySub?: Subscription;
+    verifyPage: boolean = true;
+    currentRoute = inject(ActivatedRoute);
 
     constructor(
         private authService: AuthService,
@@ -36,8 +39,10 @@ export class VerifyComponent implements OnInit, OnDestroy {
         private fb: FormBuilder,
         private snackbar: SnackbarService
     ) {
+        const token = this.currentRoute.snapshot.queryParamMap.get('token') ?? '';
+
         this.verifyForm = this.fb.group({
-            token: ['', [Validators.required, Validators.maxLength(255)]],
+            token: [token, [Validators.required, Validators.maxLength(255)]],
         });
     }
 
@@ -60,12 +65,19 @@ export class VerifyComponent implements OnInit, OnDestroy {
                 this.router.navigateByUrl('/auth/login');
             },
             error: (error) => {
-                this.snackbar.open('Failed to verify account!');
+                console.error(error);
+                this.snackbar.open('Failed to verify account!', ['snackbar-error']);
             },
         });
     }
 
+    resendVerificationEmail() {}
+
     getControl(name: string) {
         return this.verifyForm.get(name);
+    }
+
+    togglePage() {
+        this.verifyPage = !this.verifyPage;
     }
 }

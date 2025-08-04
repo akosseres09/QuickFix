@@ -1,6 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
 
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
     --color-light-text: #0f0c18;
@@ -35,72 +35,68 @@
     border-right: none;
 }
 
-html[data-theme="light"]
+html[data-theme='light']
     .mdc-text-field--outlined:not(.mdc-text-field--disabled)
     .mdc-notched-outline__leading,
-html[data-theme="light"]
+html[data-theme='light']
     .mdc-text-field--outlined:not(.mdc-text-field--disabled)
     .mdc-notched-outline__notch,
-html[data-theme="light"]
+html[data-theme='light']
     .mdc-text-field--outlined:not(.mdc-text-field--disabled)
     .mdc-notched-outline__trailing {
     border-color: var(--color-light-text) !important;
 }
 
-html[data-theme="light"]
-    .mdc-text-field--outlined:not(.mdc-text-field--disabled):not(
-        .mdc-text-field--focused
-    ):hover
+html[data-theme='light']
+    .mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover
     .mdc-notched-outline
     .mdc-notched-outline__leading,
-html[data-theme="light"]
-    .mdc-text-field--outlined:not(.mdc-text-field--disabled):not(
-        .mdc-text-field--focused
-    ):hover
+html[data-theme='light']
+    .mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover
     .mdc-notched-outline
     .mdc-notched-outline__notch,
-html[data-theme="light"]
-    .mdc-text-field--outlined:not(.mdc-text-field--disabled):not(
-        .mdc-text-field--focused
-    ):hover
+html[data-theme='light']
+    .mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover
     .mdc-notched-outline
     .mdc-notched-outline__trailing {
     border-color: var(--color-light-text) !important;
 }
 
-html[data-theme="light"]
+html[data-theme='light']
     .mat-mdc-form-field.mat-mdc-form-field.mat-mdc-form-field.mat-mdc-form-field.mat-mdc-form-field
     .mdc-notched-outline__notch {
     border-left: none;
 }
 
-html[data-theme="light"]
+html[data-theme='light']
     .mat-mdc-text-field-wrapper.mdc-text-field--outlined
     .mdc-notched-outline--upgraded
     .mdc-floating-label--float-above {
     color: var(--color-light-text) !important;
 }
-html[data-theme="light"]
-    .mdc-text-field:not(.mdc-text-field--disabled)
-    .mdc-floating-label {
+html[data-theme='light'] .mdc-text-field:not(.mdc-text-field--disabled) .mdc-floating-label {
     color: var(--color-light-text) !important;
 }
 
-html[data-theme="light"]
+html[data-theme='light']
     .mdc-text-field--invalid:not(.mdc-text-field--disabled)
     .mdc-floating-label {
     color: var(--color-light-text) !important;
 }
 
-html[data-theme="light"] input::placeholder {
+html[data-theme='light'] input::placeholder {
     color: var(--color-light-text) !important;
 }
 
-html[data-theme="light"]
-    .mdc-text-field:not(.mdc-text-field--disabled)
-    .mdc-text-field__input {
+html[data-theme='light'] .mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__input {
     color: var(--color-light-text) !important;
     caret-color: var(--color-light-text) !important;
+}
+
+.snackbar-error {
+    --mdc-snackbar-container-color: rgba(250, 53, 53, 0.74);
+    --mdc-snackbar-supporting-text-color: white;
+    --mat-snack-bar-button-color: white;
 }
 
 html,
@@ -109,5 +105,5 @@ body {
 }
 body {
     margin: 0;
-    font-family: Roboto, "Helvetica Neue", sans-serif;
+    font-family: Roboto, 'Helvetica Neue', sans-serif;
 }

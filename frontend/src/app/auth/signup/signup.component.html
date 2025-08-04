@@ -1,20 +1,14 @@
 <!-- Login Card -->
-<div
-    class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg dark:bg-slate-800 m-4"
->
+<div class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg dark:bg-slate-800 m-4">
     <!-- Header -->
     <div class="text-center">
-        <h1 class="text-3xl font-bold text-slate-900 dark:text-white">
-            Account Creation
-        </h1>
-        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
-            Simple and easy
-        </p>
+        <h1 class="text-3xl font-bold text-slate-900 dark:text-white">Account Creation</h1>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Simple and easy</p>
     </div>
-    <div class="flex flex-col items-center" *ngIf="signupErrors" >
+    <div class="flex flex-col items-center" *ngIf="signupErrors">
         @for (error of signupErrors; track $index) {
             <mat-error>
-                {{error}}
+                {{ error }}
             </mat-error>
         }
     </div>
@@ -34,12 +28,7 @@
                 required
                 placeholder="asd"
             />
-            <mat-error
-                *ngIf="
-                    getControl('username')?.invalid &&
-                    getControl('username')?.touched
-                "
-            >
+            <mat-error *ngIf="getControl('username')?.invalid">
                 <!-- You can also check for specific errors -->
                 <span *ngIf="getControl('username')?.hasError('required')"
                     >Username is required.</span
@@ -51,9 +40,7 @@
         </mat-form-field>
         <mat-form-field class="w-full" appearance="outline">
             <mat-label>Email Address</mat-label>
-            <mat-icon matPrefix class="!text-light-text dark:!text-inherit"
-                >email</mat-icon
-            >
+            <mat-icon matPrefix class="!text-light-text dark:!text-inherit">email</mat-icon>
             <input
                 formControlName="email"
                 class="focus:border-dark-primary"
@@ -63,15 +50,9 @@
                 required
                 placeholder="pat@example.com"
             />
-            <mat-error
-                *ngIf="
-                    getControl('email')?.invalid && getControl('email')?.touched
-                "
-            >
+            <mat-error *ngIf="getControl('email')?.invalid">
                 <!-- You can also check for specific errors -->
-                <span *ngIf="getControl('email')?.hasError('required')"
-                    >Email is required.</span
-                >
+                <span *ngIf="getControl('email')?.hasError('required')">Email is required.</span>
                 <span *ngIf="getControl('email')?.hasError('email')"
                     >Provide a valid email address.</span
                 >
@@ -80,9 +61,7 @@
 
         <mat-form-field class="w-full" color="accent" appearance="outline">
             <mat-label>Password</mat-label>
-            <mat-icon matPrefix class="!text-light-text dark:!text-inherit"
-                >lock</mat-icon
-            >
+            <mat-icon matPrefix class="!text-light-text dark:!text-inherit">lock</mat-icon>
             <input
                 formControlName="password"
                 matInput
@@ -94,7 +73,7 @@
                 class="cursor-pointer !text-light-text dark:!text-inherit"
                 (click)="togglePwVisibility($event)"
                 matSuffix
-                >{{ pwVisible ? "visibility_off" : "visibility" }}</mat-icon
+                >{{ pwVisible ? 'visibility_off' : 'visibility' }}</mat-icon
             >
             <mat-error *ngIf="getControl('password')?.invalid">
                 <!-- You can also check for specific errors -->
@@ -112,9 +91,7 @@
 
         <mat-form-field class="w-full" color="accent" appearance="outline">
             <mat-label>Confirm password</mat-label>
-            <mat-icon matPrefix class="!text-light-text dark:!text-inherit"
-                >lock</mat-icon
-            >
+            <mat-icon matPrefix class="!text-light-text dark:!text-inherit">lock</mat-icon>
             <input
                 formControlName="rePassword"
                 matInput
@@ -126,15 +103,15 @@
                 class="cursor-pointer !text-light-text dark:!text-inherit"
                 (click)="togglePwVisibility($event)"
                 matSuffix
-                >{{ rePwVisible ? "visibility_off" : "visibility" }}</mat-icon
+                >{{ rePwVisible ? 'visibility_off' : 'visibility' }}</mat-icon
             >
             <mat-error *ngIf="getControl('rePassword')?.invalid">
                 <!-- You can also check for specific errors -->
                 <span *ngIf="getControl('rePassword')?.hasError('required')"
-                    >Password is required.</span
+                    >Password Confirmation is required.</span
                 >
                 <span *ngIf="getControl('rePassword')?.hasError('minlength')"
-                    >Password must be at least 6 characters.</span
+                    >Password Confirmation must be at least 6 characters.</span
                 >
                 <span *ngIf="getControl('rePassword')?.hasError('mustMatch')"
                     >Passwords must match.</span
@@ -162,6 +139,14 @@
                 routerLink="/auth/login"
                 class="font-medium text-light-accent dark:text-dark-primary hover:text-light-accent-hover dark:hover:text-dark-primary-hover"
                 >Log in</a
+            >
+        </p>
+        <p>
+            Need to verify your email?
+            <a
+                routerLink="/auth/verify"
+                class="font-medium text-light-accent dark:text-dark-primary hover:text-light-accent-hover dark:hover:text-dark-primary-hover"
+                >Verify</a
             >
         </p>
     </div>
