@@ -134,7 +134,33 @@ class AuthController extends Controller
 
     public function actionResetPassword(): array
     {
+
+        $email = \Yii::$app->request->post('email');
         $token = \Yii::$app->request->post('token');
+
+        // send the reset password email if email is provided and token is not provided
+        // otherwise, reset the password using the token
+        if ($email && !$token) {
+            $user = User::find()->byEmail($email)->active()->one();
+
+            if (!$user) {
+                throw new NotFoundHttpException('No user found with this email.', 410);
+            }
+
+            $user->generatePasswordResetToken();
+
+            if (
+                $user->save() &&
+                $this->sendEmail($user, 'passwordResetToken-html', 'passwordResetToken-text', 'Password Reset Request')
+            ) {
+                return ResponseMaker::asSuccess([
+                    'success' => true,
+                    'message' => 'Password reset email sent successfully.'
+                ]);
+            }
+
+            throw new BadRequestHttpException('Failed to send password reset email.', 430);
+        }
 
         if (!$token) {
             throw new BadRequestHttpException('Token is required for password reset.');
@@ -146,14 +172,27 @@ class AuthController extends Controller
             throw new NotFoundHttpException('Invalid password reset token.', 410);
         }
 
-        $newPassword = \Yii::$app->request->post('newPassword');
+        if (!$user->isPasswordResetTokenValid()) {
+            throw new BadRequestHttpException('Password reset token has expired.', 400);
+        }
+
+        $newPassword = \Yii::$app->request->post('password');
+
 
         if (!$newPassword) {
             throw new BadRequestHttpException('New password is required.', 400);
         }
 
         $user->setPassword($newPassword);
+        $user->removePasswordResetToken();
 
-        return [];
+        if ($user->save()) {
+            return ResponseMaker::asSuccess([
+                'success' => true,
+                'message' => 'Password reset successfully.'
+            ]);
+        }
+
+        throw new BadRequestHttpException('Failed to reset password.', 430);
     }
 }

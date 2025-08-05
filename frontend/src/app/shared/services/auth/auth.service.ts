@@ -22,7 +22,7 @@ export class AuthService {
         });
     }
 
-    verify(token: string) {
+    verify(token: string): Observable<errorResponse | successResponse> {
         const headers = new HttpHeaders({
             'Content-Type': 'application/json',
         });
@@ -38,15 +38,40 @@ export class AuthService {
         );
     }
 
-    resendEmail(email: string): Observable<errorResponse | successResponse> {
+    resendEmail(
+        email: string,
+        link: string = '/auth/resend-verification-email'
+    ): Observable<errorResponse | successResponse> {
+        const headers = new HttpHeaders({
+            'Content-Type': 'application/json',
+        });
+
+        const fullUrl = this.url + link;
+
+        return this.http.post<errorResponse | successResponse>(
+            fullUrl,
+            {
+                email: email,
+            },
+            {
+                headers: headers,
+            }
+        );
+    }
+
+    resetPassword(
+        token: string,
+        password: string
+    ): Observable<errorResponse | successResponse> {
         const headers = new HttpHeaders({
             'Content-Type': 'application/json',
         });
 
         return this.http.post<errorResponse | successResponse>(
-            this.url + '/auth/resend-verification-email',
+            this.url + '/auth/reset-password',
             {
-                email: email,
+                token: token,
+                password: password,
             },
             {
                 headers: headers,

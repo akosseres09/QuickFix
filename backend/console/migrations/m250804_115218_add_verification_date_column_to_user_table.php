@@ -13,6 +13,7 @@ class m250804_115218_add_verification_date_column_to_user_table extends Migratio
     public function safeUp()
     {
         $this->addColumn('{{%user}}', 'email_verification_token_expires_at', $this->integer()->null());
+        $this->addColumn('{{%user}}', 'password_reset_token_expires_at', $this->integer()->null());
     }
 
     /**
@@ -21,5 +22,6 @@ class m250804_115218_add_verification_date_column_to_user_table extends Migratio
     public function safeDown()
     {
         $this->dropColumn('{{%user}}', 'email_verification_token_expires_at');
+        $this->dropColumn('{{%user}}', 'password_reset_token_expires_at');
     }
 }

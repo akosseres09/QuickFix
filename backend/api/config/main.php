@@ -54,6 +54,7 @@ return [
                 'auth/logout' => 'auth/logout',
                 'auth/verify' => 'auth/verify',
                 'auth/resend-verification-email' => 'auth/resend-verification-email',
+                'auth/reset-password' => 'auth/reset-password',
 
             ],
         ],

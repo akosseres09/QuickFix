@@ -24,6 +24,7 @@ use yii\web\IdentityInterface;
  * @property integer $updated_at
  * @property integer $deleted_at
  * @property integer $email_verification_token_expires_at
+ * @property integer $password_reset_token_expires_at
  * @property integer $is_admin
  * @property string $password write-only password
  */
@@ -36,7 +37,7 @@ class User extends ActiveRecord implements IdentityInterface
     const USER = 0;
     const LOGIN_SCENARIO = 'login';
     const SIGNUP_SCENARIO = 'signup';
-    const VERIFY_TOKEN_EXPIRE = 3600; // 1 hour
+    const TOKEN_EXPIRE = 3600; // 1 hour
 
     public function fields(): array
     {
@@ -127,10 +128,6 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public static function findByPasswordResetToken($token)
     {
-        if (!static::isPasswordResetTokenValid($token)) {
-            return null;
-        }
-
         return static::findOne([
             'password_reset_token' => $token,
             'status' => self::STATUS_ACTIVE,
@@ -149,15 +146,13 @@ class User extends ActiveRecord implements IdentityInterface
      * @param string $token password reset token
      * @return bool
      */
-    public static function isPasswordResetTokenValid($token)
+    public function isPasswordResetTokenValid()
     {
-        if (empty($token)) {
+        if (empty($this->password_reset_token)) {
             return false;
         }
 
-        $timestamp = (int) substr($token, strrpos($token, '_') + 1);
-        $expire = Yii::$app->params['user.passwordResetTokenExpire'];
-        return $timestamp + $expire >= time();
+        return time() < $this->password_reset_token_expires_at;
     }
 
     /**
@@ -218,7 +213,8 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public function generatePasswordResetToken()
     {
-        $this->password_reset_token = Yii::$app->security->generateRandomString() . '_' . time();
+        $this->password_reset_token = Yii::$app->security->generateRandomString();
+        $this->password_reset_token_expires_at = time() + self::TOKEN_EXPIRE;
     }
 
     /**
@@ -242,7 +238,7 @@ class User extends ActiveRecord implements IdentityInterface
 
     public function setEmailTokenExpireDate(): void
     {
-        $this->email_verification_token_expires_at = time() + self::VERIFY_TOKEN_EXPIRE;
+        $this->email_verification_token_expires_at = time() + self::TOKEN_EXPIRE;
     }
 
     public function isEmailTokenExpired(): bool
@@ -256,5 +252,6 @@ class User extends ActiveRecord implements IdentityInterface
     public function removePasswordResetToken()
     {
         $this->password_reset_token = null;
+        $this->password_reset_token_expires_at = null;
     }
 }

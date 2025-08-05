@@ -14,6 +14,8 @@ import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { Subscription } from 'rxjs';
+import { passwordMatchValidator } from '../../shared/validators/passwordValidator/passwordValidator';
+import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 
 @Component({
     selector: 'app-signup',
@@ -44,7 +46,8 @@ export class SignupComponent implements OnInit, OnDestroy {
     constructor(
         private router: Router,
         private fb: FormBuilder,
-        private authService: AuthService
+        private authService: AuthService,
+        private snackbar: SnackbarService
     ) {
         this.signupForm = this.fb.group(
             {
@@ -54,7 +57,7 @@ export class SignupComponent implements OnInit, OnDestroy {
                 rePassword: ['', [Validators.required, Validators.minLength(6)]],
             },
             {
-                validators: this.passwordMatchValidator('password', 'rePassword'),
+                validators: passwordMatchValidator('password', 'rePassword'),
             }
         );
     }
@@ -94,6 +97,7 @@ export class SignupComponent implements OnInit, OnDestroy {
         this.signupSub = this.authService.signup(this.signupForm.value).subscribe({
             next: (result) => {
                 this.signupErrors = [];
+                this.snackbar.open('Account created successfully! Please verify your email.');
                 this.router.navigateByUrl('/auth/verify');
             },
             error: (error) => {
@@ -101,27 +105,5 @@ export class SignupComponent implements OnInit, OnDestroy {
                 this.signupErrors = Object.values(errorObj).flat();
             },
         });
-    }
-
-    passwordMatchValidator(controlName: string, mactchingControlName: string) {
-        return (FormGroup: FormGroup) => {
-            const control = FormGroup.controls[controlName];
-            const matchingControl = FormGroup.controls[mactchingControlName];
-
-            if (
-                control.value !== matchingControl.value &&
-                matchingControl.touched &&
-                control.touched
-            ) {
-                matchingControl.setErrors({ mustMatch: true });
-                control.setErrors({ mustMatch: true });
-            } else if (
-                control.value === matchingControl.value &&
-                (!control.errors || !matchingControl.errors)
-            ) {
-                matchingControl.setErrors(null);
-                control.setErrors(null);
-            }
-        };
     }
 }
