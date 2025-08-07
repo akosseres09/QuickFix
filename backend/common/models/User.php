@@ -2,7 +2,10 @@
 
 namespace common\models;
 
+use api\models\UserRefreshToken;
 use common\models\query\UserQuery;
+use Lcobucci\JWT\UnencryptedToken;
+use Throwable;
 use Yii;
 use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
@@ -27,6 +30,9 @@ use yii\web\IdentityInterface;
  * @property integer $password_reset_token_expires_at
  * @property integer $is_admin
  * @property string $password write-only password
+ * 
+ * relations
+ * @property RefreshToken[] $refreshTokens
  */
 class User extends ActiveRecord implements IdentityInterface
 {
@@ -106,7 +112,25 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public static function findIdentityByAccessToken($token, $type = null)
     {
-        throw new NotSupportedException('"findIdentityByAccessToken" is not implemented.');
+        try {
+            $config = Yii::$app->get('jwt');
+
+            $parsedToken = $config->parser()->parse($token);
+            assert($parsedToken instanceof UnencryptedToken);
+
+            $constraints = $config->validationConstraints();
+
+            if (!$config->validator()->validate($parsedToken, ...$constraints)) {
+                return null;
+            }
+
+            $userId = $parsedToken->claims()->get('uid');
+
+            return static::findIdentity($userId);
+        } catch (\Throwable $e) {
+            Yii::error('Error parsing access token: ' . $e->getMessage(), __METHOD__);
+            return null;
+        }
     }
 
     /**
@@ -155,6 +179,11 @@ class User extends ActiveRecord implements IdentityInterface
         return time() < $this->password_reset_token_expires_at;
     }
 
+    public function getRefreshTokens()
+    {
+        return $this->hasMany(UserRefreshToken::class, ['user_id' => 'id']);
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -169,6 +198,16 @@ class User extends ActiveRecord implements IdentityInterface
     public function getAuthKey()
     {
         return $this->auth_key;
+    }
+
+    public function getEmailToken(): string
+    {
+        return $this->verification_token;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === self::STATUS_ACTIVE && $this->deleted_at === null;
     }
 
     /**
@@ -209,7 +248,7 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * Generates new password reset token
+     * Generates new password reset token and sets expiration date
      */
     public function generatePasswordResetToken()
     {
@@ -218,36 +257,33 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * Generates new token for email verification
+     * Generates new token for email verification and sets expiration date
      */
     public function generateEmailVerificationToken()
     {
         $this->verification_token = Yii::$app->security->generateRandomString() . '_' . time();
-    }
-
-    public function removeEmailVerifyToken(): void
-    {
-        $this->verification_token = null;
-        $this->email_verification_token_expires_at = null;
-    }
-
-    public function getEmailToken(): string
-    {
-        return $this->verification_token;
-    }
-
-    public function setEmailTokenExpireDate(): void
-    {
         $this->email_verification_token_expires_at = time() + self::TOKEN_EXPIRE;
     }
 
+    /**
+     * Checks if email verification token is expired
+     */
     public function isEmailTokenExpired(): bool
     {
         return time() > $this->email_verification_token_expires_at;
     }
 
     /**
-     * Removes password reset token
+     * Removes email verification token and its expiration date
+     */
+    public function removeEmailVerifyToken(): void
+    {
+        $this->verification_token = null;
+        $this->email_verification_token_expires_at = null;
+    }
+
+    /**
+     * Removes password reset token and its expiration date
      */
     public function removePasswordResetToken()
     {

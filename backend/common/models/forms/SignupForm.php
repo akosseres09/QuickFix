@@ -1,8 +1,8 @@
 <?php
 
-namespace common\models;
+namespace common\models\forms;
 
-use Yii;
+use common\models\User;
 use yii\base\Model;
 use yii\db\Exception;
 

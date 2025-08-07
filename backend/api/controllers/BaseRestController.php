@@ -21,6 +21,11 @@ class BaseRestController extends ActiveController
                 'Access-Control-Allow-Credentials' => true,
             ],
         ];
+        $behaviors['authenticator'] = [
+            'class' => \yii\filters\auth\HttpBearerAuth::class,
+            'except' => ['options'], // Allow OPTIONS requests without authentication
+        ];
+
         return $behaviors;
     }
 }

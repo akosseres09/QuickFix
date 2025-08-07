@@ -58,4 +58,9 @@ class UserQuery extends ActiveQuery
     {
         return $this->andWhere(['verification_token' => $token]);
     }
+
+    public function byUsername(string $username): UserQuery
+    {
+        return $this->andWhere(['username' => $username]);
+    }
 }

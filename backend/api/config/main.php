@@ -18,6 +18,7 @@ return [
             'parsers' => [
                 'application/json' => 'yii\web\JsonParser',
             ],
+            'enableCookieValidation' => false, // Disable cookie validation for API
         ],
         'response' => [
             'format' => yii\web\Response::FORMAT_JSON,
@@ -27,6 +28,7 @@ return [
             'identityClass' => 'common\models\User',
             'enableAutoLogin' => false,
             'enableSession' => false,
+            'loginUrl' => null
         ],
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
@@ -55,9 +57,26 @@ return [
                 'auth/verify' => 'auth/verify',
                 'auth/resend-verification-email' => 'auth/resend-verification-email',
                 'auth/reset-password' => 'auth/reset-password',
+                'auth/refresh-token' => 'auth/refresh-token',
 
             ],
         ],
+        'jwt' => function () {
+            $config = \Lcobucci\JWT\Configuration::forSymmetricSigner(
+                new \Lcobucci\JWT\Signer\Hmac\Sha256(),
+                \Lcobucci\JWT\Signer\Key\InMemory::plainText(Yii::$app->params['jwtSecret']),
+            );
+            $config->setValidationConstraints(
+                new \Lcobucci\JWT\Validation\Constraint\SignedWith(
+                    $config->signer(),
+                    $config->signingKey()
+                ),
+                new \Lcobucci\JWT\Validation\Constraint\LooseValidAt(
+                    \Lcobucci\Clock\SystemClock::fromUTC()
+                )
+            );
+            return $config;
+        }
     ],
     'params' => $params
 ];
