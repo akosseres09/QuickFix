@@ -67,14 +67,14 @@ class AuthController extends Controller
     public function actionLogin(): array
     {
         $request = Yii::$app->request;
-        $username = $request->post('username');
+        $username = $request->post('email');
         $password = $request->post('password');
 
         if (!$username || !$password) {
-            throw new BadRequestHttpException('Username and password required.');
+            throw new BadRequestHttpException('Email and password required.');
         }
 
-        $user = User::findByUsername($username);
+        $user = User::findByEmail($username);
 
         if (!$user || !$user->validatePassword($password)) {
             throw new UnauthorizedHttpException('Invalid credentials.');
@@ -142,7 +142,7 @@ class AuthController extends Controller
 
         $form = new SignupForm();
         if ($form->load(\Yii::$app->request->getBodyParams(), '') && $form->signup()) {
-            return  ResponseMaker::asSuccess([
+            return ResponseMaker::asSuccess([
                 'success' => true
             ]);
         }

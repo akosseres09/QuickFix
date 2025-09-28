@@ -1,4 +1,4 @@
 export const environment = {
-    apiUrl: 'http://api.ticketing.test',
+    apiUrl: 'http://api.quickfix.test',
     production: false,
 };

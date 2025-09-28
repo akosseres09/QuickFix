@@ -8,7 +8,7 @@ $params = array_merge(
 );
 
 return [
-    'id' => 'app-api',
+    'id' => 'quickfix-api',
     'basePath' => dirname(__DIR__),
     'controllerNamespace' => 'api\controllers', // Points directly to the api/controllers directory
     'bootstrap' => ['log'],
@@ -47,8 +47,7 @@ return [
             'rules' => [
                 [
                     'class' => 'yii\rest\UrlRule',
-                    // The controller paths are now simpler, without the 'v1/' prefix
-                    'controller' => ['user', 'auth'], // Add your controllers here
+                    'controller' => ['user', 'auth'],
                     'pluralize' => false
                 ],
                 'auth/login' => 'auth/login',
