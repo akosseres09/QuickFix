@@ -197,6 +197,24 @@ $dark-theme: mat.m2-define-dark-theme(
             protected-container-shape: 20px,
         )
     );
+
+    @include mat.snack-bar-overrides(
+        (
+            button-color: if($is-light-theme, white, var-color(--color-dark-text)),
+            container-color: var-color(--color-light-primary),
+            supporting-text-color: white,
+        )
+    );
+
+    @include mat.menu-overrides(
+        (
+            container-color: if(
+                    $is-light-theme,
+                    var-color(--color-light-text-hover),
+                    var-color(--color-dark-hover)
+                ),
+        )
+    );
 }
 
 html[data-theme='light'] {

@@ -33,27 +33,56 @@
         class="overflow-hidden transition-[background-color] duration-200 ease-in-out md:max-h-full md:opacity-100 md:mt-0 md:block"
         [ngClass]="{
             'max-h-0 opacity-0': !isMenuOpen,
-            'max-h-screen opacity-100 mt-4': isMenuOpen
+            'max-h-screen opacity-100 mt-4': isMenuOpen,
         }"
     >
         <ul
-            class="flex flex-col space-y-2 md:space-y-0 md:space-x-6 md:flex-row md:justify-end text-base md:items-center md:mt-2"
+            class="flex flex-col space-y-2 md:space-y-0 md:space-x-3 md:flex-row md:justify-end text-base md:items-center md:mt-2"
         >
             @for (route of routes; track $index) {
-            <li>
-                <a
-                    routerLink="{{ route.path }}"
-                    routerLinkActive="dark:bg-dark-hover bg-light-text-hover"
-                    [routerLinkActiveOptions]="{ exact: true }"
-                    class="block py-2 px-3 border border-transparent rounded-xl dark:hover:bg-dark-hover hover:bg-light-text-hover duration-200"
-                    >{{ route.name }}</a
-                >
-            </li>
+                <li>
+                    <a
+                        routerLink="{{ route.path }}"
+                        routerLinkActive="dark:bg-dark-hover bg-light-text-hover"
+                        [routerLinkActiveOptions]="{ exact: true }"
+                        class="block py-2 px-3 border border-transparent rounded-xl dark:hover:bg-dark-hover hover:bg-light-text-hover duration-200"
+                        >{{ route.name }}</a
+                    >
+                </li>
             }
 
-            <li
-                class="flex items-center justify-start gap-4 px-3 py-2"
-            >
+            <li class="hidden md:flex items-center justify-start">
+                <button
+                    class="p-2 rounded-2xl flex items-center justify-center cursor-pointer dark:hover:bg-dark-hover hover:bg-light-text-hover transition-[background-color] duration-200"
+                    matButton
+                    [matMenuTriggerFor]="menu"
+                >
+                    @if (theme === 'light') {
+                        <mat-icon> sunny </mat-icon>
+                    } @else {
+                        <mat-icon> bedtime </mat-icon>
+                    }
+                </button>
+                <mat-menu class="" #menu="matMenu">
+                    <button
+                        [ngClass]="theme === 'light' ? '!bg-light-background/60' : ''"
+                        mat-menu-item
+                        (click)="setTheme('light')"
+                    >
+                        <mat-icon> sunny </mat-icon>
+                        <span>Light</span>
+                    </button>
+                    <button
+                        [ngClass]="theme === 'dark' ? '!bg-dark-accent/20' : ''"
+                        mat-menu-item
+                        (click)="setTheme('dark')"
+                    >
+                        <mat-icon> bedtime </mat-icon>
+                        <span>Dark</span>
+                    </button>
+                </mat-menu>
+            </li>
+            <li class="flex md:hidden items-center justify-start gap-4 px-3 py-2">
                 <mat-button-toggle-group
                     name="theme"
                     [(value)]="theme"

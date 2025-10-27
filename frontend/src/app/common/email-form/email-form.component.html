@@ -12,7 +12,7 @@
         <mat-icon class="cursor-pointer !text-light-text dark:!text-inherit" matSuffix
             >lock</mat-icon
         >
-        <mat-error *ngIf="getControl('email')?.invalid">
+        <mat-error class="text-sm" *ngIf="getControl('email')?.invalid">
             <span *ngIf="getControl('email')?.hasError('required')">Email is required.</span>
             <span *ngIf="getControl('email')?.hasError('email')">Provide a valid email.</span>
         </mat-error>

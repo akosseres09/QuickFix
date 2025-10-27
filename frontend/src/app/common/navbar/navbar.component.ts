@@ -10,6 +10,7 @@ import { MatIcon } from '@angular/material/icon';
 import { RouterLink, RouterModule } from '@angular/router';
 import { User } from '../../shared/model/User';
 import { ThemeService } from '../../shared/services/theme/theme.service';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 
 @Component({
     selector: 'app-navbar',
@@ -21,6 +22,9 @@ import { ThemeService } from '../../shared/services/theme/theme.service';
         MatIcon,
         MatButtonToggle,
         MatButtonToggleGroup,
+        MatMenu,
+        MatMenuTrigger,
+        MatMenuItem,
     ],
     templateUrl: './navbar.component.html',
     styleUrl: './navbar.component.css',
