@@ -1,6 +1,103 @@
 /* You can add global styles to this file, and also import other style files */
 
-@import "tailwindcss";
+@import 'tailwindcss';
+
+@theme {
+    --color-light-text: #0f0c18;
+    --color-light-background: #e8e4f6;
+    --color-light-primary: #2a196b;
+    --color-light-secondary: #8970eb;
+    --color-light-accent: #390de7;
+
+    --color-light-text-hover: #cdcbd4;
+    --color-light-background-hover: #dcd7ed;
+    --color-light-primary-hover: #201354;
+    --color-light-secondary-hover: #7455e6;
+    --color-light-accent-hover: #2c0ab4;
+
+    --color-dark-text: #eae7f3;
+    --color-dark-background: #0d091b;
+    --color-dark-primary: #a494e6;
+    --color-dark-secondary: #2d148f;
+    --color-dark-accent: #4318f2;
+
+    --color-dark-text-hover: #16084d;
+    --color-dark-background-hover: #18112c;
+    --color-dark-primary-hover: #c1b7f0;
+    --color-dark-secondary-hover: #3f22b8;
+    --color-dark-accent-hover: #623cf5;
+}
+
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+/* fixes border-right issue with angular form fields with appearance outline */
+.mdc-notched-outline__notch {
+    border-right: none;
+}
+
+html[data-theme='light']
+    .mdc-text-field--outlined:not(.mdc-text-field--disabled)
+    .mdc-notched-outline__leading,
+html[data-theme='light']
+    .mdc-text-field--outlined:not(.mdc-text-field--disabled)
+    .mdc-notched-outline__notch,
+html[data-theme='light']
+    .mdc-text-field--outlined:not(.mdc-text-field--disabled)
+    .mdc-notched-outline__trailing {
+    border-color: var(--color-light-text) !important;
+}
+
+html[data-theme='light']
+    .mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover
+    .mdc-notched-outline
+    .mdc-notched-outline__leading,
+html[data-theme='light']
+    .mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover
+    .mdc-notched-outline
+    .mdc-notched-outline__notch,
+html[data-theme='light']
+    .mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover
+    .mdc-notched-outline
+    .mdc-notched-outline__trailing {
+    border-color: var(--color-light-text) !important;
+}
+
+html[data-theme='light']
+    .mat-mdc-form-field.mat-mdc-form-field.mat-mdc-form-field.mat-mdc-form-field.mat-mdc-form-field
+    .mdc-notched-outline__notch {
+    border-left: none;
+}
+
+html[data-theme='light']
+    .mat-mdc-text-field-wrapper.mdc-text-field--outlined
+    .mdc-notched-outline--upgraded
+    .mdc-floating-label--float-above {
+    color: var(--color-light-text) !important;
+}
+html[data-theme='light'] .mdc-text-field:not(.mdc-text-field--disabled) .mdc-floating-label {
+    color: var(--color-light-text) !important;
+}
+
+html[data-theme='light']
+    .mdc-text-field--invalid:not(.mdc-text-field--disabled)
+    .mdc-floating-label {
+    color: var(--color-light-text) !important;
+}
+
+html[data-theme='light'] input::placeholder {
+    color: var(--color-light-text) !important;
+}
+
+html[data-theme='light'] .mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__input {
+    color: var(--color-light-text) !important;
+    caret-color: var(--color-light-text) !important;
+}
+
+.snackbar-error {
+    --mdc-snackbar-container-color: rgba(250, 53, 53, 0.74);
+    --mdc-snackbar-supporting-text-color: white;
+    --mat-snack-bar-button-color: white;
+}
 
 html,
 body {
@@ -8,5 +105,5 @@ body {
 }
 body {
     margin: 0;
-    font-family: Roboto, "Helvetica Neue", sans-serif;
+    font-family: Roboto, 'Helvetica Neue', sans-serif;
 }

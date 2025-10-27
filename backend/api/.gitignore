@@ -1,2 +1,3 @@
 runtime
 config/main-local.php
+config/params-local.php

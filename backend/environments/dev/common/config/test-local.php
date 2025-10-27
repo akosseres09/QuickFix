@@ -3,7 +3,7 @@
 return [
     'components' => [
         'db' => [
-            'dsn' => 'mysql:host=localhost;dbname=yii2advanced_test',
+            'dsn' => 'pgsql:host=localhost;dbname=quickfix_db',
         ],
     ],
 ];

@@ -1,0 +1,80 @@
+<nav class="px-4 py-3 text-xl font-bold relative md:flex md:items-center">
+    <div class="max-w-screen-xl mr-auto flex items-center justify-between">
+        <!-- Logo -->
+        <a href="/auth/login" class="flex items-center space-x-2">
+            <img src="ticketing.png" class="h-10 w-10" alt="Ticketing Logo" />
+            <span>Ticketing</span>
+        </a>
+
+        <!-- Hamburger (Mobile) -->
+        <button
+            class="md:hidden inline-flex items-center p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer"
+            (click)="toggleMenu()"
+            aria-label="Toggle menu"
+        >
+            <svg
+                class="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M4 6h16M4 12h16M4 18h16"
+                ></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Mobile + Desktop Nav Links -->
+    <div
+        class="overflow-hidden transition-all duration-300 ease-in-out md:max-h-full md:opacity-100 md:mt-0 md:block"
+        [ngClass]="{
+            'max-h-0 opacity-0': !isMenuOpen,
+            'max-h-screen opacity-100 mt-4': isMenuOpen
+        }"
+    >
+        <ul
+            class="flex flex-col space-y-2 md:space-y-0 md:space-x-6 md:flex-row md:justify-end text-base md:items-center md:mt-2"
+        >
+            <li
+                class="flex md:order-first order-last items-center justify-start gap-4 px-3 py-2"
+            >
+                <mat-button-toggle-group
+                    name="theme"
+                    [(value)]="theme"
+                    (change)="onToggle($event)"
+                    aria-label="Change theme"
+                >
+                    <mat-button-toggle value="light">
+                        <div
+                            class="text-amber-400 dark:text-yellow-400 flex items-center justify-items-center h-lh"
+                        >
+                            <mat-icon>sunny</mat-icon>
+                        </div>
+                    </mat-button-toggle>
+                    <mat-button-toggle value="dark">
+                        <div
+                            class="text-light-text dark:text-inherit flex items-center justify-items-center h-lh"
+                        >
+                            <mat-icon>bedtime</mat-icon>
+                        </div>
+                    </mat-button-toggle>
+                </mat-button-toggle-group>
+            </li>
+            @for (route of routes; track $index) {
+            <li>
+                <a
+                    routerLink="{{ route.path }}"
+                    routerLinkActive="dark:bg-dark-text-hover bg-light-text-hover"
+                    [routerLinkActiveOptions]="{ exact: true }"
+                    class="block py-2 px-3 border border-transparent rounded-xl dark:hover:bg-dark-text-hover hover:bg-light-text-hover duration-300 transition-discrete"
+                    >{{ route.name }}</a
+                >
+            </li>
+            }
+        </ul>
+    </div>
+</nav>

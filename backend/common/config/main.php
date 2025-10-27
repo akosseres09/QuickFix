@@ -10,4 +10,11 @@ return [
             'class' => \yii\caching\FileCache::class,
         ],
     ],
+    'controllerMap' => [
+        'migrate' => [
+            'class' => 'yii\console\controllers\MigrateController',
+            'newFileOwnership' => '1000:www-data', # Default WSL user id
+            'newFileMode' => 0660,
+        ],
+    ],
 ];

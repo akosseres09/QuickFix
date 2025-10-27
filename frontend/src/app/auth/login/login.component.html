@@ -1,0 +1,89 @@
+<!-- Login Card -->
+<div class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg dark:bg-slate-800 m-4">
+    <!-- Header -->
+    <div class="text-center">
+        <h1 class="text-3xl font-bold text-slate-900 dark:text-white">Welcome Back</h1>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Please sign in to continue.</p>
+    </div>
+
+    <form class="space-y-4" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <mat-form-field class="w-full" appearance="outline">
+            <mat-label>Email Address</mat-label>
+            <mat-icon matPrefix class="!text-light-text dark:!text-inherit">email</mat-icon>
+            <input
+                formControlName="email"
+                class="focus:border-dark-primary foe"
+                matInput
+                type="email"
+                autocomplete="email"
+                required
+                placeholder="pat@example.com"
+            />
+            <mat-error *ngIf="getControl('email')?.invalid">
+                <!-- You can also check for specific errors -->
+                <span *ngIf="getControl('email')?.hasError('required')">Email is required.</span>
+                <span *ngIf="getControl('email')?.hasError('email')"
+                    >Provide a valid email address.</span
+                >
+            </mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="w-full" color="accent" appearance="outline">
+            <mat-label>Password</mat-label>
+            <mat-icon matPrefix class="!text-light-text dark:!text-inherit">lock</mat-icon>
+            <input
+                formControlName="password"
+                matInput
+                type="password"
+                autocomplete="current-password"
+                required
+            />
+            <mat-icon
+                class="cursor-pointer !text-light-text dark:!text-inherit"
+                (click)="togglePwVisibility($event)"
+                matSuffix
+                >{{ pwVisible ? 'visibility_off' : 'visibility' }}</mat-icon
+            >
+            <mat-error *ngIf="getControl('password')?.invalid">
+                <!-- You can also check for specific errors -->
+                <span *ngIf="getControl('password')?.hasError('required')"
+                    >Password is required.</span
+                >
+                <span *ngIf="getControl('password')?.hasError('minlength')"
+                    >Password must be at least 6 characters.</span
+                >
+            </mat-error>
+        </mat-form-field>
+
+        <div>
+            <button
+                type="submit"
+                mat-raised-button
+                color="primary"
+                class="w-full !py-3 !transition-colors !duration-300 !text-dark-text !bg-light-primary"
+            >
+                Sign In
+            </button>
+        </div>
+    </form>
+
+    <!-- Footer -->
+    <div class="text-center text-sm flex flex-col gap-2">
+        <div class="text-sm">
+            Forgot password?
+            <a
+                routerLink="/auth/reset-password"
+                class="font-medium text-light-accent dark:text-dark-primary hover:text-light-accent-hover dark:hover:text-dark-primary-hover"
+                >Reset</a
+            >
+        </div>
+        <p>
+            Don't have an account?
+            <a
+                routerLink="/auth/signup"
+                class="font-medium text-light-accent dark:text-dark-primary hover:text-light-accent-hover dark:hover:text-dark-primary-hover"
+                >Sign up</a
+            >
+        </p>
+    </div>
+</div>
