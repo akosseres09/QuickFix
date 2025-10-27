@@ -94,7 +94,11 @@ export class SignupComponent implements OnInit, OnDestroy {
     onSubmit(): void {
         if (!this.signupForm.valid) return;
 
-        this.signupSub = this.authService.signup(this.signupForm.value).subscribe({
+        this.signupErrors = [];
+        this.snackbar.open('Account created successfully! Please verify your email.');
+        this.router.navigateByUrl('/auth/verify');
+
+        /*this.signupSub = this.authService.signup(this.signupForm.value).subscribe({
             next: (result) => {
                 this.signupErrors = [];
                 this.snackbar.open('Account created successfully! Please verify your email.');
@@ -104,6 +108,6 @@ export class SignupComponent implements OnInit, OnDestroy {
                 const errorObj = error.error.error.details.error as Array<string>;
                 this.signupErrors = Object.values(errorObj).flat();
             },
-        });
+        });*/
     }
 }

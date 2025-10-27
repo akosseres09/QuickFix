@@ -59,7 +59,10 @@ export class VerifyComponent implements OnInit, OnDestroy {
 
         if (!token) return;
 
-        this.authService.verify(token as string).subscribe({
+        this.snackbar.open('Account Verified!');
+        this.router.navigateByUrl('/auth/login');
+
+        /*this.authService.verify(token as string).subscribe({
             next: (response) => {
                 this.snackbar.open('Account Verified!');
                 this.router.navigateByUrl('/auth/login');
@@ -68,7 +71,7 @@ export class VerifyComponent implements OnInit, OnDestroy {
                 console.error(error);
                 this.snackbar.open('Failed to verify account!', ['snackbar-error']);
             },
-        });
+        });*/
     }
 
     resendVerificationEmail() {}

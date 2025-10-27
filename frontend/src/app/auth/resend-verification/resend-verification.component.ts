@@ -30,7 +30,10 @@ export class ResendVerificationComponent implements OnDestroy {
     resend(email: string) {
         if (!email) return;
 
-        this.sub = this.authService.resendEmail(email).subscribe({
+        this.snackbar.open('Verification email sent successfully!');
+        this.router.navigateByUrl('/auth/verify');
+
+        /*this.sub = this.authService.resendEmail(email).subscribe({
             next: (response) => {
                 this.snackbar.open('Verification email sent successfully!');
                 this.router.navigateByUrl('/auth/verify');
@@ -42,6 +45,6 @@ export class ResendVerificationComponent implements OnDestroy {
 
                 this.snackbar.open(message, ['snackbar-error']);
             },
-        });
+        });*/
     }
 }

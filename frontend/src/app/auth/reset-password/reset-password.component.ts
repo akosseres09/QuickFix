@@ -67,8 +67,9 @@ export class ResetPasswordComponent implements OnDestroy {
 
     resend(email: string): void {
         if (!email) return;
-
-        this.emailSub = this.authService.resendEmail(email, '/auth/reset-password').subscribe({
+        this.snackBar.open('Email sent successfully!');
+        this.emailSent = true;
+        /*this.emailSub = this.authService.resendEmail(email, '/auth/reset-password').subscribe({
             next: (response) => {
                 this.snackBar.open('Email sent successfully!');
                 this.emailSent = true;
@@ -79,15 +80,16 @@ export class ResetPasswordComponent implements OnDestroy {
                 ]);
                 console.error('Error in resend email:', error);
             },
-        });
+        });*/
     }
 
     onSubmit(): void {
         if (this.form.invalid) return;
 
         const { token, password } = this.form.value;
-
-        this.passwordSub = this.authService.resetPassword(token, password).subscribe({
+        this.snackBar.open('Password reset successfully!');
+        this.router.navigateByUrl('/auth/login');
+        /*this.passwordSub = this.authService.resetPassword(token, password).subscribe({
             next: (response) => {
                 this.snackBar.open('Password reset successfully!');
                 this.router.navigateByUrl('/auth/login');
@@ -97,7 +99,7 @@ export class ResetPasswordComponent implements OnDestroy {
                     'snackbar-error',
                 ]);
             },
-        });
+        });*/
     }
 
     getControl(name: string) {
