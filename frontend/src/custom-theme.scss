@@ -1,0 +1,210 @@
+@use '@angular/material' as mat;
+
+@function var-color($name) {
+    @return #{'var(' + $name + ')'};
+}
+
+$base-theme: mat.$cyan-palette;
+
+$light-primary: mat.m2-define-palette(
+    (
+        100: var-color(--color-light-primary),
+        200: var-color(--color-light-primary),
+        300: var-color(--color-light-primary),
+        400: var-color(--color-light-primary),
+        500: var-color(--color-light-primary),
+        600: var-color(--color-light-primary),
+        700: var-color(--color-light-primary),
+        800: var-color(--color-light-primary),
+        900: var-color(--color-light-primary),
+        A100: var-color(--color-light-primary),
+        A200: var-color(--color-light-primary),
+        A400: var-color(--color-light-primary),
+        A700: var-color(--color-light-primary),
+        contrast: (
+            100: var-color(--color-light-text),
+            200: var-color(--color-light-text),
+            300: var-color(--color-light-text),
+            400: var-color(--color-light-text),
+            500: var-color(--color-light-text),
+            600: var-color(--color-light-text),
+            700: var-color(--color-light-text),
+            800: var-color(--color-light-text),
+            900: var-color(--color-light-text),
+            A100: var-color(--color-light-text),
+            A200: var-color(--color-light-text),
+            A400: var-color(--color-light-text),
+            A700: var-color(--color-light-text),
+        ),
+    )
+);
+
+$light-accent: mat.m2-define-palette(
+    (
+        100: var-color(--color-light-accent),
+        200: var-color(--color-light-accent),
+        300: var-color(--color-light-accent),
+        400: var-color(--color-light-accent),
+        500: var-color(--color-light-accent),
+        600: var-color(--color-light-accent),
+        700: var-color(--color-light-accent),
+        800: var-color(--color-light-accent),
+        900: var-color(--color-light-accent),
+        A100: var-color(--color-light-accent),
+        A200: var-color(--color-light-accent),
+        A400: var-color(--color-light-accent),
+        A700: var-color(--color-light-accent),
+        contrast: (
+            100: var-color(--color-light-text),
+            200: var-color(--color-light-text),
+            300: var-color(--color-light-text),
+            400: var-color(--color-light-text),
+            500: var-color(--color-light-text),
+            600: var-color(--color-light-text),
+            700: var-color(--color-light-text),
+            800: var-color(--color-light-text),
+            900: var-color(--color-light-text),
+            A100: var-color(--color-light-text),
+            A200: var-color(--color-light-text),
+            A400: var-color(--color-light-text),
+            A700: var-color(--color-light-text),
+        ),
+    )
+);
+
+$dark-primary: mat.m2-define-palette(
+    (
+        100: var-color(--color-dark-primary),
+        200: var-color(--color-dark-primary),
+        300: var-color(--color-dark-primary),
+        400: var-color(--color-dark-primary),
+        500: var-color(--color-dark-primary),
+        600: var-color(--color-dark-primary),
+        700: var-color(--color-dark-primary),
+        800: var-color(--color-dark-primary),
+        900: var-color(--color-dark-primary),
+        A100: var-color(--color-dark-primary),
+        A200: var-color(--color-dark-primary),
+        A400: var-color(--color-dark-primary),
+        A700: var-color(--color-dark-primary),
+        contrast: (
+            100: var-color(--color-dark-text),
+            200: var-color(--color-dark-text),
+            300: var-color(--color-dark-text),
+            400: var-color(--color-dark-text),
+            500: var-color(--color-dark-text),
+            600: var-color(--color-dark-text),
+            700: var-color(--color-dark-text),
+            800: var-color(--color-dark-text),
+            900: var-color(--color-dark-text),
+            A100: var-color(--color-dark-text),
+            A200: var-color(--color-dark-text),
+            A400: var-color(--color-dark-text),
+            A700: var-color(--color-dark-text),
+        ),
+    )
+);
+
+$dark-accent: mat.m2-define-palette(
+    (
+        100: var-color(--color-dark-accent),
+        200: var-color(--color-dark-accent),
+        300: var-color(--color-dark-accent),
+        400: var-color(--color-dark-accent),
+        500: var-color(--color-dark-accent),
+        600: var-color(--color-dark-accent),
+        700: var-color(--color-dark-accent),
+        800: var-color(--color-dark-accent),
+        900: var-color(--color-dark-accent),
+        A100: var-color(--color-dark-accent),
+        A200: var-color(--color-dark-accent),
+        A400: var-color(--color-dark-accent),
+        A700: var-color(--color-dark-accent),
+        contrast: (
+            100: var-color(--color-dark-text),
+            200: var-color(--color-dark-text),
+            300: var-color(--color-dark-text),
+            400: var-color(--color-dark-text),
+            500: var-color(--color-dark-text),
+            600: var-color(--color-dark-text),
+            700: var-color(--color-dark-text),
+            800: var-color(--color-dark-text),
+            900: var-color(--color-dark-text),
+            A100: var-color(--color-dark-text),
+            A200: var-color(--color-dark-text),
+            A400: var-color(--color-dark-text),
+            A700: var-color(--color-dark-text),
+        ),
+    )
+);
+
+$light-theme: mat.m2-define-light-theme(
+    (
+        color: (
+            primary: $light-primary,
+            accent: $light-accent,
+            background: (
+                background: var-color(--color-light-background),
+                card: var-color(--color-light-background-hover),
+            ),
+        ),
+        density: 0,
+        typography: mat.m2-define-typography-config(),
+    )
+);
+
+$dark-theme: mat.m2-define-dark-theme(
+    (
+        color: (
+            primary: $dark-primary,
+            accent: $dark-accent,
+            background: (
+                background: var-color(--color-dark-background),
+                card: var-color(--color-dark-background-hover),
+            ),
+        ),
+        density: 0,
+        typography: mat.m2-define-typography-config(),
+    )
+);
+
+@mixin app-material-overrides($is-light-theme: true) {
+    @include mat.button-toggle-overrides(
+        (
+            shape: 20px,
+            legacy-shape: 12px,
+            selected-state-background-color: if(
+                    $is-light-theme,
+                    var-color(--color-light-text-hover),
+                    var-color(--color-dark-hover)
+                ),
+            background-color: if
+                (
+                    $is-light-theme,
+                    var-color(--color-dark-text),
+                    var-color(--color-dark-background),
+                ),
+            divider-color: if(
+                    $is-light-theme,
+                    var-color(--color-light-text-hover),
+                    var-color(--color-dark-hover)
+                ),
+        )
+    );
+
+    @include mat.button-overrides(
+        (
+            protected-container-shape: 20px,
+        )
+    );
+}
+
+html[data-theme='light'] {
+    @include mat.all-component-colors($light-theme);
+    @include app-material-overrides();
+}
+
+html[data-theme='dark'] {
+    @include mat.all-component-colors($dark-theme);
+    @include app-material-overrides(false);
+}

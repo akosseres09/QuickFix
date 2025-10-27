@@ -10,7 +10,7 @@
     --color-light-accent: #390de7;
 
     --color-light-text-hover: #cdcbd4;
-    --color-light-background-hover: #dcd7ed;
+    --color-light-background-hover: #26203b;
     --color-light-primary-hover: #201354;
     --color-light-secondary-hover: #7455e6;
     --color-light-accent-hover: #2c0ab4;
@@ -21,7 +21,8 @@
     --color-dark-secondary: #2d148f;
     --color-dark-accent: #4318f2;
 
-    --color-dark-text-hover: #16084d;
+    --color-dark-text-hover: #bcb9c4;
+    --color-dark-hover: #16084d;
     --color-dark-background-hover: #18112c;
     --color-dark-primary-hover: #c1b7f0;
     --color-dark-secondary-hover: #3f22b8;
@@ -33,64 +34,6 @@
 /* fixes border-right issue with angular form fields with appearance outline */
 .mdc-notched-outline__notch {
     border-right: none;
-}
-
-html[data-theme='light']
-    .mdc-text-field--outlined:not(.mdc-text-field--disabled)
-    .mdc-notched-outline__leading,
-html[data-theme='light']
-    .mdc-text-field--outlined:not(.mdc-text-field--disabled)
-    .mdc-notched-outline__notch,
-html[data-theme='light']
-    .mdc-text-field--outlined:not(.mdc-text-field--disabled)
-    .mdc-notched-outline__trailing {
-    border-color: var(--color-light-text) !important;
-}
-
-html[data-theme='light']
-    .mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover
-    .mdc-notched-outline
-    .mdc-notched-outline__leading,
-html[data-theme='light']
-    .mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover
-    .mdc-notched-outline
-    .mdc-notched-outline__notch,
-html[data-theme='light']
-    .mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover
-    .mdc-notched-outline
-    .mdc-notched-outline__trailing {
-    border-color: var(--color-light-text) !important;
-}
-
-html[data-theme='light']
-    .mat-mdc-form-field.mat-mdc-form-field.mat-mdc-form-field.mat-mdc-form-field.mat-mdc-form-field
-    .mdc-notched-outline__notch {
-    border-left: none;
-}
-
-html[data-theme='light']
-    .mat-mdc-text-field-wrapper.mdc-text-field--outlined
-    .mdc-notched-outline--upgraded
-    .mdc-floating-label--float-above {
-    color: var(--color-light-text) !important;
-}
-html[data-theme='light'] .mdc-text-field:not(.mdc-text-field--disabled) .mdc-floating-label {
-    color: var(--color-light-text) !important;
-}
-
-html[data-theme='light']
-    .mdc-text-field--invalid:not(.mdc-text-field--disabled)
-    .mdc-floating-label {
-    color: var(--color-light-text) !important;
-}
-
-html[data-theme='light'] input::placeholder {
-    color: var(--color-light-text) !important;
-}
-
-html[data-theme='light'] .mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__input {
-    color: var(--color-light-text) !important;
-    caret-color: var(--color-light-text) !important;
 }
 
 .snackbar-error {

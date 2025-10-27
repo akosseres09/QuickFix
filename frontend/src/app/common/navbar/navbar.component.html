@@ -3,7 +3,7 @@
         <!-- Logo -->
         <a href="/auth/login" class="flex items-center space-x-2">
             <img src="ticketing.png" class="h-10 w-10" alt="Ticketing Logo" />
-            <span>Ticketing</span>
+            <span>QuickFix</span>
         </a>
 
         <!-- Hamburger (Mobile) -->
@@ -30,7 +30,7 @@
 
     <!-- Mobile + Desktop Nav Links -->
     <div
-        class="overflow-hidden transition-all duration-300 ease-in-out md:max-h-full md:opacity-100 md:mt-0 md:block"
+        class="overflow-hidden transition-[background-color] duration-200 ease-in-out md:max-h-full md:opacity-100 md:mt-0 md:block"
         [ngClass]="{
             'max-h-0 opacity-0': !isMenuOpen,
             'max-h-screen opacity-100 mt-4': isMenuOpen
@@ -39,8 +39,20 @@
         <ul
             class="flex flex-col space-y-2 md:space-y-0 md:space-x-6 md:flex-row md:justify-end text-base md:items-center md:mt-2"
         >
+            @for (route of routes; track $index) {
+            <li>
+                <a
+                    routerLink="{{ route.path }}"
+                    routerLinkActive="dark:bg-dark-hover bg-light-text-hover"
+                    [routerLinkActiveOptions]="{ exact: true }"
+                    class="block py-2 px-3 border border-transparent rounded-xl dark:hover:bg-dark-hover hover:bg-light-text-hover duration-200"
+                    >{{ route.name }}</a
+                >
+            </li>
+            }
+
             <li
-                class="flex md:order-first order-last items-center justify-start gap-4 px-3 py-2"
+                class="flex items-center justify-start gap-4 px-3 py-2"
             >
                 <mat-button-toggle-group
                     name="theme"
@@ -64,17 +76,6 @@
                     </mat-button-toggle>
                 </mat-button-toggle-group>
             </li>
-            @for (route of routes; track $index) {
-            <li>
-                <a
-                    routerLink="{{ route.path }}"
-                    routerLinkActive="dark:bg-dark-text-hover bg-light-text-hover"
-                    [routerLinkActiveOptions]="{ exact: true }"
-                    class="block py-2 px-3 border border-transparent rounded-xl dark:hover:bg-dark-text-hover hover:bg-light-text-hover duration-300 transition-discrete"
-                    >{{ route.name }}</a
-                >
-            </li>
-            }
         </ul>
     </div>
 </nav>
