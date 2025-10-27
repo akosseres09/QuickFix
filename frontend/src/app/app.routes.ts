@@ -57,4 +57,8 @@ export const routes: Routes = [
             },
         ],
     },
+    {
+        path: '',
+        loadComponent: () => import('./main/home/home.component').then((c) => c.HomeComponent),
+    },
 ];

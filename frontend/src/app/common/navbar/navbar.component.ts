@@ -50,7 +50,7 @@ export class NavbarComponent implements OnInit, AfterViewInit {
                 active: this.user === null,
             },
             {
-                path: '/home',
+                path: '',
                 name: 'Home',
                 active: this.user === null,
             },

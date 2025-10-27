@@ -69,6 +69,7 @@
                 <a
                     routerLink="{{ route.path }}"
                     routerLinkActive="dark:bg-dark-text-hover bg-light-text-hover"
+                    [routerLinkActiveOptions]="{ exact: true }"
                     class="block py-2 px-3 border border-transparent rounded-xl dark:hover:bg-dark-text-hover hover:bg-light-text-hover duration-300 transition-discrete"
                     >{{ route.name }}</a
                 >
