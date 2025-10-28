@@ -1,12 +1,9 @@
 <nav class="px-4 py-3 text-xl font-bold relative md:flex md:items-center">
     <div class="max-w-screen-xl mr-auto flex items-center justify-between">
-        <!-- Logo -->
         <a href="/auth/login" class="flex items-center space-x-2">
-            <img src="ticketing.png" class="h-10 w-10" alt="Ticketing Logo" />
-            <span>QuickFix</span>
+            <img [src]="imageSource" width="153" />
         </a>
 
-        <!-- Hamburger (Mobile) -->
         <button
             class="md:hidden inline-flex items-center p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer"
             (click)="toggleMenu()"
@@ -28,7 +25,6 @@
         </button>
     </div>
 
-    <!-- Mobile + Desktop Nav Links -->
     <div
         class="overflow-hidden transition-[background-color] duration-200 ease-in-out md:max-h-full md:opacity-100 md:mt-0 md:block"
         [ngClass]="{

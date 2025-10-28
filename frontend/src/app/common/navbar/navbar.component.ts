@@ -31,11 +31,16 @@ import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
     standalone: true,
 })
 export class NavbarComponent implements OnInit, AfterViewInit {
+    imageSource: string = 'QuickFix_dark.png';
     isMenuOpen = false;
     htmlElement: HTMLElement | null = null;
     theme: 'light' | 'dark' = 'light';
     user: User | null = null;
     routes: Array<{ path: string; name: string; active: boolean }> = [];
+    logo = {
+        light: 'QuickFix_light.png',
+        dark: 'QuickFix_dark.png',
+    };
 
     ngOnInit(): void {
         this.htmlElement = document.documentElement;
@@ -76,6 +81,7 @@ export class NavbarComponent implements OnInit, AfterViewInit {
 
         this.themeService.setTheme(theme);
         this.theme = theme;
+        this.imageSource = this.logo[this.theme];
     }
 
     toggleMenu() {

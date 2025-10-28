@@ -3,6 +3,8 @@
 @import 'tailwindcss';
 
 @theme {
+    --breakpoint-xs: 25rem;
+
     --color-light-text: #0f0c18;
     --color-light-background: #e8e4f6;
     --color-light-primary: #2a196b;
