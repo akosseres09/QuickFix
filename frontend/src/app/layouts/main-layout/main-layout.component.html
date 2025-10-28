@@ -1,8 +1,5 @@
 <main class="grid grid-rows-[auto_1fr] grid-cols-[auto_1fr] h-screen">
-    <app-main-navbar
-        (sidebarClosed)="onSidebar($event)"
-        class="row-span-1 col-span-2"
-    ></app-main-navbar>
+    <app-navbar (sidebarClosed)="onSidebar($event)" class="row-span-1 col-span-2"></app-navbar>
     <app-sidenav
         [isCollapsed]="isSidebarCollapsed"
         class="border-r-2 border-light-text-hover row-span-2 dark:border-dark-hover"

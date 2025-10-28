@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { SidenavComponent } from '../../common/sidenav/sidenav.component';
-import { MainNavbarComponent } from '../../common/main-navbar/main-navbar.component';
 import { SidebarService } from '../../shared/services/sidebar/sidebar.service';
+import { NavbarComponent } from '../../common/navbar/navbar.component';
 
 @Component({
     selector: 'app-main-layout',
-    imports: [MainNavbarComponent, RouterModule, SidenavComponent],
+    imports: [NavbarComponent, RouterModule, SidenavComponent],
     templateUrl: './main-layout.component.html',
     styleUrl: './main-layout.component.css',
 })

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
     MatButtonToggle,
@@ -12,6 +12,8 @@ import { ThemeService } from '../../shared/services/theme/theme.service';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { AppRoute } from '../../shared/constants/Routes';
 import { RouteService } from '../../shared/services/route/route.service';
+import { User } from '../../shared/model/User';
+import { SidebarService } from '../../shared/services/sidebar/sidebar.service';
 
 @Component({
     selector: 'app-navbar',
@@ -33,12 +35,21 @@ import { RouteService } from '../../shared/services/route/route.service';
 })
 export class NavbarComponent implements OnInit, AfterViewInit {
     @Output() sidebarClosed: EventEmitter<boolean> = new EventEmitter<boolean>();
-    isSidebarCollapsed: boolean = false;
-
-    imageSource: string = 'QuickFix_logo_dark.png';
+    isSidebarCollapsed: boolean;
     isMenuOpen = false;
+    imageSource: string = 'QuickFix_logo_dark.png';
     theme: 'light' | 'dark' = 'light';
     logo;
+
+    user: User | null = {
+        id: '',
+        username: '',
+        email: '',
+        status: 1,
+        created_at: new Date(),
+    };
+
+    //user: User | null = null;
 
     htmlElement: HTMLElement | null = null;
     routes: Array<AppRoute> = [];
@@ -49,14 +60,16 @@ export class NavbarComponent implements OnInit, AfterViewInit {
         let theme: 'light' | 'dark' = this.themeService.getTheme();
         this.setTheme(!theme ? 'light' : (theme as 'light' | 'dark'));
 
-        this.routes = this.routeService.getBaseAppRoutes();
+        this.routes = this.routeService.getAppRoutes(this.user).filter((route) => route.active);
     }
 
     constructor(
         private themeService: ThemeService,
         private router: Router,
-        private routeService: RouteService
+        private routeService: RouteService,
+        private sidebarService: SidebarService
     ) {
+        this.isSidebarCollapsed = this.sidebarService.getState();
         this.logo = themeService.logos;
     }
 
@@ -96,5 +109,10 @@ export class NavbarComponent implements OnInit, AfterViewInit {
 
     toggleSidebar() {
         this.isSidebarCollapsed = !this.isSidebarCollapsed;
+        const name = this.isSidebarCollapsed
+            ? this.sidebarService.CLOSED
+            : this.sidebarService.OPEN;
+        this.sidebarService.setState(name);
+        this.sidebarClosed.emit(this.isSidebarCollapsed);
     }
 }
