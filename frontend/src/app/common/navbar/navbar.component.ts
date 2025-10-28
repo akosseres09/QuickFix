@@ -7,10 +7,11 @@ import {
     MatButtonToggleGroup,
 } from '@angular/material/button-toggle';
 import { MatIcon } from '@angular/material/icon';
-import { RouterLink, RouterModule } from '@angular/router';
+import { Router, RouterLink, RouterModule } from '@angular/router';
 import { User } from '../../shared/model/User';
 import { ThemeService } from '../../shared/services/theme/theme.service';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { AppRoute, getAppRoutes } from '../../shared/constants/Routes';
 
 @Component({
     selector: 'app-navbar',
@@ -31,15 +32,17 @@ import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
     standalone: true,
 })
 export class NavbarComponent implements OnInit, AfterViewInit {
-    imageSource: string = 'QuickFix_dark.png';
+    imageSource: string = 'QuickFix_logo_dark.png';
     isMenuOpen = false;
+
     htmlElement: HTMLElement | null = null;
-    theme: 'light' | 'dark' = 'light';
     user: User | null = null;
-    routes: Array<{ path: string; name: string; active: boolean }> = [];
+    routes: Array<AppRoute> = [];
+
+    theme: 'light' | 'dark' = 'light';
     logo = {
-        light: 'QuickFix_light.png',
-        dark: 'QuickFix_dark.png',
+        light: 'QuickFix_logo_light.png',
+        dark: 'QuickFix_logo_dark.png',
     };
 
     ngOnInit(): void {
@@ -47,26 +50,13 @@ export class NavbarComponent implements OnInit, AfterViewInit {
         let theme: 'light' | 'dark' = this.themeService.getTheme();
         this.setTheme(!theme ? 'light' : (theme as 'light' | 'dark'));
 
-        this.routes = [
-            {
-                path: '/auth/login',
-                name: 'Login',
-                active: this.user === null,
-            },
-            {
-                path: '/auth/signup',
-                name: 'Sign Up',
-                active: this.user === null,
-            },
-            {
-                path: '',
-                name: 'Home',
-                active: this.user === null,
-            },
-        ];
+        this.routes = getAppRoutes(this.user);
     }
 
-    constructor(private themeService: ThemeService) {}
+    constructor(
+        private themeService: ThemeService,
+        private router: Router
+    ) {}
 
     ngAfterViewInit(): void {
         this.htmlElement = document.documentElement;
@@ -96,5 +86,9 @@ export class NavbarComponent implements OnInit, AfterViewInit {
         }
 
         this.setTheme(event.value);
+    }
+
+    navigateTo(path: string) {
+        this.router.navigateByUrl(path);
     }
 }

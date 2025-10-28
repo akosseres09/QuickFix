@@ -5,7 +5,7 @@ import { AuthService } from '../../shared/services/auth/auth.service';
 import { Router, RouterLink } from '@angular/router';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 import { CommonModule } from '@angular/common';
-import { EmailFormComponent } from '../../common/email-form/email-form.component';
+import { EmailFormComponent } from '../reset-password/email-form/email-form.component';
 
 @Component({
     selector: 'app-resend-verification',

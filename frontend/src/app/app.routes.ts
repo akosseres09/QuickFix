@@ -61,4 +61,11 @@ export const routes: Routes = [
         path: '',
         loadComponent: () => import('./main/home/home.component').then((c) => c.HomeComponent),
     },
+    {
+        path: 'dashboard',
+        loadComponent: () =>
+            import('./layouts/main-layout/main-layout.component').then(
+                (c) => c.MainLayoutComponent
+            ),
+    },
 ];

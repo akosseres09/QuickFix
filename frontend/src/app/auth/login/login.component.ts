@@ -10,13 +10,7 @@ import {
     MatSuffix,
 } from '@angular/material/input';
 import { RouterLink } from '@angular/router';
-import {
-    FormBuilder,
-    FormControl,
-    FormGroup,
-    ReactiveFormsModule,
-    Validators,
-} from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
 @Component({

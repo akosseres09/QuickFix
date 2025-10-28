@@ -1,0 +1,75 @@
+<form class="space-y-4" [formGroup]="form" (ngSubmit)="onSubmit()">
+    <mat-form-field class="w-full" color="accent" appearance="outline">
+        <mat-label>Token</mat-label>
+        <mat-icon matPrefix class="!text-light-text dark:!text-inherit">token</mat-icon>
+        <input
+            formControlName="token"
+            matInput
+            type="token"
+            autocomplete="password-reset-token"
+            required
+        />
+        <mat-error
+            class="text-sm"
+            *ngIf="getControl('token')?.invalid && getControl('token')?.touched"
+        >
+            <span *ngIf="getControl('token')?.hasError('required')">Token is required.</span>
+        </mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="w-full" color="accent" appearance="outline">
+        <mat-label>New Password</mat-label>
+        <mat-icon matPrefix class="!text-light-text dark:!text-inherit">lock</mat-icon>
+        <input
+            formControlName="password"
+            matInput
+            type="password"
+            autocomplete="current-password"
+            required
+        />
+        <mat-error
+            class="text-sm"
+            *ngIf="getControl('password')?.invalid && getControl('password')?.touched"
+        >
+            <span *ngIf="getControl('password')?.hasError('required')">Password is required</span>
+            <span *ngIf="getControl('password')?.hasError('minLength')"
+                >Password should be at least 6 characters</span
+            >
+            <span *ngIf="getControl('password')?.hasError('mustMatch')">Passwords must match</span>
+        </mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="w-full" color="accent" appearance="outline">
+        <mat-label>Confirm password</mat-label>
+        <mat-icon matPrefix class="!text-light-text dark:!text-inherit">lock</mat-icon>
+        <input
+            formControlName="rePassword"
+            matInput
+            type="password"
+            autocomplete="current-repassword"
+            required
+        />
+        <mat-error class="text-sm" *ngIf="getControl('rePassword')?.invalid">
+            <span *ngIf="getControl('rePassword')?.hasError('required')"
+                >You must confirm your password</span
+            >
+            <span *ngIf="getControl('rePassword')?.hasError('minlength')"
+                >Must be at least 6 characters</span
+            >
+            <span *ngIf="getControl('rePassword')?.hasError('mustMatch')"
+                >Passwords must match</span
+            >
+        </mat-error>
+    </mat-form-field>
+
+    <div>
+        <button
+            type="submit"
+            mat-raised-button
+            color="primary"
+            class="w-full !py-3 !transition-colors !duration-300 !text-dark-text !bg-light-primary"
+        >
+            Reset Password
+        </button>
+    </div>
+</form>

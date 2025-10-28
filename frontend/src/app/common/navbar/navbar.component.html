@@ -1,7 +1,10 @@
-<nav class="px-4 py-3 text-xl font-bold relative md:flex md:items-center">
-    <div class="max-w-screen-xl mr-auto flex items-center justify-between">
-        <a href="/auth/login" class="flex items-center space-x-2">
-            <img [src]="imageSource" width="153" />
+<nav
+    class="max-w-screen-2xl mx-auto px-4 py-3 text-xl font-bold relative md:flex md:items-center border-b-2 border-light-text-hover dark:border-dark-hover"
+>
+    <div class="mr-auto flex items-center justify-between">
+        <a *ngIf="!user" href="/auth/login" class="flex items-center space-x-2">
+            <img [src]="imageSource" width="48" />
+            <span>QuickFix</span>
         </a>
 
         <button
@@ -38,12 +41,41 @@
             @for (route of routes; track $index) {
                 <li>
                     <a
+                        *ngIf="route.type === 'button'"
                         routerLink="{{ route.path }}"
                         routerLinkActive="dark:bg-dark-hover bg-light-text-hover"
                         [routerLinkActiveOptions]="{ exact: true }"
                         class="block py-2 px-3 border border-transparent rounded-xl dark:hover:bg-dark-hover hover:bg-light-text-hover duration-200"
                         >{{ route.name }}</a
                     >
+                    <button
+                        *ngIf="route.type === 'menu'"
+                        class="p-2 rounded-2xl flex items-center justify-center cursor-pointer dark:hover:bg-dark-hover hover:bg-light-text-hover transition-[background-color] duration-200"
+                        matButton
+                        [matMenuTriggerFor]="menu"
+                    >
+                        @if (route.icon) {
+                            <mat-icon> {{ route.icon }} </mat-icon>
+                        } @else {
+                            <span>{{ route.name }}</span>
+                        }
+                        <mat-icon> keyboard_arrow_down </mat-icon>
+                    </button>
+                    <mat-menu class="" #menu="matMenu">
+                        @for (children of route.children; track $index) {
+                            <a
+                                mat-menu-item
+                                [href]="children.path"
+                                routerLinkActive="dark:!bg-dark-accent/20 !bg-light-background/60"
+                                [routerLinkActiveOptions]="{ exact: true }"
+                            >
+                                <mat-icon>
+                                    {{ children.icon }}
+                                </mat-icon>
+                                <span>{{ children.name }}</span>
+                            </a>
+                        }
+                    </mat-menu>
                 </li>
             }
 

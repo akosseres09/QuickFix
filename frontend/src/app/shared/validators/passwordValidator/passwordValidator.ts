@@ -5,7 +5,7 @@ export function passwordMatchValidator(controlName: string, mactchingControlName
         const control = FormGroup.controls[controlName];
         const matchingControl = FormGroup.controls[mactchingControlName];
 
-        if (control.value !== matchingControl.value && matchingControl.touched && control.touched) {
+        if (control.value !== matchingControl.value) {
             matchingControl.setErrors({ mustMatch: true });
             control.setErrors({ mustMatch: true });
         } else if (
