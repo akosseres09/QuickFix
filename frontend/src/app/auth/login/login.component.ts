@@ -9,7 +9,7 @@ import {
     MatPrefix,
     MatSuffix,
 } from '@angular/material/input';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
@@ -36,7 +36,10 @@ export class LoginComponent implements OnInit {
     pwVisible = false;
     loginForm: FormGroup;
 
-    constructor(private fb: FormBuilder) {
+    constructor(
+        private fb: FormBuilder,
+        private router: Router
+    ) {
         this.loginForm = this.fb.group({
             email: ['', [Validators.required, Validators.email]],
             password: ['', [Validators.required, Validators.minLength(6)]],
@@ -67,6 +70,6 @@ export class LoginComponent implements OnInit {
         if (!this.loginForm.valid) return;
 
         const { email, password } = this.loginForm.value;
-        console.log('Login attempt:', { email, password });
+        this.router.navigateByUrl('/dashboard');
     }
 }

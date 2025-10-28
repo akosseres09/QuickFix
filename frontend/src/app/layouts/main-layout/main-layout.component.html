@@ -1,8 +1,12 @@
-<main class="grid grid-cols-[250px_1fr] grid-rows-[auto_1fr] h-screen">
-    <div class="border-r-2 border-light-text-hover dark:border-dark-hover row-span-2 p-4">
-        sidenav
-    </div>
-    <app-navbar></app-navbar>
+<main class="grid grid-rows-[auto_1fr] grid-cols-[auto_1fr] h-screen">
+    <app-main-navbar
+        (sidebarClosed)="onSidebar($event)"
+        class="row-span-1 col-span-2"
+    ></app-main-navbar>
+    <app-sidenav
+        [isCollapsed]="isSidebarCollapsed"
+        class="border-r-2 border-light-text-hover row-span-2 dark:border-dark-hover"
+    ></app-sidenav>
 
     <router-outlet></router-outlet>
 </main>

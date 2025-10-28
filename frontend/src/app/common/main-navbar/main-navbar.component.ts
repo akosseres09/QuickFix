@@ -1,44 +1,41 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import {
     MatButtonToggle,
     MatButtonToggleChange,
     MatButtonToggleGroup,
 } from '@angular/material/button-toggle';
-import { MatIcon } from '@angular/material/icon';
-import { Router, RouterLink, RouterModule } from '@angular/router';
 import { ThemeService } from '../../shared/services/theme/theme.service';
-import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
-import { AppRoute } from '../../shared/constants/Routes';
 import { RouteService } from '../../shared/services/route/route.service';
+import { AppRoute } from '../../shared/constants/Routes';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { MatIcon } from '@angular/material/icon';
+import { SidebarService } from '../../shared/services/sidebar/sidebar.service';
 
 @Component({
-    selector: 'app-navbar',
+    selector: 'app-main-navbar',
     imports: [
-        RouterModule,
         CommonModule,
         RouterLink,
-        FormsModule,
-        MatIcon,
-        MatButtonToggle,
-        MatButtonToggleGroup,
+        RouterLinkActive,
         MatMenu,
         MatMenuTrigger,
+        MatIcon,
+        MatButtonToggleGroup,
+        MatButtonToggle,
         MatMenuItem,
     ],
-    templateUrl: './navbar.component.html',
-    styleUrl: './navbar.component.css',
-    standalone: true,
+    templateUrl: './main-navbar.component.html',
+    styleUrl: './main-navbar.component.css',
 })
-export class NavbarComponent implements OnInit, AfterViewInit {
+export class MainNavbarComponent {
     @Output() sidebarClosed: EventEmitter<boolean> = new EventEmitter<boolean>();
-    isSidebarCollapsed: boolean = false;
-
     imageSource: string = 'QuickFix_logo_dark.png';
     isMenuOpen = false;
     theme: 'light' | 'dark' = 'light';
     logo;
+    isSidebarCollapsed: boolean;
 
     htmlElement: HTMLElement | null = null;
     routes: Array<AppRoute> = [];
@@ -49,14 +46,16 @@ export class NavbarComponent implements OnInit, AfterViewInit {
         let theme: 'light' | 'dark' = this.themeService.getTheme();
         this.setTheme(!theme ? 'light' : (theme as 'light' | 'dark'));
 
-        this.routes = this.routeService.getBaseAppRoutes();
+        this.routes = this.routeService.getMainAppRoutes();
     }
 
     constructor(
         private themeService: ThemeService,
         private router: Router,
-        private routeService: RouteService
+        private routeService: RouteService,
+        private sidebarService: SidebarService
     ) {
+        this.isSidebarCollapsed = this.sidebarService.getState();
         this.logo = themeService.logos;
     }
 
@@ -96,5 +95,10 @@ export class NavbarComponent implements OnInit, AfterViewInit {
 
     toggleSidebar() {
         this.isSidebarCollapsed = !this.isSidebarCollapsed;
+        const name = this.isSidebarCollapsed
+            ? this.sidebarService.CLOSED
+            : this.sidebarService.OPEN;
+        this.sidebarService.setState(name);
+        this.sidebarClosed.emit(this.isSidebarCollapsed);
     }
 }
