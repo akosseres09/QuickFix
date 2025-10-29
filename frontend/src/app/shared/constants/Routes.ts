@@ -1,11 +1,11 @@
 export type AppRoute =
     | {
           type: 'menu';
-          name?: string;
+          name: string;
           active?: boolean;
           children: Array<AppRoute>;
           icon?: string;
-          path?: never;
+          path?: string;
       }
     | {
           type: 'button';

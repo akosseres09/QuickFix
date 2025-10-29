@@ -215,6 +215,20 @@ $dark-theme: mat.m2-define-dark-theme(
                 ),
         )
     );
+
+    @include mat.expansion-overrides(
+        (
+            container-background-color: if(
+                    $is-light-theme,
+                    var-color(--color-dark-text),
+                    var-color(--color-dark-background)
+                ),
+            header-collapsed-state-height: 50px,
+            header-expanded-state-height: 50px,
+        )
+    );
+
+    @include mat.list-overrides(());
 }
 
 html[data-theme='light'] {

@@ -52,3 +52,11 @@ body {
     margin: 0;
     font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
+
+.mat-expansion-panel {
+    box-shadow: none !important;
+}
+
+.mat-expansion-panel-body {
+    padding: 0 24px !important;
+}

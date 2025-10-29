@@ -31,6 +31,7 @@ export class RouteService {
             {
                 type: 'menu',
                 active: user !== null,
+                name: 'Account',
                 icon: 'account_circle',
                 children: [
                     {
@@ -61,6 +62,8 @@ export class RouteService {
             {
                 name: 'Dashboard',
                 type: 'menu',
+                icon: 'dashboard',
+                path: '/dashboard',
                 children: [
                     {
                         type: 'button',
@@ -68,6 +71,12 @@ export class RouteService {
                         name: 'Overview',
                     },
                 ],
+            },
+            {
+                name: 'Projects',
+                type: 'button',
+                icon: 'folder',
+                path: '/projects',
             },
         ];
     }
