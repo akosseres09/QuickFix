@@ -1,3 +1,5 @@
+import { BaseModel } from './BaseModel';
+
 export const DELETED = 0;
 export const INACTIVE = 9;
 export const ACTIVE = 10;
@@ -5,7 +7,7 @@ export const SYS_ADMIN = 2;
 export const ADMIN = 1;
 export const USER = 0;
 
-export interface User {
+export interface User extends BaseModel {
     id: string;
     username: string;
     email: string;

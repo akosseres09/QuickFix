@@ -190,7 +190,7 @@ export const routes: Routes = [
                 data: {
                     tabs: [
                         {
-                            label: 'OverView',
+                            label: 'Overview',
                             route: '/projects/overview',
                         },
                         {

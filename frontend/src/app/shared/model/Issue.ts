@@ -1,3 +1,4 @@
+import { BaseModel } from './BaseModel';
 import { User } from './User';
 
 export const TO_DO = 'to_do';
@@ -5,7 +6,7 @@ export const OPEN = 'open';
 export const IN_PROGRESS = 'in_progress';
 export const CLOSED = 'closed';
 
-export interface Issue {
+export interface Issue extends BaseModel {
     id: number;
     title: string;
     description: string;

@@ -1,5 +1,4 @@
 export interface DisplayedColumn {
-    mode: 'data';
     id: string;
     label: string;
     sortable: boolean;

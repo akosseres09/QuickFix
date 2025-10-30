@@ -18,35 +18,30 @@ export class IssuesComponent implements OnInit {
     shownIssues: MatTableDataSource<Issue> = new MatTableDataSource<Issue>();
     displayedColumns: Array<DisplayedColumn> = [
         {
-            mode: 'data',
             id: 'id',
             label: '#',
             sortable: false,
             value: (e: Issue) => e.id,
         },
         {
-            mode: 'data',
             id: 'title',
             label: 'Title',
             sortable: false,
             value: (e: Issue) => e.title,
         },
         {
-            mode: 'data',
             id: 'project',
             label: 'Project',
             sortable: false,
             value: (e: Issue) => e.project,
         },
         {
-            mode: 'data',
             id: 'createdAt',
             label: 'Created At',
             sortable: true,
             value: (e: Issue) => e.createdAt,
         },
         {
-            mode: 'data',
             id: 'author',
             label: 'Author',
             sortable: false,
@@ -54,14 +49,12 @@ export class IssuesComponent implements OnInit {
         },
 
         {
-            mode: 'data',
             id: 'assignee',
             label: 'Assignee',
             sortable: false,
             value: (e: Issue) => (e.assignee ? e.assignee.username : ''),
         },
         {
-            mode: 'data',
             id: 'status',
             label: 'Status',
             sortable: true,

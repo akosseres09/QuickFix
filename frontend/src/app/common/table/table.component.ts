@@ -14,11 +14,11 @@ import { DisplayedColumn } from '../../shared/constants/DisplayedColumn';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { CommonModule, DatePipe } from '@angular/common';
-import { Issue } from '../../shared/model/Issue';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { UserService } from '../../shared/services/user/user.service';
 import { ADMIN, SYS_ADMIN, User } from '../../shared/model/User';
+import { BaseModel } from '../../shared/model/BaseModel';
 
 @Component({
     selector: 'app-table',
@@ -35,13 +35,13 @@ import { ADMIN, SYS_ADMIN, User } from '../../shared/model/User';
     templateUrl: './table.component.html',
     styleUrl: './table.component.css',
 })
-export class TableComponent implements OnChanges, AfterViewInit {
-    @Input() dataSource: MatTableDataSource<Issue> = new MatTableDataSource();
+export class TableComponent<T extends BaseModel> implements OnChanges, AfterViewInit {
+    @Input() dataSource: MatTableDataSource<T> = new MatTableDataSource();
     @Input() displayedColumns: Array<DisplayedColumn> = [];
     @Input() showActions: boolean = true;
 
-    @Output() editClick = new EventEmitter<Issue>();
-    @Output() deleteClick = new EventEmitter<Issue>();
+    @Output() editClick = new EventEmitter<T>();
+    @Output() deleteClick = new EventEmitter<T>();
 
     userService = inject(UserService);
     user: User | null = this.userService.getUser();
@@ -71,11 +71,11 @@ export class TableComponent implements OnChanges, AfterViewInit {
         return ids;
     }
 
-    onEdit(element: Issue): void {
+    onEdit(element: T): void {
         this.editClick.emit(element);
     }
 
-    onDelete(element: Issue): void {
+    onDelete(element: T): void {
         this.deleteClick.emit(element);
     }
 
