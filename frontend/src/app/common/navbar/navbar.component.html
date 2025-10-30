@@ -84,7 +84,7 @@
                             @for (children of route.children; track $index) {
                                 <a
                                     mat-menu-item
-                                    [href]="children.path"
+                                    [routerLink]="children.path"
                                     routerLinkActive="dark:!bg-dark-accent/20 !bg-light-background/60"
                                     [routerLinkActiveOptions]="{ exact: true }"
                                 >
