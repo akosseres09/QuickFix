@@ -1,6 +1,12 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { AppRoute } from '../../../shared/constants/Routes';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Component, inject, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { AppRoute, ChildRoute } from '../../../shared/constants/Routes';
+import {
+    ActivatedRoute,
+    IsActiveMatchOptions,
+    Router,
+    RouterLink,
+    RouterLinkActive,
+} from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
 import {
     MatExpansionPanel,
@@ -26,8 +32,20 @@ import { CommonModule } from '@angular/common';
 export class NavitemComponent implements OnChanges {
     @Input() routes: Array<AppRoute> = [];
     @Input() isCollapsed: boolean | null = null;
+    route = inject(ActivatedRoute);
+    router = inject(Router);
+    matchOption: IsActiveMatchOptions = {
+        matrixParams: 'ignored',
+        queryParams: 'ignored',
+        fragment: 'ignored',
+        paths: 'exact',
+    };
 
     ngOnChanges(changes: SimpleChanges): void {
         this.isCollapsed = changes['isCollapsed'].currentValue;
+    }
+
+    isChildrenActive(children: Array<ChildRoute>): boolean {
+        return children.some((child) => this.router.isActive(child.path, this.matchOption));
     }
 }

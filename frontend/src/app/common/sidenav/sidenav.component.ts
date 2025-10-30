@@ -40,10 +40,4 @@ export class SidenavComponent implements OnInit, OnChanges {
     toggleSidebar(): void {
         this.isCollapsed = !this.isCollapsed;
     }
-
-    toggleMenu(menuName: string): void {
-        if (this.isCollapsed) {
-            this.isCollapsed = false;
-        }
-    }
 }

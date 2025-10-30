@@ -1,6 +1,10 @@
 @for (route of routes; track $index) {
     @if (route.children && route.children.length > 0) {
-        <mat-expansion-panel class="w-full" *ngIf="!isCollapsed">
+        <mat-expansion-panel
+            [expanded]="isChildrenActive(route.children)"
+            class="w-full"
+            *ngIf="!isCollapsed"
+        >
             <mat-expansion-panel-header
                 class="hover:!bg-light-text-hover dark:hover:!bg-dark-hover !transition-[background-color] !duration-100"
             >
