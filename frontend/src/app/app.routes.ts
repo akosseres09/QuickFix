@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { AuthComponent } from './layouts/auth/auth.component';
+import { WorktimeComponent } from './main/worktime/worktime.component';
 
 export const routes: Routes = [
     {
@@ -126,6 +127,68 @@ export const routes: Routes = [
                         title: 'QuickFix - Overview',
                     },
                 ],
+            },
+            {
+                path: 'worktime',
+                loadComponent: () =>
+                    import('./layouts/tabs-layout/tabs-layout.component').then(
+                        (c) => c.TabsLayoutComponent
+                    ),
+                data: {
+                    tabs: [
+                        {
+                            label: 'Issues',
+                            route: '/worktime/issues',
+                        },
+                        {
+                            label: 'Projects',
+                            route: '/worktime/projects',
+                        },
+                        {
+                            label: 'Statistics',
+                            route: '/worktime/stats',
+                        },
+                    ],
+                },
+                children: [
+                    {
+                        path: 'issues',
+                        pathMatch: 'full',
+                        loadComponent: () =>
+                            import('./main/worktime/worktime.component').then(
+                                (c) => WorktimeComponent
+                            ),
+                    },
+                    {
+                        path: 'projects',
+                        loadComponent: () =>
+                            import('./main/worktime/projects/projects.component').then(
+                                (c) => c.ProjectsComponent
+                            ),
+                    },
+                    {
+                        path: 'stats',
+                        loadComponent: () =>
+                            import('./main/worktime/statistics/statistics.component').then(
+                                (c) => c.StatisticsComponent
+                            ),
+                    },
+                ],
+            },
+            {
+                path: 'account',
+                loadComponent: () =>
+                    import('./main/account/account.component').then((c) => c.AccountComponent),
+            },
+            {
+                path: 'settings',
+                loadComponent: () =>
+                    import('./main/settings/settings.component').then((c) => c.SettingsComponent),
+            },
+            {
+                path: '**',
+                loadComponent: () =>
+                    import('./auth/not-found/not-found.component').then((c) => c.NotFoundComponent),
             },
         ],
     },

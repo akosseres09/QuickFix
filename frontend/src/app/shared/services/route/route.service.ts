@@ -126,7 +126,7 @@ export class RouteService {
                     {
                         name: 'Statistics',
                         icon: 'bar_chart',
-                        path: '/worktime',
+                        path: '/worktime/stats',
                     },
                 ],
             },
