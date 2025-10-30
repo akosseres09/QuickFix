@@ -227,6 +227,26 @@ $dark-theme: mat.m2-define-dark-theme(
             header-expanded-state-height: 50px,
         )
     );
+
+    @include mat.table-overrides(
+        (
+            background-color: if(
+                    $is-light-theme,
+                    var-color(--color-light-background),
+                    var-color(--color-dark-background)
+                ),
+        )
+    );
+
+    @include mat.paginator-overrides(
+        (
+            container-background-color: if(
+                    $is-light-theme,
+                    var-color(--color-light-background),
+                    var-color(--color-dark-background)
+                ),
+        )
+    );
 }
 
 html[data-theme='light'] {

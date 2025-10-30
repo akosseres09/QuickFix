@@ -1,0 +1,64 @@
+<div class="mat-elevation-z8">
+    <mat-paginator
+        [pageSizeOptions]="[5, 10, 20, 30, 50]"
+        showFirstLastButtons
+        aria-label="Select page of periodic elements"
+    >
+    </mat-paginator>
+
+    <table mat-table [dataSource]="dataSource" matSort>
+        @for (col of displayedColumns; track $index) {
+            @if (col.mode === 'data') {
+                <ng-container [matColumnDef]="col.id">
+                    @if (col.sortable) {
+                        <th
+                            mat-header-cell
+                            *matHeaderCellDef
+                            mat-sort-header
+                            class="underline underline-offset-2"
+                        >
+                            {{ col.label }}
+                        </th>
+                    } @else {
+                        <th mat-header-cell *matHeaderCellDef>
+                            {{ col.label }}
+                        </th>
+                    }
+                    <td mat-cell *matCellDef="let element">
+                        @switch (col.id) {
+                            @case ('createdAt') {
+                                <ng-container>
+                                    {{ col.value(element) | date }}
+                                </ng-container>
+                            }
+                            @default {
+                                {{ col.value(element) }}
+                            }
+                        }
+                    </td>
+                </ng-container>
+            }
+        }
+
+        @if (showActions && canModify()) {
+            <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Actions</th>
+                <td mat-cell *matCellDef="let element">
+                    <button mat-icon-button (click)="onEdit(element)" aria-label="Edit">
+                        <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="onDelete(element)" aria-label="Delete">
+                        <mat-icon class="!text-red-600">delete</mat-icon>
+                    </button>
+                </td>
+            </ng-container>
+        }
+
+        <tr mat-header-row *matHeaderRowDef="columnIds"></tr>
+        <tr
+            class="odd:!bg-light-text-hover/20 dark:odd:!bg-dark-hover/20"
+            mat-row
+            *matRowDef="let row; columns: columnIds"
+        ></tr>
+    </table>
+</div>

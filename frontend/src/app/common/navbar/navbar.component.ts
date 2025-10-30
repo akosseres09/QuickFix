@@ -14,6 +14,7 @@ import { AppRoute } from '../../shared/constants/Routes';
 import { RouteService } from '../../shared/services/route/route.service';
 import { User } from '../../shared/model/User';
 import { SidebarService } from '../../shared/services/sidebar/sidebar.service';
+import { UserService } from '../../shared/services/user/user.service';
 
 @Component({
     selector: 'app-navbar',
@@ -47,16 +48,7 @@ export class NavbarComponent implements OnInit, AfterViewInit {
     routes: Array<AppRoute> = [];
 
     ngOnInit(): void {
-        if (!this.router.url.includes('/auth')) {
-            this.user = {
-                id: '1',
-                username: 'Admin',
-                email: 'admin@example.com',
-                created_at: new Date(),
-                status: 1,
-            };
-        }
-
+        this.user = this.userService.getUser();
         this.htmlElement = document.documentElement;
 
         let theme: 'light' | 'dark' = this.themeService.getTheme();
@@ -69,7 +61,8 @@ export class NavbarComponent implements OnInit, AfterViewInit {
         private themeService: ThemeService,
         private router: Router,
         private routeService: RouteService,
-        private sidebarService: SidebarService
+        private sidebarService: SidebarService,
+        private userService: UserService
     ) {
         this.isSidebarCollapsed = this.sidebarService.getState();
         this.logo = themeService.logos;

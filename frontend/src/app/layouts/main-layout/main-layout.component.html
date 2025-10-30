@@ -1,10 +1,10 @@
-<main class="grid grid-rows-[auto_1fr] grid-cols-[auto_1fr] h-screen">
+<main class="grid grid-rows-[auto_1fr] grid-cols-[auto_1fr] h-screen overflow-hidden">
     <app-navbar (sidebarClosed)="onSidebar($event)" class="row-span-1 col-span-2"></app-navbar>
     <app-sidenav
         [isCollapsed]="isSidebarCollapsed"
-        class="border-r-2 border-light-text-hover row-span-2 dark:border-dark-hover"
+        class="border-r-2 border-light-text-hover row-span-2 dark:border-dark-hover overflow-y-auto"
     ></app-sidenav>
-    <section class="row-start-2 col-start-2 p-4">
+    <section class="row-start-2 col-start-2 p-4 overflow-y-auto">
         <router-outlet></router-outlet>
     </section>
 </main>
