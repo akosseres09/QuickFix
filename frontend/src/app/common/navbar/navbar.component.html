@@ -1,6 +1,6 @@
 <nav class="px-4 py-3 text-xl font-bold border-b-2 border-light-text-hover dark:border-dark-hover">
-    <div class="max-w-screen-2xl mx-auto relative md:flex md:items-center">
-        <div class="mr-auto flex items-center justify-between gap-4">
+    <div class="max-w-screen-2xl relative md:flex md:items-center" [class.mx-auto]="!user">
+        <div class="mr-auto flex items-center justify-between gap-12">
             <a href="/auth/login" class="flex items-center space-x-2">
                 <img [src]="imageSource" width="48" />
                 <span>QuickFix</span>

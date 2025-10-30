@@ -14,40 +14,37 @@ export class RouteService {
                 path: '/auth/login',
                 name: 'Login',
                 type: 'button',
-                active: user === null,
+                show: user === null,
             },
             {
                 path: '/auth/signup',
                 name: 'Sign Up',
                 type: 'button',
-                active: user === null,
+                show: user === null,
             },
             {
                 path: '',
                 name: 'Home',
                 type: 'button',
-                active: user === null,
+                show: user === null,
             },
             {
                 type: 'menu',
-                active: user !== null,
+                show: user !== null,
                 name: 'Account',
                 icon: 'account_circle',
                 children: [
                     {
-                        type: 'button',
                         name: 'Account',
-                        path: '/profile',
+                        path: '/account',
                         icon: 'person',
                     },
                     {
-                        type: 'button',
                         name: 'Settings',
                         path: '/settings',
                         icon: 'settings',
                     },
                     {
-                        type: 'button',
                         path: '/auth/logout',
                         name: 'Logout',
                         icon: 'logout',
@@ -60,23 +57,95 @@ export class RouteService {
     getSidenavRoutes(): Array<AppRoute> {
         return [
             {
-                name: 'Dashboard',
+                name: 'Issues',
                 type: 'menu',
-                icon: 'dashboard',
-                path: '/dashboard',
+                icon: 'report_problem',
+                path: '/issues',
                 children: [
                     {
-                        type: 'button',
-                        path: '/dashboard/overview',
                         name: 'Overview',
+                        path: '/issues/overview',
+                        icon: 'travel_explore',
+                    },
+                    {
+                        name: 'Issues',
+                        path: '/issues',
+                        icon: 'assignment',
+                    },
+                    {
+                        name: 'Board',
+                        path: '/issues/board',
+                        icon: 'space_dashboard',
+                    },
+                    {
+                        name: 'New Issue',
+                        path: '/issues/new',
+                        icon: 'add_task',
                     },
                 ],
             },
             {
                 name: 'Projects',
-                type: 'button',
+                type: 'menu',
                 icon: 'folder',
                 path: '/projects',
+                children: [
+                    {
+                        path: '/projects/overview',
+                        name: 'Overview',
+                        icon: 'travel_explore',
+                    },
+                    {
+                        path: '/projects/overview',
+                        name: 'Projects',
+                        icon: 'folder',
+                    },
+                    {
+                        path: '/projects/new',
+                        name: 'New Project',
+                        icon: 'create_new_folder',
+                    },
+                ],
+            },
+            {
+                name: 'Worktime',
+                type: 'menu',
+                icon: 'access_time',
+                path: '/worktime',
+                children: [
+                    {
+                        name: 'Issues',
+                        icon: 'report_problem',
+                        path: '/worktime/issues',
+                    },
+                    {
+                        name: 'Projects',
+                        icon: 'folder',
+                        path: '/worktime/projects',
+                    },
+                    {
+                        name: 'Statistics',
+                        icon: 'bar_chart',
+                        path: '/worktime',
+                    },
+                ],
+            },
+        ];
+    }
+
+    getBottomSidenavRoutes(): Array<AppRoute> {
+        return [
+            {
+                type: 'button',
+                name: 'Account',
+                icon: 'person',
+                path: '/account',
+            },
+            {
+                type: 'button',
+                name: 'Settings',
+                icon: 'settings',
+                path: '/settings',
             },
         ];
     }

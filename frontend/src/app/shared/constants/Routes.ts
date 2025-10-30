@@ -2,8 +2,8 @@ export type AppRoute =
     | {
           type: 'menu';
           name: string;
-          active?: boolean;
-          children: Array<AppRoute>;
+          show?: boolean;
+          children: Array<ChildRoute>;
           icon?: string;
           path?: string;
       }
@@ -11,7 +11,13 @@ export type AppRoute =
           type: 'button';
           name: string;
           path: string;
-          active?: boolean;
+          show?: boolean;
           icon?: string;
           children?: never;
       };
+
+export type ChildRoute = {
+    name: string;
+    path: string;
+    icon: string;
+};

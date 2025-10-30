@@ -41,26 +41,28 @@ export class NavbarComponent implements OnInit, AfterViewInit {
     theme: 'light' | 'dark' = 'light';
     logo;
 
-    user: User | null = {
-        id: '',
-        username: '',
-        email: '',
-        status: 1,
-        created_at: new Date(),
-    };
-
-    //user: User | null = null;
+    user: User | null = null;
 
     htmlElement: HTMLElement | null = null;
     routes: Array<AppRoute> = [];
 
     ngOnInit(): void {
+        if (!this.router.url.includes('/auth')) {
+            this.user = {
+                id: '1',
+                username: 'Admin',
+                email: 'admin@example.com',
+                created_at: new Date(),
+                status: 1,
+            };
+        }
+
         this.htmlElement = document.documentElement;
 
         let theme: 'light' | 'dark' = this.themeService.getTheme();
         this.setTheme(!theme ? 'light' : (theme as 'light' | 'dark'));
 
-        this.routes = this.routeService.getAppRoutes(this.user).filter((route) => route.active);
+        this.routes = this.routeService.getAppRoutes(this.user).filter((route) => route.show);
     }
 
     constructor(
