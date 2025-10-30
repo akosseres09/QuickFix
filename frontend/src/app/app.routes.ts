@@ -59,13 +59,74 @@ export const routes: Routes = [
     },
     {
         path: '',
+        pathMatch: 'full',
         loadComponent: () => import('./main/home/home.component').then((c) => c.HomeComponent),
     },
     {
-        path: 'dashboard',
+        path: '',
         loadComponent: () =>
             import('./layouts/main-layout/main-layout.component').then(
                 (c) => c.MainLayoutComponent
             ),
+        children: [
+            {
+                path: 'issues',
+                loadComponent: () =>
+                    import('./layouts/tabs-layout/tabs-layout.component').then(
+                        (c) => c.TabsLayoutComponent
+                    ),
+                data: {
+                    tabs: [
+                        {
+                            label: 'Overview',
+                            route: '/issues/overview',
+                        },
+                        {
+                            label: 'Issues',
+                            route: '/issues',
+                        },
+                        {
+                            label: 'Board',
+                            route: '/issues/board',
+                        },
+                        {
+                            label: 'New Issue',
+                            route: '/issues/new',
+                        },
+                    ],
+                },
+                children: [
+                    {
+                        path: '',
+                        pathMatch: 'full',
+                        loadComponent: () =>
+                            import('./main/issues/issues.component').then((c) => c.IssuesComponent),
+                        title: 'QuickFix - Issues',
+                    },
+                    {
+                        path: 'board',
+                        loadComponent: () =>
+                            import('./main/issues/board/board.component').then(
+                                (c) => c.BoardComponent
+                            ),
+                        title: 'QuickFix - Issue Board',
+                    },
+                    {
+                        path: 'new',
+                        loadComponent: () =>
+                            import('./main/issues/new/new.component').then((c) => c.NewComponent),
+                        title: 'QuickFix - New Issue',
+                    },
+                    {
+                        path: 'overview',
+                        loadComponent: () =>
+                            import('./main/issues/overview/overview.component').then(
+                                (c) => c.OverviewComponent
+                            ),
+                        title: 'QuickFix - Overview',
+                    },
+                ],
+            },
+        ],
     },
 ];

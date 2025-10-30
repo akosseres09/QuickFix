@@ -1,0 +1,15 @@
+<nav mat-tab-nav-bar [tabPanel]="tabPanel">
+    <a
+        mat-tab-link
+        *ngFor="let tab of tabs"
+        [routerLink]="tab.route"
+        routerLinkActive
+        [routerLinkActiveOptions]="{ exact: true }"
+        #rla="routerLinkActive"
+        [active]="rla.isActive"
+    >
+        {{ tab.label }}
+    </a>
+</nav>
+
+<router-outlet></router-outlet>
