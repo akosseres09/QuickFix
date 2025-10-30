@@ -152,6 +152,12 @@ export const routes: Routes = [
                 },
                 children: [
                     {
+                        path: '',
+                        pathMatch: 'full',
+                        redirectTo: 'issues',
+                    },
+
+                    {
                         path: 'issues',
                         pathMatch: 'full',
                         loadComponent: () =>
