@@ -182,6 +182,56 @@ export const routes: Routes = [
                 ],
             },
             {
+                path: 'projects',
+                loadComponent: () =>
+                    import('./layouts/tabs-layout/tabs-layout.component').then(
+                        (c) => c.TabsLayoutComponent
+                    ),
+                data: {
+                    tabs: [
+                        {
+                            label: 'OverView',
+                            route: '/projects/overview',
+                        },
+                        {
+                            label: 'Projects',
+                            route: '/projects',
+                        },
+                        {
+                            label: 'New Project',
+                            route: '/projects/new',
+                        },
+                    ],
+                },
+                children: [
+                    {
+                        path: '',
+                        pathMatch: 'full',
+                        loadComponent: () =>
+                            import('./main/projects/projects.component').then(
+                                (c) => c.ProjectsComponent
+                            ),
+                    },
+                    {
+                        path: 'overview',
+                        loadComponent: () =>
+                            import('./main/projects/overview/overview.component').then(
+                                (c) => c.OverviewComponent
+                            ),
+                    },
+                    {
+                        path: 'new',
+                        loadComponent: () =>
+                            import('./main/projects/new/new.component').then((c) => c.NewComponent),
+                    },
+                ],
+            },
+            {
+                path: 'labels',
+                loadComponent: () =>
+                    import('./main/labels/labels.component').then((c) => c.LabelsComponent),
+            },
+            {
                 path: 'account',
                 loadComponent: () =>
                     import('./main/account/account.component').then((c) => c.AccountComponent),

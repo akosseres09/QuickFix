@@ -96,7 +96,7 @@ export class RouteService {
                         icon: 'travel_explore',
                     },
                     {
-                        path: '/projects/overview',
+                        path: '/projects',
                         name: 'Projects',
                         icon: 'folder',
                     },
@@ -129,6 +129,12 @@ export class RouteService {
                         path: '/worktime/stats',
                     },
                 ],
+            },
+            {
+                name: 'Labels',
+                type: 'button',
+                icon: 'label',
+                path: '/labels',
             },
         ];
     }
