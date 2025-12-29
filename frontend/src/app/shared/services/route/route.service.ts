@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { AppRoute } from '../../constants/Routes';
 import { User } from '../../model/User';
+import { Router } from '@angular/router';
 
 @Injectable({
     providedIn: 'root',
 })
 export class RouteService {
-    constructor() {}
+    constructor(private router: Router) {}
 
     getAppRoutes(user: User | null): Array<AppRoute> {
         return [
@@ -27,6 +28,13 @@ export class RouteService {
                 name: 'Home',
                 type: 'button',
                 show: user === null,
+                exact: true,
+            },
+            {
+                path: '/projects',
+                name: 'Projects',
+                type: 'button',
+                show: user !== null,
             },
             {
                 type: 'menu',
@@ -55,7 +63,26 @@ export class RouteService {
     }
 
     getSidenavRoutes(): Array<AppRoute> {
-        return [
+        let routes: Array<AppRoute> = [
+            {
+                name: 'Projects',
+                type: 'button',
+                icon: 'folder',
+                path: '/projects',
+            },
+            {
+                name: 'Worktime',
+                type: 'button',
+                icon: 'access_time',
+                path: '/worktime',
+            },
+        ];
+        if (this.router.url.match('(/projects)|(/settings)|(/account)$')) {
+            return routes;
+        }
+
+        return (routes = [
+            ...routes,
             {
                 name: 'Issues',
                 type: 'menu',
@@ -81,29 +108,6 @@ export class RouteService {
                         name: 'New Issue',
                         path: '/issues/new',
                         icon: 'add_task',
-                    },
-                ],
-            },
-            {
-                name: 'Projects',
-                type: 'menu',
-                icon: 'folder',
-                path: '/projects',
-                children: [
-                    {
-                        path: '/projects/overview',
-                        name: 'Overview',
-                        icon: 'travel_explore',
-                    },
-                    {
-                        path: '/projects',
-                        name: 'Projects',
-                        icon: 'folder',
-                    },
-                    {
-                        path: '/projects/new',
-                        name: 'New Project',
-                        icon: 'create_new_folder',
                     },
                 ],
             },
@@ -136,7 +140,7 @@ export class RouteService {
                 icon: 'label',
                 path: '/labels',
             },
-        ];
+        ]);
     }
 
     getBottomSidenavRoutes(): Array<AppRoute> {

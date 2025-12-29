@@ -6,6 +6,7 @@ export type AppRoute =
           children: Array<ChildRoute>;
           icon?: string;
           path?: string;
+          exact?: boolean;
       }
     | {
           type: 'button';
@@ -14,6 +15,7 @@ export type AppRoute =
           show?: boolean;
           icon?: string;
           children?: never;
+          exact?: boolean;
       };
 
 export type ChildRoute = {

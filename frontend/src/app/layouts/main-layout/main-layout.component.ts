@@ -20,8 +20,4 @@ export class MainLayoutComponent {
     onSidebar(event: boolean) {
         this.isSidebarCollapsed = event;
     }
-
-    onMouseEnter() {}
-
-    onMouseLeave() {}
 }

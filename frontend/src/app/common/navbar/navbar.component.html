@@ -63,7 +63,7 @@
                             *ngIf="route.type === 'button'"
                             routerLink="{{ route.path }}"
                             routerLinkActive="dark:bg-dark-hover bg-light-text-hover"
-                            [routerLinkActiveOptions]="{ exact: true }"
+                            [routerLinkActiveOptions]="{ exact: route.exact ?? false }"
                             class="block py-2 px-3 border border-transparent rounded-xl dark:hover:bg-dark-hover hover:bg-light-text-hover duration-200"
                             >{{ route.name }}</a
                         >

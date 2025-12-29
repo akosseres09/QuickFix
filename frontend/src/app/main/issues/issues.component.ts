@@ -6,6 +6,8 @@ import { IssueService } from '../../shared/services/issue/issue.service';
 import { CommonModule } from '@angular/common';
 import { DisplayedColumn } from '../../shared/constants/DisplayedColumn';
 import { TableComponent } from '../../common/table/table.component';
+import { Router } from '@angular/router';
+import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 
 @Component({
     selector: 'app-issues',
@@ -58,14 +60,29 @@ export class IssuesComponent implements OnInit {
             id: 'status',
             label: 'Status',
             sortable: true,
-            value: (e: Issue) => e.status,
+            value: (e: Issue) =>
+                (e.status.charAt(0).toUpperCase() + e.status.slice(1)).replaceAll('_', ' '),
         },
     ];
 
-    constructor(private issueService: IssueService) {}
+    constructor(
+        private issueService: IssueService,
+        private router: Router,
+        private snackbarService: SnackbarService
+    ) {}
 
     ngOnInit(): void {
         this.issues = this.issueService.getIssues();
         this.shownIssues.data = this.issues;
+    }
+
+    onEdit(issue: Issue) {
+        this.snackbarService.open('Navigating to issue ' + issue.id);
+        //this.router.navigate(['/issues', issue.id]);
+    }
+
+    onDelete(issue: Issue) {
+        this.snackbarService.open('Issue deleted');
+        // Not implemented
     }
 }

@@ -39,9 +39,12 @@ export class TableComponent<T extends BaseModel> implements OnChanges, AfterView
     @Input() dataSource: MatTableDataSource<T> = new MatTableDataSource();
     @Input() displayedColumns: Array<DisplayedColumn> = [];
     @Input() showActions: boolean = true;
+    @Input() showEditAction: boolean = true;
+    @Input() showDeleteAction: boolean = true;
 
-    @Output() editClick = new EventEmitter<T>();
-    @Output() deleteClick = new EventEmitter<T>();
+    @Output() edit = new EventEmitter<T>();
+    @Output() delete = new EventEmitter<T>();
+    @Output() name = new EventEmitter<T>();
 
     userService = inject(UserService);
     user: User | null = this.userService.getUser();
@@ -72,14 +75,19 @@ export class TableComponent<T extends BaseModel> implements OnChanges, AfterView
     }
 
     onEdit(element: T): void {
-        this.editClick.emit(element);
+        this.edit.emit(element);
     }
 
     onDelete(element: T): void {
-        this.deleteClick.emit(element);
+        this.delete.emit(element);
     }
 
     canModify() {
         return this.user?.role === ADMIN || this.user?.role === SYS_ADMIN;
+    }
+
+    onNameClick(element: T): void {
+        console.log(element);
+        this.name.emit(element);
     }
 }

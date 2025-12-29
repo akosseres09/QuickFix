@@ -36,6 +36,12 @@ export class ProjectsComponent implements OnInit {
             value: (e: Project) => e.admin.username,
         },
         {
+            id: 'users',
+            label: '# of users',
+            sortable: true,
+            value: (e: Project) => e.users.length,
+        },
+        {
             id: 'createdAt',
             label: 'Created At',
             sortable: true,

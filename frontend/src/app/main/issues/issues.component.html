@@ -1,1 +1,6 @@
-<app-table [dataSource]="shownIssues" [displayedColumns]="displayedColumns"></app-table>
+<app-table
+    (delete)="onDelete($event)"
+    (edit)="onEdit($event)"
+    [dataSource]="shownIssues"
+    [displayedColumns]="displayedColumns"
+></app-table>

@@ -70,6 +70,6 @@ export class LoginComponent implements OnInit {
         if (!this.loginForm.valid) return;
 
         const { email, password } = this.loginForm.value;
-        this.router.navigateByUrl('/issues');
+        this.router.navigateByUrl('/projects');
     }
 }

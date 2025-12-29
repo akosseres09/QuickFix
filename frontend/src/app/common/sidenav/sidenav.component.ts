@@ -13,7 +13,7 @@ import { NavitemComponent } from './navitem/navitem.component';
 })
 export class SidenavComponent implements OnInit, OnChanges {
     @Input() isCollapsed: boolean = false;
-    topRoutes: Array<AppRoute> = [];
+    @Input() topRoutes: Array<AppRoute> = [];
     bottomRoutes: Array<AppRoute> = [];
     logo: string = '';
     theme: string = '';
@@ -28,7 +28,9 @@ export class SidenavComponent implements OnInit, OnChanges {
     }
 
     ngOnInit(): void {
-        this.topRoutes = this.routeService.getSidenavRoutes();
+        if (this.topRoutes.length === 0) {
+            this.topRoutes = this.routeService.getSidenavRoutes();
+        }
         this.bottomRoutes = this.routeService.getBottomSidenavRoutes();
         this.logo = this.themeService.logos[this.theme];
     }

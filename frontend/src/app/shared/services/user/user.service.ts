@@ -20,6 +20,8 @@ export class UserService {
                 status: ACTIVE,
                 role: ADMIN,
             };
+        } else {
+            this.user = null;
         }
 
         return this.user;

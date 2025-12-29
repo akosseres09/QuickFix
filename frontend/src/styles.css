@@ -29,6 +29,8 @@
     --color-dark-primary-hover: #c1b7f0;
     --color-dark-secondary-hover: #3f22b8;
     --color-dark-accent-hover: #623cf5;
+
+    --color-success: #4caf50;
 }
 
 @utility custom-scrollbar {
