@@ -110,4 +110,13 @@ export class NavbarComponent implements OnInit, AfterViewInit {
         this.sidebarService.setState(name);
         this.sidebarClosed.emit(this.isSidebarCollapsed);
     }
+
+    showSidebarToggle() {
+        return (
+            this.user &&
+            this.router.url.match(
+                '(/projects)|(/settings)|(/account)|(/issues)|(/labels)|(/worktime)'
+            )
+        );
+    }
 }

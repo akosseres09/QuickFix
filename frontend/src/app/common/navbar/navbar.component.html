@@ -1,12 +1,14 @@
-<nav class="px-4 py-3 text-xl font-bold border-b-2 border-light-text-hover dark:border-dark-hover">
+<nav
+    class="px-4 py-3 text-xl font-bold border-b-2 bg-light-background dark:bg-dark-background border-light-text-hover dark:border-dark-hover"
+>
     <div class="max-w-screen-2xl relative md:flex md:items-center" [class.mx-auto]="!user">
         <div class="mr-auto flex items-center justify-between gap-12">
-            <a href="/auth/login" class="flex items-center space-x-2">
+            <a href="/" class="flex items-center space-x-2">
                 <img [src]="imageSource" width="48" />
                 <span>QuickFix</span>
             </a>
             <button
-                *ngIf="user"
+                *ngIf="showSidebarToggle()"
                 (click)="toggleSidebar()"
                 class="hidden md:block p-2 rounded cursor-pointer hover:bg-light-text-hover dark:hover:bg-dark-hover transition-[background-color]"
                 [attr.aria-label]="isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
