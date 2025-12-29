@@ -131,100 +131,12 @@ export const routes: Routes = [
             {
                 path: 'worktime',
                 loadComponent: () =>
-                    import('./layouts/tabs-layout/tabs-layout.component').then(
-                        (c) => c.TabsLayoutComponent
-                    ),
-                data: {
-                    tabs: [
-                        {
-                            label: 'Issues',
-                            route: '/worktime/issues',
-                        },
-                        {
-                            label: 'Projects',
-                            route: '/worktime/projects',
-                        },
-                        {
-                            label: 'Statistics',
-                            route: '/worktime/stats',
-                        },
-                    ],
-                },
-                children: [
-                    {
-                        path: '',
-                        pathMatch: 'full',
-                        redirectTo: 'issues',
-                    },
-
-                    {
-                        path: 'issues',
-                        pathMatch: 'full',
-                        loadComponent: () =>
-                            import('./main/worktime/worktime.component').then(
-                                (c) => WorktimeComponent
-                            ),
-                    },
-                    {
-                        path: 'projects',
-                        loadComponent: () =>
-                            import('./main/worktime/projects/projects.component').then(
-                                (c) => c.ProjectsComponent
-                            ),
-                    },
-                    {
-                        path: 'stats',
-                        loadComponent: () =>
-                            import('./main/worktime/statistics/statistics.component').then(
-                                (c) => c.StatisticsComponent
-                            ),
-                    },
-                ],
+                    import('./main/worktime/worktime.component').then((c) => WorktimeComponent),
             },
             {
                 path: 'projects',
                 loadComponent: () =>
-                    import('./layouts/tabs-layout/tabs-layout.component').then(
-                        (c) => c.TabsLayoutComponent
-                    ),
-                data: {
-                    tabs: [
-                        {
-                            label: 'Overview',
-                            route: '/projects/overview',
-                        },
-                        {
-                            label: 'Projects',
-                            route: '/projects',
-                        },
-                        {
-                            label: 'New Project',
-                            route: '/projects/new',
-                        },
-                    ],
-                },
-                children: [
-                    {
-                        path: '',
-                        pathMatch: 'full',
-                        loadComponent: () =>
-                            import('./main/projects/projects.component').then(
-                                (c) => c.ProjectsComponent
-                            ),
-                    },
-                    {
-                        path: 'overview',
-                        loadComponent: () =>
-                            import('./main/projects/overview/overview.component').then(
-                                (c) => c.OverviewComponent
-                            ),
-                    },
-                    {
-                        path: 'new',
-                        loadComponent: () =>
-                            import('./main/projects/new/new.component').then((c) => c.NewComponent),
-                    },
-                ],
+                    import('./main/projects/projects.component').then((c) => c.ProjectsComponent),
             },
             {
                 path: 'labels',

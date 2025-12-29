@@ -112,29 +112,6 @@ export class RouteService {
                 ],
             },
             {
-                name: 'Worktime',
-                type: 'menu',
-                icon: 'access_time',
-                path: '/worktime',
-                children: [
-                    {
-                        name: 'Issues',
-                        icon: 'report_problem',
-                        path: '/worktime/issues',
-                    },
-                    {
-                        name: 'Projects',
-                        icon: 'folder',
-                        path: '/worktime/projects',
-                    },
-                    {
-                        name: 'Statistics',
-                        icon: 'bar_chart',
-                        path: '/worktime/stats',
-                    },
-                ],
-            },
-            {
                 name: 'Labels',
                 type: 'button',
                 icon: 'label',
