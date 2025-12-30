@@ -3,4 +3,6 @@ export interface DisplayedColumn {
     label: string;
     sortable: boolean;
     value: (element: any) => string | number | Date;
+    link?: boolean;
+    class?: string;
 }
