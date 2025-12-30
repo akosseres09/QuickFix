@@ -1,6 +1,9 @@
-<app-table
-    (delete)="onDelete($event)"
-    (edit)="onEdit($event)"
-    [dataSource]="shownIssues"
-    [displayedColumns]="displayedColumns"
-></app-table>
+<div class="max-w-7xl mx-auto">
+    <app-table
+        (delete)="onDelete($event)"
+        (edit)="onEdit($event)"
+        [dataSource]="shownIssues"
+        [displayedColumns]="displayedColumns"
+        tableHeader="Issues"
+    ></app-table>
+</div>
