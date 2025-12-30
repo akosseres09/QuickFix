@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { AppRoute } from '../../constants/Routes';
 import { User } from '../../model/User';
 import { Router } from '@angular/router';
+import { matchProjectRoutes } from '../../constants/RouteMatch';
 
 @Injectable({
     providedIn: 'root',
@@ -77,7 +78,7 @@ export class RouteService {
                 path: '/worktime',
             },
         ];
-        if (this.router.url.match('(/projects)|(/settings)|(/account)$')) {
+        if (this.router.url.match(matchProjectRoutes)) {
             return routes;
         }
 
