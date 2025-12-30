@@ -42,7 +42,9 @@ export class NavitemComponent implements OnChanges {
     };
 
     ngOnChanges(changes: SimpleChanges): void {
-        this.isCollapsed = changes['isCollapsed'].currentValue;
+        if (changes['isCollapsed']) {
+            this.isCollapsed = changes['isCollapsed'].currentValue;
+        }
     }
 
     isChildrenActive(children: Array<ChildRoute>): boolean {
