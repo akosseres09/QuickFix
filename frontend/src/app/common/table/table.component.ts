@@ -19,6 +19,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { UserService } from '../../shared/services/user/user.service';
 import { ADMIN, SYS_ADMIN, User } from '../../shared/model/User';
 import { BaseModel } from '../../shared/model/BaseModel';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 @Component({
     selector: 'app-table',
@@ -31,6 +32,7 @@ import { BaseModel } from '../../shared/model/BaseModel';
         MatSortHeader,
         MatIconModule,
         MatButtonModule,
+        MatProgressSpinner,
     ],
     templateUrl: './table.component.html',
     styleUrl: './table.component.css',
@@ -41,6 +43,8 @@ export class TableComponent<T extends BaseModel> implements OnChanges, AfterView
     @Input() showActions: boolean = true;
     @Input() showEditAction: boolean = true;
     @Input() showDeleteAction: boolean = true;
+    @Input() tableHeader = '';
+    @Input() isLoading: boolean = false;
 
     @Output() edit = new EventEmitter<T>();
     @Output() delete = new EventEmitter<T>();
@@ -63,6 +67,9 @@ export class TableComponent<T extends BaseModel> implements OnChanges, AfterView
     ngOnChanges(changes: SimpleChanges): void {
         this.dataSource = changes['dataSource'].currentValue;
         this.displayedColumns = changes['displayedColumns'].currentValue;
+        if (changes['isLoading']) {
+            this.isLoading = changes['isLoading'].currentValue;
+        }
         this.columnIds = this.displayedColumnIds();
     }
 
@@ -87,7 +94,6 @@ export class TableComponent<T extends BaseModel> implements OnChanges, AfterView
     }
 
     onNameClick(element: T): void {
-        console.log(element);
         this.name.emit(element);
     }
 }

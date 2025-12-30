@@ -1,102 +1,136 @@
-<div class="mat-elevation-z8 text-center">
-    <mat-paginator
-        [pageSizeOptions]="[5, 10, 20, 30, 50]"
-        showFirstLastButtons
-        aria-label="Select page of periodic elements"
-    >
-    </mat-paginator>
+<div class="mat-elevation-z8 text-center relative overflow-hidden rounded-lg">
+    @if (isLoading) {
+        <div class="absolute inset-0 z-30 bg-white dark:bg-gray-800 opacity-50"></div>
+        <div class="absolute z-50 top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">
+            <mat-spinner diameter="45"></mat-spinner>
+        </div>
+    }
+
+    <!-- Header Section (Responsive alignment) -->
+    <div class="flex flex-wrap justify-between items-center px-4 py-2">
+        <h2 class="font-bold text-2xl my-2 w-full sm:w-auto text-center sm:text-left">
+            {{ tableHeader }}
+        </h2>
+        <div class="w-full sm:w-auto flex justify-center">
+            <mat-paginator
+                [pageSizeOptions]="[5, 10, 20, 30, 50]"
+                showFirstLastButtons
+                aria-label="Select page of periodic elements"
+            >
+            </mat-paginator>
+        </div>
+    </div>
 
     @if (dataSource.data && dataSource.data.length > 0) {
-        <table mat-table [dataSource]="dataSource" matSort>
-            @for (col of displayedColumns; track $index) {
-                <ng-container [matColumnDef]="col.id">
-                    @if (col.sortable) {
+        <!-- 2. Scroll wrapper for x-axis scrolling -->
+        <div class="overflow-x-auto w-full">
+            <!-- Added min-w to force scroll on small devices -->
+            <table mat-table [dataSource]="dataSource" matSort class="w-full min-w-[800px]">
+                @for (col of displayedColumns; track $index) {
+                    <ng-container [matColumnDef]="col.id">
+                        @if (col.sortable) {
+                            <th
+                                mat-header-cell
+                                *matHeaderCellDef
+                                mat-sort-header
+                                class="underline underline-offset-2 !text-center text-base font-bold"
+                            >
+                                {{ col.label }}
+                            </th>
+                        } @else {
+                            <th
+                                mat-header-cell
+                                *matHeaderCellDef
+                                class="!text-center text-base font-bold"
+                            >
+                                {{ col.label }}
+                            </th>
+                        }
+
+                        <!-- 3. Centering content in cells -->
+                        <td
+                            mat-cell
+                            *matCellDef="let element"
+                            class="!text-center px-4 whitespace-nowrap"
+                        >
+                            @if (col.id === 'createdAt') {
+                                <ng-container>
+                                    {{ col.value(element) | date }}
+                                </ng-container>
+                            } @else if (col.id === 'status') {
+                                <!-- Flex justify-center for badges -->
+                                <div class="flex justify-center items-center">
+                                    <span
+                                        class="px-3 py-1 rounded-full font-semibold text-sm"
+                                        [ngClass]="{
+                                            'text-green-900 bg-green-200':
+                                                element.status === 'open',
+                                            'text-blue-900 bg-blue-200': element.status === 'to_do',
+                                            'text-yellow-900 bg-yellow-200':
+                                                element.status === 'in_progress',
+                                            'text-red-900 bg-red-200': element.status === 'closed',
+                                        }"
+                                    >
+                                        {{ col.value(element) }}
+                                    </span>
+                                </div>
+                            } @else if (col.link) {
+                                <span
+                                    class="text-blue-600 dark:text-blue-400 cursor-pointer hover:underline underline-offset-3"
+                                    (click)="onNameClick(element)"
+                                    >{{ col.value(element) }}</span
+                                >
+                            } @else {
+                                {{ col.value(element) }}
+                            }
+                        </td>
+                    </ng-container>
+                }
+
+                @if (showActions && canModify()) {
+                    <ng-container matColumnDef="actions">
                         <th
                             mat-header-cell
                             *matHeaderCellDef
-                            mat-sort-header
-                            class="underline underline-offset-2"
+                            class="!text-center text-base font-bold"
                         >
-                            {{ col.label }}
+                            Actions
                         </th>
-                    } @else {
-                        <th mat-header-cell *matHeaderCellDef>
-                            {{ col.label }}
-                        </th>
-                    }
-                    <td mat-cell *matCellDef="let element">
-                        @if (col.id === 'createdAt') {
-                            <ng-container>
-                                {{ col.value(element) | date }}
-                            </ng-container>
-                        } @else if (col.id === 'status') {
-                            <ng-container>
-                                <span
-                                    class="px-2 py-1 rounded-full font-semibold"
-                                    [ngClass]="{
-                                        'text-green-900': element.status === 'open',
-                                        'bg-green-200': element.status === 'open',
-                                        'text-blue-900': element.status === 'to_do',
-                                        'bg-blue-200': element.status === 'to_do',
-                                        'text-yellow-900': element.status === 'in_progress',
-                                        'bg-yellow-200': element.status === 'in_progress',
-                                        'text-red-900': element.status === 'closed',
-                                        'bg-red-200': element.status === 'closed',
-                                    }"
+                        <td mat-cell *matCellDef="let element" class="!text-center">
+                            <!-- Flex justify-center for action buttons -->
+                            <div class="flex justify-center items-center gap-2">
+                                <button
+                                    *ngIf="showEditAction"
+                                    mat-icon-button
+                                    (click)="onEdit(element)"
+                                    aria-label="Edit"
                                 >
-                                    {{ col.value(element) }}
-                                </span>
-                            </ng-container>
-                        } @else if (
-                            col.id === 'name' ||
-                            col.id === 'username' ||
-                            col.id === 'project' ||
-                            col.id === 'title'
-                        ) {
-                            <span
-                                class="cursor-pointer underline underline-offset-2"
-                                (click)="onNameClick(element)"
-                                >{{ col.value(element) }}</span
-                            >
-                        } @else {
-                            {{ col.value(element) }}
-                        }
-                    </td>
-                </ng-container>
-            }
+                                    <mat-icon>edit</mat-icon>
+                                </button>
+                                <button
+                                    mat-icon-button
+                                    *ngIf="showDeleteAction"
+                                    (click)="onDelete(element)"
+                                    aria-label="Delete"
+                                >
+                                    <mat-icon class="!text-red-600">delete</mat-icon>
+                                </button>
+                            </div>
+                        </td>
+                    </ng-container>
+                }
 
-            @if (showActions && canModify()) {
-                <ng-container matColumnDef="actions">
-                    <th mat-header-cell *matHeaderCellDef>Actions</th>
-                    <td mat-cell *matCellDef="let element">
-                        <button
-                            *ngIf="showEditAction"
-                            mat-icon-button
-                            (click)="onEdit(element)"
-                            aria-label="Edit"
-                        >
-                            <mat-icon>edit</mat-icon>
-                        </button>
-                        <button
-                            mat-icon-button
-                            *ngIf="showDeleteAction"
-                            (click)="onDelete(element)"
-                            aria-label="Delete"
-                        >
-                            <mat-icon class="!text-red-600">delete</mat-icon>
-                        </button>
-                    </td>
-                </ng-container>
-            }
-
-            <tr mat-header-row *matHeaderRowDef="columnIds"></tr>
-            <tr
-                class="odd:!bg-light-text-hover/20 dark:odd:!bg-dark-hover/20"
-                mat-row
-                *matRowDef="let row; columns: columnIds"
-            ></tr>
-        </table>
+                <tr mat-header-row *matHeaderRowDef="columnIds"></tr>
+                <tr
+                    class="odd:!bg-light-text-hover/20 dark:odd:!bg-dark-hover/20 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    mat-row
+                    *matRowDef="let row; columns: columnIds"
+                ></tr>
+            </table>
+        </div>
     } @else {
-        <span class="text-2xl">No data available</span>
+        <div class="p-8 flex justify-center items-center text-gray-500">
+            <span class="text-2xl">No data available</span>
+        </div>
     }
 </div>
