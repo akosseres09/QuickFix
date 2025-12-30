@@ -1,9 +1,20 @@
-import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import {
+    Component,
+    inject,
+    Input,
+    OnChanges,
+    OnDestroy,
+    OnInit,
+    SimpleChanges,
+} from '@angular/core';
 import { AppRoute } from '../../shared/constants/Routes';
 import { ThemeService } from '../../shared/services/theme/theme.service';
 import { RouteService } from '../../shared/services/route/route.service';
 import { SidebarService } from '../../shared/services/sidebar/sidebar.service';
 import { NavitemComponent } from './navitem/navitem.component';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter, Subscription } from 'rxjs';
+import { matchProjectRoutes } from '../../shared/constants/RouteMatch';
 
 @Component({
     selector: 'app-sidenav',
@@ -11,32 +22,41 @@ import { NavitemComponent } from './navitem/navitem.component';
     templateUrl: './sidenav.component.html',
     styleUrl: './sidenav.component.css',
 })
-export class SidenavComponent implements OnInit, OnChanges {
+export class SidenavComponent implements OnInit, OnChanges, OnDestroy {
     @Input() isCollapsed: boolean = false;
     @Input() topRoutes: Array<AppRoute> = [];
     bottomRoutes: Array<AppRoute> = [];
     logo: string = '';
     theme: string = '';
 
-    constructor(
-        private themeService: ThemeService,
-        private routeService: RouteService,
-        private sidebarService: SidebarService
-    ) {
-        this.theme = this.themeService.getTheme();
-        this.isCollapsed = this.sidebarService.getState();
-    }
+    private themeService = inject(ThemeService);
+    private routeService = inject(RouteService);
+    private sidebarService = inject(SidebarService);
+    private router = inject(Router);
+    private navigationSubscription: Subscription | null = null;
 
     ngOnInit(): void {
-        if (this.topRoutes.length === 0) {
-            this.topRoutes = this.routeService.getSidenavRoutes();
-        }
+        this.navigationSubscription = this.router.events
+            .pipe(filter((event) => event instanceof NavigationEnd))
+            .subscribe((event: NavigationEnd) => {
+                if (event.url.match(matchProjectRoutes)) {
+                    this.topRoutes = this.routeService.getSidenavRoutes();
+                }
+            });
+
+        this.theme = this.themeService.getTheme();
+        this.isCollapsed = this.sidebarService.getState();
+        this.topRoutes = this.routeService.getSidenavRoutes();
         this.bottomRoutes = this.routeService.getBottomSidenavRoutes();
         this.logo = this.themeService.logos[this.theme];
     }
 
     ngOnChanges(changes: SimpleChanges): void {
         this.isCollapsed = changes['isCollapsed'].currentValue;
+    }
+
+    ngOnDestroy(): void {
+        this.navigationSubscription?.unsubscribe();
     }
 
     toggleSidebar(): void {
