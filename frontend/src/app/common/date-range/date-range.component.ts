@@ -68,11 +68,11 @@ export class DateRangeComponent implements OnInit, OnDestroy {
         const urlEndDate = this.router.routerState.snapshot.root.queryParams['endDate'];
 
         if (urlStartDate) {
-            this.startDate = new Date(urlStartDate);
+            this.startDate = this.dateService.parseDate(urlStartDate);
             this.range.get('startDate')?.setValue(this.startDate);
         }
         if (urlEndDate) {
-            this.endDate = new Date(urlEndDate);
+            this.endDate = this.dateService.parseDate(urlEndDate);
             this.range.get('endDate')?.setValue(this.endDate);
         }
 
