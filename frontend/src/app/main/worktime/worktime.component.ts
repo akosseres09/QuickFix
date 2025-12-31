@@ -27,8 +27,8 @@ import { Stat } from '../../shared/constants/Stat';
     styleUrl: './worktime.component.css',
 })
 export class WorktimeComponent implements OnInit {
-    startDate: Date | null = null;
-    endDate: Date | null = null;
+    startDate: string | null = null;
+    endDate: string | null = null;
     isLoading = true;
     days: Map<string, number> = new Map();
     shownWorktimes = new MatTableDataSource<WorktimeEntry>();
@@ -172,8 +172,6 @@ export class WorktimeComponent implements OnInit {
         } else {
             const start = new Date(this.startDate);
             const end = new Date(this.endDate);
-            start.setHours(0, 0, 0, 0);
-            end.setHours(23, 59, 59, 999);
 
             this.filteredEntries = this.worktimeEntries.filter((entry) => {
                 const entryDate = new Date(entry.date);
@@ -194,7 +192,7 @@ export class WorktimeComponent implements OnInit {
         this.days = dayHours;
     }
 
-    onDateRangeChange($event: { startDate: Date; endDate: Date }) {
+    onDateRangeChange($event: { startDate: string; endDate: string }) {
         this.startDate = $event.startDate;
         this.endDate = $event.endDate;
         this.filterEntriesByDate();
