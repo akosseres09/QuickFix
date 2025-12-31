@@ -18,16 +18,11 @@ export class ProjectsComponent implements OnInit {
     shownProjects: MatTableDataSource<Project> = new MatTableDataSource<Project>();
     displayedColumns: Array<DisplayedColumn> = [
         {
-            id: 'id',
-            label: '#',
-            sortable: false,
-            value: (e: Project) => e.id,
-        },
-        {
             id: 'name',
             label: 'Name',
             sortable: true,
             value: (e: Project) => e.name,
+            link: true,
         },
         {
             id: 'admin',
