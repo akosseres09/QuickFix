@@ -13,7 +13,10 @@
         <div class="flex lg:justify-center">
             <mat-paginator
                 [disabled]="isLoading"
-                [pageSizeOptions]="[5, 10, 20, 30, 50]"
+                [pageSizeOptions]="pageSizes"
+                [pageIndex]="pageIndex"
+                [pageSize]="pageSize"
+                (page)="onPageEvent($event)"
                 showFirstLastButtons
                 aria-label="Select page of periodic elements"
             >

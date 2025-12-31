@@ -13,7 +13,7 @@ import {
 } from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { DisplayedColumn } from '../../shared/constants/DisplayedColumn';
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatSort, MatSortHeader, Sort } from '@angular/material/sort';
 import { CommonModule, DatePipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
@@ -63,18 +63,37 @@ export class TableComponent<T extends BaseModel>
 
     @ViewChild(MatPaginator) paginator!: MatPaginator;
     @ViewChild(MatSort) sort!: MatSort;
-    private readonly urlService = inject(UrlService);
-    private activeRoute = inject(ActivatedRoute);
     protected initialSortActive: string = '';
     protected initialSortDirection: 'asc' | 'desc' = 'asc';
+    protected pageIndex: number = 0;
+    protected pageSize: number = 10;
+    protected readonly pageSizes = [5, 10, 20, 30, 50];
+    private readonly urlService = inject(UrlService);
+    private readonly activeRoute = inject(ActivatedRoute);
     private sortSubscription: Subscription | null = null;
 
     ngOnInit(): void {
+        const pageSizeParam = this.activeRoute.snapshot.queryParamMap.get('pageSize');
+        const pageParam = this.activeRoute.snapshot.queryParamMap.get('page');
         const sortParam = this.activeRoute.snapshot.queryParamMap.get('sort');
+
         if (sortParam) {
             const isAsc = !sortParam.startsWith('-');
             this.initialSortActive = isAsc ? sortParam : sortParam.substring(1);
             this.initialSortDirection = isAsc ? 'asc' : 'desc';
+        }
+
+        if (pageSizeParam) {
+            if (this.pageSizes.indexOf(+pageSizeParam) === -1) {
+                this.pageSize = 10;
+                this.urlService.addQueryParams({ pageSize: this.pageSize });
+            } else {
+                this.pageSize = +pageSizeParam;
+            }
+        }
+
+        if (pageParam) {
+            this.pageIndex = +pageParam - 1;
         }
     }
 
@@ -117,6 +136,13 @@ export class TableComponent<T extends BaseModel>
             ids.push('actions');
         }
         return ids;
+    }
+
+    onPageEvent(event: PageEvent) {
+        this.pageIndex = event.pageIndex;
+        this.pageSize = event.pageSize;
+
+        this.urlService.addQueryParams({ page: this.pageIndex + 1, pageSize: this.pageSize });
     }
 
     onEdit(element: T): void {
