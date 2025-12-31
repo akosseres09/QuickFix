@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Tab } from '../../shared/constants/Tab';
 import { MatTabLink, MatTabNav, MatTabNavPanel } from '@angular/material/tabs';
@@ -12,9 +12,10 @@ import { MatTabLink, MatTabNav, MatTabNavPanel } from '@angular/material/tabs';
 })
 export class TabsLayoutComponent {
     @Input() tabs: Array<Tab>;
-    tabPanel: MatTabNavPanel = new MatTabNavPanel();
+    private route = inject(ActivatedRoute);
+    protected tabPanel: MatTabNavPanel = new MatTabNavPanel();
 
-    constructor(private route: ActivatedRoute) {
+    constructor() {
         this.tabs = this.route.snapshot.data['tabs'] ?? [];
     }
 }

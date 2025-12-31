@@ -1,15 +1,11 @@
 import { Injectable } from '@angular/core';
 import { AppRoute } from '../../constants/Routes';
 import { User } from '../../model/User';
-import { Router } from '@angular/router';
-import { matchProjectRoutes } from '../../constants/RouteMatch';
 
 @Injectable({
     providedIn: 'root',
 })
 export class RouteService {
-    constructor(private router: Router) {}
-
     getAppRoutes(user: User | null): Array<AppRoute> {
         return [
             {
@@ -34,6 +30,12 @@ export class RouteService {
             {
                 path: '/projects',
                 name: 'Projects',
+                type: 'button',
+                show: user !== null,
+            },
+            {
+                path: '/worktime',
+                name: 'Worktime',
                 type: 'button',
                 show: user !== null,
             },
@@ -64,26 +66,7 @@ export class RouteService {
     }
 
     getSidenavRoutes(): Array<AppRoute> {
-        let routes: Array<AppRoute> = [
-            {
-                name: 'Projects',
-                type: 'button',
-                icon: 'folder',
-                path: '/projects',
-            },
-            {
-                name: 'Worktime',
-                type: 'button',
-                icon: 'access_time',
-                path: '/worktime',
-            },
-        ];
-        if (this.router.url.match(matchProjectRoutes)) {
-            return routes;
-        }
-
-        return (routes = [
-            ...routes,
+        return [
             {
                 name: 'Issues',
                 type: 'menu',
@@ -118,7 +101,7 @@ export class RouteService {
                 icon: 'label',
                 path: '/labels',
             },
-        ]);
+        ];
     }
 
     getBottomSidenavRoutes(): Array<AppRoute> {

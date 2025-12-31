@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
     MatButtonToggle,
@@ -35,15 +35,14 @@ import { UserService } from '../../shared/services/user/user.service';
     standalone: true,
 })
 export class NavbarComponent implements OnInit, AfterViewInit {
+    @Input() showSidebarToggle: boolean = true;
     @Output() sidebarClosed: EventEmitter<boolean> = new EventEmitter<boolean>();
     isSidebarCollapsed: boolean;
     isMenuOpen = false;
     imageSource: string = 'QuickFix_logo_dark.png';
     theme: 'light' | 'dark' = 'light';
     logo;
-
     user: User | null = null;
-
     htmlElement: HTMLElement | null = null;
     routes: Array<AppRoute> = [];
 
@@ -109,14 +108,5 @@ export class NavbarComponent implements OnInit, AfterViewInit {
             : this.sidebarService.OPEN;
         this.sidebarService.setState(name);
         this.sidebarClosed.emit(this.isSidebarCollapsed);
-    }
-
-    showSidebarToggle() {
-        return (
-            this.user &&
-            this.router.url.match(
-                '(/projects)|(/settings)|(/account)|(/issues)|(/labels)|(/worktime)'
-            )
-        );
     }
 }
