@@ -1,27 +1,32 @@
 import { inject, Injectable } from '@angular/core';
-import { Router } from '@angular/router';
+import { QueryParamsHandling, Router } from '@angular/router';
 
 @Injectable({
     providedIn: 'root',
 })
 export class UrlService {
-    private router = inject(Router);
+    private readonly router = inject(Router);
 
-    addQueryParams(params: { [key: string]: any }): void {
+    addQueryParams(
+        params: { [key: string]: any },
+        paramsHandling: QueryParamsHandling = 'merge'
+    ): void {
         this.router.navigate([], {
             queryParams: params,
-            queryParamsHandling: 'merge',
+            queryParamsHandling: paramsHandling,
         });
     }
 
-    removeQueryParams(paramKeys: string[]): void {
-        const queryParams = { ...this.router.routerState.snapshot.root.queryParams };
+    removeQueryParams(paramKeys: string[], paramsHandling: QueryParamsHandling = 'merge'): void {
+        const queryParams: { [key: string]: null } = {};
+
         for (const key of paramKeys) {
-            delete queryParams[key];
+            queryParams[key] = null;
         }
+
         this.router.navigate([], {
             queryParams: queryParams,
-            queryParamsHandling: 'preserve',
+            queryParamsHandling: paramsHandling,
         });
     }
 }

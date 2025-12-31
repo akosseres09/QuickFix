@@ -8,11 +8,13 @@ import {
     Output,
     EventEmitter,
     inject,
+    OnInit,
+    OnDestroy,
 } from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { DisplayedColumn } from '../../shared/constants/DisplayedColumn';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
-import { MatSort, MatSortHeader } from '@angular/material/sort';
+import { MatSort, MatSortHeader, Sort } from '@angular/material/sort';
 import { CommonModule, DatePipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -20,6 +22,9 @@ import { UserService } from '../../shared/services/user/user.service';
 import { ADMIN, SYS_ADMIN, User } from '../../shared/model/User';
 import { BaseModel } from '../../shared/model/BaseModel';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { UrlService } from '../../shared/services/url/url.service';
+import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-table',
@@ -37,7 +42,9 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
     templateUrl: './table.component.html',
     styleUrl: './table.component.css',
 })
-export class TableComponent<T extends BaseModel> implements OnChanges, AfterViewInit {
+export class TableComponent<T extends BaseModel>
+    implements OnInit, OnChanges, AfterViewInit, OnDestroy
+{
     @Input() dataSource: MatTableDataSource<T> = new MatTableDataSource();
     @Input() displayedColumns: Array<DisplayedColumn> = [];
     @Input() showActions: boolean = true;
@@ -56,12 +63,27 @@ export class TableComponent<T extends BaseModel> implements OnChanges, AfterView
 
     @ViewChild(MatPaginator) paginator!: MatPaginator;
     @ViewChild(MatSort) sort!: MatSort;
+    private readonly urlService = inject(UrlService);
+    private activeRoute = inject(ActivatedRoute);
+    protected initialSortActive: string = '';
+    protected initialSortDirection: 'asc' | 'desc' = 'asc';
+    private sortSubscription: Subscription | null = null;
+
+    ngOnInit(): void {
+        const sortParam = this.activeRoute.snapshot.queryParamMap.get('sort');
+        if (sortParam) {
+            const isAsc = !sortParam.startsWith('-');
+            this.initialSortActive = isAsc ? sortParam : sortParam.substring(1);
+            this.initialSortDirection = isAsc ? 'asc' : 'desc';
+        }
+    }
 
     ngAfterViewInit(): void {
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
-
-        this.sort.sortChange.subscribe(() => (this.paginator.pageIndex = 0));
+        this.sortSubscription = this.sort.sortChange.subscribe(
+            () => (this.paginator.pageIndex = 0)
+        );
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -71,6 +93,22 @@ export class TableComponent<T extends BaseModel> implements OnChanges, AfterView
             this.isLoading = changes['isLoading'].currentValue;
         }
         this.columnIds = this.displayedColumnIds();
+    }
+
+    ngOnDestroy(): void {
+        this.sortSubscription?.unsubscribe();
+    }
+
+    onSortChange(event: Sort) {
+        if (event.direction === '') {
+            this.urlService.removeQueryParams(['sort']);
+            return;
+        }
+
+        const direction = event.direction === 'asc' ? '' : '-';
+        this.urlService.addQueryParams({
+            sort: `${direction}${event.active}`,
+        });
     }
 
     displayedColumnIds(): Array<String> {

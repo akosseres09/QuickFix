@@ -24,7 +24,15 @@
     @if (dataSource.data && dataSource.data.length > 0) {
         <div class="overflow-x-auto w-full">
             <div class="min-w-[800px]">
-                <table mat-table [dataSource]="dataSource" matSort class="w-full">
+                <table
+                    mat-table
+                    [dataSource]="dataSource"
+                    matSort
+                    (matSortChange)="onSortChange($event)"
+                    [matSortActive]="initialSortActive"
+                    [matSortDirection]="initialSortDirection"
+                    class="w-full"
+                >
                     @for (col of displayedColumns; track $index) {
                         <ng-container [matColumnDef]="col.id">
                             @if (col.sortable) {
