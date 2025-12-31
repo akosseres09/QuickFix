@@ -62,16 +62,17 @@ export const routes: Routes = [
     },
     {
         path: '',
-        pathMatch: 'full',
-        loadComponent: () => import('./main/home/home.component').then((c) => c.HomeComponent),
-    },
-    {
-        path: '',
         loadComponent: () =>
             import('./layouts/base-layout/base-layout.component').then(
                 (c) => c.BaseLayoutComponent
             ),
         children: [
+            {
+                path: '',
+                pathMatch: 'full',
+                loadComponent: () =>
+                    import('./main/home/home.component').then((c) => c.HomeComponent),
+            },
             {
                 path: 'projects',
                 loadComponent: () =>
@@ -81,6 +82,11 @@ export const routes: Routes = [
                 path: 'worktime',
                 loadComponent: () =>
                     import('./main/worktime/worktime.component').then((c) => WorktimeComponent),
+            },
+            {
+                path: '**',
+                loadComponent: () =>
+                    import('./auth/not-found/not-found.component').then((c) => c.NotFoundComponent),
             },
         ],
     },

@@ -1,6 +1,12 @@
-<main>
+<main class="flex flex-col h-full">
     <app-navbar [showSidebarToggle]="false"></app-navbar>
-    <div class="mt-10 {{ classes }}">
+    <div
+        class="my-10"
+        [ngClass]="innerPage ? 'flex justify-center' : 'max-w-7xl mx-auto w-full px-6 xl:px-0 pb-8'"
+    >
         <router-outlet></router-outlet>
     </div>
+    @if (innerPage) {
+        <app-footer></app-footer>
+    }
 </main>

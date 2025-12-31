@@ -1,19 +1,22 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { NavbarComponent } from '../../common/navbar/navbar.component';
 import { User } from '../../shared/model/User';
-import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
+import { FooterComponent } from '../../common/footer/footer.component';
+import { CommonModule } from '@angular/common';
 
 @Component({
-    selector: 'app-auth',
-    imports: [NavbarComponent, RouterOutlet],
+    selector: 'app-base',
+    imports: [NavbarComponent, RouterOutlet, FooterComponent, CommonModule],
     templateUrl: './base-layout.component.html',
     styleUrl: './base-layout.component.css',
 })
 export class BaseLayoutComponent implements OnInit {
     user: User | null = null;
-    classes = 'flex justify-center';
     router = inject(Router);
+    activeRoute = inject(ActivatedRoute);
+    innerPage = true;
 
     ngOnInit(): void {
         this.checkPage(this.router.url);
@@ -26,7 +29,9 @@ export class BaseLayoutComponent implements OnInit {
 
     checkPage(url: string) {
         if (url.match('/projects') || url.match('/worktime')) {
-            this.classes = 'max-w-7xl mx-auto';
+            this.innerPage = false;
+        } else {
+            this.innerPage = true;
         }
     }
 }
