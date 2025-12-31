@@ -63,36 +63,6 @@ export const routes: Routes = [
     {
         path: '',
         loadComponent: () =>
-            import('./layouts/base-layout/base-layout.component').then(
-                (c) => c.BaseLayoutComponent
-            ),
-        children: [
-            {
-                path: '',
-                pathMatch: 'full',
-                loadComponent: () =>
-                    import('./main/home/home.component').then((c) => c.HomeComponent),
-            },
-            {
-                path: 'projects',
-                loadComponent: () =>
-                    import('./main/projects/projects.component').then((c) => c.ProjectsComponent),
-            },
-            {
-                path: 'worktime',
-                loadComponent: () =>
-                    import('./main/worktime/worktime.component').then((c) => WorktimeComponent),
-            },
-            {
-                path: '**',
-                loadComponent: () =>
-                    import('./auth/not-found/not-found.component').then((c) => c.NotFoundComponent),
-            },
-        ],
-    },
-    {
-        path: '',
-        loadComponent: () =>
             import('./layouts/main-layout/main-layout.component').then(
                 (c) => c.MainLayoutComponent
             ),
@@ -169,6 +139,31 @@ export const routes: Routes = [
                 path: 'settings',
                 loadComponent: () =>
                     import('./main/settings/settings.component').then((c) => c.SettingsComponent),
+            },
+        ],
+    },
+    {
+        path: '',
+        loadComponent: () =>
+            import('./layouts/base-layout/base-layout.component').then(
+                (c) => c.BaseLayoutComponent
+            ),
+        children: [
+            {
+                path: '',
+                pathMatch: 'full',
+                loadComponent: () =>
+                    import('./main/home/home.component').then((c) => c.HomeComponent),
+            },
+            {
+                path: 'projects',
+                loadComponent: () =>
+                    import('./main/projects/projects.component').then((c) => c.ProjectsComponent),
+            },
+            {
+                path: 'worktime',
+                loadComponent: () =>
+                    import('./main/worktime/worktime.component').then((c) => WorktimeComponent),
             },
             {
                 path: '**',
