@@ -1,11 +1,13 @@
 import { Routes } from '@angular/router';
-import { AuthComponent } from './layouts/auth/auth.component';
 import { WorktimeComponent } from './main/worktime/worktime.component';
 
 export const routes: Routes = [
     {
         path: 'auth',
-        component: AuthComponent,
+        loadComponent: () =>
+            import('./layouts/base-layout/base-layout.component').then(
+                (c) => c.BaseLayoutComponent
+            ),
         children: [
             {
                 path: '',
@@ -62,6 +64,25 @@ export const routes: Routes = [
         path: '',
         pathMatch: 'full',
         loadComponent: () => import('./main/home/home.component').then((c) => c.HomeComponent),
+    },
+    {
+        path: '',
+        loadComponent: () =>
+            import('./layouts/base-layout/base-layout.component').then(
+                (c) => c.BaseLayoutComponent
+            ),
+        children: [
+            {
+                path: 'projects',
+                loadComponent: () =>
+                    import('./main/projects/projects.component').then((c) => c.ProjectsComponent),
+            },
+            {
+                path: 'worktime',
+                loadComponent: () =>
+                    import('./main/worktime/worktime.component').then((c) => WorktimeComponent),
+            },
+        ],
     },
     {
         path: '',
@@ -127,16 +148,6 @@ export const routes: Routes = [
                         title: 'QuickFix - Overview',
                     },
                 ],
-            },
-            {
-                path: 'worktime',
-                loadComponent: () =>
-                    import('./main/worktime/worktime.component').then((c) => WorktimeComponent),
-            },
-            {
-                path: 'projects',
-                loadComponent: () =>
-                    import('./main/projects/projects.component').then((c) => c.ProjectsComponent),
             },
             {
                 path: 'labels',
