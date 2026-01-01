@@ -63,6 +63,21 @@ export const routes: Routes = [
     {
         path: '',
         loadComponent: () =>
+            import('./layouts/base-layout/base-layout.component').then(
+                (c) => c.BaseLayoutComponent
+            ),
+        children: [
+            {
+                path: '',
+                pathMatch: 'full',
+                loadComponent: () =>
+                    import('./main/home/home.component').then((c) => c.HomeComponent),
+            },
+        ],
+    },
+    {
+        path: '',
+        loadComponent: () =>
             import('./layouts/main-layout/main-layout.component').then(
                 (c) => c.MainLayoutComponent
             ),
@@ -149,12 +164,6 @@ export const routes: Routes = [
                 (c) => c.BaseLayoutComponent
             ),
         children: [
-            {
-                path: '',
-                pathMatch: 'full',
-                loadComponent: () =>
-                    import('./main/home/home.component').then((c) => c.HomeComponent),
-            },
             {
                 path: 'projects',
                 loadComponent: () =>

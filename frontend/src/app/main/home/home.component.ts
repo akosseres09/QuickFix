@@ -2,11 +2,10 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
-import { NavbarComponent } from '../../common/navbar/navbar.component';
 
 @Component({
     selector: 'app-home',
-    imports: [CommonModule, NavbarComponent, RouterLink],
+    imports: [CommonModule, RouterLink],
     templateUrl: './home.component.html',
     styleUrl: './home.component.css',
     animations: [
