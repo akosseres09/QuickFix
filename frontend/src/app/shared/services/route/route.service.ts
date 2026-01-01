@@ -105,19 +105,6 @@ export class RouteService {
     }
 
     getBottomSidenavRoutes(): Array<AppRoute> {
-        return [
-            {
-                type: 'button',
-                name: 'Account',
-                icon: 'person',
-                path: '/account',
-            },
-            {
-                type: 'button',
-                name: 'Settings',
-                icon: 'settings',
-                path: '/settings',
-            },
-        ];
+        return [];
     }
 }

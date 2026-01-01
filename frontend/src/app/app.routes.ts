@@ -145,16 +145,6 @@ export const routes: Routes = [
                 loadComponent: () =>
                     import('./main/labels/labels.component').then((c) => c.LabelsComponent),
             },
-            {
-                path: 'account',
-                loadComponent: () =>
-                    import('./main/account/account.component').then((c) => c.AccountComponent),
-            },
-            {
-                path: 'settings',
-                loadComponent: () =>
-                    import('./main/settings/settings.component').then((c) => c.SettingsComponent),
-            },
         ],
     },
     {
@@ -173,6 +163,16 @@ export const routes: Routes = [
                 path: 'worktime',
                 loadComponent: () =>
                     import('./main/worktime/worktime.component').then((c) => WorktimeComponent),
+            },
+            {
+                path: 'account',
+                loadComponent: () =>
+                    import('./main/account/account.component').then((c) => c.AccountComponent),
+            },
+            {
+                path: 'settings',
+                loadComponent: () =>
+                    import('./main/settings/settings.component').then((c) => c.SettingsComponent),
             },
             {
                 path: '**',
