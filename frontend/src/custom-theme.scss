@@ -247,6 +247,23 @@ $dark-theme: mat.m2-define-dark-theme(
                 ),
         )
     );
+
+    @include mat.datepicker-overrides(
+        (
+            calendar-date-selected-state-background-color: var-color(--color-dark-primary),
+            calendar-date-in-range-state-background-color: if(
+                    $is-light-theme,
+                    var-color(--color-dark-primary-lighter),
+                    var-color(--color-dark-primary-darker)
+                ),
+            calendar-date-hover-state-background-color: var-color(--color-dark-primary),
+            calendar-container-background-color: if(
+                    $is-light-theme,
+                    var-color(--color-light-background),
+                    var-color(--color-dark-hover)
+                ),
+        )
+    );
 }
 
 html[data-theme='light'] {
