@@ -1,1 +1,36 @@
-<p>settings works!</p>
+<div class="max-w-4xl mx-auto p-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold mb-2">Settings</h1>
+        <p class="text-base opacity-70">Manage your application preferences and notifications</p>
+    </div>
+
+    <div class="flex flex-col gap-4">
+        <app-appearance></app-appearance>
+        <app-notification></app-notification>
+        <app-privacy></app-privacy>
+        <app-language></app-language>
+    </div>
+
+    <div
+        class="flex gap-4 mt-8 pt-8 border-t border-black/10 dark:border-white/10 md:flex-row flex-col"
+    >
+        <button
+            (click)="saveAllSettings()"
+            mat-raised-button
+            color="primary"
+            class="flex items-center gap-2 px-6 py-3 md:flex-3/5 w-full !text-dark-text"
+            [disabled]="!hasAnyChanges"
+        >
+            <mat-icon>save</mat-icon>
+            Save Changes
+        </button>
+        <button
+            (click)="resetAllSettings()"
+            mat-stroked-button
+            class="flex items-center gap-2 px-6 py-3 md:flex-2/5 w-full"
+        >
+            <mat-icon>restart_alt</mat-icon>
+            Reset to Defaults
+        </button>
+    </div>
+</div>

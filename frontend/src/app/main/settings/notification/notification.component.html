@@ -1,0 +1,98 @@
+<mat-expansion-panel class="!rounded-xl overflow-hidden">
+    <mat-expansion-panel-header class="!px-6 !py-4">
+        <mat-panel-title>
+            <mat-icon class="mr-3">notifications</mat-icon>
+            <span class="text-lg font-medium">Notifications</span>
+        </mat-panel-title>
+    </mat-expansion-panel-header>
+
+    <div class="py-4">
+        <div
+            class="flex justify-between py-4 gap-8 md:flex-row flex-col md:items-center items-start"
+        >
+            <div class="flex flex-col gap-1 flex-1">
+                <span class="font-medium text-base">Email Notifications</span>
+                <span class="text-sm opacity-70">Receive updates via email</span>
+            </div>
+            <mat-slide-toggle
+                [(ngModel)]="notifications.emailNotifications"
+                color="primary"
+            ></mat-slide-toggle>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div
+            class="flex justify-between py-4 gap-8 md:flex-row flex-col md:items-center items-start"
+        >
+            <div class="flex flex-col gap-1 flex-1">
+                <span class="font-medium text-base">Push Notifications</span>
+                <span class="text-sm opacity-70">Get real-time browser notifications</span>
+            </div>
+            <mat-slide-toggle
+                [(ngModel)]="notifications.pushNotifications"
+                color="primary"
+            ></mat-slide-toggle>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div
+            class="flex justify-between py-4 gap-8 md:flex-row flex-col md:items-center items-start"
+        >
+            <div class="flex flex-col gap-1 flex-1">
+                <span class="font-medium text-base">Task Reminders</span>
+                <span class="text-sm opacity-70">Receive reminders for upcoming tasks</span>
+            </div>
+            <mat-slide-toggle
+                [(ngModel)]="notifications.taskReminders"
+                color="primary"
+            ></mat-slide-toggle>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div
+            class="flex justify-between py-4 gap-8 md:flex-row flex-col md:items-center items-start"
+        >
+            <div class="flex flex-col gap-1 flex-1">
+                <span class="font-medium text-base">Weekly Digest</span>
+                <span class="text-sm opacity-70">Get a weekly summary of your activity</span>
+            </div>
+            <mat-slide-toggle
+                [(ngModel)]="notifications.weeklyDigest"
+                color="primary"
+            ></mat-slide-toggle>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div
+            class="flex justify-between py-4 gap-8 md:flex-row flex-col md:items-center items-start"
+        >
+            <div class="flex flex-col gap-1 flex-1">
+                <span class="font-medium text-base">Project Updates</span>
+                <span class="text-sm opacity-70">Notifications about project changes</span>
+            </div>
+            <mat-slide-toggle
+                [(ngModel)]="notifications.projectUpdates"
+                color="primary"
+            ></mat-slide-toggle>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div
+            class="flex justify-between py-4 gap-8 md:flex-row flex-col md:items-center items-start"
+        >
+            <div class="flex flex-col gap-1 flex-1">
+                <span class="font-medium text-base">Mention Alerts</span>
+                <span class="text-sm opacity-70">Get notified when someone mentions you</span>
+            </div>
+            <mat-slide-toggle
+                [(ngModel)]="notifications.mentionAlerts"
+                color="primary"
+            ></mat-slide-toggle>
+        </div>
+    </div>
+</mat-expansion-panel>

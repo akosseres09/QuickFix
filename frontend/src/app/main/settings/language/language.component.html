@@ -1,0 +1,44 @@
+<mat-expansion-panel class="!rounded-xl overflow-hidden">
+    <mat-expansion-panel-header class="!px-6 !py-4">
+        <mat-panel-title>
+            <mat-icon class="mr-3">language</mat-icon>
+            <span class="text-lg font-medium">Language & Region</span>
+        </mat-panel-title>
+    </mat-expansion-panel-header>
+
+    <div class="py-4">
+        <div
+            class="flex justify-between py-4 gap-8 md:flex-row flex-col md:items-center items-start"
+        >
+            <div class="flex flex-col gap-1 flex-1">
+                <span class="font-medium text-base">Language</span>
+                <span class="text-sm opacity-70">Select your preferred language</span>
+            </div>
+            <mat-form-field appearance="outline" class="min-w-[200px] !m-0 md:w-[200px] w-full">
+                <mat-select [(ngModel)]="language.language">
+                    @for (lang of languages; track lang.value) {
+                        <mat-option [value]="lang.value">{{ lang.label }}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div
+            class="flex justify-between py-4 gap-8 md:flex-row flex-col md:items-center items-start"
+        >
+            <div class="flex flex-col gap-1 flex-1">
+                <span class="font-medium text-base">Date Format</span>
+                <span class="text-sm opacity-70">How dates should be displayed</span>
+            </div>
+            <mat-form-field appearance="outline" class="min-w-[200px] !m-0 md:w-[200px] w-full">
+                <mat-select [(ngModel)]="language.dateFormat">
+                    @for (format of dateFormats; track format.value) {
+                        <mat-option [value]="format.value">{{ format.label }}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+        </div>
+    </div>
+</mat-expansion-panel>
