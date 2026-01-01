@@ -264,6 +264,16 @@ $dark-theme: mat.m2-define-dark-theme(
                 ),
         )
     );
+
+    @include mat.card-overrides(
+        (
+            elevated-container-color: if(
+                    $is-light-theme,
+                    var-color(--color-white),
+                    var-color(--color-dark-background-hover)
+                ),
+        )
+    );
 }
 
 html[data-theme='light'] {
