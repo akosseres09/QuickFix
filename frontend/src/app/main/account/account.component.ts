@@ -1,6 +1,6 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, computed, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -11,6 +11,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { UserService } from '../../shared/services/user/user.service';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 import { User } from '../../shared/model/User';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'app-account',
@@ -28,68 +29,65 @@ import { User } from '../../shared/model/User';
     templateUrl: './account.component.html',
     styleUrl: './account.component.css',
 })
-export class AccountComponent implements OnInit {
+export class AccountComponent {
     private userService = inject(UserService);
     private snackbarService = inject(SnackbarService);
     private fb = inject(FormBuilder);
 
-    user: User | null = null;
-    profileForm!: FormGroup;
-    profilePictureUrl: string =
-        'https://ui-avatars.com/api/?name=Admin&size=200&background=a494e6&color=0f0c18';
-    initialFormValue: any;
-    selectedFile: File | null = null;
-    previewUrl: string | null = null;
+    user = signal<User | null>(this.userService.getUser());
+    profileForm = this.fb.group({
+        username: [this.user()?.username || '', [Validators.required, Validators.minLength(3)]],
+        email: [this.user()?.email || '', [Validators.required, Validators.email]],
+        bio: ['Passionate developer working on QuickFix project'],
+        location: ['Budapest, Hungary'],
+        company: ['QuickFix Inc.'],
+        website: ['https://quickfix.com'],
+    });
+    private formValues = toSignal(this.profileForm.valueChanges, {
+        initialValue: this.profileForm.value,
+    });
+    private initialFormSnapshot = signal(this.profileForm.value);
 
-    ngOnInit(): void {
-        this.user = this.userService.getUser();
+    profilePictureUrl = signal<string>(
+        this.user()?.username
+            ? `https://ui-avatars.com/api/?name=${this.user()?.username}&size=200&background=a494e6&color=0f0c18`
+            : `https://ui-avatars.com/api/?name=User&size=200&background=a494e6&color=0f0c18`
+    );
 
-        if (this.user) {
-            this.profilePictureUrl = `https://ui-avatars.com/api/?name=${this.user.username}&size=200&background=a494e6&color=0f0c18`;
-        }
+    selectedFile = signal<File | null>(null);
+    previewUrl = signal<string | null>(null);
+    fileInput = viewChild<ElementRef>('fileInput');
 
-        this.profileForm = this.fb.group({
-            username: [this.user?.username || '', [Validators.required, Validators.minLength(3)]],
-            email: [this.user?.email || '', [Validators.required, Validators.email]],
-            bio: ['Passionate developer working on QuickFix project'],
-            location: ['Budapest, Hungary'],
-            company: ['QuickFix Inc.'],
-            website: ['https://quickfix.com'],
-        });
-
-        this.initialFormValue = this.profileForm.value;
-    }
-
-    get hasChanges(): boolean {
-        return (
-            JSON.stringify(this.profileForm.value) !== JSON.stringify(this.initialFormValue) ||
-            this.selectedFile !== null
-        );
-    }
+    hasChanges = computed(() => {
+        const current = JSON.stringify(this.formValues());
+        const initial = JSON.stringify(this.initialFormSnapshot());
+        return current !== initial || this.selectedFile() !== null;
+    });
 
     onFileSelected(event: Event): void {
-        const input = event.target as HTMLInputElement;
+        const input = this.fileInput()?.nativeElement as HTMLInputElement;
         if (input.files && input.files[0]) {
-            this.selectedFile = input.files[0];
+            this.selectedFile.set(input.files[0]);
 
-            // Create preview
             const reader = new FileReader();
             reader.onload = (e: ProgressEvent<FileReader>) => {
-                this.previewUrl = e.target?.result as string;
+                this.previewUrl.set(e.target?.result as string);
             };
-            reader.readAsDataURL(this.selectedFile);
+            reader.readAsDataURL(this.selectedFile() as File);
         }
     }
 
     triggerFileInput(): void {
-        const fileInput = document.getElementById('fileInput') as HTMLInputElement;
-        fileInput.click();
+        this.fileInput()?.nativeElement.click();
     }
 
     removeProfilePicture(): void {
-        this.selectedFile = null;
-        this.previewUrl = null;
-        this.profilePictureUrl = `https://ui-avatars.com/api/?name=${this.user?.username || 'User'}&size=200&background=a494e6&color=0f0c18`;
+        this.selectedFile.set(null);
+        this.previewUrl.set(null);
+        this.profilePictureUrl.set(
+            `https://ui-avatars.com/api/?name=${this.user()?.username || 'User'}&size=200&background=a494e6&color=0f0c18`
+        );
+        this.resetFileInput();
     }
 
     saveChanges(): void {
@@ -100,26 +98,28 @@ export class AccountComponent implements OnInit {
             return;
         }
 
-        // Here you would typically make an API call to update the user
-        // For now, we'll just show a success message
-
-        if (this.selectedFile) {
-            // Handle file upload
-            console.log('Uploading file:', this.selectedFile.name);
-            this.profilePictureUrl = this.previewUrl || this.profilePictureUrl;
+        if (this.selectedFile()) {
+            this.profilePictureUrl.set(this.previewUrl() || this.profilePictureUrl());
         }
 
-        this.initialFormValue = this.profileForm.value;
-        this.selectedFile = null;
-        this.previewUrl = null;
+        this.selectedFile.set(null);
+        this.previewUrl.set(null);
 
         this.snackbarService.open('Profile updated successfully!');
     }
 
     cancelChanges(): void {
-        this.profileForm.patchValue(this.initialFormValue);
-        this.selectedFile = null;
-        this.previewUrl = null;
+        this.profileForm.patchValue(this.initialFormSnapshot());
+        this.selectedFile.set(null);
+        this.previewUrl.set(null);
+        this.resetFileInput();
+    }
+
+    resetFileInput(): void {
+        const input = this.fileInput()?.nativeElement;
+        if (input) {
+            input.value = '';
+        }
     }
 
     getControl(name: string) {

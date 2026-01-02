@@ -10,7 +10,7 @@
                 <div class="flex flex-col items-center">
                     <div class="relative group">
                         <img
-                            [src]="previewUrl || profilePictureUrl"
+                            [src]="previewUrl() || profilePictureUrl()"
                             alt="Profile Picture"
                             class="w-40 h-40 rounded-full object-cover border-4 border-light-primary dark:border-dark-primary"
                         />
@@ -21,6 +21,7 @@
                             <mat-icon class="text-white text-4xl">photo_camera</mat-icon>
                         </div>
                         <input
+                            #fileInput
                             type="file"
                             id="fileInput"
                             accept="image/*"
@@ -29,10 +30,10 @@
                         />
                     </div>
 
-                    <h2 class="text-xl font-semibold mt-4">{{ user?.username }}</h2>
-                    <p class="text-sm opacity-70">{{ user?.email }}</p>
+                    <h2 class="text-xl font-semibold mt-4">{{ user()?.username }}</h2>
+                    <p class="text-sm opacity-70">{{ user()?.email }}</p>
 
-                    @if (user?.role === 1) {
+                    @if (user()?.role === 1) {
                         <mat-chip class="mt-3 !bg-dark-primary">
                             <div class="flex items-center gap-1">
                                 <mat-icon class="!text-base mr-1">admin_panel_settings</mat-icon>
@@ -43,7 +44,7 @@
 
                     <mat-divider class="w-full !my-4"></mat-divider>
 
-                    <div class="w-full">
+                    <div class="flex flex-col gap-3 w-full">
                         <button
                             mat-stroked-button
                             class="w-full flex items-center justify-center gap-2"
@@ -53,7 +54,7 @@
                             Upload New Photo
                         </button>
 
-                        @if (selectedFile || previewUrl) {
+                        @if (selectedFile() || previewUrl()) {
                             <button
                                 mat-stroked-button
                                 color="warn"
@@ -182,7 +183,7 @@
                             >
                             <div>
                                 <p class="opacity-70">User ID</p>
-                                <p class="font-medium">{{ user?.id }}</p>
+                                <p class="font-medium">{{ user()?.id }}</p>
                             </div>
                         </div>
                         <div
@@ -194,7 +195,7 @@
                             <div>
                                 <p class="opacity-70">Member Since</p>
                                 <p class="font-medium">
-                                    {{ user?.created_at | date: 'mediumDate' }}
+                                    {{ user()?.created_at | date: 'mediumDate' }}
                                 </p>
                             </div>
                         </div>
@@ -207,7 +208,7 @@
                             <div>
                                 <p class="opacity-70">Account Status</p>
                                 <p class="font-medium">
-                                    {{ user?.status === 10 ? 'Active' : 'Inactive' }}
+                                    {{ user()?.status === 10 ? 'Active' : 'Inactive' }}
                                 </p>
                             </div>
                         </div>
@@ -220,7 +221,7 @@
                             <div>
                                 <p class="opacity-70">Role</p>
                                 <p class="font-medium">
-                                    {{ user?.role === 1 ? 'Administrator' : 'User' }}
+                                    {{ user()?.role === 1 ? 'Administrator' : 'User' }}
                                 </p>
                             </div>
                         </div>
@@ -232,8 +233,8 @@
                         mat-raised-button
                         color="primary"
                         class="flex items-center justify-center gap-2 px-6 py-3 flex-1 !text-dark-text"
-                        [class.!text-light-text]="!hasChanges"
-                        [disabled]="!hasChanges || profileForm.invalid"
+                        [class.!text-light-text]="!hasChanges()"
+                        [disabled]="!hasChanges() || profileForm.invalid"
                         (click)="saveChanges()"
                     >
                         <mat-icon>save</mat-icon>
