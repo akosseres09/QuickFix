@@ -1,12 +1,4 @@
-import {
-    Component,
-    inject,
-    Input,
-    OnChanges,
-    OnDestroy,
-    OnInit,
-    SimpleChanges,
-} from '@angular/core';
+import { Component, inject, model, OnDestroy, OnInit, signal } from '@angular/core';
 import { AppRoute } from '../../shared/constants/Routes';
 import { ThemeService } from '../../shared/services/theme/theme.service';
 import { RouteService } from '../../shared/services/route/route.service';
@@ -22,12 +14,12 @@ import { matchProjectRoutes } from '../../shared/constants/RouteMatch';
     templateUrl: './sidenav.component.html',
     styleUrl: './sidenav.component.css',
 })
-export class SidenavComponent implements OnInit, OnChanges, OnDestroy {
-    @Input() isCollapsed: boolean = false;
-    @Input() topRoutes: Array<AppRoute> = [];
-    bottomRoutes: Array<AppRoute> = [];
-    logo: string = '';
-    theme: string = '';
+export class SidenavComponent implements OnInit, OnDestroy {
+    isCollapsed = model<boolean>(false);
+    topRoutes = model<AppRoute[]>([]);
+    bottomRoutes = signal<AppRoute[]>([]);
+    logo = signal<string>('');
+    theme = signal<'light' | 'dark'>('light');
 
     private themeService = inject(ThemeService);
     private routeService = inject(RouteService);
@@ -40,19 +32,15 @@ export class SidenavComponent implements OnInit, OnChanges, OnDestroy {
             .pipe(filter((event) => event instanceof NavigationEnd))
             .subscribe((event: NavigationEnd) => {
                 if (event.url.match(matchProjectRoutes)) {
-                    this.topRoutes = this.routeService.getSidenavRoutes();
+                    this.topRoutes.set(this.routeService.getSidenavRoutes());
                 }
             });
 
-        this.theme = this.themeService.getTheme();
-        this.isCollapsed = this.sidebarService.getState();
-        this.topRoutes = this.routeService.getSidenavRoutes();
-        this.bottomRoutes = this.routeService.getBottomSidenavRoutes();
-        this.logo = this.themeService.logos[this.theme];
-    }
-
-    ngOnChanges(changes: SimpleChanges): void {
-        this.isCollapsed = changes['isCollapsed'].currentValue;
+        this.theme.set(this.themeService.getTheme());
+        this.isCollapsed.set(this.sidebarService.getState());
+        this.topRoutes.set(this.routeService.getSidenavRoutes());
+        this.bottomRoutes.set(this.routeService.getBottomSidenavRoutes());
+        this.logo.set(this.themeService.logos[this.theme()]);
     }
 
     ngOnDestroy(): void {
@@ -60,6 +48,6 @@ export class SidenavComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     toggleSidebar(): void {
-        this.isCollapsed = !this.isCollapsed;
+        this.isCollapsed.set(!this.isCollapsed());
     }
 }

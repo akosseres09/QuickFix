@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, effect, input, OnInit, ViewChild } from '@angular/core';
 import { Chart, registerables, ChartConfiguration, ChartType } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 import { WorktimeEntry } from '../../shared/model/Worktime';
@@ -11,12 +11,11 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
     templateUrl: './line-chart.component.html',
     styleUrl: './line-chart.component.css',
 })
-export class LineChartComponent implements OnInit, OnChanges {
-    @Input() data: WorktimeEntry[] = [];
-    @Input() daysMap: Map<string, number> = new Map();
-    @Input() isLoading: boolean = true;
+export class LineChartComponent implements OnInit {
+    data = input<WorktimeEntry[]>([]);
+    daysMap = input<Map<string, number>>(new Map());
+    isLoading = input<boolean>(true);
     @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
-    private days: string[] = [];
 
     public lineChartType: ChartType = 'line';
     public lineChartData: ChartConfiguration['data'] = {
@@ -48,33 +47,23 @@ export class LineChartComponent implements OnInit, OnChanges {
         },
     };
 
+    constructor() {
+        effect(() => {
+            this.updateChartData();
+        });
+    }
+
     ngOnInit(): void {
         Chart.register(...registerables);
     }
 
-    ngOnChanges(changes: SimpleChanges): void {
-        if (changes['data']) {
-            this.data = changes['data'].currentValue;
-        }
-
-        if (changes['daysMap']) {
-            this.daysMap = changes['daysMap'].currentValue;
-        }
-
-        if (changes['isLoading']) {
-            this.isLoading = changes['isLoading'].currentValue;
-        }
-
-        this.updateChartData();
-    }
-
     updateChartData(): void {
-        const sortedDays = Array.from(this.daysMap.keys()).sort();
+        const sortedDays = Array.from(this.daysMap().keys()).sort();
 
         let cumulative = 0;
         const cumulativeData: number[] = [];
         sortedDays.forEach((day) => {
-            cumulative += this.daysMap.get(day) || 0;
+            cumulative += this.daysMap().get(day) || 0;
             cumulativeData.push(cumulative);
         });
 

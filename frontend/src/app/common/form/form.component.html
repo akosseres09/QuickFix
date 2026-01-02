@@ -1,5 +1,5 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()">
-    @for (field of fields; track $index) {
+    @for (field of fields(); track $index) {
         <mat-form-field class="w-full" [class.mb-5]="!$last" appearance="outline">
             <mat-label>{{ field.label }}</mat-label>
             @if (field.type === 'textarea') {
@@ -16,13 +16,17 @@
                     [required]="field.required"
                 />
             }
-            <mat-error *ngIf="getControl(field.name)?.invalid">
-                @for (error of field.errorText; track $index) {
-                    <span class="text-sm" *ngIf="getControl(field.name)?.hasError(error[0])">
-                        {{ error[1] }}
-                    </span>
-                }
-            </mat-error>
+            @if (getControl(field.name)?.invalid && getControl(field.name)?.touched) {
+                <mat-error>
+                    @for (error of field.errorText; track $index) {
+                        @if (getControl(field.name)?.hasError(error[0])) {
+                            <span class="text-sm">
+                                {{ error[1] }}
+                            </span>
+                        }
+                    }
+                </mat-error>
+            }
         </mat-form-field>
     }
     <div class="flex justify-end items-center">

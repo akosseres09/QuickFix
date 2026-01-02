@@ -1,4 +1,4 @@
-import { Component, inject, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import { AppRoute, ChildRoute } from '../../../shared/constants/Routes';
 import {
     ActivatedRoute,
@@ -29,9 +29,9 @@ import { CommonModule } from '@angular/common';
     templateUrl: './navitem.component.html',
     styleUrl: './navitem.component.css',
 })
-export class NavitemComponent implements OnChanges {
-    @Input() routes: Array<AppRoute> = [];
-    @Input() isCollapsed: boolean | null = null;
+export class NavitemComponent {
+    routes = input<Array<AppRoute>>([]);
+    isCollapsed = input<boolean>(false);
     route = inject(ActivatedRoute);
     router = inject(Router);
     matchOption: IsActiveMatchOptions = {
@@ -40,12 +40,6 @@ export class NavitemComponent implements OnChanges {
         fragment: 'ignored',
         paths: 'exact',
     };
-
-    ngOnChanges(changes: SimpleChanges): void {
-        if (changes['isCollapsed']) {
-            this.isCollapsed = changes['isCollapsed'].currentValue;
-        }
-    }
 
     isChildrenActive(children: Array<ChildRoute>): boolean {
         return children.some((child) => this.router.isActive(child.path, this.matchOption));

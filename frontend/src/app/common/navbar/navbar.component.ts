@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { AfterViewInit, Component, inject, input, OnInit, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonToggleChange } from '@angular/material/button-toggle';
 import { MatIcon } from '@angular/material/icon';
@@ -29,60 +29,57 @@ import { UserService } from '../../shared/services/user/user.service';
     standalone: true,
 })
 export class NavbarComponent implements OnInit, AfterViewInit {
-    @Input() showSidebarToggle: boolean = true;
-    @Output() sidebarClosed: EventEmitter<boolean> = new EventEmitter<boolean>();
-    isSidebarCollapsed: boolean;
-    isMenuOpen = false;
+    showSidebarToggle = input<boolean>(true);
+    sidebarClosed = output<boolean>();
+    isSidebarCollapsed = signal<boolean>(false);
+    isMenuOpen = signal<boolean>(false);
     imageSource: string = 'QuickFix_logo_dark.png';
-    theme: 'light' | 'dark' = 'light';
+    user = signal<User | null>(null);
+    htmlElement = signal<HTMLElement | null>(null);
+    routes = signal<AppRoute[]>([]);
     logo;
-    user: User | null = null;
-    htmlElement: HTMLElement | null = null;
-    routes: Array<AppRoute> = [];
+
+    private themeService = inject(ThemeService);
+    private router = inject(Router);
+    private routeService = inject(RouteService);
+    private sidebarService = inject(SidebarService);
+    private userService = inject(UserService);
+
+    theme = signal<'light' | 'dark'>(this.themeService.getTheme() || 'light');
 
     ngOnInit(): void {
-        this.user = this.userService.getUser();
-        this.htmlElement = document.documentElement;
-
-        let theme: 'light' | 'dark' = this.themeService.getTheme();
-        this.setTheme(!theme ? 'light' : (theme as 'light' | 'dark'));
-
-        this.routes = this.routeService.getAppRoutes(this.user).filter((route) => route.show);
+        this.user.set(this.userService.getUser());
+        this.htmlElement.set(document.documentElement);
+        this.setTheme(this.theme());
+        this.routes.set(this.routeService.getAppRoutes(this.user()).filter((route) => route.show));
     }
 
-    constructor(
-        private themeService: ThemeService,
-        private router: Router,
-        private routeService: RouteService,
-        private sidebarService: SidebarService,
-        private userService: UserService
-    ) {
-        this.isSidebarCollapsed = this.sidebarService.getState();
-        this.logo = themeService.logos;
+    constructor() {
+        this.isSidebarCollapsed.set(this.sidebarService.getState());
+        this.logo = this.themeService.logos;
     }
 
     ngAfterViewInit(): void {
-        this.htmlElement = document.documentElement;
-        if (!this.htmlElement) return;
+        this.htmlElement.set(document.documentElement);
+        const el = this.htmlElement();
+        if (!el) return;
 
-        const theme = localStorage.getItem('theme') || 'light';
-        this.htmlElement.dataset['theme'] = theme;
+        el.dataset['theme'] = this.theme();
     }
 
     setTheme(theme: 'light' | 'dark') {
-        if (!this.htmlElement) return;
-
+        if (!this.htmlElement()) return;
         this.themeService.setTheme(theme);
-        this.theme = theme;
-        this.imageSource = this.logo[this.theme];
+        this.theme.set(theme);
+        this.imageSource = this.logo[this.theme()];
     }
 
     toggleMenu() {
-        this.isMenuOpen = !this.isMenuOpen;
+        this.isMenuOpen.set(!this.isMenuOpen());
     }
 
     onToggle(event: MatButtonToggleChange) {
-        if (!this.htmlElement) return;
+        if (!this.htmlElement()) return;
 
         if (['light', 'dark'].indexOf(event.value) === -1) {
             return;
@@ -96,11 +93,12 @@ export class NavbarComponent implements OnInit, AfterViewInit {
     }
 
     toggleSidebar() {
-        this.isSidebarCollapsed = !this.isSidebarCollapsed;
-        const name = this.isSidebarCollapsed
+        this.isSidebarCollapsed.set(!this.isSidebarCollapsed());
+
+        const name = this.isSidebarCollapsed()
             ? this.sidebarService.CLOSED
             : this.sidebarService.OPEN;
         this.sidebarService.setState(name);
-        this.sidebarClosed.emit(this.isSidebarCollapsed);
+        this.sidebarClosed.emit(this.isSidebarCollapsed());
     }
 }

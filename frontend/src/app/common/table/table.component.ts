@@ -1,15 +1,14 @@
 import {
-    AfterViewInit,
     Component,
-    Input,
-    OnChanges,
-    SimpleChanges,
-    ViewChild,
-    Output,
-    EventEmitter,
     inject,
     OnInit,
-    OnDestroy,
+    model,
+    input,
+    output,
+    signal,
+    effect,
+    computed,
+    viewChild,
 } from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { DisplayedColumn } from '../../shared/constants/DisplayedColumn';
@@ -42,35 +41,71 @@ import { Subscription } from 'rxjs';
     templateUrl: './table.component.html',
     styleUrl: './table.component.css',
 })
-export class TableComponent<T extends BaseModel>
-    implements OnInit, OnChanges, AfterViewInit, OnDestroy
-{
-    @Input() dataSource: MatTableDataSource<T> = new MatTableDataSource();
-    @Input() displayedColumns: Array<DisplayedColumn> = [];
-    @Input() showActions: boolean = true;
-    @Input() showEditAction: boolean = true;
-    @Input() showDeleteAction: boolean = true;
-    @Input() tableHeader = '';
-    @Input() isLoading: boolean = false;
+export class TableComponent<T extends BaseModel> implements OnInit {
+    dataSource = model<MatTableDataSource<T>>(new MatTableDataSource<T>([]));
+    displayedColumns = input<Array<DisplayedColumn>>([]);
 
-    @Output() edit = new EventEmitter<T>();
-    @Output() delete = new EventEmitter<T>();
-    @Output() name = new EventEmitter<T>();
+    showActions = input<boolean>(true);
+    showEditAction = input<boolean>(true);
+    showDeleteAction = input<boolean>(true);
+    tableHeader = input<string>('');
+    isLoading = input<boolean>(false);
 
-    userService = inject(UserService);
-    user: User | null = this.userService.getUser();
-    columnIds: Array<String> = this.displayedColumnIds();
+    edit = output<T>();
+    delete = output<T>();
+    name = output<T>();
 
-    @ViewChild(MatPaginator) paginator!: MatPaginator;
-    @ViewChild(MatSort) sort!: MatSort;
-    protected initialSortActive: string = '';
-    protected initialSortDirection: 'asc' | 'desc' = 'asc';
-    protected pageIndex: number = 0;
-    protected pageSize: number = 10;
-    protected readonly pageSizes = [5, 10, 20, 30, 50];
+    private readonly userService = inject(UserService);
     private readonly urlService = inject(UrlService);
     private readonly activeRoute = inject(ActivatedRoute);
+
+    user = signal<User | null>(this.userService.getUser());
+
+    columnIds = computed<Array<String>>(() => {
+        const ids = this.displayedColumns().map((col) => col.id);
+        if (this.showActions() && this.canModify()) {
+            ids.push('actions');
+        }
+        return ids;
+    });
+
+    paginator = viewChild(MatPaginator);
+    sort = viewChild(MatSort);
+
+    protected initialSortActive = signal<string>('');
+    protected initialSortDirection = signal<'asc' | 'desc'>('asc');
+    protected pageIndex = signal<number>(0);
+    protected pageSize = signal<number>(10);
+    protected readonly pageSizes = [5, 10, 20, 30, 50];
+
     private sortSubscription: Subscription | null = null;
+
+    constructor() {
+        effect(() => {
+            const ds = this.dataSource();
+            const p = this.paginator();
+            const s = this.sort();
+
+            if (p) {
+                ds.paginator = p;
+            }
+            if (s) {
+                ds.sort = s;
+            }
+        });
+
+        effect((onCleanup) => {
+            const s = this.sort();
+            if (s) {
+                this.sortSubscription = s.sortChange.subscribe(
+                    () => (this.paginator()!.pageIndex = 0)
+                );
+            }
+            onCleanup(() => {
+                this.sortSubscription?.unsubscribe();
+            });
+        });
+    }
 
     ngOnInit(): void {
         const pageSizeParam = this.activeRoute.snapshot.queryParamMap.get('pageSize');
@@ -79,51 +114,22 @@ export class TableComponent<T extends BaseModel>
 
         if (sortParam) {
             const isAsc = !sortParam.startsWith('-');
-            this.initialSortActive = isAsc ? sortParam : sortParam.substring(1);
-            this.initialSortDirection = isAsc ? 'asc' : 'desc';
+            this.initialSortActive.set(isAsc ? sortParam : sortParam.substring(1));
+            this.initialSortDirection.set(isAsc ? 'asc' : 'desc');
         }
 
         if (pageSizeParam) {
             if (this.pageSizes.indexOf(+pageSizeParam) === -1) {
-                this.pageSize = 10;
-                this.urlService.addQueryParams({ pageSize: this.pageSize });
+                this.pageSize.set(10);
+                this.urlService.addQueryParams({ pageSize: this.pageSize() });
             } else {
-                this.pageSize = +pageSizeParam;
+                this.pageSize.set(+pageSizeParam);
             }
         }
 
         if (pageParam) {
-            this.pageIndex = +pageParam - 1;
+            this.pageIndex.set(+pageParam - 1);
         }
-
-        this.columnIds = this.displayedColumnIds();
-    }
-
-    ngAfterViewInit(): void {
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
-        this.sortSubscription = this.sort.sortChange.subscribe(
-            () => (this.paginator.pageIndex = 0)
-        );
-    }
-
-    ngOnChanges(changes: SimpleChanges): void {
-        if (changes['dataSource']) {
-            this.dataSource = changes['dataSource'].currentValue;
-            this.dataSource.paginator = this.paginator;
-            this.dataSource.sort = this.sort;
-        }
-        if (changes['displayedColumns']) {
-            this.displayedColumns = changes['displayedColumns'].currentValue;
-            this.columnIds = this.displayedColumnIds();
-        }
-        if (changes['isLoading']) {
-            this.isLoading = changes['isLoading'].currentValue;
-        }
-    }
-
-    ngOnDestroy(): void {
-        this.sortSubscription?.unsubscribe();
     }
 
     onSortChange(event: Sort) {
@@ -139,18 +145,17 @@ export class TableComponent<T extends BaseModel>
     }
 
     displayedColumnIds(): Array<String> {
-        const ids = this.displayedColumns.map((col) => col.id);
-        if (this.showActions && this.canModify()) {
+        const ids = this.displayedColumns().map((col) => col.id);
+        if (this.showActions() && this.canModify()) {
             ids.push('actions');
         }
         return ids;
     }
 
     onPageEvent(event: PageEvent) {
-        this.pageIndex = event.pageIndex;
-        this.pageSize = event.pageSize;
-
-        this.urlService.addQueryParams({ page: this.pageIndex + 1, pageSize: this.pageSize });
+        this.pageIndex.set(event.pageIndex);
+        this.pageSize.set(event.pageSize);
+        this.urlService.addQueryParams({ page: this.pageIndex() + 1, pageSize: this.pageSize() });
     }
 
     onEdit(element: T): void {
@@ -161,11 +166,11 @@ export class TableComponent<T extends BaseModel>
         this.delete.emit(element);
     }
 
-    canModify() {
-        return this.user?.role === ADMIN || this.user?.role === SYS_ADMIN;
-    }
-
     onNameClick(element: T): void {
         this.name.emit(element);
+    }
+
+    canModify() {
+        return this.user()?.role === ADMIN || this.user()?.role === SYS_ADMIN;
     }
 }

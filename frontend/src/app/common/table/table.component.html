@@ -1,5 +1,5 @@
 <div class="mat-elevation-z8 text-center relative overflow-hidden rounded-lg">
-    @if (isLoading) {
+    @if (isLoading()) {
         <div class="absolute inset-0 z-30 bg-white dark:bg-gray-800 opacity-50"></div>
         <div class="absolute z-50 top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">
             <mat-spinner diameter="45"></mat-spinner>
@@ -8,14 +8,14 @@
 
     <div class="flex flex-col lg:flex-row justify-between lg:items-center px-4 py-2">
         <h2 class="font-bold text-2xl my-2 mx-3 text-left">
-            {{ tableHeader }}
+            {{ tableHeader() }}
         </h2>
         <div class="flex lg:justify-center">
             <mat-paginator
-                [disabled]="isLoading"
+                [disabled]="isLoading()"
                 [pageSizeOptions]="pageSizes"
-                [pageIndex]="pageIndex"
-                [pageSize]="pageSize"
+                [pageIndex]="pageIndex()"
+                [pageSize]="pageSize()"
                 (page)="onPageEvent($event)"
                 showFirstLastButtons
                 aria-label="Select page of periodic elements"
@@ -24,19 +24,19 @@
         </div>
     </div>
 
-    @if (dataSource.data && dataSource.data.length > 0) {
+    @if (dataSource().data && dataSource().data.length > 0) {
         <div class="overflow-x-auto w-full">
             <div class="min-w-[800px]">
                 <table
                     mat-table
-                    [dataSource]="dataSource"
+                    [dataSource]="dataSource()"
                     matSort
                     (matSortChange)="onSortChange($event)"
-                    [matSortActive]="initialSortActive"
-                    [matSortDirection]="initialSortDirection"
+                    [matSortActive]="initialSortActive()"
+                    [matSortDirection]="initialSortDirection()"
                     class="w-full"
                 >
-                    @for (col of displayedColumns; track $index) {
+                    @for (col of displayedColumns(); track $index) {
                         <ng-container [matColumnDef]="col.id">
                             @if (col.sortable) {
                                 <th
@@ -100,7 +100,7 @@
                         </ng-container>
                     }
 
-                    @if (showActions && canModify()) {
+                    @if (showActions() && canModify()) {
                         <ng-container matColumnDef="actions">
                             <th
                                 mat-header-cell
@@ -111,32 +111,34 @@
                             </th>
                             <td mat-cell *matCellDef="let element" class="!text-center">
                                 <div class="flex justify-center items-center gap-2">
-                                    <button
-                                        *ngIf="showEditAction"
-                                        mat-icon-button
-                                        (click)="onEdit(element)"
-                                        aria-label="Edit"
-                                    >
-                                        <mat-icon>edit</mat-icon>
-                                    </button>
-                                    <button
-                                        mat-icon-button
-                                        *ngIf="showDeleteAction"
-                                        (click)="onDelete(element)"
-                                        aria-label="Delete"
-                                    >
-                                        <mat-icon class="!text-red-600">delete</mat-icon>
-                                    </button>
+                                    @if (showEditAction()) {
+                                        <button
+                                            mat-icon-button
+                                            (click)="onEdit(element)"
+                                            aria-label="Edit"
+                                        >
+                                            <mat-icon>edit</mat-icon>
+                                        </button>
+                                    }
+                                    @if (showDeleteAction()) {
+                                        <button
+                                            mat-icon-button
+                                            (click)="onDelete(element)"
+                                            aria-label="Delete"
+                                        >
+                                            <mat-icon class="!text-red-600">delete</mat-icon>
+                                        </button>
+                                    }
                                 </div>
                             </td>
                         </ng-container>
                     }
 
-                    <tr mat-header-row *matHeaderRowDef="columnIds"></tr>
+                    <tr mat-header-row *matHeaderRowDef="columnIds()"></tr>
                     <tr
                         class="odd:!bg-light-text-hover/20 dark:odd:!bg-dark-hover/20 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                         mat-row
-                        *matRowDef="let row; columns: columnIds"
+                        *matRowDef="let row; columns: columnIds()"
                     ></tr>
                 </table>
             </div>

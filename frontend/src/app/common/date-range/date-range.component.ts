@@ -1,12 +1,12 @@
 import {
     Component,
-    EventEmitter,
     HostListener,
     inject,
-    Input,
+    input,
+    model,
     OnDestroy,
     OnInit,
-    Output,
+    output,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -39,18 +39,17 @@ export class DateRangeComponent implements OnInit, OnDestroy {
     private readonly currentDate: Date = new Date();
     protected touchUi = window.innerWidth < 768;
 
-    @Input() startDate: Date = new Date(
-        this.currentDate.getFullYear(),
-        this.currentDate.getMonth(),
-        this.currentDate.getDate() - 7
+    startDate = model<Date>(
+        new Date(
+            this.currentDate.getFullYear(),
+            this.currentDate.getMonth(),
+            this.currentDate.getDate() - 7
+        )
     );
-    @Input() endDate: Date = new Date();
-    @Input() minDate: Date = new Date(this.startDate.getFullYear() - 2, 0, 1);
-    @Input() maxDate: Date = new Date();
-    @Output() dateRangeChange = new EventEmitter<{
-        startDate: string;
-        endDate: string;
-    }>();
+    endDate = model<Date>(new Date());
+    minDate = input<Date>(new Date(this.startDate().getFullYear() - 2, 0, 1));
+    maxDate = input<Date>(new Date());
+    dateRangeChange = output<{ startDate: string; endDate: string }>();
 
     private readonly fb = inject(FormBuilder);
     private readonly urlService = inject(UrlService);
@@ -59,8 +58,8 @@ export class DateRangeComponent implements OnInit, OnDestroy {
 
     private subscription: Subscription | null = null;
     protected range = this.fb.group({
-        startDate: this.fb.control<Date>(this.startDate),
-        endDate: this.fb.control<Date>(this.endDate),
+        startDate: this.fb.control<Date>(this.startDate()),
+        endDate: this.fb.control<Date>(this.endDate()),
     });
 
     ngOnInit(): void {
@@ -68,16 +67,16 @@ export class DateRangeComponent implements OnInit, OnDestroy {
         const urlEndDate = this.router.routerState.snapshot.root.queryParams['endDate'];
 
         if (urlStartDate) {
-            this.startDate = this.dateService.parseDate(urlStartDate);
-            this.range.get('startDate')?.setValue(this.startDate);
+            this.startDate.set(this.dateService.parseDate(urlStartDate));
+            this.range.get('startDate')?.setValue(this.startDate());
         }
         if (urlEndDate) {
-            this.endDate = this.dateService.parseDate(urlEndDate);
-            this.range.get('endDate')?.setValue(this.endDate);
+            this.endDate.set(this.dateService.parseDate(urlEndDate));
+            this.range.get('endDate')?.setValue(this.endDate());
         }
 
-        this.endDate.setHours(23, 59, 59, 999);
-        this.onDateRangChange(this.startDate, this.endDate);
+        this.endDate().setHours(23, 59, 59, 999);
+        this.onDateRangChange(this.startDate(), this.endDate());
 
         this.subscription = this.range.valueChanges.subscribe((value) => {
             if (!value.endDate || !value.startDate) {
@@ -98,8 +97,9 @@ export class DateRangeComponent implements OnInit, OnDestroy {
      */
     onDateRangChange(startDate: Date, endDate: Date): void {
         if (!startDate || !endDate) return;
-        this.startDate = startDate;
-        this.endDate = endDate;
+
+        this.startDate.set(startDate);
+        this.endDate.set(endDate);
 
         const localStart = this.dateService.toLocaleISOString(startDate);
         const localEnd = this.dateService.toLocaleISOString(endDate);

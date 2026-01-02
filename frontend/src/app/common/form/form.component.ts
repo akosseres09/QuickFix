@@ -1,13 +1,4 @@
-import {
-    Component,
-    EventEmitter,
-    inject,
-    Input,
-    OnChanges,
-    OnInit,
-    Output,
-    SimpleChanges,
-} from '@angular/core';
+import { Component, effect, inject, input, output } from '@angular/core';
 import { FormField } from '../../shared/constants/FormField';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -28,28 +19,23 @@ import { MatButton } from '@angular/material/button';
     templateUrl: './form.component.html',
     styleUrl: './form.component.css',
 })
-export class FormComponent implements OnInit, OnChanges {
-    @Input({ required: true }) fields: Array<FormField> = [];
-    @Output() save: EventEmitter<any> = new EventEmitter<any>();
-    @Output() cancel: EventEmitter<void> = new EventEmitter<void>();
+export class FormComponent {
+    fields = input.required<Array<FormField>>();
+    save = output<any>();
+    cancel = output<void>();
 
     form!: FormGroup;
     formBuilder = inject(FormBuilder);
 
     constructor() {
-        this.setForm();
-    }
-
-    ngOnInit(): void {}
-
-    ngOnChanges(changes: SimpleChanges): void {
-        this.fields = changes['fields'].currentValue;
-        this.setForm();
+        effect(() => {
+            this.setForm();
+        });
     }
 
     setForm() {
         const group: any = {};
-        this.fields.forEach((field) => {
+        this.fields().forEach((field) => {
             group[field.name] = [field.value || '', field.validators || []];
         });
         this.form = this.formBuilder.group(group);
