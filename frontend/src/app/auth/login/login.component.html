@@ -39,7 +39,7 @@
                 class="cursor-pointer !text-light-text dark:!text-inherit"
                 (click)="togglePwVisibility($event)"
                 matSuffix
-                >{{ pwVisible ? 'visibility_off' : 'visibility' }}</mat-icon
+                >{{ pwVisible() ? 'visibility_off' : 'visibility' }}</mat-icon
             >
             <mat-error class="text-sm" *ngIf="getControl('password')?.invalid">
                 <span *ngIf="getControl('password')?.hasError('required')"

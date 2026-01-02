@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { UserService } from '../../shared/services/user/user.service';
 import { User } from '../../shared/model/User';
@@ -12,9 +12,9 @@ import { MatIcon } from '@angular/material/icon';
     styleUrl: './not-found.component.css',
 })
 export class NotFoundComponent implements OnInit, OnDestroy {
-    glitchActive = false;
-    floatingOffset = 0;
-    rotationOffset = 0;
+    glitchActive = signal(false);
+    floatingOffset = signal(0);
+    rotationOffset = signal(0);
     floatingTickets: Array<{
         left: number;
         top: number;
@@ -23,13 +23,12 @@ export class NotFoundComponent implements OnInit, OnDestroy {
         rotation: number;
         id: number;
     }> = [];
+    private glitchInterval: number | null = null;
+    private floatInterval: number | null = null;
+
+    private router = inject(Router);
     userService = inject(UserService);
     user: User | null = this.userService.getUser();
-
-    private glitchInterval?: number;
-    private floatInterval?: number;
-
-    constructor(private router: Router) {}
 
     ngOnInit(): void {
         this.floatingTickets = Array.from({ length: 20 }, () => ({
@@ -42,14 +41,14 @@ export class NotFoundComponent implements OnInit, OnDestroy {
         }));
 
         this.glitchInterval = window.setInterval(() => {
-            this.glitchActive = true;
-            setTimeout(() => (this.glitchActive = false), 200);
+            this.glitchActive.set(true);
+            setTimeout(() => this.glitchActive.set(false), 200);
         }, 4000);
 
         this.floatInterval = window.setInterval(() => {
             const time = Date.now() / 1000;
-            this.floatingOffset = Math.sin(time) * 15;
-            this.rotationOffset = Math.sin(time * 0.5) * 5;
+            this.floatingOffset.set(Math.sin(time) * 15);
+            this.rotationOffset.set(Math.sin(time * 0.5) * 5);
         }, 50);
     }
 

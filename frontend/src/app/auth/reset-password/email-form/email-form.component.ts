@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -23,8 +23,8 @@ import { MatError, MatFormField, MatInput, MatLabel, MatPrefix } from '@angular/
 })
 export class EmailFormComponent {
     form: FormGroup;
-    @Output() sendForm: EventEmitter<string> = new EventEmitter<string>();
-    @Input() buttonText: string = 'Resend verification email';
+    buttonText = input<string>('Resend verification email');
+    sendForm = output<string>();
 
     constructor() {
         this.form = new FormGroup({

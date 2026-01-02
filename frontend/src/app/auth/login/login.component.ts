@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import {
@@ -32,21 +32,18 @@ import { CommonModule } from '@angular/common';
     styleUrl: './login.component.css',
     standalone: true,
 })
-export class LoginComponent implements OnInit {
-    pwVisible = false;
+export class LoginComponent {
+    pwVisible = signal(false);
     loginForm: FormGroup;
+    private fb = inject(FormBuilder);
+    private router = inject(Router);
 
-    constructor(
-        private fb: FormBuilder,
-        private router: Router
-    ) {
+    constructor() {
         this.loginForm = this.fb.group({
             email: ['', [Validators.required, Validators.email]],
             password: ['', [Validators.required, Validators.minLength(6)]],
         });
     }
-
-    ngOnInit(): void {}
 
     togglePwVisibility(event: MouseEvent): void {
         const input = (event.target as HTMLElement)
@@ -58,7 +55,7 @@ export class LoginComponent implements OnInit {
                 'type',
                 input.getAttribute('type') === 'password' ? 'text' : 'password'
             );
-            this.pwVisible = !this.pwVisible;
+            this.pwVisible.set(!this.pwVisible());
         }
     }
 

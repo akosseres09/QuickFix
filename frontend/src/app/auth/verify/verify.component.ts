@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -27,26 +27,23 @@ import { SnackbarService } from '../../shared/services/snackbar/snackbar.service
     styleUrl: './verify.component.css',
     standalone: true,
 })
-export class VerifyComponent implements OnInit, OnDestroy {
+export class VerifyComponent implements OnDestroy {
     verifyForm: FormGroup;
-    verifySub?: Subscription;
-    verifyPage: boolean = true;
+    verifySub: Subscription | null = null;
+    verifyPage = signal(true);
     currentRoute = inject(ActivatedRoute);
+    private authService = inject(AuthService);
+    private router = inject(Router);
+    private fb = inject(FormBuilder);
+    private snackbar = inject(SnackbarService);
 
-    constructor(
-        private authService: AuthService,
-        private router: Router,
-        private fb: FormBuilder,
-        private snackbar: SnackbarService
-    ) {
+    constructor() {
         const token = this.currentRoute.snapshot.queryParamMap.get('token') ?? '';
 
         this.verifyForm = this.fb.group({
             token: [token, [Validators.required, Validators.maxLength(255)]],
         });
     }
-
-    ngOnInit() {}
 
     ngOnDestroy() {
         this.verifySub?.unsubscribe();
@@ -81,6 +78,6 @@ export class VerifyComponent implements OnInit, OnDestroy {
     }
 
     togglePage() {
-        this.verifyPage = !this.verifyPage;
+        this.verifyPage.set(!this.verifyPage());
     }
 }

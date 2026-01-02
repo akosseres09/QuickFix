@@ -3,13 +3,15 @@
         <h1 class="text-3xl font-bold text-slate-900 dark:text-white">Create Account</h1>
         <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Simple and easy as that</p>
     </div>
-    <div class="flex flex-col items-center" *ngIf="signupErrors">
-        @for (error of signupErrors; track $index) {
-            <mat-error>
-                {{ error }}
-            </mat-error>
-        }
-    </div>
+    @if (signupErrors().length > 0) {
+        <div class="flex flex-col items-center">
+            @for (error of signupErrors(); track $index) {
+                <mat-error>
+                    {{ error }}
+                </mat-error>
+            }
+        </div>
+    }
 
     <form class="space-y-4" [formGroup]="signupForm" (ngSubmit)="onSubmit()">
         <mat-form-field class="w-full" appearance="outline">
@@ -69,7 +71,7 @@
                 class="cursor-pointer !text-light-text dark:!text-inherit"
                 (click)="togglePwVisibility($event)"
                 matSuffix
-                >{{ pwVisible ? 'visibility_off' : 'visibility' }}</mat-icon
+                >{{ pwVisible() ? 'visibility_off' : 'visibility' }}</mat-icon
             >
             <mat-error class="text-sm" *ngIf="getControl('password')?.invalid">
                 <span *ngIf="getControl('password')?.hasError('required')"
@@ -98,7 +100,7 @@
                 class="cursor-pointer !text-light-text dark:!text-inherit"
                 (click)="togglePwVisibility($event)"
                 matSuffix
-                >{{ rePwVisible ? 'visibility_off' : 'visibility' }}</mat-icon
+                >{{ rePwVisible() ? 'visibility_off' : 'visibility' }}</mat-icon
             >
             <mat-error class="text-sm" *ngIf="getControl('rePassword')?.invalid">
                 <span *ngIf="getControl('rePassword')?.hasError('required')"

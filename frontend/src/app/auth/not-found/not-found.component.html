@@ -27,17 +27,17 @@
         <div class="relative mb-6">
             <h1
                 class="text-6xl md:text-7xl font-bold transition-all duration-200"
-                [class.skew-x-2]="glitchActive"
-                [class.text-red-500]="glitchActive"
+                [class.skew-x-2]="glitchActive()"
+                [class.text-red-500]="glitchActive()"
             >
                 TICKET-404
             </h1>
             <div
                 class="absolute top-0 left-1/2 -translate-x-1/2 text-6xl md:text-7xl font-bold text-purple-400 pointer-events-none transition-all duration-200"
-                [class.opacity-70]="glitchActive"
-                [class.opacity-0]="!glitchActive"
-                [class.translate-x-[-48%]]="glitchActive"
-                [class.skew-x-[-2deg]]="glitchActive"
+                [class.opacity-70]="glitchActive()"
+                [class.opacity-0]="!glitchActive()"
+                [class.translate-x-[-48%]]="glitchActive()"
+                [class.skew-x-[-2deg]]="glitchActive()"
             >
                 TICKET-404
             </div>

@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy } from '@angular/core';
+import { Component, inject, OnDestroy, signal } from '@angular/core';
 import { EmailFormComponent } from './email-form/email-form.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -14,28 +14,28 @@ import { ResetFormComponent } from './reset-form/reset-form.component';
     styleUrl: './reset-password.component.css',
 })
 export class ResetPasswordComponent implements OnDestroy {
-    emailSent: boolean = false;
-    emailSub?: Subscription;
-    passwordSub?: Subscription;
+    emailSent = signal(false);
+    emailSub: Subscription | null = null;
+    passwordSub: Subscription | null = null;
     currentRoute = inject(ActivatedRoute);
-    token: string;
+    token = signal<string>('');
 
     constructor(private snackBar: SnackbarService) {
-        this.token = this.currentRoute.snapshot.queryParamMap.get('token') ?? '';
+        this.token.set(this.currentRoute.snapshot.queryParamMap.get('token') ?? '');
 
-        if (this.token) {
-            this.emailSent = true;
+        if (this.token()) {
+            this.emailSent.set(true);
         }
     }
 
     resend(email: string): void {
         if (!email) return;
         this.snackBar.open('Email sent successfully!');
-        this.emailSent = true;
+        this.emailSent.set(true);
         /*this.emailSub = this.authService.resendEmail(email, '/auth/reset-password').subscribe({
             next: (response) => {
                 this.snackBar.open('Email sent successfully!');
-                this.emailSent = true;
+                this.emailSent.set(true);
             },
             error: (error) => {
                 this.snackBar.open('Error sending email. Please try again later.', [
@@ -47,7 +47,7 @@ export class ResetPasswordComponent implements OnDestroy {
     }
 
     togglePage(): void {
-        this.emailSent = !this.emailSent;
+        this.emailSent.set(!this.emailSent());
     }
 
     ngOnDestroy(): void {

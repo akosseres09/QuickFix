@@ -1,5 +1,5 @@
 import { Component, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { Router, RouterLink } from '@angular/router';
@@ -19,7 +19,6 @@ export class ResendVerificationComponent implements OnDestroy {
     constructor(
         private authService: AuthService,
         private router: Router,
-        private fb: FormBuilder,
         private snackbar: SnackbarService
     ) {}
 

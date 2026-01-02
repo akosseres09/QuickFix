@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -36,19 +36,19 @@ import { SnackbarService } from '../../shared/services/snackbar/snackbar.service
     styleUrl: './signup.component.css',
     standalone: true,
 })
-export class SignupComponent implements OnInit, OnDestroy {
-    pwVisible = false;
-    rePwVisible = false;
+export class SignupComponent implements OnDestroy {
+    pwVisible = signal(false);
+    rePwVisible = signal(false);
+    signupErrors = signal<Array<string>>([]);
     signupForm: FormGroup;
-    signupSub?: Subscription;
-    signupErrors?: Array<string>;
+    signupSub: Subscription | null = null;
 
-    constructor(
-        private router: Router,
-        private fb: FormBuilder,
-        private authService: AuthService,
-        private snackbar: SnackbarService
-    ) {
+    private router = inject(Router);
+    private fb = inject(FormBuilder);
+    private authService = inject(AuthService);
+    private snackbar = inject(SnackbarService);
+
+    constructor() {
         this.signupForm = this.fb.group(
             {
                 username: ['', [Validators.required, Validators.minLength(5)]],
@@ -61,8 +61,6 @@ export class SignupComponent implements OnInit, OnDestroy {
             }
         );
     }
-
-    ngOnInit(): void {}
 
     ngOnDestroy() {
         this.signupSub?.unsubscribe();
@@ -80,9 +78,9 @@ export class SignupComponent implements OnInit, OnDestroy {
             );
 
             if (input.getAttribute('formcontrolname') === 'password') {
-                this.pwVisible = !this.pwVisible;
+                this.pwVisible.set(!this.pwVisible());
             } else if (input.getAttribute('formcontrolname') === 'rePassword') {
-                this.rePwVisible = !this.rePwVisible;
+                this.rePwVisible.set(!this.rePwVisible());
             }
         }
     }
@@ -94,19 +92,19 @@ export class SignupComponent implements OnInit, OnDestroy {
     onSubmit(): void {
         if (!this.signupForm.valid) return;
 
-        this.signupErrors = [];
+        this.signupErrors.set([]);
         this.snackbar.open('Account created successfully! Please verify your email.');
         this.router.navigateByUrl('/auth/verify');
 
         /*this.signupSub = this.authService.signup(this.signupForm.value).subscribe({
             next: (result) => {
-                this.signupErrors = [];
+                this.signupErrors.set([]);
                 this.snackbar.open('Account created successfully! Please verify your email.');
                 this.router.navigateByUrl('/auth/verify');
             },
             error: (error) => {
                 const errorObj = error.error.error.details.error as Array<string>;
-                this.signupErrors = Object.values(errorObj).flat();
+                this.signupErrors.set(Object.values(errorObj).flat());
             },
         });*/
     }

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, input } from '@angular/core';
 import {
     FormBuilder,
     FormControl,
@@ -10,14 +10,7 @@ import { passwordMatchValidator } from '../../../shared/validators/passwordValid
 import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import {
-    MatError,
-    MatFormField,
-    MatInput,
-    MatLabel,
-    MatPrefix,
-    MatSuffix,
-} from '@angular/material/input';
+import { MatError, MatFormField, MatInput, MatLabel, MatPrefix } from '@angular/material/input';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
 
@@ -37,9 +30,9 @@ import { MatButton } from '@angular/material/button';
     templateUrl: './reset-form.component.html',
     styleUrl: './reset-form.component.css',
 })
-export class ResetFormComponent implements OnInit {
+export class ResetFormComponent {
     form: FormGroup;
-    @Input() token: string = '';
+    token = input<string>('');
 
     constructor(
         private fb: FormBuilder,
@@ -57,8 +50,6 @@ export class ResetFormComponent implements OnInit {
             }
         );
     }
-
-    ngOnInit(): void {}
 
     getControl(name: string) {
         return this.form.get(name);
