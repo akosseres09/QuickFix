@@ -1,15 +1,16 @@
 <nav mat-tab-nav-bar [tabPanel]="tabPanel">
-    <a
-        mat-tab-link
-        *ngFor="let tab of tabs"
-        [routerLink]="tab.route"
-        routerLinkActive
-        [routerLinkActiveOptions]="{ exact: true }"
-        #rla="routerLinkActive"
-        [active]="rla.isActive"
-    >
-        {{ tab.label }}
-    </a>
+    @for (tab of tabs(); track $index) {
+        <a
+            mat-tab-link
+            [routerLink]="tab.route"
+            routerLinkActive
+            [routerLinkActiveOptions]="{ exact: true }"
+            #rla="routerLinkActive"
+            [active]="rla.isActive"
+        >
+            {{ tab.label }}
+        </a>
+    }
 </nav>
 
 <section class="mt-6">

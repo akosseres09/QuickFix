@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { NavbarComponent } from '../../common/navbar/navbar.component';
 import { User } from '../../shared/model/User';
 import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
@@ -13,10 +13,10 @@ import { CommonModule } from '@angular/common';
     styleUrl: './base-layout.component.css',
 })
 export class BaseLayoutComponent implements OnInit {
-    user: User | null = null;
+    user = signal<User | null>(null);
+    innerPage = signal<boolean>(false);
     router = inject(Router);
     activeRoute = inject(ActivatedRoute);
-    innerPage = true;
 
     ngOnInit(): void {
         this.checkPage(this.router.url);
@@ -29,9 +29,9 @@ export class BaseLayoutComponent implements OnInit {
 
     checkPage(url: string) {
         if (url.match('/(projects|worktime|account|settings)')) {
-            this.innerPage = false;
+            this.innerPage.set(true);
         } else {
-            this.innerPage = true;
+            this.innerPage.set(false);
         }
     }
 }
