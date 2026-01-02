@@ -19,13 +19,13 @@
 <app-date-range (dateRangeChange)="onDateRangeChange($event)"></app-date-range>
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6 text-white">
-    @for (stat of stats.values(); track $index) {
-        <div [class]="'rounded-xl shadow-lg flex flex-col px-6 py-3 ' + stat.bgColor">
+    @for (stat of stats; track stat[0]) {
+        <div [class]="'rounded-xl shadow-lg flex flex-col px-6 py-3 ' + stat[1].bgColor">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-semibold opacity-90">{{ stat.label }}</span>
-                <mat-icon>{{ stat.icon }}</mat-icon>
+                <span class="text-sm font-semibold opacity-90">{{ stat[1].label }}</span>
+                <mat-icon>{{ stat[1].icon }}</mat-icon>
             </div>
-            <p class="text-3xl font-bold">{{ stat.value }}</p>
+            <p class="text-3xl font-bold">{{ getstatValue(stat[0]) }}</p>
         </div>
     }
 </div>

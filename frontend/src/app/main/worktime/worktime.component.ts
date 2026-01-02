@@ -324,4 +324,12 @@ export class WorktimeComponent implements OnInit, OnDestroy {
         this.worktimeEntries.forEach((entry) => ids.add(entry.issueId));
         return Array.from(ids).sort((a, b) => a - b);
     }
+
+    getstatValue(valueName: string) {
+        const value = this.stats.get(valueName)?.value;
+        if (typeof value === 'number' && parseFloat(value.toString()) % 1 !== 0) {
+            return value.toFixed(2);
+        }
+        return value;
+    }
 }
