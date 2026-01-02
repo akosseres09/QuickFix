@@ -1,5 +1,5 @@
 import { Component, inject, OnDestroy, signal } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -28,22 +28,17 @@ import { SnackbarService } from '../../shared/services/snackbar/snackbar.service
     standalone: true,
 })
 export class VerifyComponent implements OnDestroy {
-    verifyForm: FormGroup;
-    verifySub: Subscription | null = null;
-    verifyPage = signal(true);
-    currentRoute = inject(ActivatedRoute);
     private authService = inject(AuthService);
     private router = inject(Router);
     private fb = inject(FormBuilder);
     private snackbar = inject(SnackbarService);
-
-    constructor() {
-        const token = this.currentRoute.snapshot.queryParamMap.get('token') ?? '';
-
-        this.verifyForm = this.fb.group({
-            token: [token, [Validators.required, Validators.maxLength(255)]],
-        });
-    }
+    currentRoute = inject(ActivatedRoute);
+    token = signal(this.currentRoute.snapshot.queryParamMap.get('token') ?? '');
+    verifyPage = signal(true);
+    verifyForm = this.fb.group({
+        token: [this.token(), [Validators.required, Validators.maxLength(255)]],
+    });
+    verifySub: Subscription | null = null;
 
     ngOnDestroy() {
         this.verifySub?.unsubscribe();
@@ -54,7 +49,7 @@ export class VerifyComponent implements OnDestroy {
 
         const token = this.getControl('token')?.value;
 
-        if (!token) return;
+        if (!token || token !== this.token()) return;
 
         this.snackbar.open('Account Verified!');
         this.router.navigateByUrl('/auth/login');

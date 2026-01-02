@@ -21,9 +21,13 @@
             <mat-icon class="cursor-pointer !text-light-text dark:!text-inherit" matSuffix
                 >lock</mat-icon
             >
-            <mat-error class="text-sm" *ngIf="getControl('token')?.invalid">
-                <span *ngIf="getControl('token')?.hasError('required')">Token is required.</span>
-            </mat-error>
+            @if (getControl('token')?.invalid) {
+                <mat-error class="text-sm">
+                    @if (getControl('token')?.hasError('required')) {
+                        <span>Token is required.</span>
+                    }
+                </mat-error>
+            }
         </mat-form-field>
 
         <div>

@@ -1,8 +1,7 @@
-import { Component, input } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import {
+    AbstractControlOptions,
     FormBuilder,
-    FormControl,
-    FormGroup,
     ReactiveFormsModule,
     Validators,
 } from '@angular/forms';
@@ -31,25 +30,20 @@ import { MatButton } from '@angular/material/button';
     styleUrl: './reset-form.component.css',
 })
 export class ResetFormComponent {
-    form: FormGroup;
+    private fb = inject(FormBuilder);
+    private router = inject(Router);
+    private snackBar = inject(SnackbarService);
     token = input<string>('');
-
-    constructor(
-        private fb: FormBuilder,
-        private router: Router,
-        private snackBar: SnackbarService
-    ) {
-        this.form = this.fb.group(
-            {
-                token: new FormControl(this.token, [Validators.required]),
-                password: new FormControl('', [Validators.required, Validators.minLength(6)]),
-                rePassword: new FormControl('', [Validators.required, Validators.minLength(6)]),
-            },
-            {
-                validators: passwordMatchValidator('password', 'rePassword'),
-            }
-        );
-    }
+    form = this.fb.group(
+        {
+            token: [this.token(), [Validators.required]],
+            password: ['', [Validators.required, Validators.minLength(6)]],
+            rePassword: ['', [Validators.required, Validators.minLength(6)]],
+        },
+        {
+            validators: passwordMatchValidator('password', 'rePassword'),
+        } as AbstractControlOptions
+    );
 
     getControl(name: string) {
         return this.form.get(name);

@@ -17,12 +17,17 @@
                 required
                 placeholder="pat@example.com"
             />
-            <mat-error class="text-sm" *ngIf="getControl('email')?.invalid">
-                <span *ngIf="getControl('email')?.hasError('required')">Email is required.</span>
-                <span *ngIf="getControl('email')?.hasError('email')"
-                    >Provide a valid email address.</span
-                >
-            </mat-error>
+            @if (getControl('email')?.invalid) {
+                <mat-error class="text-sm">
+                    @if (getControl('email')?.hasError('required')) {
+                        <span>Email is required.</span>
+                    }
+
+                    @if (getControl('email')?.hasError('email')) {
+                        <span>Provide a valid email address.</span>
+                    }
+                </mat-error>
+            }
         </mat-form-field>
 
         <mat-form-field class="w-full" color="accent" appearance="outline">
@@ -41,14 +46,16 @@
                 matSuffix
                 >{{ pwVisible() ? 'visibility_off' : 'visibility' }}</mat-icon
             >
-            <mat-error class="text-sm" *ngIf="getControl('password')?.invalid">
-                <span *ngIf="getControl('password')?.hasError('required')"
-                    >Password is required.</span
-                >
-                <span *ngIf="getControl('password')?.hasError('minlength')"
-                    >Password must be at least 6 characters.</span
-                >
-            </mat-error>
+            @if (getControl('password')?.invalid) {
+                <mat-error class="text-sm">
+                    @if (getControl('password')?.hasError('required')) {
+                        <span>Password is required.</span>
+                    }
+                    @if (getControl('password')?.hasError('minlength')) {
+                        <span>Password must be at least 6 characters.</span>
+                    }
+                </mat-error>
+            }
         </mat-form-field>
 
         <div>
@@ -62,8 +69,6 @@
             </button>
         </div>
     </form>
-
-    <!-- Footer -->
     <div class="text-center text-sm flex flex-col gap-2">
         <div class="text-sm">
             Forgot password?

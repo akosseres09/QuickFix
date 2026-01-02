@@ -14,13 +14,14 @@ import { ResetFormComponent } from './reset-form/reset-form.component';
     styleUrl: './reset-password.component.css',
 })
 export class ResetPasswordComponent implements OnDestroy {
+    private currentRoute = inject(ActivatedRoute);
+    private snackBar = inject(SnackbarService);
     emailSent = signal(false);
+    token = signal<string>('');
     emailSub: Subscription | null = null;
     passwordSub: Subscription | null = null;
-    currentRoute = inject(ActivatedRoute);
-    token = signal<string>('');
 
-    constructor(private snackBar: SnackbarService) {
+    constructor() {
         this.token.set(this.currentRoute.snapshot.queryParamMap.get('token') ?? '');
 
         if (this.token()) {

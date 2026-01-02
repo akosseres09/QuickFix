@@ -33,17 +33,13 @@ import { CommonModule } from '@angular/common';
     standalone: true,
 })
 export class LoginComponent {
-    pwVisible = signal(false);
-    loginForm: FormGroup;
     private fb = inject(FormBuilder);
     private router = inject(Router);
-
-    constructor() {
-        this.loginForm = this.fb.group({
-            email: ['', [Validators.required, Validators.email]],
-            password: ['', [Validators.required, Validators.minLength(6)]],
-        });
-    }
+    pwVisible = signal(false);
+    loginForm = this.fb.group({
+        email: ['', [Validators.required, Validators.email]],
+        password: ['', [Validators.required, Validators.minLength(6)]],
+    });
 
     togglePwVisibility(event: MouseEvent): void {
         const input = (event.target as HTMLElement)

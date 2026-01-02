@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, inject, OnDestroy } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../shared/services/auth/auth.service';
@@ -15,12 +15,9 @@ import { EmailFormComponent } from '../reset-password/email-form/email-form.comp
 })
 export class ResendVerificationComponent implements OnDestroy {
     sub?: Subscription;
-
-    constructor(
-        private authService: AuthService,
-        private router: Router,
-        private snackbar: SnackbarService
-    ) {}
+    private authService = inject(AuthService);
+    private router = inject(Router);
+    private snackbar = inject(SnackbarService);
 
     ngOnDestroy() {
         this.sub?.unsubscribe();

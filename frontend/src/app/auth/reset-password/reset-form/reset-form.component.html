@@ -9,12 +9,13 @@
             autocomplete="password-reset-token"
             required
         />
-        <mat-error
-            class="text-sm"
-            *ngIf="getControl('token')?.invalid && getControl('token')?.touched"
-        >
-            <span *ngIf="getControl('token')?.hasError('required')">Token is required.</span>
-        </mat-error>
+        @if (getControl('token')?.invalid && getControl('token')?.touched) {
+            <mat-error class="text-sm">
+                @if (getControl('token')?.hasError('required')) {
+                    <span>Token is required.</span>
+                }
+            </mat-error>
+        }
     </mat-form-field>
 
     <mat-form-field class="w-full" color="accent" appearance="outline">
@@ -27,16 +28,19 @@
             autocomplete="current-password"
             required
         />
-        <mat-error
-            class="text-sm"
-            *ngIf="getControl('password')?.invalid && getControl('password')?.touched"
-        >
-            <span *ngIf="getControl('password')?.hasError('required')">Password is required</span>
-            <span *ngIf="getControl('password')?.hasError('minLength')"
-                >Password should be at least 6 characters</span
-            >
-            <span *ngIf="getControl('password')?.hasError('mustMatch')">Passwords must match</span>
-        </mat-error>
+        @if (getControl('password')?.invalid && getControl('password')?.touched) {
+            <mat-error class="text-sm">
+                @if (getControl('password')?.hasError('required')) {
+                    <span>Password is required</span>
+                }
+                @if (getControl('password')?.hasError('minLength')) {
+                    <span>Password should be at least 6 characters</span>
+                }
+                @if (getControl('password')?.hasError('mustMatch')) {
+                    <span>Passwords must match</span>
+                }
+            </mat-error>
+        }
     </mat-form-field>
 
     <mat-form-field class="w-full" color="accent" appearance="outline">
@@ -49,17 +53,22 @@
             autocomplete="current-repassword"
             required
         />
-        <mat-error class="text-sm" *ngIf="getControl('rePassword')?.invalid">
-            <span *ngIf="getControl('rePassword')?.hasError('required')"
-                >You must confirm your password</span
-            >
-            <span *ngIf="getControl('rePassword')?.hasError('minlength')"
-                >Must be at least 6 characters</span
-            >
-            <span *ngIf="getControl('rePassword')?.hasError('mustMatch')"
-                >Passwords must match</span
-            >
-        </mat-error>
+
+        @if (getControl('rePassword')?.invalid) {
+            <mat-error class="text-sm">
+                @if (getControl('rePassword')?.hasError('required')) {
+                    <span>You must confirm your password</span>
+                }
+
+                @if (getControl('rePassword')?.hasError('minlength')) {
+                    <span>Must be at least 6 characters</span>
+                }
+
+                @if (getControl('rePassword')?.hasError('mustMatch')) {
+                    <span>Passwords must match</span>
+                }
+            </mat-error>
+        }
     </mat-form-field>
 
     <div>

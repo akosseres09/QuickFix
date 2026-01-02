@@ -1,5 +1,11 @@
 import { Component, inject, OnDestroy, signal } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+    AbstractControlOptions,
+    FormBuilder,
+    FormGroup,
+    ReactiveFormsModule,
+    Validators,
+} from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import {
@@ -37,30 +43,26 @@ import { SnackbarService } from '../../shared/services/snackbar/snackbar.service
     standalone: true,
 })
 export class SignupComponent implements OnDestroy {
-    pwVisible = signal(false);
-    rePwVisible = signal(false);
-    signupErrors = signal<Array<string>>([]);
-    signupForm: FormGroup;
-    signupSub: Subscription | null = null;
-
     private router = inject(Router);
     private fb = inject(FormBuilder);
     private authService = inject(AuthService);
     private snackbar = inject(SnackbarService);
 
-    constructor() {
-        this.signupForm = this.fb.group(
-            {
-                username: ['', [Validators.required, Validators.minLength(5)]],
-                email: ['', [Validators.required, Validators.email]],
-                password: ['', [Validators.required, Validators.minLength(6)]],
-                rePassword: ['', [Validators.required, Validators.minLength(6)]],
-            },
-            {
-                validators: passwordMatchValidator('password', 'rePassword'),
-            }
-        );
-    }
+    pwVisible = signal(false);
+    rePwVisible = signal(false);
+    signupErrors = signal<Array<string>>([]);
+    signupForm = this.fb.group(
+        {
+            username: ['', [Validators.required, Validators.minLength(5)]],
+            email: ['', [Validators.required, Validators.email]],
+            password: ['', [Validators.required, Validators.minLength(6)]],
+            rePassword: ['', [Validators.required, Validators.minLength(6)]],
+        },
+        {
+            validators: passwordMatchValidator('password', 'rePassword'),
+        } as AbstractControlOptions
+    );
+    signupSub: Subscription | null = null;
 
     ngOnDestroy() {
         this.signupSub?.unsubscribe();
