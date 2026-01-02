@@ -1,10 +1,11 @@
-import { Component, TemplateRef, ViewChild } from '@angular/core';
+import { Component, Input, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
     selector: 'app-worktime-dialog',
@@ -15,11 +16,13 @@ import { MatNativeDateModule } from '@angular/material/core';
         MatInputModule,
         MatDatepickerModule,
         MatNativeDateModule,
+        MatSelectModule,
     ],
     templateUrl: './worktime-dialog.component.html',
     styleUrl: './worktime-dialog.component.css',
 })
 export class WorktimeDialogComponent {
+    @Input() issueIds: number[] = [];
     @ViewChild('worktimeFormTemplate') worktimeFormTemplate!: TemplateRef<any>;
 
     worktimeForm: FormGroup;

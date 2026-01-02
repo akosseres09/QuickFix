@@ -289,6 +289,16 @@ $dark-theme: mat.m2-define-dark-theme(
             supporting-text-size: 1rem,
         )
     );
+
+    @include mat.select-overrides(
+        (
+            panel-background-color: if(
+                    $is-light-theme,
+                    var-color(--color-light-background),
+                    var-color(--color-dark-background)
+                ),
+        )
+    );
 }
 
 html[data-theme='light'] {

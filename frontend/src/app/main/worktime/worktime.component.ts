@@ -318,4 +318,10 @@ export class WorktimeComponent implements OnInit, OnDestroy {
             });
         });
     }
+
+    get issueIds(): number[] {
+        const ids = new Set<number>();
+        this.worktimeEntries.forEach((entry) => ids.add(entry.issueId));
+        return Array.from(ids).sort((a, b) => a - b);
+    }
 }

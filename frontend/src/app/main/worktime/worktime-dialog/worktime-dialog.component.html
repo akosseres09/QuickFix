@@ -3,7 +3,11 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <mat-form-field appearance="outline" class="w-full">
                 <mat-label>Issue ID</mat-label>
-                <input matInput formControlName="issueId" placeholder="1234" type="number" />
+                <mat-select formControlName="issueId">
+                    @for (id of issueIds; track $index) {
+                        <mat-option [value]="id">{{ id }}</mat-option>
+                    }
+                </mat-select>
                 @if (worktimeForm.get('issueId')?.hasError('required')) {
                     <mat-error> Issue ID is required </mat-error>
                 } @else if (worktimeForm.get('issueId')?.hasError('pattern')) {
