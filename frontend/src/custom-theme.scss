@@ -299,6 +299,39 @@ $dark-theme: mat.m2-define-dark-theme(
                 ),
         )
     );
+
+    .mat-mdc-tab-group,
+    .mat-mdc-tab-nav-bar {
+        @include mat.tabs-overrides(
+            (
+                active-indicator-color: if(
+                        $is-light-theme,
+                        var-color(--color-light-primary),
+                        var-color(--color-dark-primary)
+                    ),
+                active-label-text-color: if(
+                        $is-light-theme,
+                        var-color(--color-light-primary),
+                        var-color(--color-dark-primary)
+                    ),
+                inactive-label-text-color: if(
+                        $is-light-theme,
+                        var-color(--color-light-text),
+                        var-color(--color-dark-text)
+                    ),
+                inactive-hover-label-text-color: if(
+                        $is-light-theme,
+                        var-color(--color-light-text),
+                        var-color(--color-dark-text)
+                    ),
+                inactive-focus-label-text-color: if(
+                        $is-light-theme,
+                        var-color(--color-light-text),
+                        var-color(--color-dark-text)
+                    ),
+            )
+        );
+    }
 }
 
 html[data-theme='light'] {
