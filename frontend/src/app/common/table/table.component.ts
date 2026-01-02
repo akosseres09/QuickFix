@@ -95,6 +95,8 @@ export class TableComponent<T extends BaseModel>
         if (pageParam) {
             this.pageIndex = +pageParam - 1;
         }
+
+        this.columnIds = this.displayedColumnIds();
     }
 
     ngAfterViewInit(): void {
@@ -106,12 +108,18 @@ export class TableComponent<T extends BaseModel>
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        this.dataSource = changes['dataSource'].currentValue;
-        this.displayedColumns = changes['displayedColumns'].currentValue;
+        if (changes['dataSource']) {
+            this.dataSource = changes['dataSource'].currentValue;
+            this.dataSource.paginator = this.paginator;
+            this.dataSource.sort = this.sort;
+        }
+        if (changes['displayedColumns']) {
+            this.displayedColumns = changes['displayedColumns'].currentValue;
+            this.columnIds = this.displayedColumnIds();
+        }
         if (changes['isLoading']) {
             this.isLoading = changes['isLoading'].currentValue;
         }
-        this.columnIds = this.displayedColumnIds();
     }
 
     ngOnDestroy(): void {

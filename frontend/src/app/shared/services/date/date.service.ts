@@ -9,10 +9,21 @@ export class DateService {
      *
      * Returns a locale ISO string representation of the given date.
      */
-    toLocaleISOString(date: Date): string {
+    toLocaleISOString(date: Date, truncate = false): string {
         const copy = new Date(date);
         copy.setMinutes(date.getMinutes() - date.getTimezoneOffset());
-        return copy.toISOString();
+        return truncate ? copy.toISOString().split('T')[0] : copy.toISOString();
+    }
+
+    /**
+     *
+     * @param date The date to convert to a locale ISO date
+     * @param truncate If true, truncates the time portion
+     * Returns a Date object representing the date portion of the given date in locale ISO format.
+     */
+    toLocaleISODate(date: Date, truncate = false): Date {
+        const isoString = this.toLocaleISOString(date);
+        return new Date(truncate ? isoString.split('T')[0] : isoString);
     }
 
     /**
