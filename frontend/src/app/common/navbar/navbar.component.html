@@ -28,10 +28,10 @@
         </div>
 
         <div
-            class="overflow-hidden transition-[background-color] duration-200 ease-in-out md:max-h-full md:opacity-100 md:mt-0 md:block"
+            class="overflow-hidden transition-[background-color,max-height] duration-200 ease-in-out md:max-h-full md:mt-0 md:block"
             [ngClass]="{
-                'max-h-0 opacity-0': !isMenuOpen,
-                'max-h-screen opacity-100 mt-4': isMenuOpen,
+                'max-h-0': !isMenuOpen,
+                'max-h-screen mt-4': isMenuOpen,
             }"
         >
             <ul

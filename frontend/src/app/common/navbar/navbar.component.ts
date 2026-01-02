@@ -1,11 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import {
-    MatButtonToggle,
-    MatButtonToggleChange,
-    MatButtonToggleGroup,
-} from '@angular/material/button-toggle';
+import { MatButtonToggleChange } from '@angular/material/button-toggle';
 import { MatIcon } from '@angular/material/icon';
 import { Router, RouterLink, RouterModule } from '@angular/router';
 import { ThemeService } from '../../shared/services/theme/theme.service';
@@ -24,8 +20,6 @@ import { UserService } from '../../shared/services/user/user.service';
         RouterLink,
         FormsModule,
         MatIcon,
-        MatButtonToggle,
-        MatButtonToggleGroup,
         MatMenu,
         MatMenuTrigger,
         MatMenuItem,
