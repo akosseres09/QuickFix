@@ -1,6 +1,19 @@
-<div class="mb-8">
-    <h1 class="text-4xl font-black text-gray-900 dark:text-white mb-2">Worktime Tracking</h1>
-    <p class="text-gray-600 dark:text-gray-400">Track and analyze your time spent on issues</p>
+<div class="mb-8 flex justify-between">
+    <div>
+        <h1 class="text-4xl font-black text-gray-900 dark:text-white mb-2">Worktime Tracking</h1>
+        <p class="text-gray-600 dark:text-gray-400">Track and analyze your time spent on issues</p>
+    </div>
+    <div>
+        <button
+            class="flex md:gap-2 justify-center !text-white"
+            mat-raised-button
+            color="primary"
+            (click)="openWorktimeDialog()"
+        >
+            <mat-icon class="!mr-0">add</mat-icon>
+            <span class="hidden md:block">Add Worktime</span>
+        </button>
+    </div>
 </div>
 
 <app-date-range (dateRangeChange)="onDateRangeChange($event)"></app-date-range>
@@ -40,3 +53,4 @@
         ></app-table>
     </div>
 </div>
+<app-worktime-dialog></app-worktime-dialog>

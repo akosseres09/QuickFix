@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { WorktimeEntry } from '../../shared/model/Worktime';
@@ -10,6 +10,11 @@ import { DisplayedColumn } from '../../shared/constants/DisplayedColumn';
 import { MatTableDataSource } from '@angular/material/table';
 import { TableComponent } from '../../common/table/table.component';
 import { Stat } from '../../shared/constants/Stat';
+import { MatButton } from '@angular/material/button';
+import { DialogService } from '../../shared/services/dialog/dialog.service';
+import { WorktimeDialogComponent } from './worktime-dialog/worktime-dialog.component';
+import { Subscription } from 'rxjs';
+import { DateService } from '../../shared/services/date/date.service';
 
 @Component({
     selector: 'app-worktime',
@@ -21,14 +26,16 @@ import { Stat } from '../../shared/constants/Stat';
         BarChartComponent,
         LineChartComponent,
         MatIcon,
+        MatButton,
         TableComponent,
+        WorktimeDialogComponent,
     ],
     templateUrl: './worktime.component.html',
     styleUrl: './worktime.component.css',
 })
-export class WorktimeComponent implements OnInit {
-    startDate: string | null = null;
-    endDate: string | null = null;
+export class WorktimeComponent implements OnInit, OnDestroy {
+    startDate: string = '';
+    endDate: string = '';
     isLoading = true;
     days: Map<string, number> = new Map();
     shownWorktimes = new MatTableDataSource<WorktimeEntry>();
@@ -50,7 +57,7 @@ export class WorktimeComponent implements OnInit {
             id: 'date',
             label: 'Date',
             sortable: true,
-            value: (e: WorktimeEntry) => e.date,
+            value: (e: WorktimeEntry) => this.dateService.toLocaleISOString(new Date(e.date), true),
         },
         {
             id: 'hours',
@@ -155,9 +162,18 @@ export class WorktimeComponent implements OnInit {
     ];
 
     filteredEntries: WorktimeEntry[] = [];
+    dialogService = inject(DialogService);
+    dateService = inject(DateService);
+    dialogRefSub: Subscription | null = null;
+
+    @ViewChild(WorktimeDialogComponent) worktimeDialog!: WorktimeDialogComponent;
 
     ngOnInit() {
         this.filterEntriesByDate();
+    }
+
+    ngOnDestroy(): void {
+        this.dialogRefSub?.unsubscribe();
     }
 
     deleteEntry(id: number) {
@@ -174,27 +190,36 @@ export class WorktimeComponent implements OnInit {
             const end = new Date(this.endDate);
 
             this.filteredEntries = this.worktimeEntries.filter((entry) => {
-                const entryDate = new Date(entry.date);
+                const entryDate = this.dateService.toLocaleISODate(new Date(entry.date), true);
                 return entryDate >= start && entryDate <= end;
             });
         }
         this.getDaysFromFilteredData();
         this.updateStats();
-        this.shownWorktimes.data = this.worktimeEntries;
+        this.shownWorktimes = new MatTableDataSource<WorktimeEntry>(this.filteredEntries);
         this.isLoading = false;
     }
 
     getDaysFromFilteredData() {
         const dayHours = new Map<string, number>();
+        const start = new Date(this.startDate);
+        const end = new Date(this.endDate);
+
+        for (const dt = start; dt <= end; dt.setDate(dt.getDate() + 1)) {
+            const dateStr = this.dateService.toLocaleISOString(dt, true);
+            dayHours.set(dateStr, 0);
+        }
+
         this.filteredEntries.forEach((entry) => {
             dayHours.set(entry.date, (dayHours.get(entry.date) || 0) + entry.hours);
         });
+
         this.days = dayHours;
     }
 
     onDateRangeChange($event: { startDate: string; endDate: string }) {
-        this.startDate = $event.startDate;
-        this.endDate = $event.endDate;
+        this.startDate = this.dateService.toLocaleISOString(new Date($event.startDate), true);
+        this.endDate = this.dateService.toLocaleISOString(new Date($event.endDate), true);
         this.filterEntriesByDate();
     }
 
@@ -238,5 +263,59 @@ export class WorktimeComponent implements OnInit {
 
             mostProductiveDayStat.value = maxDay ? new Date(maxDay).toLocaleDateString() : 'N/A';
         }
+    }
+
+    openWorktimeDialog() {
+        if (!this.worktimeDialog?.worktimeFormTemplate) {
+            console.error('Worktime dialog template not available');
+            return;
+        }
+
+        const dialogRef = this.dialogService.openFormDialog(
+            'Add Worktime',
+            this.worktimeDialog.worktimeFormTemplate,
+            {
+                saveLabel: 'Save',
+                cancelLabel: 'Cancel',
+                saveDisabled: this.worktimeDialog.worktimeForm.invalid,
+                width: '600px',
+            }
+        );
+
+        // Update save button state when form validity changes
+        const subscription = this.worktimeDialog.worktimeForm.statusChanges.subscribe(() => {
+            if (!dialogRef.componentInstance) return;
+
+            dialogRef.componentInstance.data.saveDisabled =
+                this.worktimeDialog.worktimeForm.invalid;
+        });
+
+        this.dialogRefSub = dialogRef.afterClosed().subscribe((result) => {
+            subscription.unsubscribe();
+
+            if (result && result.action === 'save') {
+                // TODO: This should handle the real saving
+                // this.worktimeDialog.saveWorktime();
+
+                const formValue = this.worktimeDialog.worktimeForm.value;
+
+                const newEntry: WorktimeEntry = {
+                    id: Math.max(...this.worktimeEntries.map((e) => e.id), 0) + 1,
+                    issueId: parseInt(formValue.issueId),
+                    issue: formValue.issue,
+                    date: new Date(formValue.date).toISOString(),
+                    hours: parseFloat(formValue.hours),
+                    description: formValue.description || '',
+                    user: 'Current User',
+                };
+
+                this.worktimeEntries.unshift(newEntry);
+                this.filterEntriesByDate();
+                this.updateStats();
+            }
+            this.worktimeDialog.worktimeForm.reset({
+                date: new Date(),
+            });
+        });
     }
 }

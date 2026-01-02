@@ -274,6 +274,21 @@ $dark-theme: mat.m2-define-dark-theme(
                 ),
         )
     );
+
+    @include mat.dialog-overrides(
+        (
+            container-color: if(
+                    $is-light-theme,
+                    var-color(--color-light-background),
+                    var-color(--color-dark-background)
+                ),
+            actions-padding: 8px 16px,
+            actions-alignment: 'end',
+            subhead-weight: 700,
+            subhead-size: 1.25rem,
+            supporting-text-size: 1rem,
+        )
+    );
 }
 
 html[data-theme='light'] {

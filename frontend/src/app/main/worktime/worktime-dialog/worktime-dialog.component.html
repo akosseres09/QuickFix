@@ -1,0 +1,52 @@
+<ng-template #worktimeFormTemplate>
+    <form [formGroup]="worktimeForm" class="flex flex-col gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Issue ID</mat-label>
+                <input matInput formControlName="issueId" placeholder="1234" type="number" />
+                @if (worktimeForm.get('issueId')?.hasError('required')) {
+                    <mat-error> Issue ID is required </mat-error>
+                } @else if (worktimeForm.get('issueId')?.hasError('pattern')) {
+                    <mat-error> Must be a valid number </mat-error>
+                }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Hours</mat-label>
+                <input matInput formControlName="hours" placeholder="8" type="number" step="0.5" />
+                @if (worktimeForm.get('hours')?.hasError('required')) {
+                    <mat-error> Hours are required </mat-error>
+                } @else if (worktimeForm.get('hours')?.hasError('min')) {
+                    <mat-error> Must be at least 0.1 hours </mat-error>
+                } @else if (worktimeForm.get('hours')?.hasError('max')) {
+                    <mat-error> Cannot exceed 24 hours </mat-error>
+                }
+            </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Date</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="date" />
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            @if (worktimeForm.get('date')?.hasError('required')) {
+                <mat-error> Date is required </mat-error>
+            }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Description</mat-label>
+            <textarea
+                matInput
+                formControlName="description"
+                rows="3"
+                placeholder="Describe the work done..."
+            ></textarea>
+            @if (worktimeForm.get('description')?.hasError('required')) {
+                <mat-error> Description is required </mat-error>
+            } @else if (worktimeForm.get('description')?.hasError('maxlength')) {
+                <mat-error> Description cannot exceed 500 characters </mat-error>
+            }
+        </mat-form-field>
+    </form>
+</ng-template>

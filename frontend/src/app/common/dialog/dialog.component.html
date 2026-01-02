@@ -1,0 +1,33 @@
+<div class="flex flex-col">
+    <h2 mat-dialog-title class="text-2xl font-semibold text-gray-900 pb-4 mb-4">
+        {{ data.title }}
+    </h2>
+
+    <mat-divider></mat-divider>
+
+    <mat-dialog-content class="flex-1 overflow-y-auto px-1 !mt-4">
+        <ng-container *ngTemplateOutlet="data.content"></ng-container>
+    </mat-dialog-content>
+
+    <mat-divider></mat-divider>
+
+    <mat-dialog-actions class="mt-6 p-8">
+        <button
+            *ngIf="data.showSaveButton"
+            mat-raised-button
+            (click)="onSave()"
+            [disabled]="data.saveDisabled"
+            class="px-6 py-2 bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed rounded-md transition-colors duration-200 shadow-sm"
+        >
+            {{ data.saveLabel }}
+        </button>
+        <button
+            *ngIf="data.showCancelButton"
+            mat-button
+            (click)="onCancel()"
+            class="px-6 py-2 text-gray-700 hover:bg-gray-100 rounded-md transition-colors duration-200"
+        >
+            {{ data.cancelLabel }}
+        </button>
+    </mat-dialog-actions>
+</div>
