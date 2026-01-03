@@ -1,20 +1,104 @@
-import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+    Component,
+    computed,
+    inject,
+    OnDestroy,
+    signal,
+    TemplateRef,
+    viewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton } from '@angular/material/button';
+import { Subscription } from 'rxjs';
+
 import { WorktimeEntry } from '../../shared/model/Worktime';
 import { DateRangeComponent } from '../../common/date-range/date-range.component';
 import { BarChartComponent } from '../../common/bar-chart/bar-chart.component';
 import { LineChartComponent } from '../../common/line-chart/line-chart.component';
-import { MatIcon } from '@angular/material/icon';
-import { DisplayedColumn } from '../../shared/constants/DisplayedColumn';
-import { MatTableDataSource } from '@angular/material/table';
 import { TableComponent } from '../../common/table/table.component';
-import { Stat } from '../../shared/constants/Stat';
-import { MatButton } from '@angular/material/button';
-import { DialogService } from '../../shared/services/dialog/dialog.service';
 import { WorktimeDialogComponent } from './worktime-dialog/worktime-dialog.component';
-import { Subscription } from 'rxjs';
+import { Stat } from '../../shared/constants/Stat';
+import { DisplayedColumn } from '../../shared/constants/DisplayedColumn';
+import { DialogService } from '../../shared/services/dialog/dialog.service';
 import { DateService } from '../../shared/services/date/date.service';
+
+const MOCK_DATA: WorktimeEntry[] = [
+    {
+        id: 1,
+        issue: 'Fix login bug',
+        issueId: 1234,
+        date: '2025-12-28',
+        hours: 4,
+        description: 'Fixed authentication issue',
+        user: 'John Doe',
+    },
+    {
+        id: 2,
+        issue: 'Update dashboard UI',
+        issueId: 1235,
+        date: '2025-12-28',
+        hours: 6,
+        description: 'Redesigned dashboard layout',
+        user: 'John Doe',
+    },
+    {
+        id: 3,
+        issue: 'API integration',
+        issueId: 1236,
+        date: '2025-12-27',
+        hours: 8,
+        description: 'Integrated payment gateway',
+        user: 'John Doe',
+    },
+    {
+        id: 4,
+        issue: 'Database optimization',
+        issueId: 1237,
+        date: '2025-12-27',
+        hours: 5,
+        description: 'Optimized slow queries',
+        user: 'Jane Smith',
+    },
+    {
+        id: 5,
+        issue: 'Mobile responsive fixes',
+        issueId: 1238,
+        date: '2025-12-26',
+        hours: 3,
+        description: 'Fixed mobile layout issues',
+        user: 'John Doe',
+    },
+    {
+        id: 6,
+        issue: 'Security audit',
+        issueId: 1239,
+        date: '2025-12-26',
+        hours: 7,
+        description: 'Performed security review',
+        user: 'Jane Smith',
+    },
+    {
+        id: 7,
+        issue: 'Documentation update',
+        issueId: 1240,
+        date: '2025-12-25',
+        hours: 2,
+        description: 'Updated API documentation',
+        user: 'John Doe',
+    },
+    {
+        id: 8,
+        issue: 'Code review',
+        issueId: 1241,
+        date: '2025-12-24',
+        hours: 4,
+        description: 'Reviewed pull requests',
+        user: 'Jane Smith',
+    },
+];
 
 @Component({
     selector: 'app-worktime',
@@ -33,12 +117,119 @@ import { DateService } from '../../shared/services/date/date.service';
     templateUrl: './worktime.component.html',
     styleUrl: './worktime.component.css',
 })
-export class WorktimeComponent implements OnInit, OnDestroy {
-    startDate: string = '';
-    endDate: string = '';
-    isLoading = true;
-    days: Map<string, number> = new Map();
-    shownWorktimes = new MatTableDataSource<WorktimeEntry>();
+export class WorktimeComponent implements OnDestroy {
+    private readonly dialogService = inject(DialogService);
+    private readonly dateService = inject(DateService);
+
+    startDate = signal<string>('');
+    endDate = signal<string>('');
+    worktimeEntries = signal<WorktimeEntry[]>(MOCK_DATA);
+
+    filteredEntries = computed(() => {
+        const startStr = this.startDate();
+        const endStr = this.endDate();
+        const entries = this.worktimeEntries();
+
+        if (!startStr || !endStr) {
+            return entries;
+        }
+
+        const start = new Date(startStr);
+        const end = new Date(endStr);
+
+        return entries.filter((entry) => {
+            const entryDate = this.dateService.toLocaleISODate(new Date(entry.date), true);
+            return entryDate >= start && entryDate <= end;
+        });
+    });
+
+    shownWorktimes = computed(() => new MatTableDataSource(this.filteredEntries()));
+    days = computed(() => {
+        const dayHours = new Map<string, number>();
+        const startStr = this.startDate();
+        const endStr = this.endDate();
+        const entries = this.filteredEntries();
+
+        if (startStr && endStr) {
+            const start = new Date(startStr);
+            const end = new Date(endStr);
+            for (const dt = new Date(start); dt <= end; dt.setDate(dt.getDate() + 1)) {
+                const dateStr = this.dateService.toLocaleISOString(dt, true);
+                dayHours.set(dateStr, 0);
+            }
+        }
+
+        entries.forEach((entry) => {
+            dayHours.set(entry.date, (dayHours.get(entry.date) || 0) + entry.hours);
+        });
+
+        return dayHours;
+    });
+
+    stats = computed(() => {
+        const entries = this.filteredEntries();
+        const totalHours = entries.reduce((sum, entry) => sum + entry.hours, 0);
+        const totalEntries = entries.length;
+
+        const daysWorked = new Set(entries.map((e) => e.date)).size;
+        const avgHours = daysWorked > 0 ? totalHours / daysWorked : 0;
+
+        const dayMap = new Map<string, number>();
+        entries.forEach((e) => dayMap.set(e.date, (dayMap.get(e.date) || 0) + e.hours));
+        let maxHours = 0;
+        let maxDay = '';
+        dayMap.forEach((val, key) => {
+            if (val > maxHours) {
+                maxHours = val;
+                maxDay = key;
+            }
+        });
+
+        return new Map<string, Stat>([
+            [
+                'totalHours',
+                {
+                    label: 'Total Hours',
+                    value: totalHours,
+                    icon: 'schedule',
+                    bgColor: 'bg-blue-500',
+                },
+            ],
+            [
+                'totalEntries',
+                {
+                    label: 'Total Entries',
+                    value: totalEntries,
+                    icon: 'assignment',
+                    bgColor: 'bg-purple-500',
+                },
+            ],
+            [
+                'averageHoursPerDay',
+                {
+                    label: 'Avg Hours/Day',
+                    value: avgHours,
+                    icon: 'bar_chart',
+                    bgColor: 'bg-green-500',
+                },
+            ],
+            [
+                'mostProductiveDay',
+                {
+                    label: 'Most Productive Day',
+                    value: maxDay ? new Date(maxDay).toLocaleDateString() : 'N/A',
+                    icon: 'star',
+                    bgColor: 'bg-yellow-500',
+                },
+            ],
+        ]);
+    });
+
+    issueIds = computed(() => {
+        const ids = new Set(this.worktimeEntries().map((e) => e.issueId));
+        return Array.from(ids).sort((a, b) => a - b);
+    });
+
     displayedColumns: DisplayedColumn[] = [
         {
             id: 'issueId',
@@ -59,275 +250,69 @@ export class WorktimeComponent implements OnInit, OnDestroy {
             sortable: true,
             value: (e: WorktimeEntry) => this.dateService.toLocaleISOString(new Date(e.date), true),
         },
-        {
-            id: 'hours',
-            label: 'Hours',
-            sortable: true,
-            value: (e: WorktimeEntry) => e.hours,
-        },
+        { id: 'hours', label: 'Hours', sortable: true, value: (e: WorktimeEntry) => e.hours },
     ];
 
-    stats: Map<string, Stat> = new Map<string, Stat>([
-        [
-            'totalHours',
-            { label: 'Total Hours', value: 0, icon: 'schedule', bgColor: 'bg-blue-500' },
-        ],
-        [
-            'totalEntries',
-            { label: 'Total Entries', value: 0, icon: 'assignment', bgColor: 'bg-purple-500' },
-        ],
-        [
-            'averageHoursPerDay',
-            { label: 'Avg Hours/Day', value: 0, icon: 'bar_chart', bgColor: 'bg-green-500' },
-        ],
-        [
-            'mostProductiveDay',
-            { label: 'Most Productive Day', value: '', icon: 'star', bgColor: 'bg-yellow-500' },
-        ],
-    ]);
-
-    worktimeEntries: WorktimeEntry[] = [
-        {
-            id: 1,
-            issue: 'Fix login bug',
-            issueId: 1234,
-            date: '2025-12-28',
-            hours: 4,
-            description: 'Fixed authentication issue',
-            user: 'John Doe',
-        },
-        {
-            id: 2,
-            issue: 'Update dashboard UI',
-            issueId: 1235,
-            date: '2025-12-28',
-            hours: 6,
-            description: 'Redesigned dashboard layout',
-            user: 'John Doe',
-        },
-        {
-            id: 3,
-            issue: 'API integration',
-            issueId: 1236,
-            date: '2025-12-27',
-            hours: 8,
-            description: 'Integrated payment gateway',
-            user: 'John Doe',
-        },
-        {
-            id: 4,
-            issue: 'Database optimization',
-            issueId: 1237,
-            date: '2025-12-27',
-            hours: 5,
-            description: 'Optimized slow queries',
-            user: 'Jane Smith',
-        },
-        {
-            id: 5,
-            issue: 'Mobile responsive fixes',
-            issueId: 1238,
-            date: '2025-12-26',
-            hours: 3,
-            description: 'Fixed mobile layout issues',
-            user: 'John Doe',
-        },
-        {
-            id: 6,
-            issue: 'Security audit',
-            issueId: 1239,
-            date: '2025-12-26',
-            hours: 7,
-            description: 'Performed security review',
-            user: 'Jane Smith',
-        },
-        {
-            id: 7,
-            issue: 'Documentation update',
-            issueId: 1240,
-            date: '2025-12-25',
-            hours: 2,
-            description: 'Updated API documentation',
-            user: 'John Doe',
-        },
-        {
-            id: 8,
-            issue: 'Code review',
-            issueId: 1241,
-            date: '2025-12-24',
-            hours: 4,
-            description: 'Reviewed pull requests',
-            user: 'Jane Smith',
-        },
-    ];
-
-    filteredEntries: WorktimeEntry[] = [];
-    dialogService = inject(DialogService);
-    dateService = inject(DateService);
-    dialogRefSub: Subscription | null = null;
-
-    @ViewChild(WorktimeDialogComponent) worktimeDialog!: WorktimeDialogComponent;
-
-    ngOnInit() {
-        this.filterEntriesByDate();
-    }
+    worktimeDialog = viewChild(WorktimeDialogComponent);
+    private dialogRefSub: Subscription | null = null;
 
     ngOnDestroy(): void {
         this.dialogRefSub?.unsubscribe();
     }
 
-    deleteEntry(id: number) {
-        this.worktimeEntries = this.worktimeEntries.filter((e) => e.id !== id);
-        this.filterEntriesByDate();
-    }
-
-    filterEntriesByDate() {
-        this.isLoading = true;
-        if (!this.startDate || !this.endDate) {
-            this.filteredEntries = [...this.worktimeEntries];
-        } else {
-            const start = new Date(this.startDate);
-            const end = new Date(this.endDate);
-
-            this.filteredEntries = this.worktimeEntries.filter((entry) => {
-                const entryDate = this.dateService.toLocaleISODate(new Date(entry.date), true);
-                return entryDate >= start && entryDate <= end;
-            });
-        }
-        this.getDaysFromFilteredData();
-        this.updateStats();
-        this.shownWorktimes = new MatTableDataSource<WorktimeEntry>(this.filteredEntries);
-        this.isLoading = false;
-    }
-
-    getDaysFromFilteredData() {
-        const dayHours = new Map<string, number>();
-        const start = new Date(this.startDate);
-        const end = new Date(this.endDate);
-
-        for (const dt = start; dt <= end; dt.setDate(dt.getDate() + 1)) {
-            const dateStr = this.dateService.toLocaleISOString(dt, true);
-            dayHours.set(dateStr, 0);
-        }
-
-        this.filteredEntries.forEach((entry) => {
-            dayHours.set(entry.date, (dayHours.get(entry.date) || 0) + entry.hours);
-        });
-
-        this.days = dayHours;
-    }
-
     onDateRangeChange($event: { startDate: string; endDate: string }) {
-        this.startDate = this.dateService.toLocaleISOString(new Date($event.startDate), true);
-        this.endDate = this.dateService.toLocaleISOString(new Date($event.endDate), true);
-        this.filterEntriesByDate();
+        this.startDate.set(this.dateService.toLocaleISOString(new Date($event.startDate), true));
+        this.endDate.set(this.dateService.toLocaleISOString(new Date($event.endDate), true));
     }
 
-    updateStats() {
-        const totalHoursStat = this.stats.get('totalHours');
-        const totalEntriesStat = this.stats.get('totalEntries');
-        const averageHoursPerDayStat = this.stats.get('averageHoursPerDay');
-        const mostProductiveDayStat = this.stats.get('mostProductiveDay');
-
-        if (totalHoursStat) {
-            totalHoursStat.value = this.filteredEntries.reduce(
-                (sum, entry) => sum + entry.hours,
-                0
-            );
-        }
-
-        if (totalEntriesStat) {
-            totalEntriesStat.value = this.filteredEntries.length;
-        }
-
-        if (averageHoursPerDayStat && totalHoursStat) {
-            const daysWorked = new Set(this.filteredEntries.map((e) => e.date)).size;
-            averageHoursPerDayStat.value =
-                daysWorked > 0 ? (totalHoursStat.value as number) / daysWorked : 0;
-        }
-
-        if (mostProductiveDayStat) {
-            const dayHours = new Map<string, number>();
-            this.filteredEntries.forEach((entry) => {
-                dayHours.set(entry.date, (dayHours.get(entry.date) || 0) + entry.hours);
-            });
-
-            let maxHours = 0;
-            let maxDay = '';
-            dayHours.forEach((hours, day) => {
-                if (hours > maxHours) {
-                    maxHours = hours;
-                    maxDay = day;
-                }
-            });
-
-            mostProductiveDayStat.value = maxDay ? new Date(maxDay).toLocaleDateString() : 'N/A';
-        }
+    deleteEntry(id: number) {
+        this.worktimeEntries.update((entries) => entries.filter((e) => e.id !== id));
     }
 
     openWorktimeDialog() {
-        if (!this.worktimeDialog?.worktimeFormTemplate) {
-            console.error('Worktime dialog template not available');
-            return;
-        }
+        const dialog = this.worktimeDialog();
+        if (!dialog?.worktimeFormTemplate) return;
 
         const dialogRef = this.dialogService.openFormDialog(
             'Add Worktime',
-            this.worktimeDialog.worktimeFormTemplate,
+            dialog.worktimeFormTemplate() as TemplateRef<any>,
             {
                 saveLabel: 'Save',
                 cancelLabel: 'Cancel',
-                saveDisabled: this.worktimeDialog.worktimeForm.invalid,
+                saveDisabled: dialog.worktimeForm.invalid,
                 width: '600px',
             }
         );
 
-        // Update save button state when form validity changes
-        const subscription = this.worktimeDialog.worktimeForm.statusChanges.subscribe(() => {
-            if (!dialogRef.componentInstance) return;
-
-            dialogRef.componentInstance.data.saveDisabled =
-                this.worktimeDialog.worktimeForm.invalid;
+        const statusSub = dialog.worktimeForm.statusChanges.subscribe(() => {
+            if (dialogRef.componentInstance) {
+                dialogRef.componentInstance.data.saveDisabled = dialog.worktimeForm.invalid;
+            }
         });
 
         this.dialogRefSub = dialogRef.afterClosed().subscribe((result) => {
-            subscription.unsubscribe();
-
+            statusSub.unsubscribe();
             if (result && result.action === 'save') {
-                // TODO: This should handle the real saving
-                // this.worktimeDialog.saveWorktime();
-
-                const formValue = this.worktimeDialog.worktimeForm.value;
-
+                const formValue = dialog.worktimeForm.value;
                 const newEntry: WorktimeEntry = {
-                    id: Math.max(...this.worktimeEntries.map((e) => e.id), 0) + 1,
-                    issueId: parseInt(formValue.issueId),
-                    issue: formValue.issue,
+                    id: Math.max(...this.worktimeEntries().map((e) => e.id), 0) + 1,
+                    issueId: parseInt(formValue.issueId as string),
+                    issue: formValue.issue as string,
                     date: new Date(formValue.date).toISOString(),
                     hours: parseFloat(formValue.hours),
                     description: formValue.description || '',
                     user: 'Current User',
                 };
 
-                this.worktimeEntries.unshift(newEntry);
-                this.filterEntriesByDate();
-                this.updateStats();
+                this.worktimeEntries.update((entries) => [newEntry, ...entries]);
             }
-            this.worktimeDialog.worktimeForm.reset({
-                date: new Date(),
-            });
+            dialog.worktimeForm.reset({ date: new Date() });
         });
     }
 
-    get issueIds(): number[] {
-        const ids = new Set<number>();
-        this.worktimeEntries.forEach((entry) => ids.add(entry.issueId));
-        return Array.from(ids).sort((a, b) => a - b);
-    }
-
-    getstatValue(valueName: string) {
-        const value = this.stats.get(valueName)?.value;
-        if (typeof value === 'number' && parseFloat(value.toString()) % 1 !== 0) {
+    getStatValue(valueName: string) {
+        const value = this.stats().get(valueName)?.value;
+        if (typeof value === 'number' && value % 1 !== 0) {
             return value.toFixed(2);
         }
         return value;

@@ -1,4 +1,4 @@
-import { Component, Input, TemplateRef, ViewChild } from '@angular/core';
+import { Component, input, Input, TemplateRef, viewChild, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -22,8 +22,8 @@ import { MatSelectModule } from '@angular/material/select';
     styleUrl: './worktime-dialog.component.css',
 })
 export class WorktimeDialogComponent {
-    @Input() issueIds: number[] = [];
-    @ViewChild('worktimeFormTemplate') worktimeFormTemplate!: TemplateRef<any>;
+    issueIds = input<number[]>([]);
+    worktimeFormTemplate = viewChild('worktimeFormTemplate');
 
     worktimeForm: FormGroup;
 

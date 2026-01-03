@@ -12,7 +12,7 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 })
 export class BarChartComponent implements OnInit {
     data = input<WorktimeEntry[]>([]);
-    isLoading = input<boolean>(true);
+    isLoading = input<boolean>(false);
     daysMap = input<Map<string, number>>(new Map());
     @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
 

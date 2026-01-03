@@ -4,7 +4,7 @@
             <mat-form-field appearance="outline" class="w-full">
                 <mat-label>Issue ID</mat-label>
                 <mat-select formControlName="issueId">
-                    @for (id of issueIds; track $index) {
+                    @for (id of issueIds(); track $index) {
                         <mat-option [value]="id">{{ id }}</mat-option>
                     }
                 </mat-select>

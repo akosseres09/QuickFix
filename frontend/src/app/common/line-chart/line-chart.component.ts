@@ -14,7 +14,7 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 export class LineChartComponent implements OnInit {
     data = input<WorktimeEntry[]>([]);
     daysMap = input<Map<string, number>>(new Map());
-    isLoading = input<boolean>(true);
+    isLoading = input<boolean>(false);
     @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
 
     public lineChartType: ChartType = 'line';
