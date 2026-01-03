@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { Issue } from '../../shared/model/Issue';
@@ -15,9 +15,13 @@ import { SnackbarService } from '../../shared/services/snackbar/snackbar.service
     templateUrl: './issues.component.html',
     styleUrl: './issues.component.css',
 })
-export class IssuesComponent implements OnInit {
-    issues: Array<Issue> = [];
-    shownIssues: MatTableDataSource<Issue> = new MatTableDataSource<Issue>();
+export class IssuesComponent {
+    private snackbarService = inject(SnackbarService);
+    private issueService = inject(IssueService);
+    private router = inject(Router);
+
+    issues = signal<Issue[]>(this.issueService.getIssues());
+    shownIssues = computed(() => new MatTableDataSource<Issue>(this.issues()));
     displayedColumns: Array<DisplayedColumn> = [
         {
             id: 'id',
@@ -64,17 +68,6 @@ export class IssuesComponent implements OnInit {
                 (e.status.charAt(0).toUpperCase() + e.status.slice(1)).replaceAll('_', ' '),
         },
     ];
-
-    constructor(
-        private issueService: IssueService,
-        private router: Router,
-        private snackbarService: SnackbarService
-    ) {}
-
-    ngOnInit(): void {
-        this.issues = this.issueService.getIssues();
-        this.shownIssues.data = this.issues;
-    }
 
     onEdit(issue: Issue) {
         this.snackbarService.open('Navigating to issue ' + issue.id);

@@ -2,7 +2,7 @@
     <app-table
         (delete)="onDelete($event)"
         (edit)="onEdit($event)"
-        [dataSource]="shownIssues"
+        [dataSource]="shownIssues()"
         [displayedColumns]="displayedColumns"
         tableHeader="Issues"
     ></app-table>

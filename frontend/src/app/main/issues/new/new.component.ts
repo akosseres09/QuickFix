@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
 import { IssueService } from '../../../shared/services/issue/issue.service';
@@ -13,7 +13,7 @@ import { FormComponent } from '../../../common/form/form.component';
     templateUrl: './new.component.html',
     styleUrl: './new.component.css',
 })
-export class NewComponent implements OnInit {
+export class NewComponent {
     router = inject(Router);
     snackbarService = inject(SnackbarService);
     issueService = inject(IssueService);
@@ -43,8 +43,6 @@ export class NewComponent implements OnInit {
             ]),
         },
     ];
-
-    ngOnInit(): void {}
 
     submit(data: any) {
         this.snackbarService.open('Issue Created!');
