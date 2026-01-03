@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, inject, OnInit } from '@angular/core';
+import { afterNextRender, Component, DestroyRef, inject, signal } from '@angular/core';
 import { scaleUp, scrollAnimation, staggerAnimation } from '../../../shared/utils/animations';
 import { ScrollService } from '../../../shared/services/scroll/scroll.service';
+import { fromEvent, throttleTime } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'app-feature',
@@ -10,7 +12,10 @@ import { ScrollService } from '../../../shared/services/scroll/scroll.service';
     styleUrl: './feature.component.css',
     animations: [scaleUp, staggerAnimation, scrollAnimation],
 })
-export class FeatureComponent implements OnInit {
+export class FeatureComponent {
+    private readonly destroyRef = inject(DestroyRef);
+    private readonly scrollService = inject(ScrollService);
+    animationState = signal<'hidden' | 'visible'>('hidden');
     features = [
         {
             icon: '🎯',
@@ -40,15 +45,20 @@ export class FeatureComponent implements OnInit {
             color: 'orange',
         },
     ];
-    animationState: 'hidden' | 'visible' = 'hidden';
-    scrollService = inject(ScrollService);
 
-    ngOnInit(): void {
-        this.animationState = this.scrollService.checkScroll('feature');
+    constructor() {
+        afterNextRender(() => {
+            this.updateScrollState();
+
+            fromEvent(window, 'scroll')
+                .pipe(throttleTime(20), takeUntilDestroyed(this.destroyRef))
+                .subscribe(() => {
+                    this.updateScrollState();
+                });
+        });
     }
 
-    @HostListener('window:scroll', [])
-    onWindowScroll() {
-        this.animationState = this.scrollService.checkScroll('feature');
+    updateScrollState() {
+        this.animationState.set(this.scrollService.checkScroll('feature'));
     }
 }

@@ -13,7 +13,7 @@ export class ScrollService {
         const rect = element.getBoundingClientRect();
         const windowHeight = window.innerHeight;
 
-        if (rect.top <= windowHeight * 0.8 && rect.bottom >= 0) {
+        if (rect.top <= windowHeight * 0.95 && rect.bottom >= 0) {
             return 'visible';
         } else {
             return 'hidden';
