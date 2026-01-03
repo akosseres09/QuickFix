@@ -15,7 +15,8 @@
                 <span class="text-sm opacity-70">Receive updates via email</span>
             </div>
             <mat-slide-toggle
-                [(ngModel)]="notifications.emailNotifications"
+                [ngModel]="notifications().emailNotifications"
+                (ngModelChange)="updateSetting('emailNotifications', $event)"
                 color="primary"
             ></mat-slide-toggle>
         </div>
@@ -30,7 +31,8 @@
                 <span class="text-sm opacity-70">Get real-time browser notifications</span>
             </div>
             <mat-slide-toggle
-                [(ngModel)]="notifications.pushNotifications"
+                [ngModel]="notifications().pushNotifications"
+                (ngModelChange)="updateSetting('pushNotifications', $event)"
                 color="primary"
             ></mat-slide-toggle>
         </div>
@@ -45,7 +47,8 @@
                 <span class="text-sm opacity-70">Receive reminders for upcoming tasks</span>
             </div>
             <mat-slide-toggle
-                [(ngModel)]="notifications.taskReminders"
+                [ngModel]="notifications().taskReminders"
+                (ngModelChange)="updateSetting('taskReminders', $event)"
                 color="primary"
             ></mat-slide-toggle>
         </div>
@@ -60,7 +63,8 @@
                 <span class="text-sm opacity-70">Get a weekly summary of your activity</span>
             </div>
             <mat-slide-toggle
-                [(ngModel)]="notifications.weeklyDigest"
+                [ngModel]="notifications().weeklyDigest"
+                (ngModelChange)="updateSetting('weeklyDigest', $event)"
                 color="primary"
             ></mat-slide-toggle>
         </div>
@@ -75,7 +79,8 @@
                 <span class="text-sm opacity-70">Notifications about project changes</span>
             </div>
             <mat-slide-toggle
-                [(ngModel)]="notifications.projectUpdates"
+                [ngModel]="notifications().projectUpdates"
+                (ngModelChange)="updateSetting('projectUpdates', $event)"
                 color="primary"
             ></mat-slide-toggle>
         </div>
@@ -90,7 +95,8 @@
                 <span class="text-sm opacity-70">Get notified when someone mentions you</span>
             </div>
             <mat-slide-toggle
-                [(ngModel)]="notifications.mentionAlerts"
+                [ngModel]="notifications().mentionAlerts"
+                (ngModelChange)="updateSetting('mentionAlerts', $event)"
                 color="primary"
             ></mat-slide-toggle>
         </div>

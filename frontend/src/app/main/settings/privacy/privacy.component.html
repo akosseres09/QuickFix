@@ -15,7 +15,10 @@
                 <span class="text-sm opacity-70">Control who can see your profile</span>
             </div>
             <mat-form-field appearance="outline" class="min-w-[200px] !m-0 md:w-[200px] w-full">
-                <mat-select [(ngModel)]="privacy.profileVisibility">
+                <mat-select
+                    [ngModel]="privacy().profileVisibility"
+                    (ngModelChange)="updateSetting('profileVisibility', $event)"
+                >
                     @for (option of visibilityOptions; track option.value) {
                         <mat-option [value]="option.value">{{ option.label }}</mat-option>
                     }
@@ -32,7 +35,12 @@
                 <span class="font-medium text-base">Show Email</span>
                 <span class="text-sm opacity-70">Display your email on your profile</span>
             </div>
-            <mat-slide-toggle [(ngModel)]="privacy.showEmail" color="primary"></mat-slide-toggle>
+            <mat-slide-toggle
+                [ngModel]="privacy().showEmail"
+                (ngModelChange)="updateSetting('showEmail', $event)"
+                color="primary"
+            >
+            </mat-slide-toggle>
         </div>
 
         <mat-divider></mat-divider>
@@ -44,7 +52,12 @@
                 <span class="font-medium text-base">Show Activity</span>
                 <span class="text-sm opacity-70">Let others see your recent activity</span>
             </div>
-            <mat-slide-toggle [(ngModel)]="privacy.showActivity" color="primary"></mat-slide-toggle>
+            <mat-slide-toggle
+                [ngModel]="privacy().showActivity"
+                (ngModelChange)="updateSetting('showActivity', $event)"
+                color="primary"
+            >
+            </mat-slide-toggle>
         </div>
 
         <mat-divider></mat-divider>
@@ -57,9 +70,11 @@
                 <span class="text-sm opacity-70">Help improve the app by sharing usage data</span>
             </div>
             <mat-slide-toggle
-                [(ngModel)]="privacy.dataCollection"
+                [ngModel]="privacy().dataCollection"
+                (ngModelChange)="updateSetting('dataCollection', $event)"
                 color="primary"
-            ></mat-slide-toggle>
+            >
+            </mat-slide-toggle>
         </div>
     </div>
 </mat-expansion-panel>

@@ -16,8 +16,8 @@
                     <span class="text-sm opacity-70">Choose your preferred color theme</span>
                 </div>
                 <mat-button-toggle-group
-                    [(ngModel)]="theme"
-                    (change)="onThemeChange(theme)"
+                    [ngModel]="theme()"
+                    (ngModelChange)="onThemeChange($event)"
                     class="flex gap-2"
                 >
                     <mat-button-toggle value="light" class="flex items-center gap-2 px-4 py-2">
@@ -39,12 +39,16 @@
                 <div class="flex flex-col gap-1 flex-1">
                     <span class="font-medium text-base">Font Size</span>
                     <span class="text-sm opacity-70"
-                        >Adjust the base font size ({{ appearance.fontSize }}px)</span
+                        >Adjust the base font size ({{ appearance().fontSize }}px)</span
                     >
                 </div>
                 <div class="min-w-[200px] md:w-[200px] w-full">
                     <mat-slider min="12" max="20" step="1" discrete class="w-full">
-                        <input matSliderThumb [(ngModel)]="appearance.fontSize" />
+                        <input
+                            matSliderThumb
+                            [ngModel]="appearance().fontSize"
+                            (ngModelChange)="updateSettings('fontSize', $event)"
+                        />
                     </mat-slider>
                 </div>
             </div>
@@ -59,7 +63,8 @@
                     <span class="text-sm opacity-70">Reduce spacing for a more condensed view</span>
                 </div>
                 <mat-slide-toggle
-                    [(ngModel)]="appearance.compactMode"
+                    [ngModel]="appearance().compactMode"
+                    (ngModelChange)="updateSettings('compactMode', $event)"
                     color="primary"
                 ></mat-slide-toggle>
             </div>
@@ -74,7 +79,8 @@
                     <span class="text-sm opacity-70">Enable smooth transitions and animations</span>
                 </div>
                 <mat-slide-toggle
-                    [(ngModel)]="appearance.animationsEnabled"
+                    [ngModel]="appearance().animationsEnabled"
+                    (ngModelChange)="updateSettings('animationsEnabled', $event)"
                     color="primary"
                 ></mat-slide-toggle>
             </div>

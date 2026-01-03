@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { NotificationSettings } from '../../../shared/constants/NotificationSettings';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -22,8 +22,8 @@ import { MatSliderModule } from '@angular/material/slider';
     templateUrl: './notification.component.html',
     styleUrl: './notification.component.css',
 })
-export class NotificationComponent implements OnInit {
-    notifications: NotificationSettings = {
+export class NotificationComponent {
+    private readonly defaultSettings: NotificationSettings = {
         emailNotifications: true,
         pushNotifications: false,
         taskReminders: true,
@@ -31,34 +31,33 @@ export class NotificationComponent implements OnInit {
         projectUpdates: true,
         mentionAlerts: true,
     };
-    private initialNotifications: NotificationSettings = { ...this.notifications };
+    notifications = signal<NotificationSettings>(this.getSavedSettings());
+    private initialNotifications = signal<NotificationSettings>(this.notifications());
 
-    ngOnInit(): void {
-        const savedNotifications = localStorage.getItem('notifications');
-        if (savedNotifications) {
-            this.notifications = JSON.parse(savedNotifications);
-        }
-        this.initialNotifications = { ...this.notifications };
+    hasChanges = computed(() => {
+        return JSON.stringify(this.notifications()) !== JSON.stringify(this.initialNotifications());
+    });
+
+    updateSetting<K extends keyof NotificationSettings>(key: K, value: NotificationSettings[K]) {
+        this.notifications.update((current) => ({
+            ...current,
+            [key]: value,
+        }));
     }
 
-    get hasChanges(): boolean {
-        return JSON.stringify(this.notifications) !== JSON.stringify(this.initialNotifications);
+    getSavedSettings(): NotificationSettings {
+        const saved = localStorage.getItem('notifications');
+        return saved ? JSON.parse(saved) : { ...this.defaultSettings };
     }
 
     saveNotifications(): void {
-        localStorage.setItem('notifications', JSON.stringify(this.notifications));
-        this.initialNotifications = { ...this.notifications };
+        const settings = this.notifications();
+        localStorage.setItem('notifications', JSON.stringify(settings));
+        this.initialNotifications.set({ ...settings });
     }
 
     resetToDefaults(): void {
-        this.notifications = {
-            emailNotifications: true,
-            pushNotifications: false,
-            taskReminders: true,
-            weeklyDigest: false,
-            projectUpdates: true,
-            mentionAlerts: true,
-        };
+        this.notifications.set({ ...this.defaultSettings });
         this.saveNotifications();
     }
 }

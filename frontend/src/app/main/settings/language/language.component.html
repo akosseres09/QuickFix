@@ -15,7 +15,10 @@
                 <span class="text-sm opacity-70">Select your preferred language</span>
             </div>
             <mat-form-field appearance="outline" class="min-w-[200px] !m-0 md:w-[200px] w-full">
-                <mat-select [(ngModel)]="language.language">
+                <mat-select
+                    [ngModel]="language().language"
+                    (ngModelChange)="updateSetting('language', $event)"
+                >
                     @for (lang of languages; track lang.value) {
                         <mat-option [value]="lang.value">{{ lang.label }}</mat-option>
                     }
@@ -33,7 +36,10 @@
                 <span class="text-sm opacity-70">How dates should be displayed</span>
             </div>
             <mat-form-field appearance="outline" class="min-w-[200px] !m-0 md:w-[200px] w-full">
-                <mat-select [(ngModel)]="language.dateFormat">
+                <mat-select
+                    [ngModel]="language().dateFormat"
+                    (ngModelChange)="updateSetting('dateFormat', $event)"
+                >
                     @for (format of dateFormats; track format.value) {
                         <mat-option [value]="format.value">{{ format.label }}</mat-option>
                     }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { LanguageSettings } from '../../../shared/constants/LanguageSettings';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -22,13 +22,11 @@ import { MatExpansionModule } from '@angular/material/expansion';
     templateUrl: './language.component.html',
     styleUrl: './language.component.css',
 })
-export class LanguageComponent implements OnInit {
-    language: LanguageSettings = {
+export class LanguageComponent {
+    private readonly defaultSettings: LanguageSettings = {
         language: 'en',
         dateFormat: 'MM/DD/YYYY',
     };
-    private initialLanguage: LanguageSettings = { ...this.language };
-
     protected readonly languages = [
         { value: 'en', label: 'English' },
         { value: 'hu', label: 'Hungarian' },
@@ -39,29 +37,34 @@ export class LanguageComponent implements OnInit {
         { value: 'DD/MM/YYYY', label: 'DD/MM/YYYY' },
         { value: 'YYYY-MM-DD', label: 'YYYY-MM-DD' },
     ];
+    language = signal<LanguageSettings>(this.getSavedSettings());
+    private initialSettings = signal<LanguageSettings>(this.language());
 
-    ngOnInit(): void {
-        const savedLanguage = localStorage.getItem('language');
-        if (savedLanguage) {
-            this.language = JSON.parse(savedLanguage);
-        }
-        this.initialLanguage = { ...this.language };
+    hasChanges = computed((): boolean => {
+        return JSON.stringify(this.language()) !== JSON.stringify(this.initialSettings());
+    });
+
+    getSavedSettings(): LanguageSettings {
+        const saved = localStorage.getItem('language');
+        return saved ? JSON.parse(saved) : { ...this.defaultSettings };
     }
 
-    get hasChanges(): boolean {
-        return JSON.stringify(this.language) !== JSON.stringify(this.initialLanguage);
+    updateSetting<K extends keyof LanguageSettings>(key: K, value: LanguageSettings[K]) {
+        this.language.update((current) => ({
+            ...current,
+            [key]: value,
+        }));
     }
 
     saveSettings(): void {
-        localStorage.setItem('language', JSON.stringify(this.language));
-        this.initialLanguage = { ...this.language };
+        const settings = this.language();
+
+        localStorage.setItem('language', JSON.stringify(settings));
+        this.initialSettings.set({ ...settings });
     }
 
     resetToDefaults(): void {
-        this.language = {
-            language: 'en',
-            dateFormat: 'MM/DD/YYYY',
-        };
+        this.language.set({ ...this.defaultSettings });
         this.saveSettings();
     }
 }

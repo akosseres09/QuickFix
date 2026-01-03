@@ -1,5 +1,4 @@
-import { Component, OnInit } from '@angular/core';
-import { PrivacySettings } from '../../../shared/constants/PrivacySettings';
+import { Component, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
@@ -9,9 +8,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatSliderModule } from '@angular/material/slider';
+import { PrivacySettings } from '../../../shared/constants/PrivacySettings';
 
 @Component({
     selector: 'app-privacy',
+    standalone: true,
     imports: [
         CommonModule,
         FormsModule,
@@ -26,45 +27,46 @@ import { MatSliderModule } from '@angular/material/slider';
     templateUrl: './privacy.component.html',
     styleUrl: './privacy.component.css',
 })
-export class PrivacyComponent implements OnInit {
-    privacy: PrivacySettings = {
+export class PrivacyComponent {
+    private readonly defaultSettings: PrivacySettings = {
         profileVisibility: 'team',
         showEmail: false,
         showActivity: true,
         dataCollection: true,
     };
-    private initialPrivacy: PrivacySettings = { ...this.privacy };
+
+    privacy = signal<PrivacySettings>(this.getSavedSettings());
+    private initialPrivacy = signal<PrivacySettings>(this.privacy());
     protected readonly visibilityOptions = [
         { value: 'public', label: 'Public' },
         { value: 'team', label: 'Team Only' },
         { value: 'private', label: 'Private' },
     ];
 
-    ngOnInit(): void {
-        const savedPrivacy = localStorage.getItem('privacy');
-        if (savedPrivacy) {
-            this.privacy = JSON.parse(savedPrivacy);
-        }
-        this.initialPrivacy = { ...this.privacy };
+    hasChanges = computed(() => {
+        return JSON.stringify(this.privacy()) !== JSON.stringify(this.initialPrivacy());
+    });
+
+    private getSavedSettings(): PrivacySettings {
+        const saved = localStorage.getItem('privacy');
+        return saved ? JSON.parse(saved) : { ...this.defaultSettings };
     }
 
-    get hasChanges(): boolean {
-        return JSON.stringify(this.privacy) !== JSON.stringify(this.initialPrivacy);
+    updateSetting<K extends keyof PrivacySettings>(key: K, value: PrivacySettings[K]) {
+        this.privacy.update((current) => ({
+            ...current,
+            [key]: value,
+        }));
     }
 
     savePrivacySettings(): void {
-        localStorage.setItem('privacy', JSON.stringify(this.privacy));
-        this.initialPrivacy = { ...this.privacy };
+        const settings = this.privacy();
+        localStorage.setItem('privacy', JSON.stringify(settings));
+        this.initialPrivacy.set(settings);
     }
 
     resetToDefaults(): void {
-        this.privacy = {
-            profileVisibility: 'team',
-            showEmail: false,
-            showActivity: true,
-            dataCollection: true,
-        };
-
+        this.privacy.set({ ...this.defaultSettings });
         this.savePrivacySettings();
     }
 }
