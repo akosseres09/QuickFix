@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TableComponent } from '../../common/table/table.component';
@@ -13,9 +13,10 @@ import { ProjectService } from '../../shared/services/project/project.service';
     templateUrl: './projects.component.html',
     styleUrl: './projects.component.css',
 })
-export class ProjectsComponent implements OnInit {
-    projects: Array<Project> = [];
-    shownProjects: MatTableDataSource<Project> = new MatTableDataSource<Project>();
+export class ProjectsComponent {
+    private projectService = inject(ProjectService);
+    projects = signal<Project[]>(this.projectService.getProjects());
+    shownProjects = computed(() => new MatTableDataSource<Project>(this.projects()));
     displayedColumns: Array<DisplayedColumn> = [
         {
             id: 'name',
@@ -43,11 +44,4 @@ export class ProjectsComponent implements OnInit {
             value: (e: Project) => e.createdAt,
         },
     ];
-
-    constructor(private projectService: ProjectService) {}
-
-    ngOnInit(): void {
-        this.projects = this.projectService.getProjects();
-        this.shownProjects.data = this.projects;
-    }
 }
