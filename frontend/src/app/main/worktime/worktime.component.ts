@@ -13,6 +13,8 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
 import { Subscription } from 'rxjs';
+import { ActivatedRoute, Router } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 import { WorktimeEntry } from '../../shared/model/Worktime';
 import { DateRangeComponent } from '../../common/date-range/date-range.component';
@@ -120,10 +122,19 @@ const MOCK_DATA: WorktimeEntry[] = [
 export class WorktimeComponent implements OnDestroy {
     private readonly dialogService = inject(DialogService);
     private readonly dateService = inject(DateService);
+    private readonly router = inject(Router);
+    private readonly route = inject(ActivatedRoute);
 
-    startDate = signal<string>('');
-    endDate = signal<string>('');
+    private readonly queryParams = toSignal(this.route.queryParams);
+
+    minDate = signal<Date>(new Date('2025-01-01'));
+    maxDate = signal<Date>(new Date(new Date().setHours(23, 59, 59, 999)));
+
+    startDate = computed(() => this.getStartDate());
+    endDate = computed(() => this.getEndDate());
+
     worktimeEntries = signal<WorktimeEntry[]>(MOCK_DATA);
+    isLoading = signal<boolean>(false);
 
     filteredEntries = computed(() => {
         const startStr = this.startDate();
@@ -144,6 +155,7 @@ export class WorktimeComponent implements OnDestroy {
     });
 
     shownWorktimes = computed(() => new MatTableDataSource(this.filteredEntries()));
+
     days = computed(() => {
         const dayHours = new Map<string, number>();
         const startStr = this.startDate();
@@ -260,9 +272,50 @@ export class WorktimeComponent implements OnDestroy {
         this.dialogRefSub?.unsubscribe();
     }
 
+    getStartDate(): Date {
+        const startQuery = this.queryParams()?.['startDate'];
+        if (startQuery) {
+            const sd = new Date(startQuery);
+            if (sd >= this.minDate()) {
+                return sd;
+            }
+        }
+
+        return this.getLastWeek();
+    }
+
+    getEndDate(): Date {
+        const endQuery = this.queryParams()?.['endDate'];
+        const max = this.maxDate();
+
+        if (endQuery) {
+            const ed = new Date(endQuery);
+            if (ed <= max) {
+                return ed;
+            }
+        }
+
+        const now = new Date();
+        return now > max ? max : now;
+    }
+
+    getLastWeek(): Date {
+        const date = new Date();
+        if (date) {
+            date.setDate(date.getDate() - 7);
+        }
+        return date;
+    }
+
     onDateRangeChange($event: { startDate: string; endDate: string }) {
-        this.startDate.set(this.dateService.toLocaleISOString(new Date($event.startDate), true));
-        this.endDate.set(this.dateService.toLocaleISOString(new Date($event.endDate), true));
+        const start = this.dateService.toLocaleISOString(new Date($event.startDate), true);
+        const end = this.dateService.toLocaleISOString(new Date($event.endDate), true);
+
+        this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { startDate: start, endDate: end },
+            queryParamsHandling: 'merge',
+        });
     }
 
     deleteEntry(id: number) {

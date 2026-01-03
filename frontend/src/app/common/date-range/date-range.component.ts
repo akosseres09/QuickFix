@@ -1,14 +1,12 @@
+import { Component, effect, inject, input, model, output, signal, untracked } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
-    Component,
-    HostListener,
-    inject,
-    input,
-    model,
-    OnDestroy,
-    OnInit,
-    output,
-} from '@angular/core';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+    FormBuilder,
+    ReactiveFormsModule,
+    Validators,
+    AbstractControl,
+    ValidationErrors,
+} from '@angular/forms';
 import {
     MatDatepickerModule,
     MatDateRangeInput,
@@ -16,13 +14,12 @@ import {
 } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatNativeDateModule, provideNativeDateAdapter } from '@angular/material/core';
-import { Subscription } from 'rxjs';
-import { UrlService } from '../../shared/services/url/url.service';
-import { DateService } from '../../shared/services/date/date.service';
-import { Router } from '@angular/router';
+import { fromEvent } from 'rxjs';
+import { debounceTime, map, startWith } from 'rxjs/operators';
 
 @Component({
     selector: 'app-date-range',
+    standalone: true,
     imports: [
         MatDatepickerModule,
         MatDateRangeInput,
@@ -35,94 +32,120 @@ import { Router } from '@angular/router';
     templateUrl: './date-range.component.html',
     styleUrl: './date-range.component.css',
 })
-export class DateRangeComponent implements OnInit, OnDestroy {
-    private readonly currentDate: Date = new Date();
-    protected touchUi = window.innerWidth < 768;
+export class DateRangeComponent {
+    private readonly fb = inject(FormBuilder);
 
-    startDate = model<Date>(
-        new Date(
-            this.currentDate.getFullYear(),
-            this.currentDate.getMonth(),
-            this.currentDate.getDate() - 7
-        )
-    );
+    startDate = model<Date>(new Date());
     endDate = model<Date>(new Date());
-    minDate = input<Date>(new Date(this.startDate().getFullYear() - 2, 0, 1));
-    maxDate = input<Date>(new Date());
+    minDate = input<Date>();
+    maxDate = input<Date>();
     dateRangeChange = output<{ startDate: string; endDate: string }>();
 
-    private readonly fb = inject(FormBuilder);
-    private readonly urlService = inject(UrlService);
-    private readonly dateService = inject(DateService);
-    private readonly router = inject(Router);
+    protected touchUi = signal<boolean>(window.innerWidth < 768);
 
-    private subscription: Subscription | null = null;
-    protected range = this.fb.group({
-        startDate: this.fb.control<Date>(this.startDate()),
-        endDate: this.fb.control<Date>(this.endDate()),
-    });
+    readonly range = this.fb.group(
+        {
+            startDate: [new Date(), [Validators.required]],
+            endDate: [new Date(), [Validators.required]],
+        },
+        { validators: this.validateDateRange.bind(this) }
+    );
 
-    ngOnInit(): void {
-        const urlStartDate = this.router.routerState.snapshot.root.queryParams['startDate'];
-        const urlEndDate = this.router.routerState.snapshot.root.queryParams['endDate'];
+    constructor() {
+        effect(() => {
+            const s = this.startDate();
+            const e = this.endDate();
+            const min = this.minDate();
+            const max = this.maxDate();
 
-        if (urlStartDate) {
-            this.startDate.set(this.dateService.parseDate(urlStartDate));
-            this.range.get('startDate')?.setValue(this.startDate());
-        }
-        if (urlEndDate) {
-            this.endDate.set(this.dateService.parseDate(urlEndDate));
-            this.range.get('endDate')?.setValue(this.endDate());
-        }
+            let isInvalid = false;
+            if (min && s < min) isInvalid = true;
+            if (max && e > max) isInvalid = true;
 
-        this.endDate().setHours(23, 59, 59, 999);
-        this.onDateRangChange(this.startDate(), this.endDate());
+            if (isInvalid) {
+                let today = new Date();
+                today.setHours(23, 59, 59, 999);
 
-        this.subscription = this.range.valueChanges.subscribe((value) => {
-            if (!value.endDate || !value.startDate) {
+                if (max && today > max) {
+                    today = new Date(max);
+                }
+
+                const lastWeek = new Date(today);
+                lastWeek.setDate(today.getDate() - 7);
+                lastWeek.setHours(0, 0, 0, 0);
+
+                untracked(() => {
+                    this.startDate.set(lastWeek);
+                    this.endDate.set(today);
+
+                    this.dateRangeChange.emit({
+                        startDate: lastWeek.toISOString(),
+                        endDate: today.toISOString(),
+                    });
+                });
                 return;
             }
-            value.endDate.setHours(23, 59, 59, 999);
-            this.onDateRangChange(value.startDate, value.endDate);
-        });
-    }
 
-    /** @param startDate the start date selected from the date-range picker
-     *  @param endDate the end date selected from the date-range picker
-     *
-     * The shown dates are converted to locale ISO strings (localStart, localEnd).
-     * The dates used for filtering the db use the full ISO string (with timezone).
-     * Emits the dateRangeChange event and updates the URL query parameters accordingly.
-     *
-     */
-    onDateRangChange(startDate: Date, endDate: Date): void {
-        if (!startDate || !endDate) return;
+            const currentStart = this.range.controls.startDate.value;
+            const currentEnd = this.range.controls.endDate.value;
 
-        this.startDate.set(startDate);
-        this.endDate.set(endDate);
-
-        const localStart = this.dateService.toLocaleISOString(startDate);
-        const localEnd = this.dateService.toLocaleISOString(endDate);
-
-        this.dateRangeChange.emit({
-            startDate: startDate.toISOString(),
-            endDate: endDate.toISOString(),
+            if (s && s.getTime() !== currentStart?.getTime()) {
+                this.range.controls.startDate.setValue(s, { emitEvent: false });
+            }
+            if (e && e.getTime() !== currentEnd?.getTime()) {
+                this.range.controls.endDate.setValue(e, { emitEvent: false });
+            }
         });
 
-        const params = {
-            startDate: localStart.split('T')[0],
-            endDate: localEnd.split('T')[0],
-        };
+        this.range.valueChanges.pipe(debounceTime(200), takeUntilDestroyed()).subscribe((value) => {
+            if (this.range.valid && value.startDate && value.endDate) {
+                const s = new Date(value.startDate);
+                const e = new Date(value.endDate);
+                e.setHours(23, 59, 59, 999);
 
-        this.urlService.addQueryParams(params);
+                this.startDate.set(s);
+                this.endDate.set(e);
+
+                this.dateRangeChange.emit({
+                    startDate: s.toISOString(),
+                    endDate: e.toISOString(),
+                });
+            }
+        });
+
+        fromEvent(window, 'resize')
+            .pipe(
+                map(() => window.innerWidth < 768),
+                startWith(window.innerWidth < 768),
+                takeUntilDestroyed()
+            )
+            .subscribe((isSmall) => this.touchUi.set(isSmall));
     }
 
-    ngOnDestroy(): void {
-        this.subscription?.unsubscribe();
-    }
+    private validateDateRange(group: AbstractControl): ValidationErrors | null {
+        const startVal = group.get('startDate')?.value;
+        const endVal = group.get('endDate')?.value;
+        const min = this.minDate();
+        const max = this.maxDate();
 
-    @HostListener('window:resize', ['$event'])
-    onResize(event: Event) {
-        this.touchUi = (event.target as Window).innerWidth < 768;
+        if (!startVal || !endVal) return null;
+
+        const start = new Date(startVal);
+        const end = new Date(endVal);
+        end.setHours(23, 59, 59, 999);
+
+        const errors: ValidationErrors = {};
+
+        if (start > end) {
+            errors['invalidRange'] = true;
+        }
+        if (min && start < min) {
+            errors['minDateViolation'] = true;
+        }
+        if (max && end > max) {
+            errors['maxDateViolation'] = true;
+        }
+
+        return Object.keys(errors).length > 0 ? errors : null;
     }
 }

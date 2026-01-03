@@ -16,7 +16,17 @@
     </div>
 </div>
 
-<app-date-range (dateRangeChange)="onDateRangeChange($event)"></app-date-range>
+<div class="h-fit">
+    @if (endDate() && startDate()) {
+        <app-date-range
+            [startDate]="startDate()"
+            [endDate]="endDate()"
+            [minDate]="minDate()"
+            [maxDate]="maxDate()"
+            (dateRangeChange)="onDateRangeChange($event)"
+        ></app-date-range>
+    }
+</div>
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6 text-white">
     @for (stat of stats(); track stat[0]) {
