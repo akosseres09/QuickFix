@@ -11,6 +11,8 @@ import { RouteService } from '../../shared/services/route/route.service';
 import { User } from '../../shared/model/User';
 import { SidebarService } from '../../shared/services/sidebar/sidebar.service';
 import { UserService } from '../../shared/services/user/user.service';
+import { fromEvent, take } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'app-navbar',
@@ -55,6 +57,14 @@ export class NavbarComponent implements OnInit, AfterViewInit {
     }
 
     constructor() {
+        fromEvent(window, 'resize')
+            .pipe(takeUntilDestroyed())
+            .subscribe(() => {
+                if (window.innerWidth >= 767) {
+                    this.isMenuOpen.set(false);
+                }
+            });
+
         this.isSidebarCollapsed.set(this.sidebarService.getState());
         this.logo = this.themeService.logos;
     }

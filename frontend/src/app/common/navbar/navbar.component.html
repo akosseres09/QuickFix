@@ -31,14 +31,14 @@
         </div>
 
         <div
-            class="overflow-hidden transition-[background-color,max-height] duration-200 ease-in-out md:max-h-full md:mt-0 md:block"
+            class="overflow-hidden transition-[background-color,max-height] duration-200 ease-in-out md:max-h-full md:block"
             [ngClass]="{
-                'max-h-0': !isMenuOpen,
-                'max-h-screen mt-4': isMenuOpen,
+                'max-h-0': !isMenuOpen(),
+                'max-h-screen': isMenuOpen(),
             }"
         >
             <ul
-                class="flex flex-col space-y-2 md:space-y-0 md:space-x-3 md:flex-row md:justify-end text-base md:items-center md:mt-2"
+                class="flex flex-col space-y-2 md:space-y-0 md:space-x-3 md:flex-row md:justify-end text-base md:items-center mt-4 md:mt-2"
             >
                 @for (route of routes(); track $index) {
                     @if (route.type === 'button') {
