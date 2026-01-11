@@ -19,6 +19,7 @@ import { debounce } from 'rxjs';
 import { UrlService } from '../../shared/services/url/url.service';
 import { ActivatedRoute } from '@angular/router';
 import { MatButton } from '@angular/material/button';
+import { SpeedDialComponent } from '../../common/speed-dial/speed-dial.component';
 
 @Component({
     selector: 'app-projects',
@@ -34,6 +35,7 @@ import { MatButton } from '@angular/material/button';
         MatInput,
         MatLabel,
         MatButton,
+        SpeedDialComponent,
     ],
     providers: [
         { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { subscriptSizing: 'dynamic' } },

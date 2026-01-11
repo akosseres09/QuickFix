@@ -1,26 +1,31 @@
-<form [formGroup]="filterForm" class="flex gap-2 items-center">
-    <mat-form-field appearance="outline">
-        <mat-label>Project Name</mat-label>
-        <input
-            type="text"
-            placeholder="Select Project"
-            aria-label="Project Name"
-            matInput
-            formControlName="projectName"
-            [matAutocomplete]="auto"
-        />
-        <mat-autocomplete #auto="matAutocomplete">
-            @for (project of filteredProjects(); track project) {
-                <mat-option [value]="project.name">{{ project.name }}</mat-option>
-            }
-        </mat-autocomplete>
-    </mat-form-field>
-    @if (showFilterReset()) {
-        <button mat-flat-button color="primary" (click)="resetFilters()">Reset filters</button>
-    }
-</form>
-<app-table
-    [dataSource]="shownProjects()"
-    [displayedColumns]="displayedColumns()"
-    tableHeader="Projects"
-></app-table>
+<div class="relative h-full">
+    <form [formGroup]="filterForm" class="flex gap-2 items-center">
+        <mat-form-field appearance="outline">
+            <mat-label>Project Name</mat-label>
+            <input
+                type="text"
+                placeholder="Select Project"
+                aria-label="Project Name"
+                matInput
+                formControlName="projectName"
+                [matAutocomplete]="auto"
+            />
+            <mat-autocomplete #auto="matAutocomplete">
+                @for (project of filteredProjects(); track project) {
+                    <mat-option [value]="project.name">{{ project.name }}</mat-option>
+                }
+            </mat-autocomplete>
+        </mat-form-field>
+        @if (showFilterReset()) {
+            <button mat-flat-button color="primary" (click)="resetFilters()">Reset filters</button>
+        }
+    </form>
+    <app-table
+        [dataSource]="shownProjects()"
+        [displayedColumns]="displayedColumns()"
+        tableHeader="Projects"
+    ></app-table>
+    <div class="absolute right-0 bottom-0">
+        <app-speed-dial></app-speed-dial>
+    </div>
+</div>
