@@ -1,4 +1,13 @@
-import { animate, query, stagger, state, style, transition, trigger } from '@angular/animations';
+import {
+    animate,
+    keyframes,
+    query,
+    stagger,
+    state,
+    style,
+    transition,
+    trigger,
+} from '@angular/animations';
 
 export const scrollAnimation = trigger('scrollAnimation', [
     state(
@@ -58,5 +67,38 @@ export const scaleUp = trigger('scaleUp', [
     transition(':enter', [
         style({ opacity: 0, transform: 'scale(0.9)' }),
         animate('500ms 300ms ease-out', style({ opacity: 1, transform: 'scale(1)' })),
+    ]),
+]);
+
+export const speedDialTogglerAnimation = trigger('speedDialToggler', [
+    state('open', style({ transform: 'rotate(45deg)' })),
+    state('closed', style({ transform: 'rotate(0deg)' })),
+    transition('open <=> closed', [animate('200ms cubic-bezier(0.4, 0.0, 0.2, 1)')]),
+]);
+
+export const speedDialStaggerAnimation = trigger('speedDialStagger', [
+    transition('* => *', [
+        query(':enter', style({ opacity: 0 }), { optional: true }),
+        query(
+            ':enter',
+            stagger('40ms', [
+                animate(
+                    '200ms cubic-bezier(0.4, 0.0, 0.2, 1)',
+                    keyframes([
+                        style({ opacity: 0, transform: 'translateY(10px)' }),
+                        style({ opacity: 1, transform: 'translateY(0)' }),
+                    ])
+                ),
+            ]),
+            { optional: true }
+        ),
+        query(
+            ':leave',
+            animate(
+                '200ms cubic-bezier(0.4, 0.0, 0.2, 1)',
+                keyframes([style({ opacity: 1 }), style({ opacity: 0 })])
+            ),
+            { optional: true }
+        ),
     ]),
 ]);
