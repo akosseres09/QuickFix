@@ -56,19 +56,20 @@ export class ProjectsComponent {
     showFilterReset = signal<boolean>(this.activeRoute.snapshot.queryParamMap.has('projectName'));
     filteredProjects = signal<Project[]>(this.projectService.getProjects(this.filterForm.value));
     shownProjects = computed(() => new MatTableDataSource<Project>(this.filteredProjects()));
-    displayedColumns = signal<DisplayedColumn[]>([
+    displayedColumns = signal<DisplayedColumn<Project>[]>([
         {
             id: 'name',
             label: 'Name',
             sortable: true,
             value: (e: Project) => e.name,
-            link: true,
+            routerLink: (e: Project) => ['/projects', e.id],
         },
         {
             id: 'admin',
             label: 'Admin',
             sortable: false,
             value: (e: Project) => e.admin.username,
+            routerLink: (e: Project) => ['/users', e.admin.id],
         },
         {
             id: 'users',

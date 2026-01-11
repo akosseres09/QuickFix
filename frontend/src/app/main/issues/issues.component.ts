@@ -22,18 +22,20 @@ export class IssuesComponent {
 
     issues = signal<Issue[]>(this.issueService.getIssues());
     shownIssues = computed(() => new MatTableDataSource<Issue>(this.issues()));
-    displayedColumns: Array<DisplayedColumn> = [
+    displayedColumns: Array<DisplayedColumn<Issue>> = [
         {
             id: 'id',
             label: '#',
             sortable: false,
             value: (e: Issue) => e.id,
+            routerLink: (e: Issue) => ['/issues', e.id],
         },
         {
             id: 'title',
             label: 'Title',
             sortable: false,
             value: (e: Issue) => e.title,
+            routerLink: (e: Issue) => ['/issues', e.id],
         },
         {
             id: 'project',

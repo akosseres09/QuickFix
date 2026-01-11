@@ -242,19 +242,19 @@ export class WorktimeComponent implements OnDestroy {
         return Array.from(ids).sort((a, b) => a - b);
     });
 
-    displayedColumns: DisplayedColumn[] = [
+    displayedColumns: DisplayedColumn<WorktimeEntry>[] = [
         {
             id: 'issueId',
             label: '#',
             sortable: false,
             value: (e: WorktimeEntry) => `#${e.issueId}`,
+            routerLink: (e: WorktimeEntry) => ['/issues', e.issueId],
         },
         {
             id: 'issue',
             label: 'Issue',
             sortable: false,
             value: (e: WorktimeEntry) => e.issue,
-            link: true,
         },
         {
             id: 'date',

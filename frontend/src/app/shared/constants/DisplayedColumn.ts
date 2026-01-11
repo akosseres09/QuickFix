@@ -1,8 +1,9 @@
-export interface DisplayedColumn {
+import { BaseModel } from '../model/BaseModel';
+
+export interface DisplayedColumn<T extends BaseModel> {
     id: string;
     label: string;
     sortable: boolean;
-    value: (element: any) => string | number | Date;
-    link?: boolean;
-    class?: string;
+    value: (element: T) => string | number | Date;
+    routerLink?: (element: T) => (string | number)[];
 }

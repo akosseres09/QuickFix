@@ -22,7 +22,7 @@ import { ADMIN, SYS_ADMIN, User } from '../../shared/model/User';
 import { BaseModel } from '../../shared/model/BaseModel';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { UrlService } from '../../shared/services/url/url.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -37,13 +37,14 @@ import { Subscription } from 'rxjs';
         MatIconModule,
         MatButtonModule,
         MatProgressSpinner,
+        RouterLink,
     ],
     templateUrl: './table.component.html',
     styleUrl: './table.component.css',
 })
 export class TableComponent<T extends BaseModel> implements OnInit {
     dataSource = model<MatTableDataSource<T>>(new MatTableDataSource<T>([]));
-    displayedColumns = input<Array<DisplayedColumn>>([]);
+    displayedColumns = input<Array<DisplayedColumn<T>>>([]);
 
     showActions = input<boolean>(true);
     showEditAction = input<boolean>(true);
