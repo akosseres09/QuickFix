@@ -3,7 +3,7 @@
         @if (route.children && route.children.length > 0 && !isCollapsed()) {
             <mat-expansion-panel [expanded]="isChildrenActive(route.children)" class="w-full">
                 <mat-expansion-panel-header
-                    class="hover:!bg-light-text-hover dark:hover:!bg-dark-hover !transition-[background-color] !duration-100"
+                    class="!px-4 hover:!bg-light-text-hover dark:hover:!bg-dark-hover !transition-[background-color] !duration-100"
                 >
                     <mat-panel-title class="flex gap-2">
                         @if (route.icon) {
@@ -43,7 +43,7 @@
         } @else if (!isCollapsed()) {
             <a
                 [routerLink]="route.path"
-                class="flex items-center gap-2 w-full h-[50px] rounded-sm px-6 py-2 hover:bg-light-text-hover dark:hover:bg-dark-hover transition-[background-color] duration-100"
+                class="flex items-center gap-2 w-full h-[50px] rounded-sm px-4 py-2 hover:bg-light-text-hover dark:hover:bg-dark-hover transition-[background-color] duration-100"
                 routerLinkActive="bg-light-text-hover dark:bg-dark-hover"
                 [routerLinkActiveOptions]="{ exact: true }"
             >
