@@ -41,7 +41,7 @@ trait RefreshTokenHandlerTrait
         }
     }
 
-    protected function createToken(int $userId): UnencryptedToken
+    protected function createToken(int $userId, int $role, string $email): UnencryptedToken
     {
         $now = new DateTimeImmutable();
         $issuer = Yii::$app->params['backendUrl'] ?? 'http://api.ticketing.test';
@@ -55,6 +55,8 @@ trait RefreshTokenHandlerTrait
             ->canOnlyBeUsedAfter($now)
             ->expiresAt($now->modify('+ 5 minutes'))
             ->withClaim('uid', $userId)
+            ->withClaim('role', $role)
+            ->withClaim('email', $email)
             ->getToken($this->jwtConfig->signer(), $this->jwtConfig->signingKey());
     }
 

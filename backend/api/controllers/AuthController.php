@@ -38,10 +38,10 @@ class AuthController extends Controller
         $behaviors['corsFilter'] = [
             'class' => Cors::class,
             'cors' => [
-                'Origin' => ['*'],
+                'Origin' => ['http://localhost:4200'],
                 'Access-Control-Request-Method' => ['POST', 'OPTIONS'],
                 'Access-Control-Request-Headers' => ['Content-Type', 'Authorization'],
-                'Access-Control-Allow-Credentials' => null, // Set to true if you need to send cookies with the request
+                'Access-Control-Allow-Credentials' => true, // Set to true if you need to send cookies with the request
                 'Access-Control-Max-Age' => 86400, // 24 hours
                 'Access-Control-Expose-Headers' => [],
             ],
@@ -80,14 +80,14 @@ class AuthController extends Controller
             throw new UnauthorizedHttpException('Invalid credentials.');
         }
 
-        $token = $this->createToken($user->id);
+        $token = $this->createToken($user->id, $user->is_admin, $user->email);
 
         $refreshToken = $this->createRefreshToken($user->id);
 
-        return [
+        return ResponseMaker::asSuccess([
+            'message' => 'Login successful.',
             'access_token' => $token->toString(),
-            'refresh_token' => $refreshToken->token,
-        ];
+        ]);
     }
 
     public function actionRefreshToken(): array
@@ -114,7 +114,7 @@ class AuthController extends Controller
             throw new UnauthorizedHttpException('Invalid user.');
         }
 
-        $token = $this->createToken($user->id);
+        $token = $this->createToken($user->id, $user->is_admin, $user->email);
 
         return [
             'access_token' => $token->toString(),

@@ -1,6 +1,8 @@
 export interface successResponse {
     success: boolean;
-    data: Array<any>;
+    data: {
+        [key: string]: any;
+    };
 }
 
 export interface errorResponse {
