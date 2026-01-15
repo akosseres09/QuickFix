@@ -42,5 +42,17 @@ docker exec -it <backend_container_name> /bin/sh
 Then, run the following commands inside the container:
 
 ```bash
-TODO: See how the backend is initialized and add instructions here.
+composer install
+php init
 ```
+
+### 5. **Access the Application**
+
+To access the QuickFix application, open your web browser and navigate to:
+
+- http://localhost:4200 to access the frontend interface.
+- [api.quickfix.test](http://api.quickfix.test) to access the backend API.
+  - If you can not reach the backend API, add the following line to your hosts (`/etc/hosts` on Linux, `C:\Windows\System32\drivers\etc\hosts` on Windows) file:
+  ```
+  127.0.0.1 api.quickfix.test
+  ```
