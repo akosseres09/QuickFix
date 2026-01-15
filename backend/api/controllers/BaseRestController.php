@@ -11,7 +11,10 @@ class BaseRestController extends ActiveController
     public function behaviors(): array
     {
         $behaviors = parent::behaviors();
-        $behaviors['contentNegotiator']['formats']['text/html'] = Response::FORMAT_JSON;
+
+        $auth = $behaviors['authenticator'];
+        unset($behaviors['authenticator']);
+
         $behaviors['corsFilter'] = [
             'class' => Cors::class,
             'cors' => [
@@ -21,10 +24,12 @@ class BaseRestController extends ActiveController
                 'Access-Control-Allow-Credentials' => true,
             ],
         ];
-        $behaviors['authenticator'] = [
-            'class' => \yii\filters\auth\HttpBearerAuth::class,
-            'except' => ['options'], // Allow OPTIONS requests without authentication
-        ];
+
+        $auth['class'] = \yii\filters\auth\HttpBearerAuth::class;
+        $auth['except'] = ['options'];
+        $behaviors['authenticator'] = $auth;
+
+        $behaviors['contentNegotiator']['formats']['text/html'] = Response::FORMAT_JSON;
 
         return $behaviors;
     }

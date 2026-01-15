@@ -22,6 +22,7 @@ import { AuthService } from '../../shared/services/auth/auth.service';
 import { Subscription } from 'rxjs';
 import { passwordMatchValidator } from '../../shared/validators/passwordValidator/passwordValidator';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
+import { errorResponse } from '../../shared/model/Response';
 
 @Component({
     selector: 'app-signup',
@@ -91,23 +92,32 @@ export class SignupComponent implements OnDestroy {
         return this.signupForm.get(name);
     }
 
+    setServerValidationErrors(errorObj: Record<string, Array<string>>): void {
+        Object.keys(errorObj).forEach((key) => {
+            const control = this.getControl(key);
+            if (control) {
+                control.setErrors({ serverError: errorObj[key] });
+            }
+        });
+    }
+
     onSubmit(): void {
         if (!this.signupForm.valid) return;
 
-        this.signupErrors.set([]);
-        this.snackbar.open('Account created successfully! Please verify your email.');
-        this.router.navigateByUrl('/auth/verify');
-
-        /*this.signupSub = this.authService.signup(this.signupForm.value).subscribe({
+        this.signupSub = this.authService.signup(this.signupForm.value).subscribe({
             next: (result) => {
-                this.signupErrors.set([]);
                 this.snackbar.open('Account created successfully! Please verify your email.');
                 this.router.navigateByUrl('/auth/verify');
             },
             error: (error) => {
-                const errorObj = error.error.error.details.error as Array<string>;
-                this.signupErrors.set(Object.values(errorObj).flat());
+                const errorObj = error.error.error.details.error as Record<string, Array<string>>;
+                this.setServerValidationErrors(errorObj);
+                this.snackbar.open(
+                    (error.error as errorResponse).error.message ||
+                        'Signup failed. Please try again.',
+                    ['snackbar-error']
+                );
             },
-        });*/
+        });
     }
 }

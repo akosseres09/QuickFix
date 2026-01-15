@@ -8,6 +8,8 @@ export interface errorResponse {
     error: {
         code: number;
         message: string;
-        details: Array<any>;
+        details: {
+            [key: string]: Array<string>;
+        };
     };
 }

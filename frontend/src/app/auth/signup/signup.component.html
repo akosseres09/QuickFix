@@ -3,15 +3,6 @@
         <h1 class="text-3xl font-bold text-slate-900 dark:text-white">Create Account</h1>
         <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Simple and easy as that</p>
     </div>
-    @if (signupErrors().length > 0) {
-        <div class="flex flex-col items-center">
-            @for (error of signupErrors(); track $index) {
-                <mat-error>
-                    {{ error }}
-                </mat-error>
-            }
-        </div>
-    }
 
     <form class="space-y-4" [formGroup]="signupForm" (ngSubmit)="onSubmit()">
         <mat-form-field class="w-full" appearance="outline">
@@ -37,6 +28,14 @@
                     @if (getControl('username')?.hasError('minlength')) {
                         <span>Username must be at least 5 characters.</span>
                     }
+                    @if (getControl('username')?.hasError('serverError')) {
+                        @for (
+                            error of getControl('username')?.getError('serverError');
+                            track $index
+                        ) {
+                            <span>{{ error }}</span>
+                        }
+                    }
                 </mat-error>
             }
         </mat-form-field>
@@ -59,6 +58,11 @@
                     }
                     @if (getControl('email')?.hasError('email')) {
                         <span>Provide a valid email address.</span>
+                    }
+                    @if (getControl('email')?.hasError('serverError')) {
+                        @for (error of getControl('email')?.getError('serverError'); track $index) {
+                            <span>{{ error }}</span>
+                        }
                     }
                 </mat-error>
             }
