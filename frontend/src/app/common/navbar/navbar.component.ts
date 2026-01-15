@@ -55,8 +55,9 @@ export class NavbarComponent implements AfterViewInit {
         fromEvent(window, 'resize')
             .pipe(takeUntilDestroyed())
             .subscribe(() => {
-                if (window.innerWidth >= 767) {
+                if (window.innerWidth <= 767) {
                     this.isMenuOpen.set(false);
+                    this.toggleSidebar(true);
                 }
             });
 
@@ -101,8 +102,8 @@ export class NavbarComponent implements AfterViewInit {
         this.setTheme(event.value);
     }
 
-    toggleSidebar() {
-        this.isSidebarCollapsed.set(!this.isSidebarCollapsed());
+    toggleSidebar(value: boolean = !this.isSidebarCollapsed()): void {
+        this.isSidebarCollapsed.set(value);
 
         const name = this.isSidebarCollapsed()
             ? this.sidebarService.CLOSED
