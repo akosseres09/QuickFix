@@ -1,0 +1,89 @@
+<div class="flex flex-col gap-4">
+    <mat-expansion-panel class="!rounded-xl overflow-hidden">
+        <mat-expansion-panel-header class="!px-6 !py-4">
+            <mat-panel-title>
+                <mat-icon class="mr-3">palette</mat-icon>
+                <span class="text-lg font-medium">Appearance</span>
+            </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <div class="py-4">
+            <div
+                class="flex justify-between py-4 gap-8 md:flex-row flex-col md:items-center items-start"
+            >
+                <div class="flex flex-col gap-1 flex-1">
+                    <span class="font-medium text-base">Theme</span>
+                    <span class="text-sm opacity-70">Choose your preferred color theme</span>
+                </div>
+                <mat-button-toggle-group
+                    [ngModel]="theme()"
+                    (ngModelChange)="onThemeChange($event)"
+                    class="flex gap-2"
+                >
+                    <mat-button-toggle value="light" class="flex items-center gap-2 px-4 py-2">
+                        <mat-icon>light_mode</mat-icon>
+                        Light
+                    </mat-button-toggle>
+                    <mat-button-toggle value="dark" class="flex items-center gap-2 px-4 py-2">
+                        <mat-icon>dark_mode</mat-icon>
+                        Dark
+                    </mat-button-toggle>
+                </mat-button-toggle-group>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <div
+                class="flex justify-between py-4 gap-8 md:flex-row flex-col md:items-center items-start"
+            >
+                <div class="flex flex-col gap-1 flex-1">
+                    <span class="font-medium text-base">Font Size</span>
+                    <span class="text-sm opacity-70"
+                        >Adjust the base font size ({{ appearance().fontSize }}px)</span
+                    >
+                </div>
+                <div class="min-w-[200px] md:w-[200px] w-full">
+                    <mat-slider min="12" max="20" step="1" discrete class="w-full">
+                        <input
+                            matSliderThumb
+                            [ngModel]="appearance().fontSize"
+                            (ngModelChange)="updateSettings('fontSize', $event)"
+                        />
+                    </mat-slider>
+                </div>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <div
+                class="flex justify-between py-4 gap-8 md:flex-row flex-col md:items-center items-start"
+            >
+                <div class="flex flex-col gap-1 flex-1">
+                    <span class="font-medium text-base">Compact Mode</span>
+                    <span class="text-sm opacity-70">Reduce spacing for a more condensed view</span>
+                </div>
+                <mat-slide-toggle
+                    [ngModel]="appearance().compactMode"
+                    (ngModelChange)="updateSettings('compactMode', $event)"
+                    color="primary"
+                ></mat-slide-toggle>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <div
+                class="flex justify-between py-4 gap-8 md:flex-row flex-col md:items-center items-start"
+            >
+                <div class="flex flex-col gap-1 flex-1">
+                    <span class="font-medium text-base">Animations</span>
+                    <span class="text-sm opacity-70">Enable smooth transitions and animations</span>
+                </div>
+                <mat-slide-toggle
+                    [ngModel]="appearance().animationsEnabled"
+                    (ngModelChange)="updateSettings('animationsEnabled', $event)"
+                    color="primary"
+                ></mat-slide-toggle>
+            </div>
+        </div>
+    </mat-expansion-panel>
+</div>

@@ -2,7 +2,12 @@
 
 @import 'tailwindcss';
 
-@theme {
+:root {
+    --color-dark-primary-lighter: #bcb7e6;
+    --color-dark-primary-darker: #7e73b4;
+
+    --breakpoint-xs: 25rem;
+
     --color-light-text: #0f0c18;
     --color-light-background: #e8e4f6;
     --color-light-primary: #2a196b;
@@ -10,7 +15,7 @@
     --color-light-accent: #390de7;
 
     --color-light-text-hover: #cdcbd4;
-    --color-light-background-hover: #dcd7ed;
+    --color-light-background-hover: #26203b;
     --color-light-primary-hover: #201354;
     --color-light-secondary-hover: #7455e6;
     --color-light-accent-hover: #2c0ab4;
@@ -21,11 +26,52 @@
     --color-dark-secondary: #2d148f;
     --color-dark-accent: #4318f2;
 
-    --color-dark-text-hover: #16084d;
+    --color-dark-text-hover: #bcb9c4;
+    --color-dark-hover: #16084d;
     --color-dark-background-hover: #18112c;
     --color-dark-primary-hover: #c1b7f0;
     --color-dark-secondary-hover: #3f22b8;
     --color-dark-accent-hover: #623cf5;
+    --color-success: #4caf50;
+}
+
+@theme {
+    --breakpoint-xs: var(--breakpoint-xs);
+
+    --color-light-text: var(--color-light-text);
+    --color-light-background: var(--color-light-background);
+    --color-light-primary: var(--color-light-primary);
+    --color-light-secondary: var(--color-light-secondary);
+    --color-light-accent: var(--color-light-accent);
+    --color-light-text-hover: var(--color-light-text-hover);
+    --color-light-background-hover: var(--color-light-background-hover);
+    --color-light-primary-hover: var(--color-light-primary-hover);
+    --color-light-secondary-hover: var(--color-light-secondary-hover);
+    --color-light-accent-hover: var(--color-light-accent-hover);
+
+    --color-dark-text: var(--color-dark-text);
+    --color-dark-background: var(--color-dark-background);
+    --color-dark-primary: var(--color-dark-primary);
+    --color-dark-secondary: var(--color-dark-secondary);
+    --color-dark-accent: var(--color-dark-accent);
+
+    --color-dark-text-hover: var(--color-dark-text-hover);
+    --color-dark-hover: var(--color-dark-hover);
+    --color-dark-background-hover: var(--color-dark-background-hover);
+    --color-dark-primary-hover: var(--color-dark-primary-hover);
+    --color-dark-secondary-hover: var(--color-dark-secondary-hover);
+    --color-dark-accent-hover: var(--color-dark-accent-hover);
+    --color-success: var(--color-success);
+}
+
+@utility custom-scrollbar {
+    @apply [&::-webkit-scrollbar]:w-2
+  [&::-webkit-scrollbar-track]:rounded-full
+  [&::-webkit-scrollbar-thumb]:rounded-full
+  [&::-webkit-scrollbar-track]:bg-light-background-hover/30
+  [&::-webkit-scrollbar-thumb]:bg-gray-300
+  dark:[&::-webkit-scrollbar-track]:bg-neutral-700
+  dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500;
 }
 
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
@@ -33,64 +79,6 @@
 /* fixes border-right issue with angular form fields with appearance outline */
 .mdc-notched-outline__notch {
     border-right: none;
-}
-
-html[data-theme='light']
-    .mdc-text-field--outlined:not(.mdc-text-field--disabled)
-    .mdc-notched-outline__leading,
-html[data-theme='light']
-    .mdc-text-field--outlined:not(.mdc-text-field--disabled)
-    .mdc-notched-outline__notch,
-html[data-theme='light']
-    .mdc-text-field--outlined:not(.mdc-text-field--disabled)
-    .mdc-notched-outline__trailing {
-    border-color: var(--color-light-text) !important;
-}
-
-html[data-theme='light']
-    .mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover
-    .mdc-notched-outline
-    .mdc-notched-outline__leading,
-html[data-theme='light']
-    .mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover
-    .mdc-notched-outline
-    .mdc-notched-outline__notch,
-html[data-theme='light']
-    .mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover
-    .mdc-notched-outline
-    .mdc-notched-outline__trailing {
-    border-color: var(--color-light-text) !important;
-}
-
-html[data-theme='light']
-    .mat-mdc-form-field.mat-mdc-form-field.mat-mdc-form-field.mat-mdc-form-field.mat-mdc-form-field
-    .mdc-notched-outline__notch {
-    border-left: none;
-}
-
-html[data-theme='light']
-    .mat-mdc-text-field-wrapper.mdc-text-field--outlined
-    .mdc-notched-outline--upgraded
-    .mdc-floating-label--float-above {
-    color: var(--color-light-text) !important;
-}
-html[data-theme='light'] .mdc-text-field:not(.mdc-text-field--disabled) .mdc-floating-label {
-    color: var(--color-light-text) !important;
-}
-
-html[data-theme='light']
-    .mdc-text-field--invalid:not(.mdc-text-field--disabled)
-    .mdc-floating-label {
-    color: var(--color-light-text) !important;
-}
-
-html[data-theme='light'] input::placeholder {
-    color: var(--color-light-text) !important;
-}
-
-html[data-theme='light'] .mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__input {
-    color: var(--color-light-text) !important;
-    caret-color: var(--color-light-text) !important;
 }
 
 .snackbar-error {
@@ -106,4 +94,12 @@ body {
 body {
     margin: 0;
     font-family: Roboto, 'Helvetica Neue', sans-serif;
+}
+
+.mat-expansion-panel {
+    box-shadow: none !important;
+}
+
+.mat-expansion-panel-body {
+    padding: 0 24px !important;
 }

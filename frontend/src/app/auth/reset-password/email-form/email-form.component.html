@@ -1,0 +1,38 @@
+<form class="space-y-4" [formGroup]="form" (ngSubmit)="onSubmit()">
+    <mat-form-field class="w-full" color="accent" appearance="outline">
+        <mat-label>Email</mat-label>
+        <mat-icon matPrefix class="!text-light-text dark:!text-inherit">email</mat-icon>
+        <input
+            formControlName="email"
+            matInput
+            type="email"
+            autocomplete="current-password"
+            required
+        />
+        <mat-icon class="cursor-pointer !text-light-text dark:!text-inherit" matSuffix
+            >lock</mat-icon
+        >
+        @if (getControl('email')?.invalid) {
+            <mat-error class="text-sm">
+                @if (getControl('email')?.hasError('required')) {
+                    <span>Email is required.</span>
+                }
+
+                @if (getControl('email')?.hasError('email')) {
+                    <span>Provide a valid email.</span>
+                }
+            </mat-error>
+        }
+    </mat-form-field>
+
+    <div>
+        <button
+            type="submit"
+            mat-raised-button
+            color="primary"
+            class="w-full !py-3 !transition-colors !duration-300 !text-dark-text !bg-light-primary"
+        >
+            {{ buttonText() }}
+        </button>
+    </div>
+</form>

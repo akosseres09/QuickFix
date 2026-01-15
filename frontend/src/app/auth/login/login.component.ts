@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import {
@@ -9,14 +9,8 @@ import {
     MatPrefix,
     MatSuffix,
 } from '@angular/material/input';
-import { RouterLink } from '@angular/router';
-import {
-    FormBuilder,
-    FormControl,
-    FormGroup,
-    ReactiveFormsModule,
-    Validators,
-} from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -38,18 +32,14 @@ import { CommonModule } from '@angular/common';
     styleUrl: './login.component.css',
     standalone: true,
 })
-export class LoginComponent implements OnInit {
-    pwVisible = false;
-    loginForm: FormGroup;
-
-    constructor(private fb: FormBuilder) {
-        this.loginForm = this.fb.group({
-            email: ['', [Validators.required, Validators.email]],
-            password: ['', [Validators.required, Validators.minLength(6)]],
-        });
-    }
-
-    ngOnInit(): void {}
+export class LoginComponent {
+    private fb = inject(FormBuilder);
+    private router = inject(Router);
+    pwVisible = signal(false);
+    loginForm = this.fb.group({
+        email: ['', [Validators.required, Validators.email]],
+        password: ['', [Validators.required, Validators.minLength(6)]],
+    });
 
     togglePwVisibility(event: MouseEvent): void {
         const input = (event.target as HTMLElement)
@@ -61,7 +51,7 @@ export class LoginComponent implements OnInit {
                 'type',
                 input.getAttribute('type') === 'password' ? 'text' : 'password'
             );
-            this.pwVisible = !this.pwVisible;
+            this.pwVisible.set(!this.pwVisible());
         }
     }
 
@@ -73,6 +63,6 @@ export class LoginComponent implements OnInit {
         if (!this.loginForm.valid) return;
 
         const { email, password } = this.loginForm.value;
-        console.log('Login attempt:', { email, password });
+        this.router.navigateByUrl('/projects');
     }
 }

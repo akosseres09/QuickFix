@@ -1,15 +1,13 @@
-<!-- Login Card -->
-<div class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg dark:bg-slate-800 m-4">
-    <!-- Header -->
+<div class="max-w-md p-5 xs:p-8 space-y-6 sm:m-4 bg-white rounded-xl shadow-lg dark:bg-slate-800">
     <div class="text-center">
         <h1 class="text-3xl font-bold text-slate-900 dark:text-white">Welcome Back</h1>
-        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Please sign in to continue.</p>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Please sign in to continue</p>
     </div>
 
     <form class="space-y-4" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
         <mat-form-field class="w-full" appearance="outline">
             <mat-label>Email Address</mat-label>
-            <mat-icon matPrefix class="!text-light-text dark:!text-inherit">email</mat-icon>
+            <mat-icon matPrefix>email</mat-icon>
             <input
                 formControlName="email"
                 class="focus:border-dark-primary foe"
@@ -19,13 +17,17 @@
                 required
                 placeholder="pat@example.com"
             />
-            <mat-error *ngIf="getControl('email')?.invalid">
-                <!-- You can also check for specific errors -->
-                <span *ngIf="getControl('email')?.hasError('required')">Email is required.</span>
-                <span *ngIf="getControl('email')?.hasError('email')"
-                    >Provide a valid email address.</span
-                >
-            </mat-error>
+            @if (getControl('email')?.invalid) {
+                <mat-error class="text-sm">
+                    @if (getControl('email')?.hasError('required')) {
+                        <span>Email is required.</span>
+                    }
+
+                    @if (getControl('email')?.hasError('email')) {
+                        <span>Provide a valid email address.</span>
+                    }
+                </mat-error>
+            }
         </mat-form-field>
 
         <mat-form-field class="w-full" color="accent" appearance="outline">
@@ -42,17 +44,18 @@
                 class="cursor-pointer !text-light-text dark:!text-inherit"
                 (click)="togglePwVisibility($event)"
                 matSuffix
-                >{{ pwVisible ? 'visibility_off' : 'visibility' }}</mat-icon
+                >{{ pwVisible() ? 'visibility_off' : 'visibility' }}</mat-icon
             >
-            <mat-error *ngIf="getControl('password')?.invalid">
-                <!-- You can also check for specific errors -->
-                <span *ngIf="getControl('password')?.hasError('required')"
-                    >Password is required.</span
-                >
-                <span *ngIf="getControl('password')?.hasError('minlength')"
-                    >Password must be at least 6 characters.</span
-                >
-            </mat-error>
+            @if (getControl('password')?.invalid) {
+                <mat-error class="text-sm">
+                    @if (getControl('password')?.hasError('required')) {
+                        <span>Password is required.</span>
+                    }
+                    @if (getControl('password')?.hasError('minlength')) {
+                        <span>Password must be at least 6 characters.</span>
+                    }
+                </mat-error>
+            }
         </mat-form-field>
 
         <div>
@@ -66,15 +69,13 @@
             </button>
         </div>
     </form>
-
-    <!-- Footer -->
     <div class="text-center text-sm flex flex-col gap-2">
         <div class="text-sm">
             Forgot password?
             <a
                 routerLink="/auth/reset-password"
                 class="font-medium text-light-accent dark:text-dark-primary hover:text-light-accent-hover dark:hover:text-dark-primary-hover"
-                >Reset</a
+                >Request Password Reset</a
             >
         </div>
         <p>

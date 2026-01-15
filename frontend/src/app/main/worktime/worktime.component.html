@@ -1,0 +1,58 @@
+<div class="mb-8 flex justify-between">
+    <div>
+        <h1 class="text-4xl font-black text-gray-900 dark:text-white mb-2">Worktime Tracking</h1>
+        <p class="text-gray-600 dark:text-gray-400">Track and analyze your time spent on issues</p>
+    </div>
+    <div>
+        <button
+            class="flex md:gap-2 justify-center !text-white"
+            mat-raised-button
+            color="primary"
+            (click)="openWorktimeDialog()"
+        >
+            <mat-icon class="!mr-0">add</mat-icon>
+            <span class="hidden md:block">Add Worktime</span>
+        </button>
+    </div>
+</div>
+
+<div class="h-fit">
+    @if (endDate() && startDate()) {
+        <app-date-range
+            [startDate]="startDate()"
+            [endDate]="endDate()"
+            [minDate]="minDate()"
+            [maxDate]="maxDate()"
+            (dateRangeChange)="onDateRangeChange($event)"
+        ></app-date-range>
+    }
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6 text-white">
+    @for (stat of stats(); track stat[0]) {
+        <div [class]="'rounded-xl shadow-lg flex flex-col px-6 py-3 ' + stat[1].bgColor">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-semibold opacity-90">{{ stat[1].label }}</span>
+                <mat-icon>{{ stat[1].icon }}</mat-icon>
+            </div>
+            <p class="text-3xl font-bold">{{ getStatValue(stat[0]) }}</p>
+        </div>
+    }
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <app-bar-chart [data]="filteredEntries()" [daysMap]="days()"></app-bar-chart>
+
+    <app-line-chart [data]="filteredEntries()" [daysMap]="days()"></app-line-chart>
+</div>
+
+<div class="rounded-xl shadow-lg overflow-hidden">
+    <div class="overflow-x-auto">
+        <app-table
+            [dataSource]="shownWorktimes()"
+            [displayedColumns]="displayedColumns"
+            [tableHeader]="'Recent Entries'"
+        ></app-table>
+    </div>
+</div>
+<app-worktime-dialog [issueIds]="issueIds()"></app-worktime-dialog>

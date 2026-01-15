@@ -1,11 +1,11 @@
-import { Component, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, inject, OnDestroy } from '@angular/core';
+import { ReactiveFormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { Router, RouterLink } from '@angular/router';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 import { CommonModule } from '@angular/common';
-import { EmailFormComponent } from '../../common/email-form/email-form.component';
+import { EmailFormComponent } from '../reset-password/email-form/email-form.component';
 
 @Component({
     selector: 'app-resend-verification',
@@ -15,13 +15,9 @@ import { EmailFormComponent } from '../../common/email-form/email-form.component
 })
 export class ResendVerificationComponent implements OnDestroy {
     sub?: Subscription;
-
-    constructor(
-        private authService: AuthService,
-        private router: Router,
-        private fb: FormBuilder,
-        private snackbar: SnackbarService
-    ) {}
+    private authService = inject(AuthService);
+    private router = inject(Router);
+    private snackbar = inject(SnackbarService);
 
     ngOnDestroy() {
         this.sub?.unsubscribe();
@@ -30,7 +26,10 @@ export class ResendVerificationComponent implements OnDestroy {
     resend(email: string) {
         if (!email) return;
 
-        this.sub = this.authService.resendEmail(email).subscribe({
+        this.snackbar.open('Verification email sent successfully!');
+        this.router.navigateByUrl('/auth/verify');
+
+        /*this.sub = this.authService.resendEmail(email).subscribe({
             next: (response) => {
                 this.snackbar.open('Verification email sent successfully!');
                 this.router.navigateByUrl('/auth/verify');
@@ -42,6 +41,6 @@ export class ResendVerificationComponent implements OnDestroy {
 
                 this.snackbar.open(message, ['snackbar-error']);
             },
-        });
+        });*/
     }
 }

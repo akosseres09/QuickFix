@@ -1,0 +1,19 @@
+<div
+    class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-2 md:p-4 lg:p-6 border border-gray-200 dark:border-gray-700"
+>
+    <div class="h-80 relative">
+        @if (isLoading()) {
+            <div class="absolute inset-0 bg-white dark:bg-gray-800 opacity-50"></div>
+            <div class="absolute z-50 top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">
+                <mat-spinner diameter="45"></mat-spinner>
+            </div>
+        }
+        <canvas
+            baseChart
+            [type]="lineChartType"
+            [data]="lineChartData"
+            [options]="lineChartOptions"
+        >
+        </canvas>
+    </div>
+</div>

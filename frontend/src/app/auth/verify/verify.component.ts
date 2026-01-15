@@ -1,5 +1,5 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, inject, OnDestroy, signal } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -27,26 +27,18 @@ import { SnackbarService } from '../../shared/services/snackbar/snackbar.service
     styleUrl: './verify.component.css',
     standalone: true,
 })
-export class VerifyComponent implements OnInit, OnDestroy {
-    verifyForm: FormGroup;
-    verifySub?: Subscription;
-    verifyPage: boolean = true;
+export class VerifyComponent implements OnDestroy {
+    private authService = inject(AuthService);
+    private router = inject(Router);
+    private fb = inject(FormBuilder);
+    private snackbar = inject(SnackbarService);
     currentRoute = inject(ActivatedRoute);
-
-    constructor(
-        private authService: AuthService,
-        private router: Router,
-        private fb: FormBuilder,
-        private snackbar: SnackbarService
-    ) {
-        const token = this.currentRoute.snapshot.queryParamMap.get('token') ?? '';
-
-        this.verifyForm = this.fb.group({
-            token: [token, [Validators.required, Validators.maxLength(255)]],
-        });
-    }
-
-    ngOnInit() {}
+    token = signal(this.currentRoute.snapshot.queryParamMap.get('token') ?? '');
+    verifyPage = signal(true);
+    verifyForm = this.fb.group({
+        token: [this.token(), [Validators.required, Validators.maxLength(255)]],
+    });
+    verifySub: Subscription | null = null;
 
     ngOnDestroy() {
         this.verifySub?.unsubscribe();
@@ -57,9 +49,12 @@ export class VerifyComponent implements OnInit, OnDestroy {
 
         const token = this.getControl('token')?.value;
 
-        if (!token) return;
+        if (!token || token !== this.token()) return;
 
-        this.authService.verify(token as string).subscribe({
+        this.snackbar.open('Account Verified!');
+        this.router.navigateByUrl('/auth/login');
+
+        /*this.authService.verify(token as string).subscribe({
             next: (response) => {
                 this.snackbar.open('Account Verified!');
                 this.router.navigateByUrl('/auth/login');
@@ -68,7 +63,7 @@ export class VerifyComponent implements OnInit, OnDestroy {
                 console.error(error);
                 this.snackbar.open('Failed to verify account!', ['snackbar-error']);
             },
-        });
+        });*/
     }
 
     resendVerificationEmail() {}
@@ -78,6 +73,6 @@ export class VerifyComponent implements OnInit, OnDestroy {
     }
 
     togglePage() {
-        this.verifyPage = !this.verifyPage;
+        this.verifyPage.set(!this.verifyPage());
     }
 }

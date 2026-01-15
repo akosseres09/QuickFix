@@ -59,10 +59,7 @@ export class AuthService {
         );
     }
 
-    resetPassword(
-        token: string,
-        password: string
-    ): Observable<errorResponse | successResponse> {
+    resetPassword(token: string, password: string): Observable<errorResponse | successResponse> {
         const headers = new HttpHeaders({
             'Content-Type': 'application/json',
         });

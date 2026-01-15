@@ -1,0 +1,38 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+    @for (field of fields(); track $index) {
+        <mat-form-field class="w-full" [class.mb-5]="!$last" appearance="outline">
+            <mat-label>{{ field.label }}</mat-label>
+            @if (field.type === 'textarea') {
+                <textarea
+                    matInput
+                    [formControlName]="field.name"
+                    [required]="field.required"
+                ></textarea>
+            } @else {
+                <input
+                    matInput
+                    [type]="field.type"
+                    [formControlName]="field.name"
+                    [required]="field.required"
+                />
+            }
+            @if (getControl(field.name)?.invalid && getControl(field.name)?.touched) {
+                <mat-error>
+                    @for (error of field.errorText; track $index) {
+                        @if (getControl(field.name)?.hasError(error[0])) {
+                            <span class="text-sm">
+                                {{ error[1] }}
+                            </span>
+                        }
+                    }
+                </mat-error>
+            }
+        </mat-form-field>
+    }
+    <div class="flex justify-end items-center">
+        <div class="w-[25%] flex gap-4">
+            <button mat-flat-button class="flex-1 !bg-red-600" (click)="onCancel()">Cancel</button>
+            <button mat-flat-button class="flex-1 !bg-success" (click)="onSubmit()">Create</button>
+        </div>
+    </div>
+</form>

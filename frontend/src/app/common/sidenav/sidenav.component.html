@@ -1,0 +1,14 @@
+<nav
+    class="flex flex-col items-center h-full transition-[width] duration-50"
+    [class.w-18]="isCollapsed()"
+    [class.w-[250px]]="!isCollapsed()"
+>
+    <div
+        class="py-4 h-full flex justify-between flex-col gap-8 items-center overflow-y-auto custom-scrollbar"
+        [class.w-full]="!isCollapsed()"
+        [class.px-2]="!isCollapsed()"
+    >
+        <app-navitem [routes]="topRoutes()" [isCollapsed]="isCollapsed()"></app-navitem>
+        <app-navitem [routes]="bottomRoutes()" [isCollapsed]="isCollapsed()"></app-navitem>
+    </div>
+</nav>

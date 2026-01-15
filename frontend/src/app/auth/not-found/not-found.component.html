@@ -1,1 +1,152 @@
-<p>not-found works!</p>
+<div class="min-h-screen flex items-center justify-center p-4 overflow-hidden relative">
+    <div class="relative z-10 text-center max-w-3xl">
+        <div
+            class="mb-8 inline-block transition-transform duration-50"
+            [style.transform]="
+                'translateY(' + floatingOffset + 'px) rotate(' + rotationOffset + 'deg)'
+            "
+        >
+            <div class="relative">
+                <svg
+                    class="w-32 h-32 mx-auto text-red-500 drop-shadow-2xl"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"
+                    />
+                </svg>
+                <div
+                    class="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full w-8 h-8 flex items-center justify-center animate-bounce"
+                >
+                    404
+                </div>
+            </div>
+        </div>
+
+        <div class="relative mb-6">
+            <h1
+                class="text-6xl md:text-7xl font-bold transition-all duration-200"
+                [class.skew-x-2]="glitchActive()"
+                [class.text-red-500]="glitchActive()"
+            >
+                TICKET-404
+            </h1>
+            <div
+                class="absolute top-0 left-1/2 -translate-x-1/2 text-6xl md:text-7xl font-bold text-purple-400 pointer-events-none transition-all duration-200"
+                [class.opacity-70]="glitchActive()"
+                [class.opacity-0]="!glitchActive()"
+                [class.translate-x-[-48%]]="glitchActive()"
+                [class.skew-x-[-2deg]]="glitchActive()"
+            >
+                TICKET-404
+            </div>
+        </div>
+        <div
+            class="inline-flex items-center gap-2 dark:bg-dark-primary/50 bg-light-primary/20 text-light-primary dark:text-dark-text px-4 py-2 rounded-full mb-6"
+        >
+            <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+            >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 8v4M12 16h.01" />
+            </svg>
+            <span class="font-semibold">Status: Not Found</span>
+        </div>
+
+        <h2 class="text-4xl md:text-5xl font-bold mb-4 drop-shadow-lg">Not Found</h2>
+        <p class="text-lg md:text-xl mb-8 max-w-md mx-auto">
+            Oops! The page you're looking for is not in our backlog.
+        </p>
+
+        <div
+            class="bg-dark-secondary backdrop-blur-sm rounded-lg p-6 mb-8 max-w-md mx-auto text-left"
+        >
+            <div class="flex items-start gap-3 mb-4">
+                <svg
+                    class="w-6 h-6 text-slate-400 flex-shrink-0 mt-1"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                    />
+                </svg>
+                <div class="flex-1 text-lg">
+                    <h3 class="text-white font-semibold mb-2">Error Details</h3>
+                    <div class="space-y-2 text-sm font-semibold">
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Priority:</span>
+                            <span class="text-red-400 font-medium">Critical</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Assignee:</span>
+                            <span class="text-slate-300">Unassigned</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Reporter:</span>
+                            <span class="text-slate-300">You</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Created:</span>
+                            <span class="text-slate-300">Just now</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-dark-text pt-4">
+                <p class="text-slate-400 text-sm italic">
+                    "The requested resource could not be located in the system. Please verify the
+                    URL or contact support."
+                </p>
+            </div>
+        </div>
+        <div class="flex flex-wrap gap-4 justify-center mb-6">
+            @if (!user()) {
+                <button
+                    (click)="goBack()"
+                    class="cursor-pointer flex items-center gap-2 px-6 py-3 bg-light-secondary-hover dark:bg-dark-primary-hover text-white dark:text-black rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                >
+                    <svg
+                        class="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                    >
+                        <path d="M19 12H5M12 19l-7-7 7-7" />
+                    </svg>
+                    Go Back
+                </button>
+                <button
+                    (click)="goHome()"
+                    class="cursor-pointer flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg shadow-purple-500/50"
+                >
+                    <mat-icon>login</mat-icon>
+                    Login
+                </button>
+            } @else {
+                <button
+                    (click)="goHome()"
+                    class="cursor-pointer flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg shadow-purple-500/50"
+                >
+                    <mat-icon>home</mat-icon>
+                    Projects
+                </button>
+                <button
+                    (click)="viewAllIssues()"
+                    class="cursor-pointer flex items-center gap-2 px-6 py-3 bg-light-secondary-hover dark:bg-dark-primary-hover text-white dark:text-black rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                >
+                    <mat-icon>assignment</mat-icon>
+                    View All Issues
+                </button>
+            }
+        </div>
+    </div>
+</div>

@@ -4,8 +4,12 @@ import { Injectable } from '@angular/core';
     providedIn: 'root',
 })
 export class ThemeService {
-    theme: 'light' | 'dark' =
-        (localStorage.getItem('theme') as 'light' | 'dark') || 'light';
+    logos: { [key: string]: string } = {
+        light: 'QuickFix_logo_light.png',
+        dark: 'QuickFix_logo_dark.png',
+    };
+
+    theme: 'light' | 'dark' = (localStorage.getItem('theme') as 'light' | 'dark') || 'light';
     constructor() {}
 
     getTheme(): 'light' | 'dark' {

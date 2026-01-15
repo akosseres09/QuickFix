@@ -1,11 +1,9 @@
-<!-- Login Card -->
-<div class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg dark:bg-slate-800 m-4">
-    <!-- Header -->
+<div class="max-w-md p-5 xs:p-8 space-y-6 sm:m-4 bg-white rounded-xl shadow-lg dark:bg-slate-800">
     <div class="text-center">
         <h1 class="text-3xl font-bold text-slate-900 dark:text-white">Verify Account</h1>
         <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
-            We have sent an email to the previously given email address. Please paste the verifying
-            token in the input below to continue.
+            We have sent an email to your email address. Please paste the verifying token in the
+            input below to continue
         </p>
     </div>
 
@@ -23,9 +21,13 @@
             <mat-icon class="cursor-pointer !text-light-text dark:!text-inherit" matSuffix
                 >lock</mat-icon
             >
-            <mat-error *ngIf="getControl('token')?.invalid">
-                <span *ngIf="getControl('token')?.hasError('required')">Token is required.</span>
-            </mat-error>
+            @if (getControl('token')?.invalid) {
+                <mat-error class="text-sm">
+                    @if (getControl('token')?.hasError('required')) {
+                        <span>Token is required.</span>
+                    }
+                </mat-error>
+            }
         </mat-form-field>
 
         <div>
@@ -42,12 +44,12 @@
 
     <div class="text-center text-sm flex flex-col gap-2">
         <div class="text-sm">
-            Didn't receive the email?
+            Have not received the email?
             <a
                 routerLink="/auth/resend-verification"
                 class="cursor-pointer font-medium text-light-accent dark:text-dark-primary hover:text-light-accent-hover dark:hover:text-dark-primary-hover"
             >
-                Click here to resend the verification email.
+                Resend Email
             </a>
         </div>
     </div>
