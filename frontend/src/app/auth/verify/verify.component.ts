@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, signal } from '@angular/core';
+import { Component, DestroyRef, inject, OnDestroy, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -8,6 +8,7 @@ import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'app-verify',
@@ -32,6 +33,7 @@ export class VerifyComponent implements OnDestroy {
     private router = inject(Router);
     private fb = inject(FormBuilder);
     private snackbar = inject(SnackbarService);
+    private destroyRef = inject(DestroyRef);
     currentRoute = inject(ActivatedRoute);
     token = signal(this.currentRoute.snapshot.queryParamMap.get('token') ?? '');
     verifyPage = signal(true);
@@ -45,25 +47,30 @@ export class VerifyComponent implements OnDestroy {
     }
 
     onSubmit() {
-        if (!this.verifyForm.valid) return;
+        console.log(this.verifyForm.invalid);
+
+        if (this.verifyForm.invalid) return;
 
         const token = this.getControl('token')?.value;
 
-        if (!token || token !== this.token()) return;
+        if (!token) return;
 
         this.snackbar.open('Account Verified!');
         this.router.navigateByUrl('/auth/login');
 
-        /*this.authService.verify(token as string).subscribe({
-            next: (response) => {
-                this.snackbar.open('Account Verified!');
-                this.router.navigateByUrl('/auth/login');
-            },
-            error: (error) => {
-                console.error(error);
-                this.snackbar.open('Failed to verify account!', ['snackbar-error']);
-            },
-        });*/
+        this.authService
+            .verify(token as string)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+                next: (response) => {
+                    this.snackbar.open('Account Verified!');
+                    this.router.navigateByUrl('/auth/login');
+                },
+                error: (error) => {
+                    console.error(error);
+                    this.snackbar.open('Failed to verify account!', ['snackbar-error']);
+                },
+            });
     }
 
     resendVerificationEmail() {}

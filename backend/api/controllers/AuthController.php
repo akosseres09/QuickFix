@@ -194,7 +194,7 @@ class AuthController extends Controller
         $user = User::find()->byEmail($email)->inactive()->one();
 
         if (!$user) {
-            throw new NotFoundHttpException('No user found to email!', 410);
+            throw new NotFoundHttpException('No inactive account found with this email address!', 410);
         }
 
         $user->generateEmailVerificationToken();

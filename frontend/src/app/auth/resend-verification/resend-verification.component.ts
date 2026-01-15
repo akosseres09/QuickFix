@@ -1,11 +1,11 @@
-import { Component, inject, OnDestroy } from '@angular/core';
+import { Component, DestroyRef, inject } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
-import { Subscription } from 'rxjs';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { Router, RouterLink } from '@angular/router';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 import { CommonModule } from '@angular/common';
 import { EmailFormComponent } from '../reset-password/email-form/email-form.component';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'app-resend-verification',
@@ -13,34 +13,30 @@ import { EmailFormComponent } from '../reset-password/email-form/email-form.comp
     templateUrl: './resend-verification.component.html',
     styleUrl: './resend-verification.component.css',
 })
-export class ResendVerificationComponent implements OnDestroy {
-    sub?: Subscription;
+export class ResendVerificationComponent {
     private authService = inject(AuthService);
     private router = inject(Router);
     private snackbar = inject(SnackbarService);
-
-    ngOnDestroy() {
-        this.sub?.unsubscribe();
-    }
+    private destroyRef = inject(DestroyRef);
 
     resend(email: string) {
         if (!email) return;
 
-        this.snackbar.open('Verification email sent successfully!');
-        this.router.navigateByUrl('/auth/verify');
+        this.authService
+            .resendEmail(email)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+                next: (response) => {
+                    this.snackbar.open('Verification email sent successfully!');
+                    this.router.navigateByUrl('/auth/verify');
+                },
+                error: (error) => {
+                    const message =
+                        error.error.message ||
+                        'An error occurred while sending the verification email.';
 
-        /*this.sub = this.authService.resendEmail(email).subscribe({
-            next: (response) => {
-                this.snackbar.open('Verification email sent successfully!');
-                this.router.navigateByUrl('/auth/verify');
-            },
-            error: (error) => {
-                const message =
-                    error.error.message ||
-                    'An error occurred while sending the verification email.';
-
-                this.snackbar.open(message, ['snackbar-error']);
-            },
-        });*/
+                    this.snackbar.open(message, ['snackbar-error']);
+                },
+            });
     }
 }

@@ -1,8 +1,7 @@
-import { Component, inject, OnDestroy, signal } from '@angular/core';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
 import {
     AbstractControlOptions,
     FormBuilder,
-    FormGroup,
     ReactiveFormsModule,
     Validators,
 } from '@angular/forms';
@@ -23,6 +22,7 @@ import { Subscription } from 'rxjs';
 import { passwordMatchValidator } from '../../shared/validators/passwordValidator/passwordValidator';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 import { errorResponse } from '../../shared/model/Response';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'app-signup',
@@ -43,11 +43,12 @@ import { errorResponse } from '../../shared/model/Response';
     styleUrl: './signup.component.css',
     standalone: true,
 })
-export class SignupComponent implements OnDestroy {
+export class SignupComponent {
     private router = inject(Router);
     private fb = inject(FormBuilder);
     private authService = inject(AuthService);
     private snackbar = inject(SnackbarService);
+    private destroyRef = inject(DestroyRef);
 
     pwVisible = signal(false);
     rePwVisible = signal(false);
@@ -63,11 +64,6 @@ export class SignupComponent implements OnDestroy {
             validators: passwordMatchValidator('password', 'rePassword'),
         } as AbstractControlOptions
     );
-    signupSub: Subscription | null = null;
-
-    ngOnDestroy() {
-        this.signupSub?.unsubscribe();
-    }
 
     togglePwVisibility(event: MouseEvent): void {
         const input = (event.target as HTMLElement)
@@ -104,20 +100,26 @@ export class SignupComponent implements OnDestroy {
     onSubmit(): void {
         if (!this.signupForm.valid) return;
 
-        this.signupSub = this.authService.signup(this.signupForm.value).subscribe({
-            next: (result) => {
-                this.snackbar.open('Account created successfully! Please verify your email.');
-                this.router.navigateByUrl('/auth/verify');
-            },
-            error: (error) => {
-                const errorObj = error.error.error.details.error as Record<string, Array<string>>;
-                this.setServerValidationErrors(errorObj);
-                this.snackbar.open(
-                    (error.error as errorResponse).error.message ||
-                        'Signup failed. Please try again.',
-                    ['snackbar-error']
-                );
-            },
-        });
+        this.authService
+            .signup(this.signupForm.value)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+                next: (result) => {
+                    this.snackbar.open('Account created successfully! Please verify your email.');
+                    this.router.navigateByUrl('/auth/verify');
+                },
+                error: (error) => {
+                    const errorObj = error.error.error.details.error as Record<
+                        string,
+                        Array<string>
+                    >;
+                    this.setServerValidationErrors(errorObj);
+                    this.snackbar.open(
+                        (error.error as errorResponse).error.message ||
+                            'Signup failed. Please try again.',
+                        ['snackbar-error']
+                    );
+                },
+            });
     }
 }
