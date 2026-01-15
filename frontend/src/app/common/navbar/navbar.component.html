@@ -2,25 +2,20 @@
     class="px-4 py-3 text-xl font-bold border-b-2 bg-light-background dark:bg-dark-background border-light-text-hover dark:border-dark-hover"
 >
     <div class="relative md:flex md:items-center" [class.mx-auto]="!user()">
-        <div class="mr-auto flex items-center justify-between gap-12">
-            <a href="/" class="flex items-center space-x-2">
-                <img [src]="imageSource" width="48" />
-                <span>QuickFix</span>
-            </a>
+        <div class="mr-auto flex items-center justify-between gap-6">
             @if (showSidebarToggle()) {
                 <button
                     (click)="toggleSidebar()"
                     class="hidden md:flex p-2 rounded cursor-pointer hover:bg-light-text-hover dark:hover:bg-dark-hover transition-[background-color]"
                     [attr.aria-label]="isSidebarCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
                 >
-                    <mat-icon
-                        class="transition-[rotate]"
-                        [class.!rotate-180]="isSidebarCollapsed()"
-                    >
-                        keyboard_double_arrow_right
-                    </mat-icon>
+                    <mat-icon class="transition-[rotate]"> menu </mat-icon>
                 </button>
             }
+            <a href="/" class="flex items-center space-x-2">
+                <img [src]="imageSource" width="48" />
+                <span>QuickFix</span>
+            </a>
             <button
                 class="md:hidden inline-flex items-center p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer"
                 (click)="toggleMenu()"
