@@ -221,7 +221,7 @@ class AuthController extends Controller
             $user = User::find()->byEmail($email)->active()->one();
 
             if (!$user) {
-                throw new NotFoundHttpException('No user found with this email.', 410);
+                throw new NotFoundHttpException('No active user found with this email address!', 410);
             }
 
             $user->generatePasswordResetToken();

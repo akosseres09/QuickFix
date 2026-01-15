@@ -18,7 +18,6 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../shared/services/auth/auth.service';
-import { Subscription } from 'rxjs';
 import { passwordMatchValidator } from '../../shared/validators/passwordValidator/passwordValidator';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 import { errorResponse } from '../../shared/model/Response';
