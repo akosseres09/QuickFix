@@ -119,6 +119,7 @@ export class AuthService {
                 {},
                 {
                     headers: this.headers,
+                    withCredentials: true,
                 }
             )
             .pipe(

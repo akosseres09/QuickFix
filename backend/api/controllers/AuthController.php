@@ -35,17 +35,20 @@ class AuthController extends Controller
     {
         $behaviors = parent::behaviors();
         unset($behaviors['authenticator']);
-        $behaviors['corsFilter'] = [
-            'class' => Cors::class,
-            'cors' => [
-                'Origin' => ['http://localhost:4200'],
-                'Access-Control-Request-Method' => ['POST', 'OPTIONS'],
-                'Access-Control-Request-Headers' => ['Content-Type', 'Authorization'],
-                'Access-Control-Allow-Credentials' => true, // Set to true if you need to send cookies with the request
-                'Access-Control-Max-Age' => 86400, // 24 hours
-                'Access-Control-Expose-Headers' => [],
-            ],
-        ];
+        if (YII_ENV_PROD || !YII_DEBUG) {
+            $behaviors['corsFilter'] = [
+                'class' => Cors::class,
+                'cors' => [
+                    'Origin' => ['http://localhost:4200'],
+                    'Access-Control-Request-Method' => ['POST', 'OPTIONS'],
+                    'Access-Control-Request-Headers' => ['Content-Type', 'Authorization'],
+                    'Access-Control-Allow-Credentials' => true, // Set to true if you need to send cookies with the request
+                    'Access-Control-Max-Age' => 86400, // 24 hours
+                    'Access-Control-Expose-Headers' => [],
+                ],
+            ];
+        }
+
         $behaviors['contentNegotiator']['formats']['text/html'] = Response::FORMAT_JSON;
 
         $behaviors['authenticator'] = [
@@ -66,6 +69,7 @@ class AuthController extends Controller
 
     public function actionLogin(): array
     {
+
         $request = Yii::$app->request;
         $username = $request->post('email');
         $password = $request->post('password');
@@ -83,6 +87,7 @@ class AuthController extends Controller
         $token = $this->createToken($user->id, $user->is_admin, $user->email);
 
         $refreshToken = $this->createRefreshToken($user->id);
+        $this->addToCookie($refreshToken->token);
 
         return ResponseMaker::asSuccess([
             'message' => 'Login successful.',
@@ -134,7 +139,7 @@ class AuthController extends Controller
 
         Yii::$app->response->cookies->remove('refresh-token');
 
-        return ['message' => 'Logged out successfully.'];
+        return ResponseMaker::asSuccess(['message' => 'Logged out successfully.']);
     }
 
     public function actionSignup(): array

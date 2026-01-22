@@ -88,7 +88,6 @@ trait RefreshTokenHandlerTrait
                 );
             }
 
-            $this->addToCookie($credential->token);
             return $credential;
         }
 
@@ -124,8 +123,6 @@ trait RefreshTokenHandlerTrait
             }
         }
 
-        $this->addToCookie($refreshToken->token);
-
         return $refreshToken;
     }
 
@@ -139,8 +136,10 @@ trait RefreshTokenHandlerTrait
             'name' => 'refresh-token',
             'value' => $token,
             'httpOnly' => true,
-            'sameSite' => 'none',
-            'path' => '/auth'
+            'sameSite' => \yii\web\Cookie::SAME_SITE_LAX,
+            'secure' => false,
+            'path' => '/',
+            'domain' => '',
         ]));
     }
 }
