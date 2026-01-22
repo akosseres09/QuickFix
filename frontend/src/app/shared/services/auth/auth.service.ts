@@ -1,35 +1,10 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { errorResponse, successResponse } from '../../model/Response';
-import { Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../../../environments/environment.development';
-
-interface Claims {
-    uid: number;
-    role: string;
-    email: string;
-}
-
-interface DecodedToken {
-    // issuer
-    iss: string;
-    // audience
-    aud: string;
-    // jwt id
-    jti: string;
-    // issued at
-    iat: number;
-    // not before
-    nbf: number;
-    // expiration
-    exp: number;
-    // user id (custom claim)
-    uid: number;
-    // role (custom claim)
-    role: string;
-    // email (custom claim)
-    email: string;
-}
+import { Claims } from '../../constants/Claims';
+import { DecodedToken } from '../../constants/DecodedToken';
 
 @Injectable({
     providedIn: 'root',
@@ -44,6 +19,8 @@ export class AuthService {
 
     currentUserClaims = signal<Claims | null>(this.getUserFromToken());
     isLoggedIn = computed(() => this.currentUserClaims() !== null);
+    isRefreshing = false;
+    refreshTokenSubject = new BehaviorSubject<string | null>(null);
 
     signup(data: any): Observable<errorResponse | successResponse> {
         return this.http.post<errorResponse | successResponse>(this.url + '/auth/signup', data, {
@@ -110,6 +87,26 @@ export class AuthService {
                         localStorage.setItem(this.tokenKey, data['access_token']);
                         const user = this.decodeToken(data['access_token']);
                         this.currentUserClaims.set(user);
+                    }
+                })
+            );
+    }
+
+    refresh(): Observable<errorResponse | successResponse> {
+        return this.http
+            .post<errorResponse | successResponse>(
+                this.url + '/auth/refresh-token',
+                {},
+                {
+                    headers: this.headers,
+                    withCredentials: true,
+                }
+            )
+            .pipe(
+                tap((response) => {
+                    if (response.success) {
+                        const resp = response as successResponse;
+                        localStorage.setItem('access_token', resp.data['access_token']);
                     }
                 })
             );

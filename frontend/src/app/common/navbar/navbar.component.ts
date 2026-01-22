@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, inject, input, output, signal } from '@angular/core';
+import { AfterViewInit, Component, DestroyRef, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonToggleChange } from '@angular/material/button-toggle';
 import { MatIcon } from '@angular/material/icon';
@@ -8,11 +8,11 @@ import { ThemeService } from '../../shared/services/theme/theme.service';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { AppRoute } from '../../shared/constants/Routes';
 import { RouteService } from '../../shared/services/route/route.service';
-import { User } from '../../shared/model/User';
 import { SidebarService } from '../../shared/services/sidebar/sidebar.service';
-import { UserService } from '../../shared/services/user/user.service';
-import { filter, fromEvent, take } from 'rxjs';
+import { filter, fromEvent } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Claims } from '../../shared/constants/Claims';
+import { AuthService } from '../../shared/services/auth/auth.service';
 
 @Component({
     selector: 'app-navbar',
@@ -35,14 +35,16 @@ export class NavbarComponent implements AfterViewInit {
     private router = inject(Router);
     private routeService = inject(RouteService);
     private sidebarService = inject(SidebarService);
-    private userService = inject(UserService);
+    private authService = inject(AuthService);
+    private destroyRef = inject(DestroyRef);
 
     showSidebarToggle = input<boolean>(true);
     sidebarClosed = output<boolean>();
+    logoutClicked = output<void>();
     isSidebarCollapsed = signal<boolean>(this.sidebarService.getState());
     isMenuOpen = signal<boolean>(false);
     imageSource: string = 'QuickFix_logo_dark.png';
-    user = signal<User | null>(this.userService.getUser());
+    user = signal<Claims | null>(this.authService.currentUserClaims());
     htmlElement = signal<HTMLElement | null>(document.documentElement);
     routes = signal<AppRoute[]>(
         this.routeService.getAppRoutes(this.user()).filter((route) => route.show)
@@ -110,5 +112,16 @@ export class NavbarComponent implements AfterViewInit {
             : this.sidebarService.OPEN;
         this.sidebarService.setState(name);
         this.sidebarClosed.emit(this.isSidebarCollapsed());
+    }
+
+    logout() {
+        this.authService
+            .logout()
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe((response) => {
+                if (response.success) {
+                    this.router.navigate(['/auth/login']);
+                }
+            });
     }
 }

@@ -1,7 +1,7 @@
 <nav
     class="px-4 py-3 text-xl font-bold border-b-2 bg-light-background dark:bg-dark-background border-light-text-hover dark:border-dark-hover"
 >
-    <div class="relative md:flex md:items-center" [class.mx-auto]="!user()">
+    <div class="relative md:flex md:items-center mx-auto">
         <div class="mr-auto flex items-center justify-between gap-6">
             @if (showSidebarToggle()) {
                 <button
@@ -74,6 +74,10 @@
                                         <span>{{ children.name }}</span>
                                     </a>
                                 }
+                                <button (click)="logout()" mat-menu-item>
+                                    <mat-icon> logout </mat-icon>
+                                    Logout
+                                </button>
                             </mat-menu>
                         </li>
                         @for (child of route.children; track $index) {
@@ -87,6 +91,14 @@
                                 >
                             </li>
                         }
+                        <li class="block md:hidden">
+                            <button
+                                class="block py-2 px-3 border border-transparent rounded-xl dark:hover:bg-dark-hover hover:bg-light-text-hover duration-200"
+                                (click)="logout()"
+                            >
+                                Logout
+                            </button>
+                        </li>
                     }
                 }
 

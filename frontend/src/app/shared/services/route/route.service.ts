@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { AppRoute } from '../../constants/Routes';
-import { User } from '../../model/User';
+import { Claims } from '../../constants/Claims';
 
 @Injectable({
     providedIn: 'root',
 })
 export class RouteService {
-    getAppRoutes(user: User | null): Array<AppRoute> {
+    getAppRoutes(user: Claims | null): Array<AppRoute> {
         return [
             {
                 path: '/auth/login',
@@ -54,11 +54,6 @@ export class RouteService {
                         name: 'Settings',
                         path: '/settings',
                         icon: 'settings',
-                    },
-                    {
-                        path: '/auth/logout',
-                        name: 'Logout',
-                        icon: 'logout',
                     },
                 ],
             },
