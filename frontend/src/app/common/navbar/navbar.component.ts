@@ -119,9 +119,7 @@ export class NavbarComponent implements AfterViewInit {
             .logout()
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe((response) => {
-                if (response.success) {
-                    this.router.navigate(['/auth/login']);
-                }
+                this.router.navigate(['/auth/login']);
             });
     }
 }

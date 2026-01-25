@@ -94,14 +94,10 @@ export class AuthService {
 
     refresh(): Observable<errorResponse | successResponse> {
         return this.http
-            .post<errorResponse | successResponse>(
-                this.url + '/auth/refresh-token',
-                {},
-                {
-                    headers: this.headers,
-                    withCredentials: true,
-                }
-            )
+            .get<errorResponse | successResponse>(this.url + '/auth/refresh', {
+                headers: this.headers,
+                withCredentials: true,
+            })
             .pipe(
                 tap((response) => {
                     if (response.success) {
@@ -132,6 +128,13 @@ export class AuthService {
             );
     }
 
+    me(): Observable<errorResponse | successResponse> {
+        return this.http.get<errorResponse | successResponse>(this.url + '/auth/me', {
+            headers: this.headers,
+            withCredentials: true,
+        });
+    }
+
     getAccessToken(): string | null {
         return localStorage.getItem('access_token');
     }
@@ -139,8 +142,6 @@ export class AuthService {
     private getUserFromToken(): Claims | null {
         const decodedToken = this.getDecodedToken();
         if (!decodedToken) return null;
-
-        console.log(decodedToken);
 
         return {
             uid: decodedToken.uid,

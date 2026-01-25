@@ -56,7 +56,8 @@ return [
                 'auth/verify' => 'auth/verify',
                 'auth/resend-verification-email' => 'auth/resend-verification-email',
                 'auth/reset-password' => 'auth/reset-password',
-                'auth/refresh-token' => 'auth/refresh-token',
+                'auth/refresh' => 'auth/refresh',
+                'auth/me' => 'auth/me',
 
             ],
         ],

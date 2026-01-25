@@ -2,6 +2,7 @@
 
 namespace api\controllers;
 
+use api\components\AccessTokenHandler;
 use api\components\RefreshTokenHandlerTrait;
 use Yii;
 use api\components\ResponseMaker;
@@ -21,6 +22,7 @@ class AuthController extends Controller
 
     use EmailSenderTrait;
     use RefreshTokenHandlerTrait;
+    use AccessTokenHandler;
 
     public $enableCsrfValidation = false;
     private Configuration $jwtConfig;
@@ -53,7 +55,7 @@ class AuthController extends Controller
 
         $behaviors['authenticator'] = [
             'class' => \yii\filters\auth\HttpBearerAuth::class,
-            'except' => ['login', 'refresh-token', 'signup', 'verify', 'resend-verification-email', 'reset-password'],
+            'except' => ['login', 'refresh', 'signup', 'verify', 'resend-verification-email', 'reset-password'],
         ];
 
         return $behaviors;
@@ -63,6 +65,8 @@ class AuthController extends Controller
     {
         return [
             '*' => ['POST', 'OPTIONS'],
+            'me' => ['GET', 'OPTIONS'],
+            'refresh' => ['GET', 'OPTIONS'],
         ];
     }
 
@@ -84,7 +88,7 @@ class AuthController extends Controller
             throw new UnauthorizedHttpException('Invalid credentials.');
         }
 
-        $token = $this->createToken($user->id, $user->is_admin, $user->email);
+        $token = $this->createAccessToken($user->id, $user->is_admin, $user->email);
 
         $refreshToken = $this->createRefreshToken($user->id);
         $this->addToCookie($refreshToken->token);
@@ -95,7 +99,7 @@ class AuthController extends Controller
         ]);
     }
 
-    public function actionRefreshToken(): array
+    public function actionRefresh(): array
     {
         $cookieRefreshToken = Yii::$app->request->cookies->getValue('refresh-token');
 
@@ -105,21 +109,21 @@ class AuthController extends Controller
 
         $refreshToken = $this->getRefreshToken($cookieRefreshToken);
 
-        if (!$refreshToken->isValid()) {
-            $refreshToken = $this->createRefreshToken($refreshToken);
+        if (!$refreshToken) {
+            throw new BadRequestHttpException('Invalid or expired refresh token.');
         }
 
-        if (!$refreshToken) {
-            throw new UnauthorizedHttpException('Invalid or expired refresh token.');
+        if (!$refreshToken->isValid()) {
+            $refreshToken = $this->createRefreshToken($refreshToken);
         }
 
         $user = $refreshToken->user;
 
         if (!$user) {
-            throw new UnauthorizedHttpException('Invalid user.');
+            throw new BadRequestHttpException('Invalid user.');
         }
 
-        $token = $this->createToken($user->id, $user->is_admin, $user->email);
+        $token = $this->createAccessToken($user->id, $user->is_admin, $user->email);
 
         return [
             'access_token' => $token->toString(),
@@ -140,6 +144,24 @@ class AuthController extends Controller
         Yii::$app->response->cookies->remove('refresh-token');
 
         return ResponseMaker::asSuccess(['message' => 'Logged out successfully.']);
+    }
+
+    public function actionMe(): array
+    {
+        $user = Yii::$app->user->identity;
+
+        if (!$user) {
+            throw new UnauthorizedHttpException('User not authenticated.');
+        }
+
+        return ResponseMaker::asSuccess([
+            'id' => $user->id,
+            'email' => $user->email,
+            'username' => $user->username,
+            'is_admin' => (bool)$user->is_admin,
+            'status' => $user->status,
+            'created_at' => $user->created_at,
+        ]);
     }
 
     public function actionSignup(): array

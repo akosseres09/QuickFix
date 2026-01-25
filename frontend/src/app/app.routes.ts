@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router';
 import { WorktimeComponent } from './main/worktime/worktime.component';
+import { authenticatedGuard } from './shared/guards/authenticated/authenticated.guard';
+import { unauthenticatedGuard } from './shared/guards/unauthenticated/unauthenticated.guard';
 
 export const routes: Routes = [
     {
@@ -19,12 +21,14 @@ export const routes: Routes = [
                 loadComponent: () =>
                     import('./auth/login/login.component').then((c) => c.LoginComponent),
                 title: 'QuickFix - Login',
+                canActivate: [unauthenticatedGuard],
             },
             {
                 path: 'signup',
                 loadComponent: () =>
                     import('./auth/signup/signup.component').then((c) => c.SignupComponent),
                 title: 'QuickFix - Signup',
+                canActivate: [unauthenticatedGuard],
             },
             {
                 path: 'reset-password',
@@ -33,12 +37,14 @@ export const routes: Routes = [
                         (c) => c.ResetPasswordComponent
                     ),
                 title: 'QuickFix - Reset Password',
+                canActivate: [unauthenticatedGuard],
             },
             {
                 path: 'verify',
                 loadComponent: () =>
                     import('./auth/verify/verify.component').then((c) => c.VerifyComponent),
                 title: 'QuickFix - Verify Account',
+                canActivate: [unauthenticatedGuard],
             },
             {
                 path: 'resend-verification',
@@ -47,12 +53,14 @@ export const routes: Routes = [
                         (c) => c.ResendVerificationComponent
                     ),
                 title: 'QuickFix - Resend Verification',
+                canActivate: [unauthenticatedGuard],
             },
             {
                 path: 'not-found',
                 loadComponent: () =>
                     import('./auth/not-found/not-found.component').then((c) => c.NotFoundComponent),
                 title: 'QuickFix - Not Found',
+                canActivate: [unauthenticatedGuard],
             },
             {
                 path: '**',
@@ -115,6 +123,7 @@ export const routes: Routes = [
                         loadComponent: () =>
                             import('./main/issues/issues.component').then((c) => c.IssuesComponent),
                         title: 'QuickFix - Issues',
+                        canActivate: [authenticatedGuard],
                     },
                     {
                         path: 'board',
@@ -123,12 +132,14 @@ export const routes: Routes = [
                                 (c) => c.BoardComponent
                             ),
                         title: 'QuickFix - Issue Board',
+                        canActivate: [authenticatedGuard],
                     },
                     {
                         path: 'new',
                         loadComponent: () =>
                             import('./main/issues/new/new.component').then((c) => c.NewComponent),
                         title: 'QuickFix - New Issue',
+                        canActivate: [authenticatedGuard],
                     },
                     {
                         path: 'overview',
@@ -137,6 +148,7 @@ export const routes: Routes = [
                                 (c) => c.OverviewComponent
                             ),
                         title: 'QuickFix - Overview',
+                        canActivate: [authenticatedGuard],
                     },
                 ],
             },
@@ -144,6 +156,8 @@ export const routes: Routes = [
                 path: 'labels',
                 loadComponent: () =>
                     import('./main/labels/labels.component').then((c) => c.LabelsComponent),
+                canActivate: [authenticatedGuard],
+                title: 'QuickFix - Labels',
             },
         ],
     },
@@ -158,26 +172,31 @@ export const routes: Routes = [
                 path: 'projects',
                 loadComponent: () =>
                     import('./main/projects/projects.component').then((c) => c.ProjectsComponent),
+                canActivate: [authenticatedGuard],
             },
             {
                 path: 'worktime',
                 loadComponent: () =>
                     import('./main/worktime/worktime.component').then((c) => WorktimeComponent),
+                canActivate: [authenticatedGuard],
             },
             {
                 path: 'account',
                 loadComponent: () =>
                     import('./main/account/account.component').then((c) => c.AccountComponent),
+                canActivate: [authenticatedGuard],
             },
             {
                 path: 'settings',
                 loadComponent: () =>
                     import('./main/settings/settings.component').then((c) => c.SettingsComponent),
+                canActivate: [authenticatedGuard],
             },
             {
                 path: '**',
                 loadComponent: () =>
                     import('./auth/not-found/not-found.component').then((c) => c.NotFoundComponent),
+                canActivate: [authenticatedGuard],
             },
         ],
     },
