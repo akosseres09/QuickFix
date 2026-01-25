@@ -53,7 +53,15 @@ class User extends ActiveRecord implements IdentityInterface
             unset($fields['password_hash']);
         }
 
-        unset($fields['password_reset_token'], $fields['auth_key'], $fields['verification_token']);
+        unset(
+            $fields['password_reset_token'],
+            $fields['auth_key'],
+            $fields['verification_token'],
+            $fields['email_verification_token_expires_at'],
+            $fields['password_reset_token_expires_at'],
+            $fields['deleted_at']
+        );
+
         return $fields;
     }
 

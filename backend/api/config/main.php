@@ -47,7 +47,7 @@ return [
             'rules' => [
                 [
                     'class' => 'yii\rest\UrlRule',
-                    'controller' => ['user', 'auth'],
+                    'controller' => ['user', 'auth', 'project', 'member'],
                     'pluralize' => false
                 ],
                 'auth/login' => 'auth/login',
@@ -58,7 +58,12 @@ return [
                 'auth/reset-password' => 'auth/reset-password',
                 'auth/refresh' => 'auth/refresh',
                 'auth/me' => 'auth/me',
-
+                'project/<id:\d+>/add-member' => 'project/add-member',
+                'project/<id:\d+>/remove-member' => 'project/remove-member',
+                [
+                    'pattern' => 'project/<projectId:\d+>/members',
+                    'route' => 'member/index',
+                ],
             ],
         ],
         'jwt' => function () {
