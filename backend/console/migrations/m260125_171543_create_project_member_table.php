@@ -1,11 +1,12 @@
 <?php
 
+use common\models\ProjectMember;
 use yii\db\Migration;
 
 /**
  * Handles the creation of table `{{%project_member}}`.
  */
-class m250125_000002_create_project_member_table extends Migration
+class m260125_171543_create_project_member_table extends Migration
 {
     /**
      * {@inheritdoc}
@@ -16,7 +17,7 @@ class m250125_000002_create_project_member_table extends Migration
             'id' => $this->primaryKey(),
             'project_id' => $this->integer()->notNull(),
             'user_id' => $this->integer()->notNull(),
-            'role' => $this->string(20)->notNull()->defaultValue('member'),
+            'role' => $this->integer()->notNull()->defaultValue(ProjectMember::ROLE_GUEST),
             'created_at' => $this->integer()->notNull(),
         ]);
 

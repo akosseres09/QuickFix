@@ -22,8 +22,18 @@ use yii\db\ActiveRecord;
 class ProjectMember extends ActiveRecord
 {
     // Role constants
-    const ROLE_MEMBER = 'member';
-    const ROLE_ADMIN = 'admin';
+    const ROLE_GUEST = 0;
+    const ROLE_MEMBER = 1;
+    const ROLE_ADMIN = 2;
+    const ROLE_OWNER = 3;
+
+    const ROLE_LIST = [
+        self::ROLE_GUEST,
+        self::ROLE_MEMBER,
+        self::ROLE_ADMIN,
+        self::ROLE_OWNER
+    ];
+
 
     /**
      * {@inheritdoc}
@@ -54,9 +64,9 @@ class ProjectMember extends ActiveRecord
         return [
             [['project_id', 'user_id'], 'required'],
             [['project_id', 'user_id', 'created_at'], 'integer'],
-            [['role'], 'string', 'max' => 20],
+            [['role'], 'integer'],
             [['role'], 'default', 'value' => self::ROLE_MEMBER],
-            [['role'], 'in', 'range' => [self::ROLE_MEMBER, self::ROLE_ADMIN]],
+            [['role'], 'in', 'range' => self::ROLE_LIST],
             [['project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['project_id' => 'id']],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['user_id' => 'id']],
             [['project_id', 'user_id'], 'unique', 'targetAttribute' => ['project_id', 'user_id'], 'message' => 'This user is already a member of this project.'],
@@ -118,8 +128,10 @@ class ProjectMember extends ActiveRecord
     public static function getRoles(): array
     {
         return [
+            self::ROLE_GUEST => 'Guest',
             self::ROLE_MEMBER => 'Member',
             self::ROLE_ADMIN => 'Admin',
+            self::ROLE_OWNER => 'Owner',
         ];
     }
 

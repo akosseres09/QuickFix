@@ -20,7 +20,7 @@ use yii\db\ActiveRecord;
  * @property string $end_date
  * @property integer $owner_id
  * @property string $visibility
- * @property string $priority
+ * @property int $priority
  * @property string $color
  * @property integer $progress
  * @property float $budget
@@ -45,10 +45,30 @@ class Project extends ActiveRecord
     const VISIBILITY_TEAM = 'team';
 
     // Priority constants
-    const PRIORITY_LOW = 'low';
-    const PRIORITY_MEDIUM = 'medium';
-    const PRIORITY_HIGH = 'high';
-    const PRIORITY_CRITICAL = 'critical';
+    const PRIORITY_LOW = 0;
+    const PRIORITY_MEDIUM = 1;
+    const PRIORITY_HIGH = 2;
+    const PRIORITY_CRITICAL = 3;
+
+    const PRIORITY_LIST = [
+        self::PRIORITY_LOW,
+        self::PRIORITY_MEDIUM,
+        self::PRIORITY_HIGH,
+        self::PRIORITY_CRITICAL
+    ];
+
+    const VISIBILITY_LIST = [
+        self::VISIBILITY_PUBLIC,
+        self::VISIBILITY_PRIVATE,
+        self::VISIBILITY_TEAM
+    ];
+
+    const STATUS_LIST = [
+        self::STATUS_ACTIVE,
+        self::STATUS_ARCHIVED,
+        self::STATUS_ON_HOLD,
+        self::STATUS_COMPLETED
+    ];
 
     /**
      * {@inheritdoc}
@@ -90,27 +110,13 @@ class Project extends ActiveRecord
             [['key'], 'match', 'pattern' => '/^[A-Z0-9]+$/', 'message' => 'Key must contain only uppercase letters and numbers'],
             [['status'], 'string', 'max' => 20],
             [['status'], 'default', 'value' => self::STATUS_ACTIVE],
-            [['status'], 'in', 'range' => [
-                self::STATUS_ACTIVE,
-                self::STATUS_ARCHIVED,
-                self::STATUS_ON_HOLD,
-                self::STATUS_COMPLETED
-            ]],
+            [['status'], 'in', 'range' => self::STATUS_LIST],
             [['visibility'], 'string', 'max' => 20],
             [['visibility'], 'default', 'value' => self::VISIBILITY_PUBLIC],
-            [['visibility'], 'in', 'range' => [
-                self::VISIBILITY_PUBLIC,
-                self::VISIBILITY_PRIVATE,
-                self::VISIBILITY_TEAM
-            ]],
-            [['priority'], 'string', 'max' => 20],
+            [['visibility'], 'in', 'range' => self::VISIBILITY_LIST],
+            [['priority'], 'integer'],
             [['priority'], 'default', 'value' => self::PRIORITY_MEDIUM],
-            [['priority'], 'in', 'range' => [
-                self::PRIORITY_LOW,
-                self::PRIORITY_MEDIUM,
-                self::PRIORITY_HIGH,
-                self::PRIORITY_CRITICAL
-            ]],
+            [['priority'], 'in', 'range' => self::PRIORITY_LIST],
             [['color'], 'string', 'max' => 7],
             [['color'], 'match', 'pattern' => '/^#[0-9A-Fa-f]{6}$/', 'message' => 'Color must be a valid hex color code'],
             [['progress'], 'default', 'value' => 0],

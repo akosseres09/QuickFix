@@ -1,11 +1,12 @@
 <?php
 
+use common\models\Project;
 use yii\db\Migration;
 
 /**
  * Handles the creation of table `{{%project}}`.
  */
-class m250125_000001_create_project_table extends Migration
+class m260125_165015_create_project_table extends Migration
 {
     /**
      * {@inheritdoc}
@@ -17,12 +18,12 @@ class m250125_000001_create_project_table extends Migration
             'name' => $this->string(255)->notNull(),
             'key' => $this->string(10)->notNull()->unique(),
             'description' => $this->text()->null(),
-            'status' => $this->string(20)->notNull()->defaultValue('active'),
+            'status' => $this->string(20)->notNull()->defaultValue(Project::STATUS_ACTIVE),
             'start_date' => $this->date()->null(),
             'end_date' => $this->date()->null(),
             'owner_id' => $this->integer()->notNull(),
-            'visibility' => $this->string(20)->notNull()->defaultValue('public'),
-            'priority' => $this->string(20)->notNull()->defaultValue('medium'),
+            'visibility' => $this->string(20)->notNull()->defaultValue(Project::VISIBILITY_PUBLIC),
+            'priority' => $this->integer()->notNull()->defaultValue(Project::PRIORITY_MEDIUM),
             'color' => $this->string(7)->null(),
             'progress' => $this->integer()->notNull()->defaultValue(0),
             'budget' => $this->decimal(10, 2)->null(),
@@ -57,6 +58,18 @@ class m250125_000001_create_project_table extends Migration
             'idx-project-owner_id',
             '{{%project}}',
             'owner_id'
+        );
+
+        $this->createIndex(
+            'idx-project-name',
+            '{{%project}}',
+            'name'
+        );
+
+        $this->createIndex(
+            'idx-project-priority',
+            '{{%project}}',
+            'priority'
         );
     }
 
