@@ -47,20 +47,20 @@ class User extends ActiveRecord implements IdentityInterface
 
     public function fields(): array
     {
-        $fields = parent::fields();
+        $fields = [
+            'id',
+            'username',
+            'email',
+            'status',
+            'isAdmin' => 'is_admin',
+            'createdAt' => 'created_at',
+            'updatedAt' => 'updated_at',
+            'passwordHash' => 'password_hash',
+        ];
 
         if ($this->getScenario() === self::SCENARIO_DEFAULT) {
             unset($fields['password_hash']);
         }
-
-        unset(
-            $fields['password_reset_token'],
-            $fields['auth_key'],
-            $fields['verification_token'],
-            $fields['email_verification_token_expires_at'],
-            $fields['password_reset_token_expires_at'],
-            $fields['deleted_at']
-        );
 
         return $fields;
     }
@@ -101,6 +101,7 @@ class User extends ActiveRecord implements IdentityInterface
             [['created_at', 'updated_at', 'deleted_at', 'email_verification_token_expires_at'], 'integer']
         ];
     }
+
 
     public static function find(): UserQuery
     {

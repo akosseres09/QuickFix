@@ -19,15 +19,13 @@ class ProjectController extends BaseRestController
     public function behaviors(): array
     {
         $behaviors = parent::behaviors();
-
-        $behaviors['verbs'] = [
+        $behaviors['verbs'] = array_merge($behaviors['verbs'] ?? [], [
             'class' => VerbFilter::class,
             'actions' => [
                 'add-member' => ['POST'],
                 'remove-member' => ['DELETE'],
-                'members' => ['GET'],
             ],
-        ];
+        ]);
 
         return $behaviors;
     }

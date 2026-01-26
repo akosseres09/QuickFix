@@ -87,6 +87,17 @@ class ProjectMember extends ActiveRecord
         ];
     }
 
+    public function fields()
+    {
+        return [
+            'id',
+            'projectId' => 'project_id',
+            'userId' => 'user_id',
+            'role',
+            'createdAt' => 'created_at'
+        ];
+    }
+
     public function extraFields()
     {
         return ['project', 'user'];

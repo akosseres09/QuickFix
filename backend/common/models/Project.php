@@ -149,6 +149,27 @@ class Project extends ActiveRecord
         ];
     }
 
+    public function fields()
+    {
+        return [
+            'id',
+            'name',
+            'key',
+            'description',
+            'status',
+            'startDate' => 'start_date',
+            'endDate' => 'end_date',
+            'ownerId' => 'owner_id',
+            'visibility',
+            'priority',
+            'color',
+            'progress',
+            'budget',
+            'createdAt' => 'created_at',
+            'updatedAt' => 'updated_at',
+        ];
+    }
+
     public function extraFields()
     {
         return ['members', 'owner', 'projectMembers'];
