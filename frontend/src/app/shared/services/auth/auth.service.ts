@@ -5,6 +5,7 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../../../environments/environment.development';
 import { Claims } from '../../constants/Claims';
 import { DecodedToken } from '../../constants/DecodedToken';
+import { SignupData } from '../../constants/SignupData';
 
 @Injectable({
     providedIn: 'root',
@@ -22,8 +23,16 @@ export class AuthService {
     isRefreshing = false;
     refreshTokenSubject = new BehaviorSubject<string | null>(null);
 
-    signup(data: any): Observable<errorResponse | successResponse> {
-        return this.http.post<errorResponse | successResponse>(this.url + '/auth/signup', data, {
+    signup(data: SignupData): Observable<errorResponse | successResponse> {
+        const fixed = {
+            ...data,
+            first_name: data.firstName,
+            last_name: data.lastName,
+            date_of_birth: data.dateOfBirth,
+            phone_number: data.phoneNumber,
+        };
+
+        return this.http.post<errorResponse | successResponse>(this.url + '/auth/signup', fixed, {
             headers: this.headers,
         });
     }

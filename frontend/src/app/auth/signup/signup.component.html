@@ -1,36 +1,222 @@
-<div class="max-w-md p-5 xs:p-8 space-y-6 sm:m-4 bg-white rounded-xl shadow-lg dark:bg-slate-800">
+<div
+    class="max-w-lg md:max-w-2xl p-5 xs:p-8 space-y-6 sm:m-4 bg-white rounded-xl shadow-lg dark:bg-slate-800"
+>
     <div class="text-center">
         <h1 class="text-3xl font-bold text-slate-900 dark:text-white">Create Account</h1>
         <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Simple and easy as that</p>
     </div>
 
-    <form class="space-y-4" [formGroup]="signupForm" (ngSubmit)="onSubmit()">
-        <mat-form-field class="w-full" appearance="outline">
-            <mat-label>Username</mat-label>
-            <mat-icon matPrefix class="!text-light-text dark:!text-inherit"
-                >account_circle</mat-icon
-            >
-            <input
-                formControlName="username"
-                class="focus:border-dark-primary"
-                matInput
-                type="text"
-                autocomplete="username"
-                required
-                placeholder="asd"
-            />
+    <form class="space-y-5" [formGroup]="signupForm" (ngSubmit)="onSubmit()">
+        <div class="flex flex-col md:flex-row gap-4">
+            <mat-form-field class="w-full" appearance="outline">
+                <mat-label>First Name</mat-label>
+                <mat-icon matPrefix class="!text-light-text dark:!text-inherit">person</mat-icon>
+                <input
+                    formControlName="firstName"
+                    matInput
+                    type="text"
+                    autocomplete="given-name"
+                    required
+                    placeholder="John"
+                />
+                @if (getControl('firstName')?.invalid) {
+                    <mat-error class="text-sm">
+                        @if (getControl('firstName')?.hasError('required')) {
+                            <span>First name is required.</span>
+                        }
+                        @if (getControl('firstName')?.hasError('serverError')) {
+                            @for (
+                                error of getControl('firstName')?.getError('serverError');
+                                track $index
+                            ) {
+                                <span>{{ error }}</span>
+                            }
+                        }
+                    </mat-error>
+                }
+            </mat-form-field>
 
-            @if (getControl('username')?.invalid) {
+            <mat-form-field class="w-full" appearance="outline">
+                <mat-label>Last Name</mat-label>
+                <mat-icon matPrefix class="!text-light-text dark:!text-inherit">person</mat-icon>
+                <input
+                    formControlName="lastName"
+                    matInput
+                    type="text"
+                    autocomplete="family-name"
+                    required
+                    placeholder="Doe"
+                />
+                @if (getControl('lastName')?.invalid) {
+                    <mat-error class="text-sm">
+                        @if (getControl('lastName')?.hasError('required')) {
+                            <span>Last name is required.</span>
+                        }
+                        @if (getControl('lastName')?.hasError('serverError')) {
+                            @for (
+                                error of getControl('lastName')?.getError('serverError');
+                                track $index
+                            ) {
+                                <span>{{ error }}</span>
+                            }
+                        }
+                    </mat-error>
+                }
+            </mat-form-field>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-4">
+            <mat-form-field class="w-full flex-8/12" appearance="outline">
+                <mat-label>Username</mat-label>
+                <mat-icon matPrefix class="!text-light-text dark:!text-inherit"
+                    >account_circle</mat-icon
+                >
+                <input
+                    formControlName="username"
+                    matInput
+                    type="text"
+                    autocomplete="username"
+                    required
+                    placeholder="johndoe"
+                />
+                @if (getControl('username')?.invalid) {
+                    <mat-error class="text-sm">
+                        @if (getControl('username')?.hasError('required')) {
+                            <span>Username is required.</span>
+                        }
+                        @if (getControl('username')?.hasError('minlength')) {
+                            <span>Username must be at least 5 characters.</span>
+                        }
+                        @if (getControl('username')?.hasError('serverError')) {
+                            @for (
+                                error of getControl('username')?.getError('serverError');
+                                track $index
+                            ) {
+                                <span>{{ error }}</span>
+                            }
+                        }
+                    </mat-error>
+                }
+            </mat-form-field>
+
+            <mat-form-field class="w-full" appearance="outline">
+                <mat-label>Email Address</mat-label>
+                <mat-icon matPrefix class="!text-light-text dark:!text-inherit">email</mat-icon>
+                <input
+                    formControlName="email"
+                    matInput
+                    type="email"
+                    autocomplete="email"
+                    required
+                    placeholder="john.doe@example.com"
+                />
+                @if (getControl('email')?.invalid) {
+                    <mat-error class="text-sm">
+                        @if (getControl('email')?.hasError('required')) {
+                            <span>Email is required.</span>
+                        }
+                        @if (getControl('email')?.hasError('email')) {
+                            <span>Provide a valid email address.</span>
+                        }
+                        @if (getControl('email')?.hasError('serverError')) {
+                            @for (
+                                error of getControl('email')?.getError('serverError');
+                                track $index
+                            ) {
+                                <span>{{ error }}</span>
+                            }
+                        }
+                    </mat-error>
+                }
+            </mat-form-field>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-4">
+            <mat-form-field class="w-full" color="accent" appearance="outline">
+                <mat-label>Password</mat-label>
+                <mat-icon matPrefix class="!text-light-text dark:!text-inherit">lock</mat-icon>
+                <input
+                    formControlName="password"
+                    matInput
+                    type="password"
+                    autocomplete="new-password"
+                    required
+                />
+                <mat-icon
+                    class="cursor-pointer !text-light-text dark:!text-inherit"
+                    (click)="togglePwVisibility($event)"
+                    matSuffix
+                    >{{ pwVisible() ? 'visibility_off' : 'visibility' }}</mat-icon
+                >
+                @if (getControl('password')?.invalid) {
+                    <mat-error class="text-sm">
+                        @if (getControl('password')?.hasError('required')) {
+                            <span>Password is required.</span>
+                        }
+                        @if (getControl('password')?.hasError('minlength')) {
+                            <span>Password must be at least 6 characters.</span>
+                        }
+                        @if (getControl('password')?.hasError('mustMatch')) {
+                            <span>Passwords must match.</span>
+                        }
+                    </mat-error>
+                }
+            </mat-form-field>
+
+            <mat-form-field class="w-full" color="accent" appearance="outline">
+                <mat-label>Confirm password</mat-label>
+                <mat-icon matPrefix class="!text-light-text dark:!text-inherit">lock</mat-icon>
+                <input
+                    formControlName="rePassword"
+                    matInput
+                    type="password"
+                    autocomplete="new-password"
+                    required
+                />
+                <mat-icon
+                    class="cursor-pointer !text-light-text dark:!text-inherit"
+                    (click)="togglePwVisibility($event)"
+                    matSuffix
+                    >{{ rePwVisible() ? 'visibility_off' : 'visibility' }}</mat-icon
+                >
+                @if (getControl('rePassword')?.invalid) {
+                    <mat-error class="text-sm">
+                        @if (getControl('rePassword')?.hasError('required')) {
+                            <span>Password Confirmation is required.</span>
+                        }
+                        @if (getControl('rePassword')?.hasError('minlength')) {
+                            <span>Password Confirmation must be at least 6 characters.</span>
+                        }
+                        @if (getControl('rePassword')?.hasError('mustMatch')) {
+                            <span>Passwords must match.</span>
+                        }
+                    </mat-error>
+                }
+            </mat-form-field>
+        </div>
+
+        <mat-form-field class="w-full" appearance="outline">
+            <mat-label>Date of Birth</mat-label>
+            <mat-icon matPrefix class="!text-light-text dark:!text-inherit">cake</mat-icon>
+            <input formControlName="dateOfBirth" matInput type="date" autocomplete="bday" />
+            @if (getControl('dateOfBirth')?.invalid) {
                 <mat-error class="text-sm">
-                    @if (getControl('username')?.hasError('required')) {
-                        <span>Username is required.</span>
+                    @if (getControl('dateOfBirth')?.hasError('invalidDate')) {
+                        <span>Please provide a valid date.</span>
                     }
-                    @if (getControl('username')?.hasError('minlength')) {
-                        <span>Username must be at least 5 characters.</span>
+                    @if (getControl('dateOfBirth')?.hasError('futureDate')) {
+                        <span>Date of birth cannot be in the future.</span>
                     }
-                    @if (getControl('username')?.hasError('serverError')) {
+                    @if (getControl('dateOfBirth')?.hasError('minAge')) {
+                        <span
+                            >You must be at least
+                            {{ getControl('dateOfBirth')?.getError('minAge')?.requiredAge }} years
+                            old.</span
+                        >
+                    }
+                    @if (getControl('dateOfBirth')?.hasError('serverError')) {
                         @for (
-                            error of getControl('username')?.getError('serverError');
+                            error of getControl('dateOfBirth')?.getError('serverError');
                             track $index
                         ) {
                             <span>{{ error }}</span>
@@ -39,92 +225,29 @@
                 </mat-error>
             }
         </mat-form-field>
+
         <mat-form-field class="w-full" appearance="outline">
-            <mat-label>Email Address</mat-label>
-            <mat-icon matPrefix class="!text-light-text dark:!text-inherit">email</mat-icon>
+            <mat-label>Phone Number</mat-label>
+            <mat-icon matPrefix class="!text-light-text dark:!text-inherit">phone</mat-icon>
             <input
-                formControlName="email"
-                class="focus:border-dark-primary"
+                formControlName="phoneNumber"
                 matInput
-                type="email"
-                autocomplete="email"
-                required
-                placeholder="pat@example.com"
+                type="tel"
+                autocomplete="tel"
+                placeholder="+1234567890"
             />
-            @if (getControl('email')?.invalid) {
+            @if (getControl('phoneNumber')?.invalid) {
                 <mat-error class="text-sm">
-                    @if (getControl('email')?.hasError('required')) {
-                        <span>Email is required.</span>
+                    @if (getControl('phoneNumber')?.hasError('invalidPhone')) {
+                        <span>Provide a valid phone number (e.g., +1234567890).</span>
                     }
-                    @if (getControl('email')?.hasError('email')) {
-                        <span>Provide a valid email address.</span>
-                    }
-                    @if (getControl('email')?.hasError('serverError')) {
-                        @for (error of getControl('email')?.getError('serverError'); track $index) {
+                    @if (getControl('phoneNumber')?.hasError('serverError')) {
+                        @for (
+                            error of getControl('phoneNumber')?.getError('serverError');
+                            track $index
+                        ) {
                             <span>{{ error }}</span>
                         }
-                    }
-                </mat-error>
-            }
-        </mat-form-field>
-
-        <mat-form-field class="w-full" color="accent" appearance="outline">
-            <mat-label>Password</mat-label>
-            <mat-icon matPrefix class="!text-light-text dark:!text-inherit">lock</mat-icon>
-            <input
-                formControlName="password"
-                matInput
-                type="password"
-                autocomplete="current-password"
-                required
-            />
-            <mat-icon
-                class="cursor-pointer !text-light-text dark:!text-inherit"
-                (click)="togglePwVisibility($event)"
-                matSuffix
-                >{{ pwVisible() ? 'visibility_off' : 'visibility' }}</mat-icon
-            >
-            @if (getControl('password')?.invalid) {
-                <mat-error class="text-sm">
-                    @if (getControl('password')?.hasError('required')) {
-                        <span>Password is required.</span>
-                    }
-                    @if (getControl('password')?.hasError('minlength')) {
-                        <span>Password must be at least 6 characters.</span>
-                    }
-                    @if (getControl('password')?.hasError('mustMatch')) {
-                        <span>Passwords must match.</span>
-                    }
-                </mat-error>
-            }
-        </mat-form-field>
-
-        <mat-form-field class="w-full" color="accent" appearance="outline">
-            <mat-label>Confirm password</mat-label>
-            <mat-icon matPrefix class="!text-light-text dark:!text-inherit">lock</mat-icon>
-            <input
-                formControlName="rePassword"
-                matInput
-                type="password"
-                autocomplete="current-repassword"
-                required
-            />
-            <mat-icon
-                class="cursor-pointer !text-light-text dark:!text-inherit"
-                (click)="togglePwVisibility($event)"
-                matSuffix
-                >{{ rePwVisible() ? 'visibility_off' : 'visibility' }}</mat-icon
-            >
-            @if (getControl('rePassword')?.invalid) {
-                <mat-error class="text-sm">
-                    @if (getControl('rePassword')?.hasError('required')) {
-                        <span>Password Confirmation is required.</span>
-                    }
-                    @if (getControl('rePassword')?.hasError('minlength')) {
-                        <span>Password Confirmation must be at least 6 characters.</span>
-                    }
-                    @if (getControl('rePassword')?.hasError('mustMatch')) {
-                        <span>Passwords must match.</span>
                     }
                 </mat-error>
             }

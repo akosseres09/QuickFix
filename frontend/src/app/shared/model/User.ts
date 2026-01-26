@@ -11,12 +11,18 @@ export interface User extends BaseModel {
     id: string;
     username: string;
     email: string;
+    firstName: string;
+    lastName: string;
+    phoneNumber: string | null;
+    dateOfBirth: Date | null;
+    profilePictureUrl: string | null;
     status: typeof DELETED | typeof INACTIVE | typeof ACTIVE;
-    role: typeof ADMIN | typeof USER | typeof SYS_ADMIN;
-    auth_key?: string;
-    password_hash?: string;
-    password_reset_token?: string;
-    created_at: Date;
-    updated_at?: Date;
-    verification_token?: string;
+    isAdmin: typeof ADMIN | typeof USER | typeof SYS_ADMIN;
+    authKey?: string;
+    passwordHash?: string;
+    passwordResetToken?: string;
+    createdAt: number;
+    updatedAt: number | null;
+    deletedAt: number | null;
+    verificationToken?: string;
 }

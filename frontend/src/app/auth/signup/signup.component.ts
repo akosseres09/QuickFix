@@ -19,9 +19,12 @@ import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { passwordMatchValidator } from '../../shared/validators/passwordValidator/passwordValidator';
+import { phoneValidator } from '../../shared/validators/phoneValidator/phoneValidator';
+import { minAgeValidator } from '../../shared/validators/dateValidator/dateValidator';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 import { errorResponse } from '../../shared/model/Response';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { SignupData } from '../../shared/constants/SignupData';
 
 @Component({
     selector: 'app-signup',
@@ -54,10 +57,14 @@ export class SignupComponent {
     signupErrors = signal<Array<string>>([]);
     signupForm = this.fb.group(
         {
+            firstName: ['', [Validators.required]],
+            lastName: ['', [Validators.required]],
             username: ['', [Validators.required, Validators.minLength(5)]],
             email: ['', [Validators.required, Validators.email]],
             password: ['', [Validators.required, Validators.minLength(6)]],
             rePassword: ['', [Validators.required, Validators.minLength(6)]],
+            dateOfBirth: [null as Date | null, [minAgeValidator(13)]],
+            phoneNumber: ['', [phoneValidator()]],
         },
         {
             validators: passwordMatchValidator('password', 'rePassword'),
@@ -100,7 +107,7 @@ export class SignupComponent {
         if (!this.signupForm.valid) return;
 
         this.authService
-            .signup(this.signupForm.value)
+            .signup(this.signupForm.value as SignupData)
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
                 next: (result) => {
