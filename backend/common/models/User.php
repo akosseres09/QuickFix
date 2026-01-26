@@ -7,7 +7,6 @@ use common\models\query\UserQuery;
 use Lcobucci\JWT\UnencryptedToken;
 use Throwable;
 use Yii;
-use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
@@ -23,6 +22,11 @@ use yii\web\IdentityInterface;
  * @property string $email
  * @property string $auth_key
  * @property integer $status
+ * @property string $first_name
+ * @property string $last_name
+ * @property string $phone_number
+ * @property date $date_of_birth
+ * @property string $profile_picture_url
  * @property integer $created_at
  * @property integer $updated_at
  * @property integer $deleted_at
@@ -56,6 +60,11 @@ class User extends ActiveRecord implements IdentityInterface
             'createdAt' => 'created_at',
             'updatedAt' => 'updated_at',
             'passwordHash' => 'password_hash',
+            'firstName' => 'first_name',
+            'lastName' => 'last_name',
+            'phoneNumber' => 'phone_number',
+            'dateOfBirth' => 'date_of_birth',
+            'profilePictureUrl' => 'profile_picture_url',
         ];
 
         if ($this->getScenario() === self::SCENARIO_DEFAULT) {
@@ -303,5 +312,10 @@ class User extends ActiveRecord implements IdentityInterface
     {
         $this->password_reset_token = null;
         $this->password_reset_token_expires_at = null;
+    }
+
+    public function setProfilePictureUrl(): void
+    {
+        $this->profile_picture_url = 'https://ui-avatars.com/api/?name=' . urlencode($this->first_name . ' ' . $this->last_name) . '&background=random&size=256';
     }
 }

@@ -13,6 +13,8 @@ class SignupForm extends Model
 {
     use \common\components\traits\EmailSenderTrait;
 
+    public $first_name;
+    public $last_name;
     public $username;
     public $email;
     public $password;
@@ -25,8 +27,8 @@ class SignupForm extends Model
     public function rules(): array
     {
         return [
-            [['username', 'email'], 'trim'],
-            [['username', 'email', 'password', 'rePassword'], 'required'],
+            [['username', 'email', 'first_name', 'last_name'], 'trim'],
+            [['username', 'email', 'password', 'rePassword', 'first_name', 'last_name'], 'required'],
             ['username', 'unique', 'targetClass' => '\common\models\User', 'message' => 'This username has already been taken.'],
             ['username', 'string', 'min' => 5, 'max' => 255],
             ['email', 'email'],
@@ -52,6 +54,9 @@ class SignupForm extends Model
         $user = new User();
         $user->username = $this->username;
         $user->email = $this->email;
+        $user->first_name = $this->first_name;
+        $user->last_name = $this->last_name;
+        $user->setProfilePictureUrl();
         $user->setPassword($this->password);
         $user->generateAuthKey();
         $user->generateEmailVerificationToken();
