@@ -1,4 +1,12 @@
-import { Component, computed, ElementRef, inject, signal, viewChild } from '@angular/core';
+import {
+    Component,
+    computed,
+    DestroyRef,
+    ElementRef,
+    inject,
+    signal,
+    viewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -11,7 +19,10 @@ import { MatChipsModule } from '@angular/material/chips';
 import { UserService } from '../../shared/services/user/user.service';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 import { User } from '../../shared/model/User';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { DateService } from '../../shared/services/date/date.service';
+import { minAgeValidator } from '../../shared/validators/dateValidator/dateValidator';
+import { phoneValidator } from '../../shared/validators/phoneValidator/phoneValidator';
 
 @Component({
     selector: 'app-account',
@@ -32,28 +43,23 @@ import { toSignal } from '@angular/core/rxjs-interop';
 export class AccountComponent {
     private userService = inject(UserService);
     private snackbarService = inject(SnackbarService);
+    private readonly dateService = inject(DateService);
     private fb = inject(FormBuilder);
+    private readonly destroyRef = inject(DestroyRef);
 
-    user = signal<User | null>(this.userService.getUser());
+    user = signal<User | null>(null);
     profileForm = this.fb.group({
-        username: [this.user()?.username || '', [Validators.required, Validators.minLength(3)]],
-        email: [this.user()?.email || '', [Validators.required, Validators.email]],
-        bio: ['Passionate developer working on QuickFix project'],
-        location: ['Budapest, Hungary'],
-        company: ['QuickFix Inc.'],
-        website: ['https://quickfix.com'],
+        username: ['', [Validators.required, Validators.minLength(3)]],
+        email: ['', [Validators.required, Validators.email]],
+        phoneNumber: ['', [phoneValidator()]],
+        dateOfBirth: ['', [minAgeValidator(13)]],
     });
     private formValues = toSignal(this.profileForm.valueChanges, {
         initialValue: this.profileForm.value,
     });
     private initialFormSnapshot = signal(this.profileForm.value);
 
-    profilePictureUrl = signal<string>(
-        this.user()?.username
-            ? `https://ui-avatars.com/api/?name=${this.user()?.username}&size=200&background=a494e6&color=0f0c18`
-            : `https://ui-avatars.com/api/?name=User&size=200&background=a494e6&color=0f0c18`
-    );
-
+    profilePictureUrl = signal<string>('');
     selectedFile = signal<File | null>(null);
     previewUrl = signal<string | null>(null);
     fileInput = viewChild<ElementRef>('fileInput');
@@ -63,6 +69,33 @@ export class AccountComponent {
         const initial = JSON.stringify(this.initialFormSnapshot());
         return current !== initial || this.selectedFile() !== null;
     });
+
+    constructor() {
+        this.userService
+            .getUser()
+            .pipe(takeUntilDestroyed())
+            .subscribe((userData) => {
+                this.user.set(userData);
+                this.profilePictureUrl.set(userData.profilePictureUrl);
+                this.initialFormSnapshot.set({
+                    username: userData.username,
+                    email: userData.email,
+                    phoneNumber: userData.phoneNumber || '',
+                });
+                this.setProfileFormValues();
+            });
+    }
+
+    setProfileFormValues(): void {
+        if (!this.user()) return;
+
+        this.profileForm.patchValue({
+            username: this.user()?.username || '',
+            email: this.user()?.email || '',
+            phoneNumber: this.user()?.phoneNumber || '',
+            dateOfBirth: this.user()?.dateOfBirth,
+        });
+    }
 
     onFileSelected(event: Event): void {
         const input = this.fileInput()?.nativeElement as HTMLInputElement;
@@ -84,9 +117,7 @@ export class AccountComponent {
     removeProfilePicture(): void {
         this.selectedFile.set(null);
         this.previewUrl.set(null);
-        this.profilePictureUrl.set(
-            `https://ui-avatars.com/api/?name=${this.user()?.username || 'User'}&size=200&background=a494e6&color=0f0c18`
-        );
+        this.profilePictureUrl.set(this.user()?.profilePictureUrl as string);
         this.resetFileInput();
     }
 
@@ -102,10 +133,17 @@ export class AccountComponent {
             this.profilePictureUrl.set(this.previewUrl() || this.profilePictureUrl());
         }
 
+        this.userService
+            .updateUser(this.profileForm.value as Partial<User>)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe((response) => {
+                this.initialFormSnapshot.set(this.profileForm.value);
+                this.user.set(response);
+                this.snackbarService.open('Profile updated successfully!');
+            });
+
         this.selectedFile.set(null);
         this.previewUrl.set(null);
-
-        this.snackbarService.open('Profile updated successfully!');
     }
 
     cancelChanges(): void {
@@ -124,5 +162,10 @@ export class AccountComponent {
 
     getControl(name: string) {
         return this.profileForm.get(name);
+    }
+
+    createDate(timestamp: number) {
+        const date = this.dateService.parseDate(timestamp);
+        return this.dateService.toLocaleISOString(date).split('T')[0];
     }
 }

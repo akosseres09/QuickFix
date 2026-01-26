@@ -1,50 +1,33 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Project } from '../../model/Project';
-import { UserService } from '../user/user.service';
-import { User } from '../../model/User';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { environment } from '../../../../environments/environment.development';
 
 export interface ProjectFilters {
-    projectName?: string | null;
+    name?: string | null;
+    expand?: string | null;
 }
 
 @Injectable({
     providedIn: 'root',
 })
 export class ProjectService {
-    constructor(private userService: UserService) {}
+    private readonly http = inject(HttpClient);
+    private readonly url = environment.apiUrl;
 
-    getProjects(filters: Partial<ProjectFilters> = {}): Array<Project> {
-        let baseProjects = [
-            {
-                id: '1',
-                name: 'Google IT',
-                createdAt: new Date(),
-                admin: this.userService.getUser() as User,
-                users: [],
-                issues: [],
-            },
-            {
-                id: '1',
-                name: 'Google HR',
-                createdAt: new Date(),
-                admin: this.userService.getUser() as User,
-                users: [
-                    this.userService.getUser() as User,
-                    this.userService.getUser() as User,
-                    this.userService.getUser() as User,
-                    this.userService.getUser() as User,
-                ],
-                issues: [],
-            },
-        ];
+    getProjects(filters: Partial<ProjectFilters> = {}) {
+        let params = new HttpParams();
 
-        baseProjects = baseProjects.filter((project) => {
-            if (filters.projectName) {
-                return project.name.toLowerCase().includes(filters.projectName.toLowerCase());
+        Object.keys(filters).forEach((key) => {
+            const value = filters[key as keyof ProjectFilters];
+
+            if (value != null) {
+                params = params.set(key, value.toString());
             }
-            return true;
         });
 
-        return baseProjects;
+        return this.http.get<Project[]>(`${this.url}/project`, {
+            params: params,
+        });
     }
 }

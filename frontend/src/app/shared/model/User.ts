@@ -14,8 +14,8 @@ export interface User extends BaseModel {
     firstName: string;
     lastName: string;
     phoneNumber: string | null;
-    dateOfBirth: Date | null;
-    profilePictureUrl: string | null;
+    dateOfBirth: string | null;
+    profilePictureUrl: string;
     status: typeof DELETED | typeof INACTIVE | typeof ACTIVE;
     isAdmin: typeof ADMIN | typeof USER | typeof SYS_ADMIN;
     authKey?: string;

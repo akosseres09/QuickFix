@@ -101,40 +101,6 @@
                         </ng-container>
                     }
 
-                    @if (showActions() && canModify()) {
-                        <ng-container matColumnDef="actions">
-                            <th
-                                mat-header-cell
-                                *matHeaderCellDef
-                                class="!text-center text-base font-bold"
-                            >
-                                Actions
-                            </th>
-                            <td mat-cell *matCellDef="let element" class="!text-center">
-                                <div class="flex justify-center items-center gap-2">
-                                    @if (showEditAction()) {
-                                        <button
-                                            mat-icon-button
-                                            (click)="onEdit(element)"
-                                            aria-label="Edit"
-                                        >
-                                            <mat-icon>edit</mat-icon>
-                                        </button>
-                                    }
-                                    @if (showDeleteAction()) {
-                                        <button
-                                            mat-icon-button
-                                            (click)="onDelete(element)"
-                                            aria-label="Delete"
-                                        >
-                                            <mat-icon class="!text-red-600">delete</mat-icon>
-                                        </button>
-                                    }
-                                </div>
-                            </td>
-                        </ng-container>
-                    }
-
                     <tr mat-header-row *matHeaderRowDef="columnIds()"></tr>
                     <tr
                         class="odd:!bg-light-text-hover/20 dark:odd:!bg-dark-hover/20 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"

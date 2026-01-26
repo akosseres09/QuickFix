@@ -99,15 +99,16 @@ class User extends ActiveRecord implements IdentityInterface
     {
         return [
             [['username', 'password_reset_token', 'auth_key', 'email'], 'unique'],
-            [['auth_key', 'username', 'password_hash', 'email'], 'required'],
+            [['auth_key', 'username', 'password_hash', 'email', 'first_name', 'last_name'], 'required'],
             [['auth_key'], 'string', 'max' => 32],
             [['email'], 'email'],
-            [['email', 'password_hash', 'username', 'password_reset_token', 'verification_token'], 'string', 'max' => 255],
+            [['email', 'password_hash', 'username', 'password_reset_token', 'verification_token', 'first_name', 'last_name', 'phone_number'], 'string', 'max' => 255],
             ['is_admin', 'default', 'value' => self::USER],
             ['is_admin', 'in', 'range' => [self::USER, self::ADMIN]],
             ['status', 'default', 'value' => self::STATUS_INACTIVE],
             ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_INACTIVE]],
-            [['created_at', 'updated_at', 'deleted_at', 'email_verification_token_expires_at'], 'integer']
+            [['created_at', 'updated_at', 'deleted_at', 'email_verification_token_expires_at'], 'integer'],
+            [['date_of_birth'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TableComponent } from '../../common/table/table.component';
@@ -20,6 +20,8 @@ import { UrlService } from '../../shared/services/url/url.service';
 import { ActivatedRoute } from '@angular/router';
 import { MatButton } from '@angular/material/button';
 import { SpeedDialComponent } from '../../common/speed-dial/speed-dial.component';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { DateService } from '../../shared/services/date/date.service';
 
 @Component({
     selector: 'app-projects',
@@ -43,18 +45,21 @@ import { SpeedDialComponent } from '../../common/speed-dial/speed-dial.component
     templateUrl: './projects.component.html',
     styleUrl: './projects.component.css',
 })
-export class ProjectsComponent {
+export class ProjectsComponent implements OnInit {
     private readonly urlService = inject(UrlService);
     private readonly fb = inject(FormBuilder);
     private readonly projectService = inject(ProjectService);
     private readonly activeRoute = inject(ActivatedRoute);
-    projects = signal<Project[]>(this.projectService.getProjects());
+    private readonly destroyRef = inject(DestroyRef);
+    private readonly dateService = inject(DateService);
+    projects = signal<Project[]>([]);
 
     filterForm = this.fb.group({
-        projectName: [this.activeRoute.snapshot.queryParamMap.get('projectName') || ''],
+        name: [this.activeRoute.snapshot.queryParamMap.get('name') || ''],
+        expand: ['owner,members'],
     });
-    showFilterReset = signal<boolean>(this.activeRoute.snapshot.queryParamMap.has('projectName'));
-    filteredProjects = signal<Project[]>(this.projectService.getProjects(this.filterForm.value));
+    showFilterReset = signal<boolean>(this.activeRoute.snapshot.queryParamMap.has('name'));
+    filteredProjects = signal<Project[]>([]);
     shownProjects = computed(() => new MatTableDataSource<Project>(this.filteredProjects()));
     displayedColumns = signal<DisplayedColumn<Project>[]>([
         {
@@ -65,23 +70,26 @@ export class ProjectsComponent {
             routerLink: (e: Project) => ['/projects', e.id],
         },
         {
-            id: 'admin',
-            label: 'Admin',
+            id: 'owner',
+            label: 'Owner',
             sortable: false,
-            value: (e: Project) => e.admin.username,
-            routerLink: (e: Project) => ['/users', e.admin.id],
+            value: (e: Project) => e.owner?.username || 'N/A',
+            routerLink: (e: Project) => ['/users', e.owner?.id],
         },
         {
             id: 'users',
             label: '# of users',
             sortable: true,
-            value: (e: Project) => e.users.length,
+            value: (e: Project) => e.members.length + 1,
         },
         {
             id: 'createdAt',
             label: 'Created At',
             sortable: true,
-            value: (e: Project) => e.createdAt,
+            value: (e: Project) => {
+                const date = this.dateService.parseDate(e.createdAt);
+                return this.dateService.toLocaleISOString(date).split('T')[0];
+            },
         },
     ]);
 
@@ -100,12 +108,26 @@ export class ProjectsComponent {
                     this.showFilterReset.set(true);
                 }
                 this.urlService.addQueryParams(filters);
-                this.filteredProjects.set(this.projectService.getProjects(filters));
+                this.getProjects(filters);
             });
+    }
+
+    ngOnInit(): void {
+        this.getProjects(this.filterForm.value);
     }
 
     resetFilters() {
         this.filterForm.reset();
         this.showFilterReset.set(false);
+    }
+
+    getProjects(filters: Partial<ProjectFilters> = {}) {
+        this.projectService
+            .getProjects(filters)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe((response) => {
+                this.projects.set(response);
+                this.filteredProjects.set(response);
+            });
     }
 }

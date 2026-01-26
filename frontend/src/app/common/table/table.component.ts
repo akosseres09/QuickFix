@@ -9,6 +9,7 @@ import {
     effect,
     computed,
     viewChild,
+    DestroyRef,
 } from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { DisplayedColumn } from '../../shared/constants/DisplayedColumn';
@@ -17,13 +18,14 @@ import { MatSort, MatSortHeader, Sort } from '@angular/material/sort';
 import { CommonModule, DatePipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { UserService } from '../../shared/services/user/user.service';
-import { ADMIN, SYS_ADMIN, User } from '../../shared/model/User';
 import { BaseModel } from '../../shared/model/BaseModel';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { UrlService } from '../../shared/services/url/url.service';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { Claims } from '../../shared/constants/Claims';
+import { AuthService } from '../../shared/services/auth/auth.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'app-table',
@@ -46,9 +48,6 @@ export class TableComponent<T extends BaseModel> implements OnInit {
     dataSource = model<MatTableDataSource<T>>(new MatTableDataSource<T>([]));
     displayedColumns = input<Array<DisplayedColumn<T>>>([]);
 
-    showActions = input<boolean>(true);
-    showEditAction = input<boolean>(true);
-    showDeleteAction = input<boolean>(true);
     tableHeader = input<string>('');
     isLoading = input<boolean>(false);
 
@@ -56,18 +55,15 @@ export class TableComponent<T extends BaseModel> implements OnInit {
     delete = output<T>();
     name = output<T>();
 
-    private readonly userService = inject(UserService);
+    private readonly authService = inject(AuthService);
     private readonly urlService = inject(UrlService);
     private readonly activeRoute = inject(ActivatedRoute);
+    private readonly destroyRef = inject(DestroyRef);
 
-    user = signal<User | null>(this.userService.getUser());
+    user = signal<Claims | null>(this.authService.currentUserClaims());
 
     columnIds = computed<Array<String>>(() => {
-        const ids = this.displayedColumns().map((col) => col.id);
-        if (this.showActions() && this.canModify()) {
-            ids.push('actions');
-        }
-        return ids;
+        return this.displayedColumnIds();
     });
 
     paginator = viewChild(MatPaginator);
@@ -95,16 +91,13 @@ export class TableComponent<T extends BaseModel> implements OnInit {
             }
         });
 
-        effect((onCleanup) => {
+        effect(() => {
             const s = this.sort();
             if (s) {
-                this.sortSubscription = s.sortChange.subscribe(
-                    () => (this.paginator()!.pageIndex = 0)
-                );
+                this.sortSubscription = s.sortChange
+                    .pipe(takeUntilDestroyed(this.destroyRef))
+                    .subscribe(() => (this.paginator()!.pageIndex = 0));
             }
-            onCleanup(() => {
-                this.sortSubscription?.unsubscribe();
-            });
         });
     }
 
@@ -146,11 +139,7 @@ export class TableComponent<T extends BaseModel> implements OnInit {
     }
 
     displayedColumnIds(): Array<String> {
-        const ids = this.displayedColumns().map((col) => col.id);
-        if (this.showActions() && this.canModify()) {
-            ids.push('actions');
-        }
-        return ids;
+        return this.displayedColumns().map((col) => col.id);
     }
 
     onPageEvent(event: PageEvent) {
@@ -159,19 +148,7 @@ export class TableComponent<T extends BaseModel> implements OnInit {
         this.urlService.addQueryParams({ page: this.pageIndex() + 1, pageSize: this.pageSize() });
     }
 
-    onEdit(element: T): void {
-        this.edit.emit(element);
-    }
-
-    onDelete(element: T): void {
-        this.delete.emit(element);
-    }
-
     onNameClick(element: T): void {
         this.name.emit(element);
-    }
-
-    canModify() {
-        return this.user()?.role === ADMIN || this.user()?.role === SYS_ADMIN;
     }
 }

@@ -4,253 +4,326 @@
         <p class="text-base opacity-70">Manage your profile and account settings</p>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-1">
-            <mat-card class="!rounded-xl p-6">
-                <div class="flex flex-col items-center">
-                    <div class="relative group">
-                        <img
-                            [src]="previewUrl() || profilePictureUrl()"
-                            alt="Profile Picture"
-                            class="w-40 h-40 rounded-full object-cover border-4 border-light-primary dark:border-dark-primary"
-                        />
-                        <div
-                            class="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
-                            (click)="triggerFileInput()"
-                        >
-                            <mat-icon class="text-white text-4xl">photo_camera</mat-icon>
-                        </div>
-                        <input
-                            #fileInput
-                            type="file"
-                            id="fileInput"
-                            accept="image/*"
-                            class="hidden"
-                            (change)="onFileSelected($event)"
-                        />
-                    </div>
-
-                    <h2 class="text-xl font-semibold mt-4">{{ user()?.username }}</h2>
-                    <p class="text-sm opacity-70">{{ user()?.email }}</p>
-
-                    @if (user()?.role === 1) {
-                        <mat-chip class="mt-3 !bg-dark-primary">
-                            <div class="flex items-center gap-1">
-                                <mat-icon class="!text-base mr-1">admin_panel_settings</mat-icon>
-                                Admin
+    @if (user(); as user) {
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-1">
+                <mat-card class="!rounded-xl p-6">
+                    <div class="flex flex-col items-center">
+                        <div class="relative group">
+                            <img
+                                [src]="previewUrl() || profilePictureUrl()"
+                                alt="Profile Picture"
+                                class="w-40 h-40 rounded-full object-cover"
+                            />
+                            <div
+                                class="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                                (click)="triggerFileInput()"
+                            >
+                                <mat-icon class="text-white text-4xl">photo_camera</mat-icon>
                             </div>
-                        </mat-chip>
-                    }
+                            <input
+                                #fileInput
+                                type="file"
+                                id="fileInput"
+                                accept="image/*"
+                                class="hidden"
+                                (change)="onFileSelected($event)"
+                            />
+                        </div>
+                        <h2 class="text-xl font-semibold mt-4">
+                            {{ user.firstName + ' ' + user.lastName }}
+                        </h2>
+                        <p class="opacity-90">{{ '@' + user.username }}</p>
+                        <p class="text-sm opacity-70">{{ user.email }}</p>
 
-                    <mat-divider class="w-full !my-4"></mat-divider>
+                        @if (user.isAdmin === 1) {
+                            <mat-chip class="mt-3 !bg-dark-primary">
+                                <div class="flex items-center gap-1">
+                                    <mat-icon class="!text-base mr-1"
+                                        >admin_panel_settings</mat-icon
+                                    >
+                                    Admin
+                                </div>
+                            </mat-chip>
+                        }
 
-                    <div class="flex flex-col gap-3 w-full">
-                        <button
-                            mat-stroked-button
-                            class="w-full flex items-center justify-center gap-2"
-                            (click)="triggerFileInput()"
-                        >
-                            <mat-icon>upload</mat-icon>
-                            Upload New Photo
-                        </button>
+                        <mat-divider class="w-full !my-4"></mat-divider>
 
-                        @if (selectedFile() || previewUrl()) {
+                        <div class="flex flex-col gap-3 w-full">
                             <button
                                 mat-stroked-button
-                                color="warn"
                                 class="w-full flex items-center justify-center gap-2"
-                                (click)="removeProfilePicture()"
+                                (click)="triggerFileInput()"
                             >
-                                <mat-icon>delete</mat-icon>
-                                Remove Photo
+                                <mat-icon>upload</mat-icon>
+                                Upload New Photo
                             </button>
-                        }
+
+                            @if (selectedFile() || previewUrl()) {
+                                <button
+                                    mat-stroked-button
+                                    color="warn"
+                                    class="w-full flex items-center justify-center gap-2"
+                                    (click)="removeProfilePicture()"
+                                >
+                                    <mat-icon>delete</mat-icon>
+                                    Remove Photo
+                                </button>
+                            }
+                        </div>
+
+                        <div class="mt-6 text-xs opacity-60 text-center">
+                            <p>Recommended: Square image, at least 400x400px</p>
+                            <p class="mt-1">Max file size: 5MB</p>
+                        </div>
+                    </div>
+                </mat-card>
+            </div>
+
+            <div class="lg:col-span-2">
+                <mat-card class="!rounded-xl p-6">
+                    <h2 class="text-2xl font-semibold mb-6 flex items-center gap-2">
+                        <mat-icon>person</mat-icon>
+                        Profile Information
+                    </h2>
+
+                    <form [formGroup]="profileForm" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <mat-form-field appearance="outline" class="w-full">
+                                <mat-label>Username</mat-label>
+                                <mat-icon matPrefix>account_circle</mat-icon>
+                                <input
+                                    matInput
+                                    formControlName="username"
+                                    placeholder="Enter username"
+                                />
+                                @if (
+                                    getControl('username')?.hasError('required') &&
+                                    getControl('username')?.touched
+                                ) {
+                                    <mat-error>Username is required</mat-error>
+                                }
+                                @if (
+                                    getControl('username')?.hasError('minlength') &&
+                                    getControl('username')?.touched
+                                ) {
+                                    <mat-error>Username must be at least 3 characters</mat-error>
+                                }
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="w-full">
+                                <mat-label>Email</mat-label>
+                                <mat-icon matPrefix>email</mat-icon>
+                                <input
+                                    matInput
+                                    formControlName="email"
+                                    placeholder="Enter email"
+                                    type="email"
+                                />
+                                @if (
+                                    getControl('email')?.hasError('required') &&
+                                    getControl('email')?.touched
+                                ) {
+                                    <mat-error>Email is required</mat-error>
+                                }
+                                @if (
+                                    getControl('email')?.hasError('email') &&
+                                    getControl('email')?.touched
+                                ) {
+                                    <mat-error>Please enter a valid email</mat-error>
+                                }
+                            </mat-form-field>
+
+                            <mat-form-field class="w-full" appearance="outline">
+                                <mat-label>Date of Birth</mat-label>
+                                <mat-icon matPrefix class="!text-light-text dark:!text-inherit"
+                                    >cake</mat-icon
+                                >
+                                <input
+                                    formControlName="dateOfBirth"
+                                    matInput
+                                    type="date"
+                                    autocomplete="bday"
+                                />
+                                @if (getControl('dateOfBirth')?.invalid) {
+                                    <mat-error class="text-sm">
+                                        @if (getControl('dateOfBirth')?.hasError('invalidDate')) {
+                                            <span>Please provide a valid date.</span>
+                                        }
+                                        @if (getControl('dateOfBirth')?.hasError('futureDate')) {
+                                            <span>Date of birth cannot be in the future.</span>
+                                        }
+                                        @if (getControl('dateOfBirth')?.hasError('minAge')) {
+                                            <span
+                                                >You must be at least
+                                                {{
+                                                    getControl('dateOfBirth')?.getError('minAge')
+                                                        ?.requiredAge
+                                                }}
+                                                years old.</span
+                                            >
+                                        }
+                                        @if (getControl('dateOfBirth')?.hasError('serverError')) {
+                                            @for (
+                                                error of getControl('dateOfBirth')?.getError(
+                                                    'serverError'
+                                                );
+                                                track $index
+                                            ) {
+                                                <span>{{ error }}</span>
+                                            }
+                                        }
+                                    </mat-error>
+                                }
+                            </mat-form-field>
+                            <mat-form-field class="w-full" appearance="outline">
+                                <mat-label>Phone Number</mat-label>
+                                <mat-icon matPrefix class="!text-light-text dark:!text-inherit"
+                                    >phone</mat-icon
+                                >
+                                <input
+                                    formControlName="phoneNumber"
+                                    matInput
+                                    type="tel"
+                                    autocomplete="tel"
+                                    placeholder="+1234567890"
+                                />
+                                @if (getControl('phoneNumber')?.invalid) {
+                                    <mat-error class="text-sm">
+                                        @if (getControl('phoneNumber')?.hasError('invalidPhone')) {
+                                            <span
+                                                >Provide a valid phone number (e.g.,
+                                                +1234567890).</span
+                                            >
+                                        }
+                                        @if (getControl('phoneNumber')?.hasError('serverError')) {
+                                            @for (
+                                                error of getControl('phoneNumber')?.getError(
+                                                    'serverError'
+                                                );
+                                                track $index
+                                            ) {
+                                                <span>{{ error }}</span>
+                                            }
+                                        }
+                                    </mat-error>
+                                }
+                            </mat-form-field>
+                        </div>
+                    </form>
+
+                    <mat-divider class="!my-6"></mat-divider>
+
+                    <div class="space-y-3">
+                        <h3 class="text-lg font-medium mb-3">Account Details</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                            <div
+                                class="flex items-center gap-2 p-3 rounded-lg bg-light-background dark:bg-dark-background"
+                            >
+                                <mat-icon class="text-light-primary dark:text-dark-primary"
+                                    >badge</mat-icon
+                                >
+                                <div>
+                                    <p class="opacity-70">User ID</p>
+                                    <p class="font-medium">{{ user?.id }}</p>
+                                </div>
+                            </div>
+                            <div
+                                class="flex items-center gap-2 p-3 rounded-lg bg-light-background dark:bg-dark-background"
+                            >
+                                <mat-icon class="text-light-primary dark:text-dark-primary"
+                                    >calendar_today</mat-icon
+                                >
+                                <div>
+                                    <p class="opacity-70">Member Since</p>
+                                    <p class="font-medium">
+                                        {{ createDate(user.createdAt) }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div
+                                class="flex items-center gap-2 p-3 rounded-lg bg-light-background dark:bg-dark-background"
+                            >
+                                <mat-icon class="text-light-primary dark:text-dark-primary"
+                                    >check_circle</mat-icon
+                                >
+                                <div>
+                                    <p class="opacity-70">Account Status</p>
+                                    <p class="font-medium">
+                                        {{ user?.status === 10 ? 'Active' : 'Inactive' }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div
+                                class="flex items-center gap-2 p-3 rounded-lg bg-light-background dark:bg-dark-background"
+                            >
+                                <mat-icon class="text-light-primary dark:text-dark-primary"
+                                    >security</mat-icon
+                                >
+                                <div>
+                                    <p class="opacity-70">Role</p>
+                                    <p class="font-medium">
+                                        {{ user?.isAdmin === 1 ? 'Administrator' : 'User' }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div
+                                class="flex items-center gap-2 p-3 rounded-lg bg-light-background dark:bg-dark-background"
+                            >
+                                <mat-icon class="text-light-primary dark:text-dark-primary"
+                                    >phone</mat-icon
+                                >
+                                <div>
+                                    <p class="opacity-70">Phone Number</p>
+                                    <p class="font-medium">
+                                        {{ user?.phoneNumber || 'N/A' }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div
+                                class="flex items-center gap-2 p-3 rounded-lg bg-light-background dark:bg-dark-background"
+                            >
+                                <mat-icon class="text-light-primary dark:text-dark-primary"
+                                    >crib</mat-icon
+                                >
+                                <div>
+                                    <p class="opacity-70">Date of Birth</p>
+                                    <p class="font-medium">
+                                        {{
+                                            user?.dateOfBirth
+                                                ? (user.dateOfBirth | date: 'yyyy-MM-dd')
+                                                : 'N/A'
+                                        }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="mt-6 text-xs opacity-60 text-center">
-                        <p>Recommended: Square image, at least 400x400px</p>
-                        <p class="mt-1">Max file size: 5MB</p>
+                    <div class="flex gap-4 mt-6 md:flex-row flex-col">
+                        <button
+                            mat-raised-button
+                            color="primary"
+                            class="flex items-center justify-center gap-2 px-6 py-3 md:flex-1 !text-dark-text"
+                            [class.!text-light-text]="!hasChanges()"
+                            [disabled]="!hasChanges() || profileForm.invalid"
+                            (click)="saveChanges()"
+                        >
+                            <mat-icon>save</mat-icon>
+                            Save Changes
+                        </button>
+                        <button
+                            mat-stroked-button
+                            class="flex items-center justify-center gap-2 px-6 py-3"
+                            [disabled]="!hasChanges"
+                            (click)="cancelChanges()"
+                        >
+                            <mat-icon>cancel</mat-icon>
+                            Cancel
+                        </button>
                     </div>
-                </div>
-            </mat-card>
+                </mat-card>
+            </div>
         </div>
-
-        <div class="lg:col-span-2">
-            <mat-card class="!rounded-xl p-6">
-                <h2 class="text-2xl font-semibold mb-6 flex items-center gap-2">
-                    <mat-icon>person</mat-icon>
-                    Profile Information
-                </h2>
-
-                <form [formGroup]="profileForm" class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <mat-form-field appearance="outline" class="w-full">
-                            <mat-label>Username</mat-label>
-                            <mat-icon matPrefix>account_circle</mat-icon>
-                            <input
-                                matInput
-                                formControlName="username"
-                                placeholder="Enter username"
-                            />
-                            @if (
-                                getControl('username')?.hasError('required') &&
-                                getControl('username')?.touched
-                            ) {
-                                <mat-error>Username is required</mat-error>
-                            }
-                            @if (
-                                getControl('username')?.hasError('minlength') &&
-                                getControl('username')?.touched
-                            ) {
-                                <mat-error>Username must be at least 3 characters</mat-error>
-                            }
-                        </mat-form-field>
-
-                        <mat-form-field appearance="outline" class="w-full">
-                            <mat-label>Email</mat-label>
-                            <mat-icon matPrefix>email</mat-icon>
-                            <input
-                                matInput
-                                formControlName="email"
-                                placeholder="Enter email"
-                                type="email"
-                            />
-                            @if (
-                                getControl('email')?.hasError('required') &&
-                                getControl('email')?.touched
-                            ) {
-                                <mat-error>Email is required</mat-error>
-                            }
-                            @if (
-                                getControl('email')?.hasError('email') &&
-                                getControl('email')?.touched
-                            ) {
-                                <mat-error>Please enter a valid email</mat-error>
-                            }
-                        </mat-form-field>
-                    </div>
-
-                    <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>Bio</mat-label>
-                        <mat-icon matPrefix>info</mat-icon>
-                        <textarea
-                            matInput
-                            formControlName="bio"
-                            placeholder="Tell us about yourself"
-                            rows="3"
-                        ></textarea>
-                    </mat-form-field>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <mat-form-field appearance="outline" class="w-full">
-                            <mat-label>Location</mat-label>
-                            <mat-icon matPrefix>location_on</mat-icon>
-                            <input
-                                matInput
-                                formControlName="location"
-                                placeholder="City, Country"
-                            />
-                        </mat-form-field>
-
-                        <mat-form-field appearance="outline" class="w-full">
-                            <mat-label>Company</mat-label>
-                            <mat-icon matPrefix>business</mat-icon>
-                            <input matInput formControlName="company" placeholder="Company name" />
-                        </mat-form-field>
-                    </div>
-
-                    <mat-form-field appearance="outline" class="w-full">
-                        <mat-label>Website</mat-label>
-                        <mat-icon matPrefix>link</mat-icon>
-                        <input
-                            matInput
-                            formControlName="website"
-                            placeholder="https://example.com"
-                        />
-                    </mat-form-field>
-                </form>
-
-                <mat-divider class="!my-6"></mat-divider>
-
-                <div class="space-y-3">
-                    <h3 class="text-lg font-medium mb-3">Account Details</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                        <div
-                            class="flex items-center gap-2 p-3 rounded-lg bg-light-background dark:bg-dark-background"
-                        >
-                            <mat-icon class="text-light-primary dark:text-dark-primary"
-                                >badge</mat-icon
-                            >
-                            <div>
-                                <p class="opacity-70">User ID</p>
-                                <p class="font-medium">{{ user()?.id }}</p>
-                            </div>
-                        </div>
-                        <div
-                            class="flex items-center gap-2 p-3 rounded-lg bg-light-background dark:bg-dark-background"
-                        >
-                            <mat-icon class="text-light-primary dark:text-dark-primary"
-                                >calendar_today</mat-icon
-                            >
-                            <div>
-                                <p class="opacity-70">Member Since</p>
-                                <p class="font-medium">
-                                    {{ user()?.created_at | date: 'mediumDate' }}
-                                </p>
-                            </div>
-                        </div>
-                        <div
-                            class="flex items-center gap-2 p-3 rounded-lg bg-light-background dark:bg-dark-background"
-                        >
-                            <mat-icon class="text-light-primary dark:text-dark-primary"
-                                >check_circle</mat-icon
-                            >
-                            <div>
-                                <p class="opacity-70">Account Status</p>
-                                <p class="font-medium">
-                                    {{ user()?.status === 10 ? 'Active' : 'Inactive' }}
-                                </p>
-                            </div>
-                        </div>
-                        <div
-                            class="flex items-center gap-2 p-3 rounded-lg bg-light-background dark:bg-dark-background"
-                        >
-                            <mat-icon class="text-light-primary dark:text-dark-primary"
-                                >security</mat-icon
-                            >
-                            <div>
-                                <p class="opacity-70">Role</p>
-                                <p class="font-medium">
-                                    {{ user()?.role === 1 ? 'Administrator' : 'User' }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex gap-4 mt-6 md:flex-row flex-col">
-                    <button
-                        mat-raised-button
-                        color="primary"
-                        class="flex items-center justify-center gap-2 px-6 py-3 flex-1 !text-dark-text"
-                        [class.!text-light-text]="!hasChanges()"
-                        [disabled]="!hasChanges() || profileForm.invalid"
-                        (click)="saveChanges()"
-                    >
-                        <mat-icon>save</mat-icon>
-                        Save Changes
-                    </button>
-                    <button
-                        mat-stroked-button
-                        class="flex items-center justify-center gap-2 px-6 py-3"
-                        [disabled]="!hasChanges"
-                        (click)="cancelChanges()"
-                    >
-                        <mat-icon>cancel</mat-icon>
-                        Cancel
-                    </button>
-                </div>
-            </mat-card>
-        </div>
-    </div>
+    }
 </div>
