@@ -7,7 +7,6 @@ import { Event, NavigationStart, Router, RouterLink, RouterModule } from '@angul
 import { ThemeService } from '../../shared/services/theme/theme.service';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { AppRoute } from '../../shared/constants/Routes';
-import { RouteService } from '../../shared/services/route/route.service';
 import { SidebarService } from '../../shared/services/sidebar/sidebar.service';
 import { filter, fromEvent } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -33,7 +32,6 @@ import { AuthService } from '../../shared/services/auth/auth.service';
 export class NavbarComponent implements AfterViewInit {
     private themeService = inject(ThemeService);
     private router = inject(Router);
-    private routeService = inject(RouteService);
     private sidebarService = inject(SidebarService);
     private authService = inject(AuthService);
     private destroyRef = inject(DestroyRef);
@@ -46,9 +44,7 @@ export class NavbarComponent implements AfterViewInit {
     imageSource: string = 'QuickFix_logo_dark.png';
     user = signal<Claims | null>(this.authService.currentUserClaims());
     htmlElement = signal<HTMLElement | null>(document.documentElement);
-    routes = signal<AppRoute[]>(
-        this.routeService.getAppRoutes(this.user()).filter((route) => route.show)
-    );
+    routes = signal<AppRoute[]>(this.getAppRoutes().filter((route) => route.show));
     logo = this.themeService.logos;
     theme = signal<'light' | 'dark'>(this.themeService.getTheme() || 'light');
 
@@ -81,6 +77,60 @@ export class NavbarComponent implements AfterViewInit {
         if (!el) return;
 
         el.dataset['theme'] = this.theme();
+    }
+
+    getAppRoutes(): Array<AppRoute> {
+        return [
+            {
+                path: '/auth/login',
+                name: 'Login',
+                type: 'button',
+                show: this.user() === null,
+            },
+            {
+                path: '/auth/signup',
+                name: 'Sign Up',
+                type: 'button',
+                show: this.user() === null,
+            },
+            {
+                path: '',
+                name: 'Home',
+                type: 'button',
+                show: this.user() === null,
+                exact: true,
+            },
+            {
+                path: '/projects',
+                name: 'Projects',
+                type: 'button',
+                show: this.user() !== null,
+            },
+            {
+                path: '/worktime',
+                name: 'Worktime',
+                type: 'button',
+                show: this.user() !== null,
+            },
+            {
+                type: 'menu',
+                show: this.user() !== null,
+                name: 'Account',
+                icon: 'account_circle',
+                children: [
+                    {
+                        name: 'Account',
+                        path: '/account',
+                        icon: 'person',
+                    },
+                    {
+                        name: 'Settings',
+                        path: '/settings',
+                        icon: 'settings',
+                    },
+                ],
+            },
+        ];
     }
 
     setTheme(theme: 'light' | 'dark') {

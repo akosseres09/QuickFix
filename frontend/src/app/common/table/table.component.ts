@@ -14,7 +14,7 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { DisplayedColumn } from '../../shared/constants/DisplayedColumn';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatSort, MatSortHeader, Sort, SortDirection } from '@angular/material/sort';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { BaseModel } from '../../shared/model/BaseModel';
@@ -30,7 +30,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
         CommonModule,
         MatTableModule,
         MatPaginatorModule,
-        DatePipe,
         MatSort,
         MatSortHeader,
         MatIconModule,

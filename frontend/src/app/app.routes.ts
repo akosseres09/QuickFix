@@ -84,12 +84,17 @@ export const routes: Routes = [
         ],
     },
     {
-        path: '',
+        path: 'project/:projectId',
         loadComponent: () =>
             import('./layouts/main-layout/main-layout.component').then(
                 (c) => c.MainLayoutComponent
             ),
         children: [
+            {
+                path: '',
+                pathMatch: 'full',
+                redirectTo: 'issues',
+            },
             {
                 path: 'issues',
                 loadComponent: () =>
@@ -100,19 +105,19 @@ export const routes: Routes = [
                     tabs: [
                         {
                             label: 'Overview',
-                            route: '/issues/overview',
+                            route: 'overview',
                         },
                         {
                             label: 'Issues',
-                            route: '/issues',
+                            route: '.',
                         },
                         {
                             label: 'Board',
-                            route: '/issues/board',
+                            route: 'board',
                         },
                         {
                             label: 'New Issue',
-                            route: '/issues/new',
+                            route: 'new',
                         },
                     ],
                 },

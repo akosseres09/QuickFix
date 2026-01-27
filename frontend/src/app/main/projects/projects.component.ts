@@ -78,14 +78,14 @@ export class ProjectsComponent implements OnInit {
             label: 'Name',
             sortable: true,
             value: (e: Project) => e.name,
-            routerLink: (e: Project) => ['/projects', e.id],
+            routerLink: (e: Project) => ['/project', e.key],
         },
         {
             id: 'owner',
             label: 'Owner',
             sortable: false,
             value: (e: Project) => e.owner?.username || 'N/A',
-            routerLink: (e: Project) => (e.owner?.id ? ['/users', e.owner.id] : []),
+            routerLink: (e: Project) => (e.owner?.id ? ['/user', '@' + e.owner.username] : []),
         },
         {
             id: 'users',
