@@ -1,1 +1,312 @@
-<p>new works!</p>
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-4 sm:p-6 space-y-6">
+        <div class="border-b border-slate-200 dark:border-slate-700 pb-4">
+            <div class="flex items-center justify-between">
+                <h1 class="text-3xl font-bold text-slate-900 dark:text-white">
+                    Create New Project
+                </h1>
+                <mat-icon class="cursor-pointer !overflow-visible" (click)="openInfo()"
+                    >info</mat-icon
+                >
+            </div>
+            <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                Fill in the details below to create a new project
+            </p>
+        </div>
+
+        <form [formGroup]="projectForm" (ngSubmit)="onSubmit()" class="space-y-6">
+            <div class="space-y-4">
+                <h2 class="text-xl font-semibold text-slate-800 dark:text-slate-200">
+                    Basic Information
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Project Name -->
+                    <mat-form-field class="w-full" appearance="outline">
+                        <mat-label>Project Name</mat-label>
+                        <mat-icon matPrefix>folder</mat-icon>
+                        <input
+                            formControlName="name"
+                            matInput
+                            type="text"
+                            placeholder="My Awesome Project"
+                            required
+                        />
+                        @if (projectForm.get('name')?.invalid && projectForm.get('name')?.touched) {
+                            <mat-error>
+                                @if (projectForm.get('name')?.hasError('required')) {
+                                    <span>Project name is required</span>
+                                }
+                                @if (projectForm.get('name')?.hasError('maxlength')) {
+                                    <span>Name must not exceed 255 characters</span>
+                                }
+                            </mat-error>
+                        }
+                    </mat-form-field>
+
+                    <!-- Project Key -->
+                    <mat-form-field class="w-full" appearance="outline">
+                        <mat-label>Project Key</mat-label>
+                        <mat-icon matPrefix>key</mat-icon>
+                        <input
+                            formControlName="key"
+                            matInput
+                            type="text"
+                            placeholder="PROJ"
+                            required
+                            maxlength="10"
+                            style="text-transform: uppercase"
+                        />
+                        @if (projectForm.get('key')?.invalid && projectForm.get('key')?.touched) {
+                            <mat-error>
+                                @if (projectForm.get('key')?.hasError('required')) {
+                                    <span>Project key is required</span>
+                                }
+                                @if (projectForm.get('key')?.hasError('pattern')) {
+                                    <span>Only uppercase letters and numbers allowed</span>
+                                }
+                                @if (projectForm.get('key')?.hasError('maxlength')) {
+                                    <span>Key must not exceed 10 characters</span>
+                                }
+                            </mat-error>
+                        }
+                    </mat-form-field>
+                </div>
+
+                <!-- Description -->
+                <mat-form-field class="w-full" appearance="outline">
+                    <mat-label>Description</mat-label>
+                    <textarea
+                        formControlName="description"
+                        matInput
+                        rows="4"
+                        placeholder="Describe your project..."
+                    ></textarea>
+                </mat-form-field>
+            </div>
+
+            <!-- Project Settings Section -->
+            <div class="space-y-4">
+                <h2
+                    class="text-xl font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2"
+                >
+                    Project Settings
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Status -->
+                    <mat-form-field class="w-full" appearance="outline">
+                        <mat-label>Status</mat-label>
+                        <mat-icon matPrefix>flag</mat-icon>
+                        <mat-select formControlName="status" required>
+                            @for (status of statusList; track status) {
+                                <mat-option [value]="status">
+                                    {{ getStatusLabel(status) }}
+                                </mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+
+                    <!-- Visibility -->
+                    <mat-form-field class="w-full" appearance="outline">
+                        <mat-label>Visibility</mat-label>
+                        <mat-icon matPrefix>visibility</mat-icon>
+                        <mat-select formControlName="visibility" required>
+                            @for (visibility of visibilityList; track visibility) {
+                                <mat-option [value]="visibility">
+                                    {{ getVisibilityLabel(visibility) }}
+                                </mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+
+                    <!-- Priority -->
+                    <mat-form-field class="w-full" appearance="outline">
+                        <mat-label>Priority</mat-label>
+                        <mat-icon matPrefix>priority_high</mat-icon>
+                        <mat-select formControlName="priority" required>
+                            @for (priority of priorityList; track priority) {
+                                <mat-option [value]="priority">
+                                    {{ getPriorityLabel(priority) }}
+                                </mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Start Date -->
+                    <mat-form-field class="w-full" appearance="outline">
+                        <mat-label>Start Date</mat-label>
+                        <mat-icon matPrefix>event</mat-icon>
+                        <input formControlName="startDate" matInput [matDatepicker]="startPicker" />
+                        <mat-datepicker-toggle
+                            matIconSuffix
+                            [for]="startPicker"
+                        ></mat-datepicker-toggle>
+                        <mat-datepicker #startPicker></mat-datepicker>
+                    </mat-form-field>
+
+                    <!-- End Date -->
+                    <mat-form-field class="w-full" appearance="outline">
+                        <mat-label>End Date</mat-label>
+                        <mat-icon matPrefix>event</mat-icon>
+                        <input formControlName="endDate" matInput [matDatepicker]="endPicker" />
+                        <mat-datepicker-toggle
+                            matIconSuffix
+                            [for]="endPicker"
+                        ></mat-datepicker-toggle>
+                        <mat-datepicker #endPicker></mat-datepicker>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <!-- Additional Details Section -->
+            <div class="space-y-4">
+                <h2 class="text-xl font-semibold text-slate-800 dark:text-slate-200">
+                    Additional Details
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Color -->
+                    <mat-form-field class="w-full" appearance="outline">
+                        <mat-label>Project Color</mat-label>
+                        <mat-icon matPrefix>palette</mat-icon>
+                        <input formControlName="color" matInput type="color" />
+                        @if (
+                            projectForm.get('color')?.invalid && projectForm.get('color')?.touched
+                        ) {
+                            <mat-error>
+                                @if (projectForm.get('color')?.hasError('pattern')) {
+                                    <span>Invalid color format</span>
+                                }
+                            </mat-error>
+                        }
+                    </mat-form-field>
+
+                    <!-- Budget -->
+                    <mat-form-field class="w-full" appearance="outline">
+                        <mat-label>Budget</mat-label>
+                        <mat-icon matPrefix>attach_money</mat-icon>
+                        <input
+                            formControlName="budget"
+                            matInput
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="0.00"
+                        />
+                        @if (
+                            projectForm.get('budget')?.invalid && projectForm.get('budget')?.touched
+                        ) {
+                            <mat-error>
+                                @if (projectForm.get('budget')?.hasError('min')) {
+                                    <span>Budget must be positive</span>
+                                }
+                            </mat-error>
+                        }
+                    </mat-form-field>
+                </div>
+
+                <!-- Progress -->
+                <div class="w-full">
+                    <label
+                        class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
+                    >
+                        Initial Progress: {{ projectForm.get('progress')?.value }}%
+                    </label>
+                    <mat-slider
+                        class="!w-[-webkit-fill-available]"
+                        [min]="0"
+                        [max]="100"
+                        [step]="0.5"
+                        [discrete]="true"
+                        [showTickMarks]="true"
+                    >
+                        <input formControlName="progress" class="!p-0 !left-0" matSliderThumb />
+                    </mat-slider>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div
+                class="flex justify-center md:justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700"
+            >
+                <button
+                    type="submit"
+                    mat-raised-button
+                    color="primary"
+                    [disabled]="projectForm.invalid"
+                    class="!px-6 !py-2 flex-1/2"
+                >
+                    <mat-icon class="mr-1">add</mat-icon>
+                    Create
+                </button>
+                <button
+                    type="button"
+                    mat-stroked-button
+                    (click)="onCancel()"
+                    class="!px-6 !py-2 flex-1/2"
+                >
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<ng-template #infoDialog>
+    <div class="space-y-4">
+        <p>
+            Creating a new project allows you to organize and manage your tasks, team members, and
+            resources effectively. Fill in the required fields to set up your project.
+        </p>
+        <ul class="list-disc list-inside space-y-2">
+            <li>
+                <strong class="dark:text-white text-light-text">Project Name:</strong> The name of
+                your project. This is a required field.
+            </li>
+            <li>
+                <strong class="dark:text-white text-light-text">Project Key:</strong> A unique
+                identifier for your project, typically used in URLs and references. Must be
+                uppercase letters and numbers only.
+            </li>
+            <li>
+                <strong class="dark:text-white text-light-text">Description:</strong> A brief
+                overview of the project's purpose and goals.
+            </li>
+            <li>
+                <strong class="dark:text-white text-light-text">Status:</strong> The current state
+                of the project (e.g., Active, Archived, On Hold, Completed).
+            </li>
+            <li>
+                <strong class="dark:text-white text-light-text">Visibility:</strong> Determines who
+                can see the project (e.g., Public, Private, Team (Invite only)).
+            </li>
+            <li>
+                <strong class="dark:text-white text-light-text">Priority:</strong> Indicates the
+                importance of the project relative to others.
+            </li>
+            <li>
+                <strong class="dark:text-white text-light-text">Start and End Dates:</strong> Define
+                the timeline for your project.
+            </li>
+            <li>
+                <strong class="dark:text-white text-light-text">Color:</strong> Choose a color to
+                represent your project visually.
+            </li>
+            <li>
+                <strong class="dark:text-white text-light-text">Budget:</strong> Set a financial
+                limit for the project's expenses.
+            </li>
+            <li>
+                <strong class="dark:text-white text-light-text">Progress:</strong> Indicate the
+                initial completion percentage of the project.
+            </li>
+        </ul>
+        <p>
+            Once you've filled out the form, click "Create Project" to add it to your dashboard. You
+            can always edit these details later as your project evolves.
+        </p>
+    </div>
+</ng-template>

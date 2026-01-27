@@ -175,6 +175,12 @@ export const routes: Routes = [
                 canActivate: [authenticatedGuard],
             },
             {
+                path: 'projects/new',
+                loadComponent: () =>
+                    import('./main/projects/new/new.component').then((c) => c.NewComponent),
+                canActivate: [authenticatedGuard],
+            },
+            {
                 path: 'worktime',
                 loadComponent: () =>
                     import('./main/worktime/worktime.component').then((c) => WorktimeComponent),

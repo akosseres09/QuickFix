@@ -25,9 +25,9 @@ export interface Project extends BaseModel {
     key: string;
     description: string;
     status: string;
-    startDate: Date;
-    endDate: Date;
-    owner_id: string;
+    startDate: string | null;
+    endDate: string | null;
+    ownerId: string;
     visibility: string;
     priority: number;
     color: string;
@@ -35,7 +35,7 @@ export interface Project extends BaseModel {
     budget: number;
     createdAt: number;
     updatedAt: number;
-    owner: User;
-    projectMembers: Array<User>;
-    members: Array<User>;
+    owner?: User;
+    projectMembers?: Array<User>;
+    members?: Array<User>;
 }

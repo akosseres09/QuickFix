@@ -83,4 +83,25 @@ export class ProjectService {
     getProjectsSimple(queryParams: ApiQueryParams = {}): Observable<Project[]> {
         return this.getProjects(queryParams).pipe(map((response) => response.items));
     }
+
+    /**
+     * Creates a new project
+     */
+    createProject(project: Partial<Project>): Observable<Project> {
+        return this.http.post<Project>(`${this.url}/project`, project);
+    }
+
+    /**
+     * Updates an existing project
+     */
+    updateProject(id: string, project: Partial<Project>): Observable<Project> {
+        return this.http.put<Project>(`${this.url}/project/${id}`, project);
+    }
+
+    /**
+     * Deletes a project
+     */
+    deleteProject(id: string): Observable<void> {
+        return this.http.delete<void>(`${this.url}/project/${id}`);
+    }
 }

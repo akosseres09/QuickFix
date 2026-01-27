@@ -332,6 +332,23 @@ $dark-theme: mat.m2-define-dark-theme(
             )
         );
     }
+
+    @include mat.slider-overrides(
+        (
+            value-indicator-width: 100%,
+            value-indicator-padding: 0,
+        )
+    );
+
+    @include mat.tooltip-overrides(
+        (
+            container-color: if(
+                    $is-light-theme,
+                    var-color(--color-dark-text),
+                    var-color(--color-dark-background)
+                ),
+        )
+    );
 }
 
 html[data-theme='light'] {

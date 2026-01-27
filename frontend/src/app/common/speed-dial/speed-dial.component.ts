@@ -1,4 +1,4 @@
-import { Component, computed, input, signal } from '@angular/core';
+import { Component, computed, input, output, signal } from '@angular/core';
 import { MatFabButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { SpeedDialButton } from '../../shared/constants/SpeedDialButton';
@@ -21,7 +21,18 @@ export class SpeedDialComponent {
     protected shownButtons = computed(() => (this.isDialOpen() ? this.buttons() : []));
     private isDialOpen = computed(() => this.dialState() === 'open');
 
+    togglerClick = output<void>();
+
+    /**
+     * Toggles the speed dial open/closed state if there are any buttons.
+     * Emits togglerClick event if no buttons provided.
+     */
     onTogglerClick(): void {
+        if (this.buttons.length === 0) {
+            this.togglerClick.emit();
+            return;
+        }
+
         this.dialState.set(this.isDialOpen() ? 'closed' : 'open');
     }
 }

@@ -17,7 +17,7 @@ import { MatOptionModule } from '@angular/material/core';
 import { MatInput } from '@angular/material/input';
 import { debounce } from 'rxjs';
 import { UrlService } from '../../shared/services/url/url.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatButton } from '@angular/material/button';
 import { SpeedDialComponent } from '../../common/speed-dial/speed-dial.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -53,6 +53,7 @@ export class ProjectsComponent implements OnInit {
     private readonly activeRoute = inject(ActivatedRoute);
     private readonly destroyRef = inject(DestroyRef);
     private readonly dateService = inject(DateService);
+    private readonly router = inject(Router);
     projects = signal<Project[]>([]);
 
     // Table state
@@ -84,13 +85,13 @@ export class ProjectsComponent implements OnInit {
             label: 'Owner',
             sortable: false,
             value: (e: Project) => e.owner?.username || 'N/A',
-            routerLink: (e: Project) => ['/users', e.owner?.id],
+            routerLink: (e: Project) => (e.owner?.id ? ['/users', e.owner.id] : []),
         },
         {
             id: 'users',
             label: '# of users',
             sortable: true,
-            value: (e: Project) => e.members.length + 1,
+            value: (e: Project) => (e.members?.length || 0) + 1,
         },
         {
             id: 'createdAt',
@@ -232,5 +233,9 @@ export class ProjectsComponent implements OnInit {
         });
 
         this.getProjects();
+    }
+
+    createProject() {
+        this.router.navigate(['/projects/new']);
     }
 }

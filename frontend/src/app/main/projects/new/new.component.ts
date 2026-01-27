@@ -1,9 +1,150 @@
-import { Component } from '@angular/core';
+import {
+    Component,
+    DestroyRef,
+    inject,
+    OnInit,
+    Signal,
+    TemplateRef,
+    viewChild,
+} from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatSliderModule } from '@angular/material/slider';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { ProjectService } from '../../../shared/services/project/project.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {
+    PRIORITY_LIST,
+    STATUS_LIST,
+    VISIBILITY_LIST,
+    PRIORITY_LOW,
+    PRIORITY_MEDIUM,
+    PRIORITY_HIGH,
+    PRIORITY_CRITICAL,
+    STATUS_ACTIVE,
+    VISIBILITY_PUBLIC,
+    Project,
+} from '../../../shared/model/Project';
+import { DialogService } from '../../../shared/services/dialog/dialog.service';
 
 @Component({
     selector: 'app-new',
-    imports: [],
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatButtonModule,
+        MatIconModule,
+        MatSliderModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+    ],
     templateUrl: './new.component.html',
     styleUrl: './new.component.css',
 })
-export class NewComponent {}
+export class NewComponent implements OnInit {
+    private readonly fb = inject(FormBuilder);
+    private readonly projectService = inject(ProjectService);
+    private readonly router = inject(Router);
+    private readonly destroyRef = inject(DestroyRef);
+    private readonly dialogService = inject(DialogService);
+
+    readonly priorityList = PRIORITY_LIST;
+    readonly statusList = STATUS_LIST;
+    readonly visibilityList = VISIBILITY_LIST;
+
+    projectForm = this.fb.group({
+        name: ['', [Validators.required, Validators.maxLength(255)]],
+        key: [
+            '',
+            [Validators.required, Validators.maxLength(10), Validators.pattern(/^[A-Z0-9]+$/)],
+        ],
+        description: [''],
+        status: [STATUS_ACTIVE, Validators.required],
+        startDate: [null as string | null],
+        endDate: [null as string | null],
+        visibility: [VISIBILITY_PUBLIC, Validators.required],
+        priority: [PRIORITY_MEDIUM, Validators.required],
+        color: ['#3b82f6', [Validators.pattern(/^#[0-9A-Fa-f]{6}$/)]],
+        progress: [0, [Validators.min(0), Validators.max(100)]],
+        budget: [0, [Validators.min(0)]],
+    });
+
+    infoDialogRef: Signal<TemplateRef<any> | undefined> = viewChild('infoDialog');
+
+    ngOnInit(): void {
+        // Auto-generate key from name
+        this.projectForm.get('name')?.valueChanges.subscribe((name) => {
+            if (name && !this.projectForm.get('key')?.dirty) {
+                const key = name
+                    .toUpperCase()
+                    .replace(/[^A-Z0-9]/g, '')
+                    .substring(0, 10);
+                this.projectForm.get('key')?.setValue(key, { emitEvent: false });
+            }
+        });
+    }
+
+    onSubmit(): void {
+        if (this.projectForm.valid) {
+            const formValue = this.projectForm.value as Partial<Project>;
+            this.projectService
+                .createProject(formValue)
+                .pipe(takeUntilDestroyed(this.destroyRef))
+                .subscribe({
+                    next: (project) => {
+                        this.router.navigate(['/projects', project.id]);
+                    },
+                    error: (error) => {
+                        console.error('Error creating project:', error);
+                        // Handle error (show notification, etc.)
+                    },
+                });
+        }
+    }
+
+    onCancel(): void {
+        this.router.navigate(['/projects']);
+    }
+
+    getPriorityLabel(priority: number): string {
+        switch (priority) {
+            case PRIORITY_LOW:
+                return 'Low';
+            case PRIORITY_MEDIUM:
+                return 'Medium';
+            case PRIORITY_HIGH:
+                return 'High';
+            case PRIORITY_CRITICAL:
+                return 'Critical';
+            default:
+                return 'Unknown';
+        }
+    }
+
+    getStatusLabel(status: string): string {
+        return status
+            .split('_')
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+    }
+
+    getVisibilityLabel(visibility: string): string {
+        return visibility.charAt(0).toUpperCase() + visibility.slice(1);
+    }
+
+    openInfo(): void {
+        const dialogRef = this.infoDialogRef();
+        if (!dialogRef) return;
+        this.dialogService.openConfirmDialog('Project Information', dialogRef);
+    }
+}
