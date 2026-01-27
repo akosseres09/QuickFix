@@ -19,6 +19,20 @@ export const PRIORITY_LIST = [PRIORITY_LOW, PRIORITY_MEDIUM, PRIORITY_HIGH, PRIO
 export const VISIBILITY_LIST = [VISIBILITY_PUBLIC, VISIBILITY_PRIVATE, VISIBILITY_TEAM];
 export const STATUS_LIST = [STATUS_ACTIVE, STATUS_ARCHIVED, STATUS_ON_HOLD, STATUS_COMPLETED];
 
+export const PRIORITY_MAP: { [key: number]: string } = {
+    [PRIORITY_LOW]: 'Low',
+    [PRIORITY_MEDIUM]: 'Medium',
+    [PRIORITY_HIGH]: 'High',
+    [PRIORITY_CRITICAL]: 'Critical',
+};
+
+export const STATUS_MAP: { [key: string]: string } = {
+    [STATUS_ACTIVE]: 'Active',
+    [STATUS_ARCHIVED]: 'Archived',
+    [STATUS_ON_HOLD]: 'On Hold',
+    [STATUS_COMPLETED]: 'Completed',
+};
+
 export interface Project extends BaseModel {
     id: string;
     name: string;

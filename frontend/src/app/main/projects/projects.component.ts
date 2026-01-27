@@ -3,7 +3,7 @@ import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angula
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TableComponent } from '../../common/table/table.component';
-import { Project } from '../../shared/model/Project';
+import { PRIORITY_MAP, Project, STATUS_MAP } from '../../shared/model/Project';
 import { DisplayedColumn } from '../../shared/constants/DisplayedColumn';
 import { ApiQueryParams, ProjectService } from '../../shared/services/project/project.service';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
@@ -92,6 +92,18 @@ export class ProjectsComponent implements OnInit {
             label: '# of users',
             sortable: true,
             value: (e: Project) => (e.members?.length || 0) + 1,
+        },
+        {
+            id: 'status',
+            label: 'Status',
+            sortable: true,
+            value: (e: Project) => STATUS_MAP[e.status],
+        },
+        {
+            id: 'priority',
+            label: 'Priority',
+            sortable: true,
+            value: (e: Project) => PRIORITY_MAP[e.priority],
         },
         {
             id: 'createdAt',

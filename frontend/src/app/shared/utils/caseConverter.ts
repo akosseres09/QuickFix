@@ -17,3 +17,7 @@ export function toSnakeCase(obj: any): any {
 
     return obj;
 }
+
+export function snakeCaseToCamelCase(key: string): string {
+    return key.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
+}
