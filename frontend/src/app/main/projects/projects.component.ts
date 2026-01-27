@@ -56,7 +56,6 @@ export class ProjectsComponent implements OnInit {
 
     filterForm = this.fb.group({
         name: [this.activeRoute.snapshot.queryParamMap.get('name') || ''],
-        expand: ['owner,members'],
     });
     showFilterReset = signal<boolean>(this.activeRoute.snapshot.queryParamMap.has('name'));
     filteredProjects = signal<Project[]>([]);
@@ -123,7 +122,7 @@ export class ProjectsComponent implements OnInit {
 
     getProjects(filters: Partial<ProjectFilters> = {}) {
         this.projectService
-            .getProjects(filters)
+            .getProjects(filters, 'owner,members')
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe((response) => {
                 this.projects.set(response);

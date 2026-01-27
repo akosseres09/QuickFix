@@ -5,7 +5,6 @@ import { environment } from '../../../../environments/environment.development';
 
 export interface ProjectFilters {
     name?: string | null;
-    expand?: string | null;
 }
 
 @Injectable({
@@ -15,16 +14,20 @@ export class ProjectService {
     private readonly http = inject(HttpClient);
     private readonly url = environment.apiUrl;
 
-    getProjects(filters: Partial<ProjectFilters> = {}) {
+    getProjects(filters: Partial<ProjectFilters> = {}, expand: string = '') {
         let params = new HttpParams();
 
         Object.keys(filters).forEach((key) => {
             const value = filters[key as keyof ProjectFilters];
 
-            if (value != null) {
+            if (value?.trim() && value != null) {
                 params = params.set(key, value.toString());
             }
         });
+
+        if (expand) {
+            params = params.set('expand', expand);
+        }
 
         return this.http.get<Project[]>(`${this.url}/project`, {
             params: params,

@@ -5,8 +5,8 @@ namespace api\controllers;
 use api\components\ResponseMaker;
 use common\models\Project;
 use common\models\ProjectMember;
+use common\models\search\ProjectSearch;
 use Yii;
-use yii\data\ActiveDataProvider;
 use yii\filters\VerbFilter;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
@@ -35,35 +35,12 @@ class ProjectController extends BaseRestController
         $actions = parent::actions();
 
         // Configure the index action with custom data provider
-        $actions['index']['prepareDataProvider'] = [$this, 'prepareDataProvider'];
+        $actions['index']['prepareDataProvider'] = function ($action, $filter) {
+            $searchModel = new ProjectSearch();
+            return $searchModel->search(Yii::$app->request->queryParams);
+        };
 
         return $actions;
-    }
-
-    /**
-     * Prepare data provider for index action with visibility filtering
-     */
-    public function prepareDataProvider()
-    {
-        $userId = Yii::$app->user->id;
-
-        $query = Project::find()
-            ->alias('p')
-            ->leftJoin('project_member pm', 'pm.project_id = p.id AND pm.user_id = :userId', [':userId' => $userId])
-            ->where([
-                'or',
-                ['p.visibility' => Project::VISIBILITY_PUBLIC],
-                ['p.owner_id' => $userId],
-                [
-                    'and',
-                    ['p.visibility' => Project::VISIBILITY_TEAM],
-                    ['is not', 'pm.id', null]
-                ]
-            ]);
-
-        return new ActiveDataProvider([
-            'query' => $query,
-        ]);
     }
 
     /**
