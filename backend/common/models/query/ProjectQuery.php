@@ -74,7 +74,7 @@ class ProjectQuery extends ActiveQuery
      * @param int $ownerId
      * @return ProjectQuery
      */
-    public function byOwner(int $ownerId): ProjectQuery
+    public function byOwner(string $ownerId): ProjectQuery
     {
         return $this->andWhere(['owner_id' => $ownerId]);
     }

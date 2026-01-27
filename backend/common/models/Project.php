@@ -11,14 +11,14 @@ use yii\db\ActiveRecord;
 /**
  * Project model
  *
- * @property integer $id
+ * @property string $id
  * @property string $name
  * @property string $key
  * @property string $description
  * @property string $status
  * @property string $start_date
  * @property string $end_date
- * @property integer $owner_id
+ * @property string $owner_id
  * @property string $visibility
  * @property int $priority
  * @property string $color
@@ -96,13 +96,27 @@ class Project extends ActiveRecord
     /**
      * {@inheritdoc}
      */
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+            if ($insert && empty($this->id)) {
+                $this->id = Yii::$app->security->generateRandomString(36);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function rules(): array
     {
         return [
             [['name', 'key', 'owner_id'], 'required'],
             [['description'], 'string'],
             [['start_date', 'end_date'], 'date', 'format' => 'php:Y-m-d'],
-            [['owner_id', 'progress', 'created_at', 'updated_at'], 'integer'],
+            [['progress', 'created_at', 'updated_at'], 'integer'],
             [['budget'], 'number'],
             [['name'], 'string', 'max' => 255],
             [['key'], 'string', 'max' => 10],
@@ -121,6 +135,7 @@ class Project extends ActiveRecord
             [['color'], 'match', 'pattern' => '/^#[0-9A-Fa-f]{6}$/', 'message' => 'Color must be a valid hex color code'],
             [['progress'], 'default', 'value' => 0],
             [['progress'], 'integer', 'min' => 0, 'max' => 100],
+            [['owner_id'], 'string', 'max' => 36],
             [['owner_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['owner_id' => 'id']],
         ];
     }

@@ -13,8 +13,8 @@ class m250805_170054_create_user_refresh_token_table extends Migration
     public function safeUp()
     {
         $this->createTable('{{%user_refresh_token}}', [
-            'id' => $this->primaryKey(),
-            'user_id' => $this->integer()->notNull(),
+            'id' => $this->string(36)->notNull(),
+            'user_id' => $this->string(36)->notNull(),
             'token' => $this->string()->notNull()->unique(),
             'ip' => $this->string(45)->null(),
             'user_agent' => $this->text()->null(),
@@ -22,6 +22,8 @@ class m250805_170054_create_user_refresh_token_table extends Migration
             'expires_at' => $this->integer()->notNull(),
             'revoked_at' => $this->integer()->null(),
         ]);
+
+        $this->addPrimaryKey('pk-user_refresh_token-id', '{{%user_refresh_token}}', 'id');
 
         $this->addForeignKey(
             'fk-refresh-token-user',

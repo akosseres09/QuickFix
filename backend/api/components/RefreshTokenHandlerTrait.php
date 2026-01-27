@@ -42,10 +42,10 @@ trait RefreshTokenHandlerTrait
     /**
      * Creates or updates a refresh token for the user.
      * If $credential is an instance of UserRefreshToken, it updates the existing token.
-     * If $credential is an integer (user ID), it creates a new refresh token.
+     * If $credential is a string (user ID), it creates a new refresh token.
      * Both cases will add the token to the response cookies.
      */
-    protected function createRefreshToken(int|UserRefreshToken $credential, int $expiresInSeconds = 300): UserRefreshToken | null
+    protected function createRefreshToken(string|UserRefreshToken $credential, int $expiresInSeconds = 300): UserRefreshToken | null
     {
         $credentialOptions = [
             'token' => Yii::$app->security->generateRandomString(64),
@@ -55,7 +55,7 @@ trait RefreshTokenHandlerTrait
         ];
 
         if ($credential instanceof UserRefreshToken) {
-            return $this->createRefreshTokenByExistingToken($credential, $credentialOptions);
+            return $this->updateExistingRefreshToken($credential, $credentialOptions);
         }
 
         $refreshToken = UserRefreshToken::find()
@@ -99,7 +99,7 @@ trait RefreshTokenHandlerTrait
      *    ['token' => string, 'expiresInSeconds' => int, 'ip' => string, 'agent' => string ]
      * @return UserRefreshToken
      */
-    private function createRefreshTokenByExistingToken(UserRefreshToken $credential, array $credentialOptions): UserRefreshToken
+    private function updateExistingRefreshToken(UserRefreshToken $credential, array $credentialOptions): UserRefreshToken
     {
         if ($credential->isRevoked()) {
             throw new UnauthorizedHttpException('Refresh token is revoked.');
@@ -125,7 +125,7 @@ trait RefreshTokenHandlerTrait
      *    ['token' => string, 'expiresInSeconds' => int, 'ip' => string, 'agent' => string ]
      * @return UserRefreshToken
      */
-    private function createNewRefreshToken(int $credential, array $credentialOptions): UserRefreshToken
+    private function createNewRefreshToken(string $credential, array $credentialOptions): UserRefreshToken
     {
         $refreshToken = new UserRefreshToken([
             'user_id' => $credential,

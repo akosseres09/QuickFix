@@ -14,7 +14,7 @@ use yii\web\IdentityInterface;
 /**
  * User model
  *
- * @property integer $id
+ * @property string $id
  * @property string $username
  * @property string $password_hash
  * @property string $password_reset_token
@@ -90,6 +90,20 @@ class User extends ActiveRecord implements IdentityInterface
         return [
             TimestampBehavior::class,
         ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+            if ($insert && empty($this->id)) {
+                $this->id = Yii::$app->security->generateRandomString(36);
+            }
+            return true;
+        }
+        return false;
     }
 
     /**

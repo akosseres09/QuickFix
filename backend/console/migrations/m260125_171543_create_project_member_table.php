@@ -14,12 +14,14 @@ class m260125_171543_create_project_member_table extends Migration
     public function safeUp()
     {
         $this->createTable('{{%project_member}}', [
-            'id' => $this->primaryKey(),
-            'project_id' => $this->integer()->notNull(),
-            'user_id' => $this->integer()->notNull(),
+            'id' => $this->string(36)->notNull(),
+            'project_id' => $this->string(36)->notNull(),
+            'user_id' => $this->string(36)->notNull(),
             'role' => $this->integer()->notNull()->defaultValue(ProjectMember::ROLE_GUEST),
             'created_at' => $this->integer()->notNull(),
         ]);
+
+        $this->addPrimaryKey('pk-project_member-id', '{{%project_member}}', 'id');
 
         // Add foreign key for project_id
         $this->addForeignKey(

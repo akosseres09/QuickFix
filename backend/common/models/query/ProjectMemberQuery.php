@@ -25,20 +25,20 @@ class ProjectMemberQuery extends ActiveQuery
 
     /**
      * Filter by project
-     * @param int $projectId
+     * @param string $projectId
      * @return ProjectMemberQuery
      */
-    public function byProject(int $projectId): ProjectMemberQuery
+    public function byProject(string $projectId): ProjectMemberQuery
     {
         return $this->andWhere(['project_id' => $projectId]);
     }
 
     /**
      * Filter by user
-     * @param int $userId
+     * @param string $userId
      * @return ProjectMemberQuery
      */
-    public function byUser(int $userId): ProjectMemberQuery
+    public function byUser(string $userId): ProjectMemberQuery
     {
         return $this->andWhere(['user_id' => $userId]);
     }

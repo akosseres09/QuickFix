@@ -10,9 +10,9 @@ use yii\db\ActiveRecord;
 /**
  * ProjectMember model
  *
- * @property integer $id
- * @property integer $project_id
- * @property integer $user_id
+ * @property string $id
+ * @property string $project_id
+ * @property string $user_id
  * @property string $role
  * @property integer $created_at
  * 
@@ -63,7 +63,8 @@ class ProjectMember extends ActiveRecord
     {
         return [
             [['project_id', 'user_id'], 'required'],
-            [['project_id', 'user_id', 'created_at'], 'integer'],
+            [['project_id', 'user_id'], 'string', 'max' => 36],
+            [['created_at'], 'integer'],
             [['role'], 'integer'],
             [['role'], 'default', 'value' => self::ROLE_MEMBER],
             [['role'], 'in', 'range' => self::ROLE_LIST],
@@ -101,6 +102,20 @@ class ProjectMember extends ActiveRecord
     public function extraFields()
     {
         return ['project', 'user'];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+            if ($insert && empty($this->id)) {
+                $this->id = Yii::$app->security->generateRandomString(36);
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
