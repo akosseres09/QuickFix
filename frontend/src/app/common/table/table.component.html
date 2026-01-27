@@ -73,23 +73,19 @@
                                     >
                                         {{ col.value(element) }}
                                     </a>
-                                } @else if (col.id === 'createdAt') {
-                                    <ng-container>
-                                        {{ col.value(element) | date }}
-                                    </ng-container>
                                 } @else if (col.id === 'status') {
                                     <div class="flex justify-center items-center">
                                         <span
                                             class="px-3 py-1 rounded-full font-semibold text-sm"
                                             [ngClass]="{
                                                 'text-green-900 bg-green-200':
-                                                    element.status === 'open',
+                                                    element.status === 'active',
                                                 'text-blue-900 bg-blue-200':
-                                                    element.status === 'to_do',
+                                                    element.status === 'archived',
                                                 'text-yellow-900 bg-yellow-200':
-                                                    element.status === 'in_progress',
+                                                    element.status === 'on_hold',
                                                 'text-red-900 bg-red-200':
-                                                    element.status === 'closed',
+                                                    element.status === 'completed',
                                             }"
                                         >
                                             {{ col.value(element) }}
