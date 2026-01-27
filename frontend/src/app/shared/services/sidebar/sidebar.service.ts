@@ -6,16 +6,16 @@ import { Injectable } from '@angular/core';
 export class SidebarService {
     CLOSED: 'closed' = 'closed';
     OPEN: 'open' = 'open';
-    isCollapsed: boolean = (localStorage.getItem('sidebar') as string) === this.CLOSED;
+    isOpened: boolean = (localStorage.getItem('sidebar') as string) === this.OPEN;
 
     constructor() {}
 
     getState(): boolean {
-        return this.isCollapsed;
+        return this.isOpened;
     }
 
     setState(state: 'open' | 'closed') {
-        this.isCollapsed = state.toLowerCase() === this.CLOSED;
+        this.isOpened = state.toLowerCase() === this.OPEN;
         localStorage.setItem('sidebar', state.toLowerCase());
     }
 }

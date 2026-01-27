@@ -1,10 +1,30 @@
-<main class="grid grid-rows-[auto_1fr] grid-cols-[auto_1fr] h-screen overflow-hidden">
-    <app-navbar (sidebarClosed)="onSidebar($event)" class="row-span-1 col-span-2"></app-navbar>
-    <app-sidenav
-        [isCollapsed]="isSidebarCollapsed()"
-        class="border-r-2 border-light-text-hover row-span-2 dark:border-dark-hover overflow-y-auto"
-    ></app-sidenav>
-    <section class="row-start-2 col-start-2 p-4 overflow-y-auto">
-        <router-outlet></router-outlet>
-    </section>
+<main class="h-screen w-full overflow-hidden">
+    <mat-sidenav-container>
+        <mat-sidenav
+            mode="over"
+            [opened]="isSidebarOpened()"
+            (openedChange)="onSidebar($event)"
+            position="start"
+            class="!w-72 px-2 py-4"
+        >
+            <div class="ps-1 mb-4">
+                <a href="/" class="flex items-center gap-4">
+                    <img [src]="imageSource()" width="48" />
+                    <span class="text-xl font-semibold">QuickFix</span>
+                </a>
+            </div>
+            <app-navitem [routes]="sideNavRoutes()"></app-navitem>
+        </mat-sidenav>
+        <mat-sidenav-content>
+            <app-navbar
+                [isSidebarOpened]="isSidebarOpened()"
+                (isSidebarOpenedChange)="onSidebar($event)"
+                (imageSourceChange)="imageSource.set($event)"
+                class="row-span-1 col-span-2"
+            ></app-navbar>
+            <section class="row-start-2 col-start-2 p-4 overflow-y-auto">
+                <router-outlet></router-outlet>
+            </section>
+        </mat-sidenav-content>
+    </mat-sidenav-container>
 </main>

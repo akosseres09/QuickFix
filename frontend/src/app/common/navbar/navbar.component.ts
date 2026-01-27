@@ -1,5 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, DestroyRef, inject, input, output, signal } from '@angular/core';
+import {
+    AfterViewInit,
+    Component,
+    DestroyRef,
+    inject,
+    input,
+    model,
+    output,
+    signal,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonToggleChange } from '@angular/material/button-toggle';
 import { MatIcon } from '@angular/material/icon';
@@ -37,11 +46,10 @@ export class NavbarComponent implements AfterViewInit {
     private destroyRef = inject(DestroyRef);
 
     showSidebarToggle = input<boolean>(true);
-    sidebarClosed = output<boolean>();
     logoutClicked = output<void>();
-    isSidebarCollapsed = signal<boolean>(this.sidebarService.getState());
+    isSidebarOpened = model<boolean>(this.sidebarService.getState());
     isMenuOpen = signal<boolean>(false);
-    imageSource: string = 'QuickFix_logo_dark.png';
+    imageSource = model<string>('QuickFix_logo_dark.png');
     user = signal<Claims | null>(this.authService.currentUserClaims());
     htmlElement = signal<HTMLElement | null>(document.documentElement);
     routes = signal<AppRoute[]>(this.getAppRoutes().filter((route) => route.show));
@@ -55,7 +63,7 @@ export class NavbarComponent implements AfterViewInit {
             .subscribe(() => {
                 if (window.innerWidth <= 767) {
                     this.isMenuOpen.set(false);
-                    this.toggleSidebar(true);
+                    this.isSidebarOpened.set(true);
                 }
             });
 
@@ -68,6 +76,7 @@ export class NavbarComponent implements AfterViewInit {
             )
             .subscribe(() => {
                 this.isMenuOpen.set(false);
+                this.isSidebarOpened.set(false);
             });
     }
 
@@ -137,7 +146,7 @@ export class NavbarComponent implements AfterViewInit {
         if (!this.htmlElement()) return;
         this.themeService.setTheme(theme);
         this.theme.set(theme);
-        this.imageSource = this.logo[this.theme()];
+        this.imageSource.set(this.logo[this.theme()]);
     }
 
     toggleMenu() {
@@ -154,14 +163,8 @@ export class NavbarComponent implements AfterViewInit {
         this.setTheme(event.value);
     }
 
-    toggleSidebar(value: boolean = !this.isSidebarCollapsed()): void {
-        this.isSidebarCollapsed.set(value);
-
-        const name = this.isSidebarCollapsed()
-            ? this.sidebarService.CLOSED
-            : this.sidebarService.OPEN;
-        this.sidebarService.setState(name);
-        this.sidebarClosed.emit(this.isSidebarCollapsed());
+    toggleSidebar(value: boolean = !this.isSidebarOpened()): void {
+        this.isSidebarOpened.set(value);
     }
 
     logout() {

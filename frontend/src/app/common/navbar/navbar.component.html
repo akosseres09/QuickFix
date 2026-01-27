@@ -7,13 +7,13 @@
                 <button
                     (click)="toggleSidebar()"
                     class="hidden md:flex p-2 rounded cursor-pointer hover:bg-light-text-hover dark:hover:bg-dark-hover transition-[background-color]"
-                    [attr.aria-label]="isSidebarCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
+                    [attr.aria-label]="isSidebarOpened() ? 'Collapse sidebar' : 'Expand sidebar'"
                 >
                     <mat-icon class="transition-[rotate]"> menu </mat-icon>
                 </button>
             }
             <a href="/" class="flex items-center space-x-2">
-                <img [src]="imageSource" width="48" />
+                <img [src]="imageSource()" width="48" />
                 <span>QuickFix</span>
             </a>
             <button
