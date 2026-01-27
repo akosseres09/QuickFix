@@ -12,7 +12,7 @@ export interface DecodedToken {
     // expiration
     exp: number;
     // user id (custom claim)
-    uid: number;
+    uid: string;
     // role (custom claim)
     role: string;
     // email (custom claim)

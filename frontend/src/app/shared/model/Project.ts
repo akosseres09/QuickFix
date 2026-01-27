@@ -20,14 +20,14 @@ export const VISIBILITY_LIST = [VISIBILITY_PUBLIC, VISIBILITY_PRIVATE, VISIBILIT
 export const STATUS_LIST = [STATUS_ACTIVE, STATUS_ARCHIVED, STATUS_ON_HOLD, STATUS_COMPLETED];
 
 export interface Project extends BaseModel {
-    id: number;
+    id: string;
     name: string;
     key: string;
     description: string;
     status: string;
     startDate: Date;
     endDate: Date;
-    owner_id: number;
+    owner_id: string;
     visibility: string;
     priority: number;
     color: string;

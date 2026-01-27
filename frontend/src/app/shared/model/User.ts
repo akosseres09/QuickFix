@@ -8,7 +8,7 @@ export const ADMIN = 1;
 export const USER = 0;
 
 export interface User extends BaseModel {
-    id: number;
+    id: string;
     username: string;
     email: string;
     firstName: string;

@@ -1,5 +1,5 @@
 export interface Claims {
-    uid: number;
+    uid: string;
     role: string;
     email: string;
 }
