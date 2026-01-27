@@ -163,6 +163,16 @@
                                                 years old.</span
                                             >
                                         }
+                                        @if (getControl('dateOfBirth')?.hasError('maxAge')) {
+                                            <span
+                                                >You must be at most
+                                                {{
+                                                    getControl('dateOfBirth')?.getError('maxAge')
+                                                        ?.requiredAge
+                                                }}
+                                                years old.</span
+                                            >
+                                        }
                                         @if (getControl('dateOfBirth')?.hasError('serverError')) {
                                             @for (
                                                 error of getControl('dateOfBirth')?.getError(
@@ -304,8 +314,8 @@
                         <button
                             mat-raised-button
                             color="primary"
-                            class="flex items-center justify-center gap-2 px-6 py-3 md:flex-1 !text-dark-text"
-                            [class.!text-light-text]="!hasChanges()"
+                            class="flex items-center justify-center gap-2 px-6 py-3 md:flex-3/5 !text-dark-text"
+                            [class.!text-light-text]="!hasChanges() || profileForm.invalid"
                             [disabled]="!hasChanges() || profileForm.invalid"
                             (click)="saveChanges()"
                         >
@@ -314,8 +324,8 @@
                         </button>
                         <button
                             mat-stroked-button
-                            class="flex items-center justify-center gap-2 px-6 py-3"
-                            [disabled]="!hasChanges"
+                            class="flex items-center justify-center gap-2 px-6 py-3 md:flex-2/5"
+                            [disabled]="!hasChanges() || profileForm.invalid"
                             (click)="cancelChanges()"
                         >
                             <mat-icon>cancel</mat-icon>

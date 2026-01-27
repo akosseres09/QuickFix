@@ -21,8 +21,12 @@ import { SnackbarService } from '../../shared/services/snackbar/snackbar.service
 import { User } from '../../shared/model/User';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { DateService } from '../../shared/services/date/date.service';
-import { minAgeValidator } from '../../shared/validators/dateValidator/dateValidator';
+import {
+    maxAgeValidator,
+    minAgeValidator,
+} from '../../shared/validators/dateValidator/dateValidator';
 import { phoneValidator } from '../../shared/validators/phoneValidator/phoneValidator';
+import { AuthService } from '../../shared/services/auth/auth.service';
 
 @Component({
     selector: 'app-account',
@@ -41,10 +45,11 @@ import { phoneValidator } from '../../shared/validators/phoneValidator/phoneVali
     styleUrl: './account.component.css',
 })
 export class AccountComponent {
-    private userService = inject(UserService);
-    private snackbarService = inject(SnackbarService);
+    private readonly userService = inject(UserService);
+    private readonly snackbarService = inject(SnackbarService);
     private readonly dateService = inject(DateService);
-    private fb = inject(FormBuilder);
+    private readonly authService = inject(AuthService);
+    private readonly fb = inject(FormBuilder);
     private readonly destroyRef = inject(DestroyRef);
 
     user = signal<User | null>(null);
@@ -52,7 +57,7 @@ export class AccountComponent {
         username: ['', [Validators.required, Validators.minLength(3)]],
         email: ['', [Validators.required, Validators.email]],
         phoneNumber: ['', [phoneValidator()]],
-        dateOfBirth: ['', [minAgeValidator(13)]],
+        dateOfBirth: ['', [minAgeValidator(13), maxAgeValidator(75)]],
     });
     private formValues = toSignal(this.profileForm.valueChanges, {
         initialValue: this.profileForm.value,
@@ -67,7 +72,7 @@ export class AccountComponent {
     hasChanges = computed(() => {
         const current = JSON.stringify(this.formValues());
         const initial = JSON.stringify(this.initialFormSnapshot());
-        return current !== initial || this.selectedFile() !== null;
+        return this.canEdit() && (current !== initial || this.selectedFile() !== null);
     });
 
     constructor() {
@@ -78,9 +83,10 @@ export class AccountComponent {
                 this.user.set(userData);
                 this.profilePictureUrl.set(userData.profilePictureUrl);
                 this.initialFormSnapshot.set({
-                    username: userData.username,
-                    email: userData.email,
+                    username: userData.username || '',
+                    email: userData.email || '',
                     phoneNumber: userData.phoneNumber || '',
+                    dateOfBirth: userData.dateOfBirth,
                 });
                 this.setProfileFormValues();
             });
@@ -137,8 +143,8 @@ export class AccountComponent {
             .updateUser(this.profileForm.value as Partial<User>)
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe((response) => {
-                this.initialFormSnapshot.set(this.profileForm.value);
                 this.user.set(response);
+                this.initialFormSnapshot.set(this.profileForm.value);
                 this.snackbarService.open('Profile updated successfully!');
             });
 
@@ -167,5 +173,15 @@ export class AccountComponent {
     createDate(timestamp: number) {
         const date = this.dateService.parseDate(timestamp);
         return this.dateService.toLocaleISOString(date).split('T')[0];
+    }
+
+    canEdit(): boolean {
+        const uid = this.authService.currentUserClaims()?.uid;
+        if (!uid) return false;
+
+        const user = this.user();
+        if (!user) return false;
+
+        return uid === user.id;
     }
 }
