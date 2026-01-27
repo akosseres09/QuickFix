@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
-import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TableComponent } from '../../common/table/table.component';
 import { Project } from '../../shared/model/Project';
 import { DisplayedColumn } from '../../shared/constants/DisplayedColumn';
-import { ProjectFilters, ProjectService } from '../../shared/services/project/project.service';
+import { ApiQueryParams, ProjectService } from '../../shared/services/project/project.service';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import {
@@ -22,6 +22,7 @@ import { MatButton } from '@angular/material/button';
 import { SpeedDialComponent } from '../../common/speed-dial/speed-dial.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DateService } from '../../shared/services/date/date.service';
+import { Sort, SortDirection } from '@angular/material/sort';
 
 @Component({
     selector: 'app-projects',
@@ -53,6 +54,16 @@ export class ProjectsComponent implements OnInit {
     private readonly destroyRef = inject(DestroyRef);
     private readonly dateService = inject(DateService);
     projects = signal<Project[]>([]);
+
+    // Table state
+    pageSize = signal<number>(10);
+    pageIndex = signal<number>(0);
+    sortActive = signal<string>('');
+    sortDirection = signal<SortDirection>('asc');
+
+    // Pagination metadata from server
+    totalCount = signal<number>(0);
+    isLoading = signal<boolean>(false);
 
     filterForm = this.fb.group({
         name: [this.activeRoute.snapshot.queryParamMap.get('name') || ''],
@@ -96,23 +107,42 @@ export class ProjectsComponent implements OnInit {
         this.filterForm.valueChanges
             .pipe(debounce(() => new Promise((resolve) => setTimeout(resolve, 300))))
             .subscribe((filters) => {
-                const filterArray = Object.entries(filters);
-                filterArray.forEach(([key, value]) => {
+                // Update URL with filter params
+                const urlFilters: Record<string, any> = { ...filters };
+                Object.entries(urlFilters).forEach(([key, value]) => {
                     if (!value) {
-                        filters[key as keyof ProjectFilters] = null;
+                        urlFilters[key] = null;
                     }
                 });
 
-                if (filterArray.some(([_, value]) => value)) {
-                    this.showFilterReset.set(true);
-                }
-                this.urlService.addQueryParams(filters);
-                this.getProjects(filters);
+                this.showFilterReset.set(
+                    Object.values(filters).some((value) => value !== null && value !== '')
+                );
+
+                this.urlService.addQueryParams(urlFilters);
+                this.getProjects();
             });
     }
 
     ngOnInit(): void {
-        this.getProjects(this.filterForm.value);
+        // Initialize pagination and sorting from query params
+        const pageSizeParam = this.activeRoute.snapshot.queryParamMap.get('pageSize');
+        const pageParam = this.activeRoute.snapshot.queryParamMap.get('page');
+        const sortParam = this.activeRoute.snapshot.queryParamMap.get('sort');
+
+        if (pageSizeParam) {
+            this.pageSize.set(+pageSizeParam);
+        }
+        if (pageParam) {
+            this.pageIndex.set(+pageParam - 1);
+        }
+        if (sortParam) {
+            const isAsc = !sortParam.startsWith('-');
+            this.sortActive.set(isAsc ? sortParam : sortParam.substring(1));
+            this.sortDirection.set(isAsc ? 'asc' : 'desc');
+        }
+
+        this.getProjects();
     }
 
     resetFilters() {
@@ -120,13 +150,87 @@ export class ProjectsComponent implements OnInit {
         this.showFilterReset.set(false);
     }
 
-    getProjects(filters: Partial<ProjectFilters> = {}) {
+    /**
+     * Builds unified query params from all sources:
+     * - Filter form values
+     * - Pagination state
+     * - Sorting state
+     * - Expansion requirements
+     */
+    private buildQueryParams(): ApiQueryParams {
+        const params: ApiQueryParams = {
+            // Spread filter form values
+            ...this.filterForm.value,
+
+            // Add pagination (only if not default values)
+            page: this.pageIndex() > 0 ? this.pageIndex() + 1 : null,
+            pageSize: this.pageSize() !== 20 ? this.pageSize() : null,
+
+            // Add sorting (only if sortDirection is not '')
+            sort: this.sortDirection()
+                ? `${this.sortDirection() === 'desc' ? '-' : ''}${this.sortActive()}`
+                : null,
+
+            // Add expansion
+            expand: 'owner,members',
+        };
+
+        return params;
+    }
+
+    /**
+     * Fetches projects from the server using current query params.
+     * Updates the projects signal and pagination metadata.
+     */
+    getProjects() {
+        this.isLoading.set(true);
+        const queryParams = this.buildQueryParams();
+
         this.projectService
-            .getProjects(filters, 'owner,members')
+            .getProjects(queryParams)
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe((response) => {
-                this.projects.set(response);
-                this.filteredProjects.set(response);
+                this.projects.set(response.items);
+                this.filteredProjects.set(response.items);
+                this.totalCount.set(response._meta.totalCount);
+                this.isLoading.set(false);
             });
+    }
+
+    /**
+     * Handles sort change events from the table, updates the URL and fetches new data.
+     * @param event Sort event emitted from the table when user changes sorting.
+     */
+    onSortChange(event: Sort) {
+        this.sortActive.set(event.active);
+        this.sortDirection.set(event.direction);
+
+        if (event.direction === '') {
+            this.urlService.removeQueryParams(['sort']);
+        } else {
+            const direction = event.direction === 'asc' ? '' : '-';
+            this.urlService.addQueryParams({
+                sort: `${direction}${event.active}`,
+            });
+        }
+
+        this.pageIndex.set(0);
+        this.getProjects();
+    }
+
+    /**
+     * Handles page change events from the paginator, updates the URL and fetches new data.
+     * @param event PageEvent emitted from paginator. Holds the new page index and size.
+     */
+    onPageChange(event: PageEvent) {
+        this.pageIndex.set(event.pageIndex);
+        this.pageSize.set(event.pageSize);
+
+        this.urlService.addQueryParams({
+            page: event.pageIndex + 1,
+            pageSize: event.pageSize,
+        });
+
+        this.getProjects();
     }
 }

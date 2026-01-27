@@ -8,6 +8,13 @@ use yii\web\Response;
 
 class BaseRestController extends ActiveController
 {
+    public $serializer = [
+        'class' => 'yii\rest\Serializer',
+        'collectionEnvelope' => 'items',
+        'metaEnvelope' => '_meta',
+        'linksEnvelope' => '_links',
+    ];
+
     public function behaviors(): array
     {
         $behaviors = parent::behaviors();

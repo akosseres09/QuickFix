@@ -24,6 +24,14 @@
         [dataSource]="shownProjects()"
         [displayedColumns]="displayedColumns()"
         tableHeader="Projects"
+        [initialPageSize]="pageSize()"
+        [initialPageIndex]="pageIndex()"
+        [initialSortActive]="sortActive()"
+        [initialSortDirection]="sortDirection()"
+        [totalCount]="totalCount()"
+        [isLoading]="isLoading()"
+        (sortChange)="onSortChange($event)"
+        (pageChange)="onPageChange($event)"
     ></app-table>
     <div class="absolute right-0 bottom-0">
         <app-speed-dial></app-speed-dial>

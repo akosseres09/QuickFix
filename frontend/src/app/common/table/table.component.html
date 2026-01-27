@@ -14,8 +14,9 @@
             <mat-paginator
                 [disabled]="isLoading()"
                 [pageSizeOptions]="pageSizes"
-                [pageIndex]="pageIndex()"
-                [pageSize]="pageSize()"
+                [pageIndex]="initialPageIndex()"
+                [pageSize]="initialPageSize()"
+                [length]="totalCount()"
                 (page)="onPageEvent($event)"
                 showFirstLastButtons
                 aria-label="Select page of periodic elements"
