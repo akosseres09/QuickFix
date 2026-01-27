@@ -25,7 +25,7 @@ class m260125_165015_create_project_table extends Migration
             'visibility' => $this->string(20)->notNull()->defaultValue(Project::VISIBILITY_PUBLIC),
             'priority' => $this->integer()->notNull()->defaultValue(Project::PRIORITY_MEDIUM),
             'color' => $this->string(7)->null(),
-            'progress' => $this->integer()->notNull()->defaultValue(0),
+            'progress' => $this->float(2)->notNull()->defaultValue(0),
             'budget' => $this->decimal(10, 2)->null(),
             'created_at' => $this->integer()->notNull(),
             'updated_at' => $this->integer()->notNull(),

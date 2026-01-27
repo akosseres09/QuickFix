@@ -16,7 +16,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, formatDate } from '@angular/common';
 import { Router } from '@angular/router';
 import { ProjectService } from '../../../shared/services/project/project.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -33,6 +33,7 @@ import {
     Project,
 } from '../../../shared/model/Project';
 import { DialogService } from '../../../shared/services/dialog/dialog.service';
+import { AuthService } from '../../../shared/services/auth/auth.service';
 
 @Component({
     selector: 'app-new',
@@ -57,16 +58,18 @@ export class NewComponent implements OnInit {
     private readonly router = inject(Router);
     private readonly destroyRef = inject(DestroyRef);
     private readonly dialogService = inject(DialogService);
+    private readonly authService = inject(AuthService);
 
     readonly priorityList = PRIORITY_LIST;
     readonly statusList = STATUS_LIST;
     readonly visibilityList = VISIBILITY_LIST;
+    readonly userId = this.authService.currentUserClaims()?.uid;
 
     projectForm = this.fb.group({
         name: ['', [Validators.required, Validators.maxLength(255)]],
         key: [
             '',
-            [Validators.required, Validators.maxLength(10), Validators.pattern(/^[A-Z0-9]+$/)],
+            [Validators.required, Validators.maxLength(10), Validators.pattern(/^[A-Z0-9_-]+$/)],
         ],
         description: [''],
         status: [STATUS_ACTIVE, Validators.required],
@@ -95,21 +98,31 @@ export class NewComponent implements OnInit {
     }
 
     onSubmit(): void {
-        if (this.projectForm.valid) {
-            const formValue = this.projectForm.value as Partial<Project>;
-            this.projectService
-                .createProject(formValue)
-                .pipe(takeUntilDestroyed(this.destroyRef))
-                .subscribe({
-                    next: (project) => {
-                        this.router.navigate(['/projects', project.id]);
-                    },
-                    error: (error) => {
-                        console.error('Error creating project:', error);
-                        // Handle error (show notification, etc.)
-                    },
-                });
-        }
+        if (this.projectForm.invalid || !this.userId) return;
+
+        const formValue = {
+            ...this.projectForm.value,
+            startDate: this.projectForm.value.startDate
+                ? formatDate(this.projectForm.value.startDate, 'yyyy-MM-dd', 'en-US')
+                : null,
+            endDate: this.projectForm.value.endDate
+                ? formatDate(this.projectForm.value.endDate, 'yyyy-MM-dd', 'en-US')
+                : null,
+            ownerId: this.userId,
+        } as Partial<Project>;
+
+        console.log(formValue);
+        this.projectService
+            .createProject(formValue)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+                next: (project) => {
+                    this.router.navigate(['/projects', project.id]);
+                },
+                error: (error) => {
+                    console.error('Error creating project:', error);
+                },
+            });
     }
 
     onCancel(): void {

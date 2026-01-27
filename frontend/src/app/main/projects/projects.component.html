@@ -1,4 +1,4 @@
-<div class="relative h-full">
+<div class="min-h-full">
     <form [formGroup]="filterForm" class="flex gap-2 items-center">
         <mat-form-field appearance="outline">
             <mat-label>Project Name</mat-label>
@@ -33,7 +33,7 @@
         (sortChange)="onSortChange($event)"
         (pageChange)="onPageChange($event)"
     ></app-table>
-    <div class="absolute right-0 bottom-0">
+    <div class="fixed right-6 bottom-6 z-50">
         <app-speed-dial (togglerClick)="createProject()"></app-speed-dial>
     </div>
 </div>
