@@ -16,7 +16,6 @@ import { Event, NavigationStart, Router, RouterLink, RouterModule } from '@angul
 import { ThemeService } from '../../shared/services/theme/theme.service';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { AppRoute } from '../../shared/constants/Routes';
-import { SidebarService } from '../../shared/services/sidebar/sidebar.service';
 import { filter, fromEvent } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Claims } from '../../shared/constants/Claims';
@@ -41,20 +40,21 @@ import { AuthService } from '../../shared/services/auth/auth.service';
 export class NavbarComponent implements AfterViewInit {
     private themeService = inject(ThemeService);
     private router = inject(Router);
-    private sidebarService = inject(SidebarService);
     private authService = inject(AuthService);
     private destroyRef = inject(DestroyRef);
 
-    showSidebarToggle = input<boolean>(true);
-    logoutClicked = output<void>();
-    isSidebarOpened = model<boolean>(this.sidebarService.getState());
-    isMenuOpen = signal<boolean>(false);
+    isSidebarOpened = model<boolean>(window.innerWidth > 767);
     imageSource = model<string>('QuickFix_logo_dark.png');
+    logoutClicked = output<void>();
+    showMenuLogo = input<boolean>(true);
+
+    isMenuOpen = signal<boolean>(false);
     user = signal<Claims | null>(this.authService.currentUserClaims());
     htmlElement = signal<HTMLElement | null>(document.documentElement);
     routes = signal<AppRoute[]>(this.getAppRoutes().filter((route) => route.show));
-    logo = this.themeService.logos;
     theme = signal<'light' | 'dark'>(this.themeService.getTheme() || 'light');
+    showSidebarToggleButton = signal<boolean>(window.innerWidth <= 767);
+    logo = this.themeService.logos;
 
     constructor() {
         this.setTheme(this.theme());
@@ -62,7 +62,11 @@ export class NavbarComponent implements AfterViewInit {
             .pipe(takeUntilDestroyed())
             .subscribe(() => {
                 if (window.innerWidth <= 767) {
+                    this.showSidebarToggleButton.set(true);
                     this.isMenuOpen.set(false);
+                    this.isSidebarOpened.set(false);
+                } else {
+                    this.showSidebarToggleButton.set(false);
                     this.isSidebarOpened.set(true);
                 }
             });
@@ -76,7 +80,6 @@ export class NavbarComponent implements AfterViewInit {
             )
             .subscribe(() => {
                 this.isMenuOpen.set(false);
-                this.isSidebarOpened.set(false);
             });
     }
 
@@ -164,6 +167,8 @@ export class NavbarComponent implements AfterViewInit {
     }
 
     toggleSidebar(value: boolean = !this.isSidebarOpened()): void {
+        console.log('toggled');
+
         this.isSidebarOpened.set(value);
     }
 

@@ -1,11 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { SidebarService } from '../../shared/services/sidebar/sidebar.service';
 import { NavbarComponent } from '../../common/navbar/navbar.component';
 import { MatSidenavContainer, MatSidenav, MatSidenavContent } from '@angular/material/sidenav';
 import { AppRoute } from '../../shared/constants/Routes';
 import { NavitemComponent } from '../../common/sidenav/navitem/navitem.component';
 import { ThemeService } from '../../shared/services/theme/theme.service';
+import { fromEvent } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { CommonModule } from '@angular/common';
 
 @Component({
     selector: 'app-main-layout',
@@ -16,27 +18,27 @@ import { ThemeService } from '../../shared/services/theme/theme.service';
         MatSidenav,
         MatSidenavContent,
         NavitemComponent,
+        CommonModule,
     ],
     templateUrl: './main-layout.component.html',
     styleUrl: './main-layout.component.css',
 })
 export class MainLayoutComponent {
-    private sidebarService = inject(SidebarService);
     private activeRoute = inject(ActivatedRoute);
     private themeService = inject(ThemeService);
-    isSidebarOpened = signal<boolean>(this.sidebarService.getState());
+    isSidebarOpened = signal<boolean>(window.innerWidth > 767);
     projectId = signal<string | null>(this.activeRoute.snapshot.paramMap.get('projectId'));
     sideNavRoutes = signal<AppRoute[]>(this.getSideNavRoutes());
     imageSource = signal<string>(this.themeService.logos[this.themeService.getTheme()]);
+    sidebarMode = signal<'over' | 'push' | 'side'>(window.innerWidth < 768 ? 'over' : 'side');
 
-    onSidebar(event: boolean) {
-        this.setSidebarState(event);
-    }
-
-    setSidebarState(open: boolean): void {
-        const collapsedState = open ? 'open' : 'closed';
-        this.sidebarService.setState(collapsedState);
-        this.isSidebarOpened.set(open);
+    constructor() {
+        fromEvent(window, 'resize')
+            .pipe(takeUntilDestroyed())
+            .subscribe(() => {
+                this.sidebarMode.set(window.innerWidth < 768 ? 'over' : 'side');
+                this.isSidebarOpened.set(window.innerWidth > 767);
+            });
     }
 
     getSideNavRoutes(): Array<AppRoute> {

@@ -1,11 +1,12 @@
 <main class="h-screen w-full overflow-hidden">
-    <mat-sidenav-container>
+    <mat-sidenav-container class="!h-full">
         <mat-sidenav
-            mode="over"
+            #sidenav
+            [mode]="sidebarMode()"
             [opened]="isSidebarOpened()"
-            (openedChange)="onSidebar($event)"
+            (openedChange)="isSidebarOpened.set($event)"
             position="start"
-            class="!w-72 px-2 py-4"
+            class="!w-64 px-2 py-4 overflow-hidden"
         >
             <div class="ps-1 mb-4">
                 <a href="/" class="flex items-center gap-4">
@@ -17,8 +18,9 @@
         </mat-sidenav>
         <mat-sidenav-content>
             <app-navbar
+                [showMenuLogo]="false"
                 [isSidebarOpened]="isSidebarOpened()"
-                (isSidebarOpenedChange)="onSidebar($event)"
+                (isSidebarOpenedChange)="isSidebarOpened.set($event)"
                 (imageSourceChange)="imageSource.set($event)"
                 class="row-span-1 col-span-2"
             ></app-navbar>
