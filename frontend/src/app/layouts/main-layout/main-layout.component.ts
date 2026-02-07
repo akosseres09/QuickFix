@@ -66,7 +66,7 @@ export class MainLayoutComponent {
                     },
                     {
                         name: 'New Issue',
-                        path: `/project/${this.projectId()}/issues/new`,
+                        path: `/project/${this.projectId()}/issues/add`,
                         icon: 'add_task',
                     },
                 ],

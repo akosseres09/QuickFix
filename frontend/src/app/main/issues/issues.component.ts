@@ -6,12 +6,14 @@ import { IssueService } from '../../shared/services/issue/issue.service';
 import { CommonModule } from '@angular/common';
 import { DisplayedColumn } from '../../shared/constants/DisplayedColumn';
 import { TableComponent } from '../../common/table/table.component';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
+import { SpeedDialComponent } from '../../common/speed-dial/speed-dial.component';
+import { SpeedDialButton } from '../../shared/constants/SpeedDialButton';
 
 @Component({
     selector: 'app-issues',
-    imports: [MatTableModule, MatPaginatorModule, CommonModule, TableComponent],
+    imports: [MatTableModule, MatPaginatorModule, CommonModule, TableComponent, SpeedDialComponent],
     templateUrl: './issues.component.html',
     styleUrl: './issues.component.css',
 })
@@ -19,6 +21,7 @@ export class IssuesComponent {
     private snackbarService = inject(SnackbarService);
     private issueService = inject(IssueService);
     private router = inject(Router);
+    private activeRoute = inject(ActivatedRoute);
 
     issues = signal<Issue[]>(this.issueService.getIssues());
     shownIssues = computed(() => new MatTableDataSource<Issue>(this.issues()));
@@ -68,6 +71,17 @@ export class IssuesComponent {
             sortable: true,
             value: (e: Issue) =>
                 (e.status.charAt(0).toUpperCase() + e.status.slice(1)).replaceAll('_', ' '),
+        },
+    ];
+    speedDialButtons: SpeedDialButton[] = [
+        {
+            iconName: 'add',
+            label: 'Create Issue',
+            action: () => {
+                this.router.navigate(['add'], {
+                    relativeTo: this.activeRoute,
+                });
+            },
         },
     ];
 

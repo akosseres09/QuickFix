@@ -117,7 +117,7 @@ export const routes: Routes = [
                         },
                         {
                             label: 'New Issue',
-                            route: 'new',
+                            route: 'add',
                         },
                     ],
                 },
@@ -140,7 +140,7 @@ export const routes: Routes = [
                         canActivate: [authenticatedGuard],
                     },
                     {
-                        path: 'new',
+                        path: 'add',
                         loadComponent: () =>
                             import('./main/issues/new/new.component').then((c) => c.NewComponent),
                         title: 'QuickFix - New Issue',
