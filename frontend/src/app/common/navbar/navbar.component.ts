@@ -80,6 +80,9 @@ export class NavbarComponent implements AfterViewInit {
             )
             .subscribe(() => {
                 this.isMenuOpen.set(false);
+                if (window.innerWidth <= 767) {
+                    this.isSidebarOpened.set(false);
+                }
             });
     }
 
