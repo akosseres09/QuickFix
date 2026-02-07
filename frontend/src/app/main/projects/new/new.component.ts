@@ -158,6 +158,8 @@ export class NewComponent implements OnInit {
     openInfo(): void {
         const dialogRef = this.infoDialogRef();
         if (!dialogRef) return;
-        this.dialogService.openConfirmDialog('Project Information', dialogRef);
+        this.dialogService.openConfirmDialog('Project Information', dialogRef, {
+            width: '600px',
+        });
     }
 }
