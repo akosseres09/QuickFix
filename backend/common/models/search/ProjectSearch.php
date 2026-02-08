@@ -11,7 +11,8 @@ class ProjectSearch extends Project
     public function rules(): array
     {
         return [
-            [['id', 'owner_id', 'status'], 'integer'],
+            [['id', 'owner_id'], 'string'],
+            [['status'], 'integer'],
             [['name', 'description'], 'safe'],
         ];
     }

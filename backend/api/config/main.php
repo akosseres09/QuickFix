@@ -1,5 +1,7 @@
 <?php
 
+use yii\rest\UrlRule;
+
 $params = array_merge(
     require __DIR__ . '/../../common/config/params.php',
     require __DIR__ . '/../../common/config/params-local.php',
@@ -46,9 +48,21 @@ return [
             'showScriptName' => false,
             'rules' => [
                 [
-                    'class' => 'yii\rest\UrlRule',
-                    'controller' => ['user', 'auth', 'project', 'member', 'issue'],
-                    'pluralize' => false
+                    'class' => UrlRule::class,
+                    'controller' => ['user', 'auth', 'project', 'member'],
+                    'pluralize' => false,
+                    'tokens' => [
+                        '{id}' => '<id:[A-Za-z0-9_\-]+>',
+                    ]
+                ],
+                [
+                    'class' => UrlRule::class,
+                    'controller' => ['issue'],
+                    'pluralize' => false,
+                    'prefix' => '<project_id:[A-Za-z0-9_\-]+>/',
+                    'tokens' => [
+                        '{id}' => '<id:[A-Za-z0-9_\-]+>',
+                    ]
                 ],
                 'auth/login' => 'auth/login',
                 'auth/signup' => 'auth/signup',
@@ -58,10 +72,10 @@ return [
                 'auth/reset-password' => 'auth/reset-password',
                 'auth/refresh' => 'auth/refresh',
                 'auth/me' => 'auth/me',
-                'project/<id:\d+>/add-member' => 'project/add-member',
-                'project/<id:\d+>/remove-member' => 'project/remove-member',
+                'project/<id:[A-Za-z0-9_\-]+>/add-member' => 'project/add-member',
+                'project/<id:[A-Za-z0-9_\-]+>/remove-member' => 'project/remove-member',
                 [
-                    'pattern' => 'project/<projectId:\d+>/members',
+                    'pattern' => 'project/<projectId:[A-Za-z0-9_\-]+>/members',
                     'route' => 'member/index',
                 ],
             ],

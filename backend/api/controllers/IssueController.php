@@ -3,8 +3,8 @@
 namespace api\controllers;
 
 use common\models\Issue;
+use common\models\search\IssueSearch;
 use Yii;
-use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 
 class IssueController extends BaseRestController
@@ -17,14 +17,8 @@ class IssueController extends BaseRestController
 
         // Configure the index action with custom data provider
         $actions['index']['prepareDataProvider'] = function ($action, $filter) {
-            $params = Yii::$app->request->queryParams;
-
-            if (!isset($params['projectId'])) {
-                throw new BadRequestHttpException('Project ID is required to list issues.');
-            }
-
-            $query = Issue::find()->byProject($params['projectId']);
-            return $query->all();
+            $issueSearch = new IssueSearch();
+            return $issueSearch->search(Yii::$app->request->queryParams);
         };
 
         return $actions;
@@ -39,8 +33,8 @@ class IssueController extends BaseRestController
             return;
         }
 
-        if (!$model->canAccess($this->userId)) {
-            throw new  ForbiddenHttpException('You do not have permission to access this issue.');
+        if (!$model->canAccess(Yii::$app->user->id)) {
+            throw new ForbiddenHttpException('You do not have permission to access this issue.');
         }
     }
 }

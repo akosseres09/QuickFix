@@ -40,6 +40,11 @@ class ProjectController extends BaseRestController
             return $searchModel->search(Yii::$app->request->queryParams);
         };
 
+        // Configure actions to use custom findModel (find by key instead of ID)
+        $actions['view']['findModel'] = [$this, 'findModel'];
+        $actions['update']['findModel'] = [$this, 'findModel'];
+        $actions['delete']['findModel'] = [$this, 'findModel'];
+
         return $actions;
     }
 
@@ -76,7 +81,7 @@ class ProjectController extends BaseRestController
     /**
      * Add a member to the project
      */
-    public function actionAddMember(int $id): array
+    public function actionAddMember(string $id): array
     {
         $project = $this->findModel($id);
         $this->checkOwnership($project);
@@ -94,7 +99,7 @@ class ProjectController extends BaseRestController
         }
 
         $member = new ProjectMember();
-        $member->project_id = $id;
+        $member->project_id = $project->id;
         $member->user_id = $userId;
         $member->role = $role;
 
@@ -114,12 +119,12 @@ class ProjectController extends BaseRestController
     /**
      * Remove a member from the project
      */
-    public function actionRemoveMember(int $id, int $memberId): array
+    public function actionRemoveMember(string $id, int $memberId): array
     {
         $project = $this->findModel($id);
         $this->checkOwnership($project);
 
-        $member = ProjectMember::findOne(['id' => $memberId, 'project_id' => $id]);
+        $member = ProjectMember::findOne(['id' => $memberId, 'project_id' => $project->id]);
 
         if (!$member) {
             throw new NotFoundHttpException('Member not found.');
@@ -135,17 +140,20 @@ class ProjectController extends BaseRestController
     }
 
     /**
-     * Find project model by ID
+     * Used by view, delete and update actions to find the model based on the key value provided in the URL.
+     * @param string $id
+     * @throws NotFoundHttpException if the model cannot be found
+     * @return Project the loaded model
      */
-    protected function findModel(int $id): Project
+    public function findModel($id): Project
     {
-        $model = Project::findOne($id);
+        $project = Project::find()->byKey($id)->one();
 
-        if ($model === null) {
-            throw new NotFoundHttpException('Project not found.');
+        if (!$project) {
+            throw new NotFoundHttpException('Project not found!');
         }
 
-        return $model;
+        return $project;
     }
 
     /**

@@ -106,10 +106,11 @@ class Issue extends ActiveRecord
             $this->id = Yii::$app->security->generateRandomString(36);
         }
 
-        if (empty($this->issue_key)) {
-            $this->issue_key = $this->generateIssueKey();
+        if (!empty($this->issue_key)) {
+            $this->issue_key = null;
         }
 
+        $this->issue_key = $this->generateIssueKey();
         return true;
     }
 
@@ -218,5 +219,24 @@ class Issue extends ActiveRecord
     public static function find(): IssueQuery
     {
         return new IssueQuery(get_called_class());
+    }
+
+    /**
+     * Generates a unique issue key for the project.
+     * Format: <PROJECT_KEY>-<NUMBER>
+     * 
+     * @return string|null
+     */
+    public function generateIssueKey()
+    {
+        // Get the project directly by ID (can't use relation in beforeSave)
+        $project = Project::findOne($this->project_id);
+        if (!$project) {
+            return null;
+        }
+
+        $count = Issue::find()->byProject($this->project_id)->count();
+        $nextNumber = $count + 1;
+        return strtoupper($project->key) . '-' . $nextNumber;
     }
 }
