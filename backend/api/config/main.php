@@ -47,7 +47,7 @@ return [
             'rules' => [
                 [
                     'class' => 'yii\rest\UrlRule',
-                    'controller' => ['user', 'auth', 'project', 'member'],
+                    'controller' => ['user', 'auth', 'project', 'member', 'issue'],
                     'pluralize' => false
                 ],
                 'auth/login' => 'auth/login',

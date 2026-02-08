@@ -30,6 +30,7 @@ use yii\db\ActiveRecord;
  * @property User $owner
  * @property ProjectMember[] $projectMembers
  * @property User[] $members
+ * @property Issue[] $issues
  */
 class Project extends ActiveRecord
 {
@@ -98,13 +99,19 @@ class Project extends ActiveRecord
      */
     public function beforeSave($insert)
     {
-        if (parent::beforeSave($insert)) {
-            if ($insert && empty($this->id)) {
-                $this->id = Yii::$app->security->generateRandomString(36);
-            }
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+
+        if (!$insert) {
             return true;
         }
-        return false;
+
+        if ($insert && empty($this->id)) {
+            $this->id = Yii::$app->security->generateRandomString(36);
+        }
+
+        return true;
     }
 
     /**
@@ -193,7 +200,7 @@ class Project extends ActiveRecord
 
     public function extraFields()
     {
-        return ['members', 'owner', 'projectMembers'];
+        return ['members', 'owner', 'projectMembers', 'issues'];
     }
 
     /**
@@ -228,12 +235,22 @@ class Project extends ActiveRecord
     }
 
     /**
+     * Gets query for [[Issues]].
+     * 
+     * @return \yii\db\ActiveQuery
+     */
+    public function getIssues()
+    {
+        return $this->hasMany(Issue::class, ['project_id' => 'id']);
+    }
+
+    /**
      * Check if a user can access this project
-     *
-     * @param int $userId
+     * 
+     * @param string $userId
      * @return bool
      */
-    public function canAccess(int $userId): bool
+    public function canAccess(string $userId): bool
     {
         // Owner always has access
         if ($this->owner_id == $userId) {
@@ -263,10 +280,10 @@ class Project extends ActiveRecord
     /**
      * Check if user is a member of the project
      *
-     * @param int $userId
+     * @param string $userId
      * @return bool
      */
-    public function isMember(int $userId): bool
+    public function isMember(string $userId): bool
     {
         return ProjectMember::find()
             ->where(['project_id' => $this->id, 'user_id' => $userId])
@@ -276,10 +293,10 @@ class Project extends ActiveRecord
     /**
      * Check if user is an admin member of the project
      *
-     * @param int $userId
+     * @param string $userId
      * @return bool
      */
-    public function isMemberAdmin(int $userId): bool
+    public function isMemberAdmin(string $userId): bool
     {
         return ProjectMember::find()
             ->where([

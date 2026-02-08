@@ -37,6 +37,9 @@ use yii\web\IdentityInterface;
  * 
  * relations
  * @property RefreshToken[] $refreshTokens
+ * @property Project[] $projects
+ * @property Issue[] $createdIssues
+ * @property Issue[] $assignedIssues
  */
 class User extends ActiveRecord implements IdentityInterface
 {
@@ -217,9 +220,45 @@ class User extends ActiveRecord implements IdentityInterface
         return time() < $this->password_reset_token_expires_at;
     }
 
+    /**
+     * Gets query for [[UserRefreshToken]]
+     * 
+     * @return \yii\db\ActiveQuery
+     */
     public function getRefreshTokens()
     {
         return $this->hasMany(UserRefreshToken::class, ['user_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[Project]]
+     * 
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProjects()
+    {
+        return $this->hasMany(Project::class, ['id' => 'project_id'])
+            ->viaTable('project_member', ['user_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[Issue]] created by the user
+     * 
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCreatedIssues()
+    {
+        return $this->hasMany(Issue::class, ['created_by' => 'id']);
+    }
+
+    /**
+     * Gets query for [[Issue]] assigned to the user
+     * 
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAssignedIssues()
+    {
+        return $this->hasMany(Issue::class, ['assigned_to' => 'id']);
     }
 
     /**
