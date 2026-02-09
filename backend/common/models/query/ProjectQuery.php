@@ -90,6 +90,16 @@ class ProjectQuery extends ActiveQuery
     }
 
     /**
+     * Filter by project key or ID
+     * @param string $keyOrId
+     * @return ProjectQuery
+     */
+    public function byKeyOrId(string $keyOrId): ProjectQuery
+    {
+        return $this->andWhere(['or', ['key' => $keyOrId], ['id' => $keyOrId]]);
+    }
+
+    /**
      * Filter by visibility
      * @param string $visibility
      * @return ProjectQuery
