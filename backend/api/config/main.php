@@ -49,7 +49,12 @@ return [
             'rules' => [
                 [
                     'class' => UrlRule::class,
-                    'controller' => ['user', 'auth', 'project', 'member'],
+                    'controller' => ['auth'],
+                    'pluralize' => false,
+                ],
+                [
+                    'class' => UrlRule::class,
+                    'controller' => ['user', 'project'],
                     'pluralize' => false,
                     'tokens' => [
                         '{id}' => '<id:[A-Za-z0-9_\-]+>',
@@ -57,7 +62,7 @@ return [
                 ],
                 [
                     'class' => UrlRule::class,
-                    'controller' => ['issue'],
+                    'controller' => ['issue', 'member'],
                     'pluralize' => false,
                     'prefix' => '<project_id:[A-Za-z0-9_\-]+>/',
                     'tokens' => [
@@ -72,12 +77,6 @@ return [
                 'auth/reset-password' => 'auth/reset-password',
                 'auth/refresh' => 'auth/refresh',
                 'auth/me' => 'auth/me',
-                'project/<id:[A-Za-z0-9_\-]+>/add-member' => 'project/add-member',
-                'project/<id:[A-Za-z0-9_\-]+>/remove-member' => 'project/remove-member',
-                [
-                    'pattern' => 'project/<projectId:[A-Za-z0-9_\-]+>/members',
-                    'route' => 'member/index',
-                ],
             ],
         ],
         'jwt' => function () {

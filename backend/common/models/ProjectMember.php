@@ -107,15 +107,41 @@ class ProjectMember extends ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function beforeSave($insert)
+    public function beforeValidate()
     {
-        if (parent::beforeSave($insert)) {
-            if ($insert && empty($this->id)) {
-                $this->id = Yii::$app->security->generateRandomString(36);
-            }
+        if (!parent::beforeValidate()) {
+            return false;
+        }
+
+        if (!$this->isNewRecord) {
             return true;
         }
-        return false;
+
+        if ($this->project_id === null) {
+            $this->project_id = Yii::$app->request->get('project_id');
+        }
+
+        return true;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function beforeSave($insert)
+    {
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+
+        if (!$insert) {
+            return true;
+        }
+
+        if (empty($this->id)) {
+            $this->id = Yii::$app->security->generateRandomString(36);
+        }
+
+        return true;
     }
 
     /**

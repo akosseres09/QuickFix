@@ -12,7 +12,7 @@ class MemberController extends BaseRestController
     public function actions()
     {
         $actions = parent::actions();
-        unset($actions['view'], $actions['update']);
+        unset($actions['view']);
         $actions['index']['prepareDataProvider'] = [$this, 'prepareDataProvider'];
         return $actions;
     }
@@ -20,13 +20,13 @@ class MemberController extends BaseRestController
 
     public function prepareDataProvider()
     {
-        $projectId = Yii::$app->request->get('projectId');
+        $projectId = Yii::$app->request->get('project_id');
 
         if (!$projectId) {
             throw new \yii\web\BadRequestHttpException('Project ID is required.');
         }
 
-        $query = ProjectMember::find()->byProject((int)$projectId);
+        $query = ProjectMember::find()->byProject($projectId);
         return new \yii\data\ActiveDataProvider([
             'query' => $query,
         ]);
