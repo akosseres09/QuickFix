@@ -3,6 +3,7 @@
 namespace common\models\search;
 
 use common\models\Issue;
+use common\models\Project;
 
 class IssueSearch extends Issue
 {
@@ -23,12 +24,22 @@ class IssueSearch extends Issue
         $pageSize = isset($params['pageSize']) ? (int)$params['pageSize'] : 20;
         $pageSize = min($pageSize, 100);
 
+        // Can be the project ID or project key
         $projectId = $params['project_id'] ?? null;
         if (!$projectId) {
             throw new \InvalidArgumentException('Project ID is required for issue search.');
         }
 
-        $query = Issue::find()->byProject($projectId);
+        $project = null;
+        // if $projectId is not project.id then try to find project by key
+        if (strlen($projectId) !== 36) {
+            $project = Project::find()->byKey($projectId)->one();
+            if (!$project) {
+                throw new \InvalidArgumentException('Project not found with the given ID or key.');
+            }
+        }
+
+        $query = Issue::find()->byProjectId($project ? $project->id : $projectId);
 
         $dataProvider = new \yii\data\ActiveDataProvider([
             'query' => $query,
