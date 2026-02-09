@@ -1,10 +1,16 @@
 <div class="max-w-7xl mx-auto">
     <app-table
-        (delete)="onDelete($event)"
-        (edit)="onEdit($event)"
         [dataSource]="shownIssues()"
         [displayedColumns]="displayedColumns"
         tableHeader="Issues"
+        [initialPageSize]="pageSize()"
+        [initialPageIndex]="pageIndex()"
+        [initialSortActive]="sortActive()"
+        [initialSortDirection]="sortDirection()"
+        [totalCount]="totalCount()"
+        [isLoading]="isLoading()"
+        (sortChange)="onSortChange($event)"
+        (pageChange)="onPageChange($event)"
     ></app-table>
     <div class="fixed right-6 bottom-6 z-50">
         <app-speed-dial [buttons]="speedDialButtons"></app-speed-dial>
