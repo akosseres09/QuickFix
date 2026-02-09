@@ -5,7 +5,7 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TableComponent } from '../../common/table/table.component';
 import { PRIORITY_MAP, Project, STATUS_MAP } from '../../shared/model/Project';
 import { DisplayedColumn } from '../../shared/constants/DisplayedColumn';
-import { ApiQueryParams, ProjectService } from '../../shared/services/project/project.service';
+import { ProjectService } from '../../shared/services/project/project.service';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import {
@@ -23,6 +23,7 @@ import { SpeedDialComponent } from '../../common/speed-dial/speed-dial.component
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DateService } from '../../shared/services/date/date.service';
 import { Sort, SortDirection } from '@angular/material/sort';
+import { ApiQueryParams } from '../../shared/constants/api/ApiQueryParams';
 
 @Component({
     selector: 'app-projects',
@@ -97,6 +98,7 @@ export class ProjectsComponent implements OnInit {
             id: 'status',
             label: 'Status',
             sortable: true,
+            badge: true,
             value: (e: Project) => STATUS_MAP[e.status],
         },
         {

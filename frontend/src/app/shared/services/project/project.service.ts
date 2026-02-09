@@ -3,51 +3,8 @@ import { Project } from '../../model/Project';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../../environments/environment.development';
 import { map, Observable } from 'rxjs';
-
-/**
- * Pagination metadata from Yii2 REST API
- */
-export interface PaginationMeta {
-    totalCount: number;
-    pageCount: number;
-    currentPage: number;
-    perPage: number;
-}
-
-/**
- * Paginated API response structure from Yii2
- */
-export interface PaginatedResponse<T> {
-    items: T[];
-    _meta: PaginationMeta;
-    _links: {
-        self: { href: string };
-        first?: { href: string };
-        last?: { href: string };
-        next?: { href: string };
-        prev?: { href: string };
-    };
-}
-
-/**
- * Unified interface for all API query parameters
- * Includes:
- *   - Model attribute filters (e.g., name, status)
- *   - Pagination (page, pageSize)
- *   - Sorting (sort)
- *   - Expansion (expand)
- */
-export interface ApiQueryParams {
-    // Pagination
-    page?: number | null;
-    pageSize?: number | null;
-    // Sorting (e.g., 'createdAt' or '-createdAt' for descending)
-    sort?: string | null;
-    // Expansion (e.g., 'owner,members')
-    expand?: string | null;
-    // Dynamic filters based on model attributes
-    [param: string]: string | number | boolean | null | undefined;
-}
+import { ApiQueryParams } from '../../constants/api/ApiQueryParams';
+import { PaginatedResponse } from '../../constants/api/PaginatedResponse';
 
 @Injectable({
     providedIn: 'root',
