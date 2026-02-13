@@ -2,9 +2,9 @@
 
 namespace api\controllers;
 
-use common\models\User;
+use common\models\resource\UserResource;
 
 class UserController extends BaseRestController
 {
-    public $modelClass = User::class;
+    public $modelClass = UserResource::class;
 }
