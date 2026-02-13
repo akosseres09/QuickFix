@@ -66,10 +66,6 @@ class ProjectSearch extends Project
                         'asc' => ['p.name' => SORT_ASC],
                         'desc' => ['p.name' => SORT_DESC],
                     ],
-                    'created_at' => [
-                        'asc' => ['p.created_at' => SORT_ASC],
-                        'desc' => ['p.created_at' => SORT_DESC],
-                    ],
                     'createdAt' => [
                         'asc' => ['p.created_at' => SORT_ASC],
                         'desc' => ['p.created_at' => SORT_DESC],
@@ -78,7 +74,6 @@ class ProjectSearch extends Project
                         'asc' => ['p.status' => SORT_ASC],
                         'desc' => ['p.status' => SORT_DESC],
                     ],
-                    // 3. Update the Sort to use the subquery
                     'users' => [
                         'asc' => [$memberCountSql => SORT_ASC],
                         'desc' => [$memberCountSql => SORT_DESC],

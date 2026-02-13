@@ -35,10 +35,6 @@ class IssueController extends BaseRestController
      */
     public function checkAccess($action, $model = null, $params = [])
     {
-        if ($model == null) {
-            return;
-        }
-
         if (!$model->canAccess(Yii::$app->user->id)) {
             throw new ForbiddenHttpException('You do not have permission to access this issue.');
         }

@@ -50,10 +50,16 @@ class IssueSearch extends Issue
                 'pageParam' => 'page',
             ],
             'sort' => [
-                'defaultOrder' => ['created_at' => SORT_DESC],
+                'defaultOrder' => ['createdAt' => SORT_DESC],
                 'attributes' => [
-                    'created_at',
-                    'updated_at',
+                    'createdAt' => [
+                        'asc' => ['created_at' => SORT_ASC],
+                        'desc' => ['created_at' => SORT_DESC],
+                    ],
+                    'updatedAt' => [
+                        'asc' => ['updated_at' => SORT_ASC],
+                        'desc' => ['updated_at' => SORT_DESC],
+                    ],
                     'status',
                     'type',
                     'priority',

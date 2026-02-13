@@ -18,7 +18,7 @@ class SignupForm extends Model
     public $username;
     public $email;
     public $password;
-    public $rePassword;
+    public $confirm_password;
 
 
     /**
@@ -28,14 +28,26 @@ class SignupForm extends Model
     {
         return [
             [['username', 'email', 'first_name', 'last_name'], 'trim'],
-            [['username', 'email', 'password', 'rePassword', 'first_name', 'last_name'], 'required'],
+            [['username', 'email', 'password', 'confirm_password', 'first_name', 'last_name'], 'required'],
             ['username', 'unique', 'targetClass' => '\common\models\User', 'message' => 'This username has already been taken.'],
             ['username', 'string', 'min' => 5, 'max' => 255],
             ['email', 'email'],
             ['email', 'string', 'max' => 255],
             ['email', 'unique', 'targetClass' => '\common\models\User', 'message' => 'This email address has already been taken.'],
-            [['password', 'rePassword'], 'string', 'min' => 6],
-            ['password', 'compare', 'compareAttribute' => 'rePassword'],
+            [['password', 'confirm_password'], 'string', 'min' => 6],
+            ['password', 'compare', 'compareAttribute' => 'confirm_password'],
+        ];
+    }
+
+    public function fields()
+    {
+        return [
+            'username',
+            'email',
+            'firstName' => 'first_name',
+            'lastName' => 'last_name',
+            'password',
+            'confirmPassword' => 'confirm_password',
         ];
     }
 

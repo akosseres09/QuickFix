@@ -213,7 +213,8 @@ class Issue extends ActiveRecord
         return [
             'project',
             'owner',
-            'creator'
+            'creator',
+            'assignee'
         ];
     }
 

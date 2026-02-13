@@ -167,7 +167,7 @@
                 <mat-label>Confirm password</mat-label>
                 <mat-icon matPrefix class="!text-light-text dark:!text-inherit">lock</mat-icon>
                 <input
-                    formControlName="rePassword"
+                    formControlName="confirmPassword"
                     matInput
                     type="password"
                     autocomplete="new-password"
@@ -179,15 +179,15 @@
                     matSuffix
                     >{{ rePwVisible() ? 'visibility_off' : 'visibility' }}</mat-icon
                 >
-                @if (getControl('rePassword')?.invalid) {
+                @if (getControl('confirmPassword')?.invalid) {
                     <mat-error class="text-sm">
-                        @if (getControl('rePassword')?.hasError('required')) {
+                        @if (getControl('confirmPassword')?.hasError('required')) {
                             <span>Password Confirmation is required.</span>
                         }
-                        @if (getControl('rePassword')?.hasError('minlength')) {
+                        @if (getControl('confirmPassword')?.hasError('minlength')) {
                             <span>Password Confirmation must be at least 6 characters.</span>
                         }
-                        @if (getControl('rePassword')?.hasError('mustMatch')) {
+                        @if (getControl('confirmPassword')?.hasError('mustMatch')) {
                             <span>Passwords must match.</span>
                         }
                     </mat-error>

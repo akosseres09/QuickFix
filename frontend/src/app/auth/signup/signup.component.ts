@@ -62,12 +62,12 @@ export class SignupComponent {
             username: ['', [Validators.required, Validators.minLength(5)]],
             email: ['', [Validators.required, Validators.email]],
             password: ['', [Validators.required, Validators.minLength(6)]],
-            rePassword: ['', [Validators.required, Validators.minLength(6)]],
+            confirmPassword: ['', [Validators.required, Validators.minLength(6)]],
             dateOfBirth: [null as Date | null, [minAgeValidator(13)]],
             phoneNumber: ['', [phoneValidator()]],
         },
         {
-            validators: passwordMatchValidator('password', 'rePassword'),
+            validators: passwordMatchValidator('password', 'confirmPassword'),
         } as AbstractControlOptions
     );
 
@@ -84,7 +84,7 @@ export class SignupComponent {
 
             if (input.getAttribute('formcontrolname') === 'password') {
                 this.pwVisible.set(!this.pwVisible());
-            } else if (input.getAttribute('formcontrolname') === 'rePassword') {
+            } else if (input.getAttribute('formcontrolname') === 'confirmPassword') {
                 this.rePwVisible.set(!this.rePwVisible());
             }
         }
@@ -105,6 +105,8 @@ export class SignupComponent {
 
     onSubmit(): void {
         if (!this.signupForm.valid) return;
+
+        console.log(this.signupForm.value);
 
         this.authService
             .signup(this.signupForm.value as SignupData)
