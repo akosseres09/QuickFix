@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\models\query\ProjectQuery;
+use common\models\resource\UserResource;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -27,7 +28,7 @@ use yii\db\ActiveRecord;
  * @property integer $created_at
  * @property integer $updated_at
  * 
- * @property User $owner
+ * @property UserResource $owner
  * @property ProjectMember[] $projectMembers
  * @property User[] $members
  * @property Issue[] $issues
@@ -149,7 +150,7 @@ class Project extends ActiveRecord
             [['progress'], 'default', 'value' => 0],
             [['progress'], 'double', 'min' => 0, 'max' => 100],
             [['owner_id'], 'string', 'max' => 36],
-            [['owner_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['owner_id' => 'id']],
+            [['owner_id'], 'exist', 'skipOnError' => true, 'targetClass' => UserResource::class, 'targetAttribute' => ['owner_id' => 'id']],
         ];
     }
 
@@ -210,7 +211,7 @@ class Project extends ActiveRecord
      */
     public function getOwner()
     {
-        return $this->hasOne(User::class, ['id' => 'owner_id']);
+        return $this->hasOne(UserResource::class, ['id' => 'owner_id']);
     }
 
     /**
@@ -230,7 +231,7 @@ class Project extends ActiveRecord
      */
     public function getMembers()
     {
-        return $this->hasMany(User::class, ['id' => 'user_id'])
+        return $this->hasMany(UserResource::class, ['id' => 'user_id'])
             ->viaTable('{{%project_member}}', ['project_id' => 'id']);
     }
 

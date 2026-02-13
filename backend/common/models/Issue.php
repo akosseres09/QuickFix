@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\models\query\IssueQuery;
+use common\models\resource\UserResource;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -27,8 +28,8 @@ use yii\db\ActiveRecord;
  * @property bool $is_archived
  * 
  * @property Project $project
- * @property User $creator
- * @property User|null $assignee
+ * @property UserResource $creator
+ * @property UserResource|null $assignee
  */
 class Issue extends ActiveRecord
 {
@@ -176,8 +177,8 @@ class Issue extends ActiveRecord
             [['project_id', 'created_by', 'assigned_to'], 'string', 'max' => 36],
             [['project_id', 'issue_key'], 'unique', 'targetAttribute' => ['project_id', 'issue_key'], 'message' => 'The combination of Project ID and Issue Key has already been taken.'],
             [['project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['project_id' => 'id']],
-            [['created_by'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['created_by' => 'id']],
-            [['assigned_to'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['assigned_to' => 'id']],
+            [['created_by'], 'exist', 'skipOnError' => true, 'targetClass' => UserResource::class, 'targetAttribute' => ['created_by' => 'id']],
+            [['assigned_to'], 'exist', 'skipOnError' => true, 'targetClass' => UserResource::class, 'targetAttribute' => ['assigned_to' => 'id']],
         ];
     }
 
@@ -235,7 +236,7 @@ class Issue extends ActiveRecord
      */
     public function getCreator()
     {
-        return $this->hasOne(User::class, ['id' => 'created_by']);
+        return $this->hasOne(UserResource::class, ['id' => 'created_by']);
     }
 
     /**
@@ -245,7 +246,7 @@ class Issue extends ActiveRecord
      */
     public function getAssignee()
     {
-        return $this->hasOne(User::class, ['id' => 'assigned_to']);
+        return $this->hasOne(UserResource::class, ['id' => 'assigned_to']);
     }
 
     public function canAccess(string $userId): bool

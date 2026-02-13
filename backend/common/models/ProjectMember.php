@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\models\query\ProjectMemberQuery;
+use common\models\resource\UserResource;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -69,7 +70,7 @@ class ProjectMember extends ActiveRecord
             [['role'], 'default', 'value' => self::ROLE_MEMBER],
             [['role'], 'in', 'range' => self::ROLE_LIST],
             [['project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['project_id' => 'id']],
-            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['user_id' => 'id']],
+            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => UserResource::class, 'targetAttribute' => ['user_id' => 'id']],
             [['project_id', 'user_id'], 'unique', 'targetAttribute' => ['project_id', 'user_id'], 'message' => 'This user is already a member of this project.'],
         ];
     }
@@ -117,7 +118,7 @@ class ProjectMember extends ActiveRecord
             return true;
         }
 
-        if ($this->project_id === null) {
+        if (!$this->project_id) {
             $this->project_id = Yii::$app->request->get('project_id');
         }
 
@@ -161,7 +162,7 @@ class ProjectMember extends ActiveRecord
      */
     public function getUser()
     {
-        return $this->hasOne(User::class, ['id' => 'user_id']);
+        return $this->hasOne(UserResource::class, ['id' => 'user_id']);
     }
 
     /**
