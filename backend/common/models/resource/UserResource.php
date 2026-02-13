@@ -3,7 +3,6 @@
 namespace common\models\resource;
 
 use common\models\User;
-use Yii;
 
 class UserResource extends User
 {
