@@ -3,7 +3,6 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { QuillModule } from 'ngx-quill';
 import Quill, { Delta } from 'quill';
-import { CdkOverlayOrigin } from '@angular/cdk/overlay';
 
 /**
  * Rich text editor component using Quill.
@@ -22,7 +21,7 @@ import { CdkOverlayOrigin } from '@angular/cdk/overlay';
 
 @Component({
     selector: 'app-text-editor',
-    imports: [CommonModule, QuillModule, CdkOverlayOrigin],
+    imports: [CommonModule, QuillModule],
     templateUrl: './text-editor.component.html',
     styleUrl: './text-editor.component.css',
     providers: [
