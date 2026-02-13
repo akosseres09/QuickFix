@@ -3,7 +3,13 @@ import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angula
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TableComponent } from '../../common/table/table.component';
-import { PRIORITY_MAP, Project, STATUS_MAP } from '../../shared/model/Project';
+import {
+    PRIORITY_COLOR_MAP,
+    PRIORITY_MAP,
+    Project,
+    STATUS_COLOR_MAP,
+    STATUS_MAP,
+} from '../../shared/model/Project';
 import { DisplayedColumn } from '../../shared/constants/DisplayedColumn';
 import { ProjectService } from '../../shared/services/project/project.service';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
@@ -98,13 +104,14 @@ export class ProjectsComponent implements OnInit {
             id: 'status',
             label: 'Status',
             sortable: true,
-            badge: true,
+            badge: (e: Project) => STATUS_COLOR_MAP[e.status],
             value: (e: Project) => STATUS_MAP[e.status],
         },
         {
             id: 'priority',
             label: 'Priority',
             sortable: true,
+            badge: (e: Project) => PRIORITY_COLOR_MAP[e.priority],
             value: (e: Project) => PRIORITY_MAP[e.priority],
         },
         {
@@ -112,7 +119,7 @@ export class ProjectsComponent implements OnInit {
             label: 'Created At',
             sortable: true,
             value: (e: Project) => {
-                const date = this.dateService.parseDate(e.createdAt);
+                const date = this.dateService.parseTimestamp(e.createdAt);
                 return this.dateService.toLocaleISOString(date).split('T')[0];
             },
         },

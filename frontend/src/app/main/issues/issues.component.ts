@@ -1,7 +1,15 @@
 import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { Issue, PRIORITY_MAP, STATUS_MAP, TYPE_MAP } from '../../shared/model/Issue';
+import {
+    Issue,
+    PRIORITY_COLOR_MAP,
+    PRIORITY_MAP,
+    STATUS_COLOR_MAP,
+    STATUS_MAP,
+    TYPE_COLOR_MAP,
+    TYPE_MAP,
+} from '../../shared/model/Issue';
 import { IssueService } from '../../shared/services/issue/issue.service';
 import { CommonModule } from '@angular/common';
 import { DisplayedColumn } from '../../shared/constants/DisplayedColumn';
@@ -70,21 +78,21 @@ export class IssuesComponent {
             id: 'status',
             label: 'Status',
             sortable: true,
-            badge: true,
+            badge: (e: Issue) => STATUS_COLOR_MAP[e.status],
             value: (e: Issue) => STATUS_MAP[e.status],
         },
         {
             id: 'priority',
             label: 'Priority',
             sortable: true,
-            badge: true,
+            badge: (e: Issue) => PRIORITY_COLOR_MAP[e.priority],
             value: (e: Issue) => PRIORITY_MAP[e.priority],
         },
         {
             id: 'type',
             label: 'Type',
             sortable: true,
-            badge: true,
+            badge: (e: Issue) => TYPE_COLOR_MAP[e.type],
             value: (e: Issue) => TYPE_MAP[e.type],
         },
         {
@@ -92,7 +100,7 @@ export class IssuesComponent {
             label: 'Created At',
             sortable: true,
             value: (e: Issue) => {
-                const date = this.dateService.parseDate(e.createdAt);
+                const date = this.dateService.parseTimestamp(e.createdAt);
                 return this.dateService.toLocaleISOString(date).split('T')[0];
             },
         },

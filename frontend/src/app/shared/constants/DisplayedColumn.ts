@@ -6,5 +6,5 @@ export interface DisplayedColumn<T extends BaseModel> {
     sortable: boolean;
     value: (element: T) => string | number | Date;
     routerLink?: (element: T) => (string | number)[];
-    badge?: boolean;
+    badge?: (element: T) => string | null;
 }

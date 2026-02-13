@@ -73,20 +73,11 @@
                                     >
                                         {{ col.value(element) }}
                                     </a>
-                                } @else if (col.badge) {
+                                } @else if (typeof col.badge === 'function') {
                                     <div class="flex justify-center items-center">
                                         <span
-                                            class="px-3 py-1 rounded-full font-semibold text-sm"
-                                            [ngClass]="{
-                                                'text-green-900 bg-green-200':
-                                                    element.status === 'active',
-                                                'text-blue-900 bg-blue-200':
-                                                    element.status === 'archived',
-                                                'text-yellow-900 bg-yellow-200':
-                                                    element.status === 'on_hold',
-                                                'text-red-900 bg-red-200':
-                                                    element.status === 'completed',
-                                            }"
+                                            class="px-3 py-1 rounded-full font-semibold text-sm border-2"
+                                            [ngClass]="col.badge!(element)"
                                         >
                                             {{ col.value(element) }}
                                         </span>

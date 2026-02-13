@@ -33,6 +33,20 @@ export const STATUS_MAP: { [key: string]: string } = {
     [STATUS_COMPLETED]: 'Completed',
 };
 
+export const STATUS_COLOR_MAP: { [key: string]: string } = {
+    [STATUS_ACTIVE]: 'text-emerald-700 bg-emerald-100',
+    [STATUS_ARCHIVED]: 'text-slate-600 bg-slate-100',
+    [STATUS_ON_HOLD]: 'text-amber-700 bg-amber-100',
+    [STATUS_COMPLETED]: 'text-blue-700 bg-blue-100',
+};
+
+export const PRIORITY_COLOR_MAP: { [key: number]: string } = {
+    [PRIORITY_LOW]: 'text-green-900 bg-green-200',
+    [PRIORITY_MEDIUM]: 'text-yellow-900 bg-yellow-200',
+    [PRIORITY_HIGH]: 'text-orange-900 bg-orange-200',
+    [PRIORITY_CRITICAL]: 'text-red-900 bg-red-200',
+};
+
 export interface Project extends BaseModel {
     id: string;
     name: string;

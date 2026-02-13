@@ -48,6 +48,28 @@ export const TYPE_MAP: { [key: number]: string } = {
     [TYPE_INCIDENT]: 'Incident',
 };
 
+export const TYPE_COLOR_MAP: { [key: number]: string } = {
+    [TYPE_BUG]: 'text-red-700 bg-red-100',
+    [TYPE_FEATURE]: 'text-purple-700 bg-purple-100',
+    [TYPE_TASK]: 'text-blue-700 bg-blue-100',
+    [TYPE_INCIDENT]: 'text-orange-700 bg-orange-100',
+};
+
+export const STATUS_COLOR_MAP: { [key: number]: string } = {
+    [STATUS_OPEN]: 'text-sky-700 bg-sky-50',
+    [STATUS_IN_PROGRESS]: 'text-indigo-700 bg-indigo-100',
+    [STATUS_REVIEW]: 'text-fuchsia-700 bg-fuchsia-100',
+    [STATUS_RESOLVED]: 'text-teal-700 bg-teal-100',
+    [STATUS_CLOSED]: 'text-gray-500 bg-gray-200',
+};
+
+export const PRIORITY_COLOR_MAP: { [key: number]: string } = {
+    [PRIORITY_LOW]: 'text-green-900 bg-green-200',
+    [PRIORITY_MEDIUM]: 'text-yellow-900 bg-yellow-200',
+    [PRIORITY_HIGH]: 'text-orange-900 bg-orange-200',
+    [PRIORITY_CRITICAL]: 'text-red-900 bg-red-200',
+};
+
 export interface Issue extends BaseModel {
     id: number;
     projectId: string;
