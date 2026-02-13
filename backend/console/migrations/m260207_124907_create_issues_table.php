@@ -18,7 +18,6 @@ class m260207_124907_create_issues_table extends Migration
             'project_id' => $this->string(36)->notNull(),
             'issue_key' => $this->string(20)->notNull(),
             'title' => $this->string(255)->notNull(),
-            'description' => $this->text()->notNull(),
             'type' => $this->smallInteger()->notNull()->defaultValue(Issue::TYPE_TASK),
             'status' => $this->smallInteger()->notNull()->defaultValue(Issue::STATUS_OPEN),
             'priority' => $this->smallInteger()->notNull()->defaultValue(Issue::PRIORITY_MEDIUM),
@@ -30,6 +29,8 @@ class m260207_124907_create_issues_table extends Migration
             'due_date' => $this->integer()->null(),
             'is_archived' => $this->boolean()->notNull()->defaultValue(false),
         ]);
+
+        $this->addColumn('{{%issue}}', 'description', 'jsonb');
 
         $this->addPrimaryKey('pk-issue-id', '{{%issue}}', 'id');
         $this->addForeignKey(

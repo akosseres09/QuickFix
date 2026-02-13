@@ -161,8 +161,8 @@ class Issue extends ActiveRecord
     public function rules()
     {
         return [
-            [['project_id', 'title', 'description'], 'required'],
-            [['description'], 'string'],
+            [['project_id', 'title'], 'required'],
+            [['description'], 'safe'],
             [['title'], 'string', 'max' => 255],
             [['issue_key'], 'string', 'max' => 20],
             [['type', 'status', 'priority', 'closed_at', 'due_date', 'created_at', 'updated_at'], 'integer'],
