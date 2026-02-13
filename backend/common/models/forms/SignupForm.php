@@ -19,6 +19,8 @@ class SignupForm extends Model
     public $email;
     public $password;
     public $confirm_password;
+    public $date_of_birth;
+    public $phone_number;
 
 
     /**
@@ -36,6 +38,8 @@ class SignupForm extends Model
             ['email', 'unique', 'targetClass' => '\common\models\User', 'message' => 'This email address has already been taken.'],
             [['password', 'confirm_password'], 'string', 'min' => 6],
             ['password', 'compare', 'compareAttribute' => 'confirm_password'],
+            ['date_of_birth', 'date', 'format' => 'php:Y-m-d'],
+            ['phone_number', 'string', 'max' => 255],
         ];
     }
 
@@ -48,6 +52,8 @@ class SignupForm extends Model
             'lastName' => 'last_name',
             'password',
             'confirmPassword' => 'confirm_password',
+            'dateOfBirth' => 'date_of_birth',
+            'phoneNumber' => 'phone_number',
         ];
     }
 
@@ -63,11 +69,16 @@ class SignupForm extends Model
             return null;
         }
 
+        /**
+         * @var User $user
+         */
         $user = new User();
         $user->username = $this->username;
         $user->email = $this->email;
         $user->first_name = $this->first_name;
         $user->last_name = $this->last_name;
+        $user->date_of_birth = $this->date_of_birth;
+        $user->phone_number = $this->phone_number;
         $user->setProfilePictureUrl();
         $user->setPassword($this->password);
         $user->generateAuthKey();

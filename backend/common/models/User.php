@@ -25,7 +25,7 @@ use yii\web\IdentityInterface;
  * @property string $first_name
  * @property string $last_name
  * @property string $phone_number
- * @property date $date_of_birth
+ * @property string $date_of_birth
  * @property string $profile_picture_url
  * @property integer $created_at
  * @property integer $updated_at
@@ -36,7 +36,7 @@ use yii\web\IdentityInterface;
  * @property string $password write-only password
  * 
  * relations
- * @property RefreshToken[] $refreshTokens
+ * @property UserRefreshToken[] $refreshTokens
  * @property Project[] $projects
  * @property Issue[] $createdIssues
  * @property Issue[] $assignedIssues
@@ -100,13 +100,23 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public function beforeSave($insert)
     {
-        if (parent::beforeSave($insert)) {
-            if ($insert && empty($this->id)) {
-                $this->id = Yii::$app->security->generateRandomString(36);
-            }
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+
+        if (!$insert) {
             return true;
         }
-        return false;
+
+        if (empty($this->id)) {
+            $this->id = Yii::$app->security->generateRandomString(36);
+        }
+
+        if (empty($this->profile_picture_url)) {
+            $this->profile_picture_url = $this->generateProfilePictureUrl();
+        }
+
+        return true;
     }
 
     /**
@@ -370,6 +380,16 @@ class User extends ActiveRecord implements IdentityInterface
 
     public function setProfilePictureUrl(): void
     {
-        $this->profile_picture_url = 'https://ui-avatars.com/api/?name=' . urlencode($this->first_name . ' ' . $this->last_name) . '&background=random&size=256';
+        $url = $this->generateProfilePictureUrl();
+        $this->profile_picture_url = $url;
+    }
+
+    public function generateProfilePictureUrl(): string
+    {
+        if ($this->first_name && $this->last_name) {
+            return 'https://ui-avatars.com/api/?name=' . urlencode($this->first_name . ' ' . $this->last_name) . '&background=random&size=256';
+        }
+
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->username) . '&background=random&size=256';
     }
 }

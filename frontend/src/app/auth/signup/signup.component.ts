@@ -106,8 +106,6 @@ export class SignupComponent {
     onSubmit(): void {
         if (!this.signupForm.valid) return;
 
-        console.log(this.signupForm.value);
-
         this.authService
             .signup(this.signupForm.value as SignupData)
             .pipe(takeUntilDestroyed(this.destroyRef))

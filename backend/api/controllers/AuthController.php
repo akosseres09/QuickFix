@@ -148,6 +148,9 @@ class AuthController extends Controller
 
     public function actionMe(): array
     {
+        /**
+         * @var User
+         */
         $user = Yii::$app->user->identity;
 
         if (!$user) {
@@ -168,7 +171,7 @@ class AuthController extends Controller
     {
 
         $form = new SignupForm();
-        if ($form->load(\Yii::$app->request->getBodyParams(), '') && $form->signup()) {
+        if ($form->load(Yii::$app->request->getBodyParams(), '') && $form->signup()) {
             return ResponseMaker::asSuccess([
                 'success' => true
             ]);
@@ -184,7 +187,7 @@ class AuthController extends Controller
      */
     public function actionVerify(): array
     {
-        $token = \Yii::$app->request->post('token');
+        $token = Yii::$app->request->post('token');
 
         $user = User::findByVerificationToken($token);
 
@@ -212,7 +215,7 @@ class AuthController extends Controller
     public function actionResendVerificationEmail(): array
     {
 
-        $email = trim(\Yii::$app->request->post('email'));
+        $email = trim(Yii::$app->request->post('email'));
 
         if (!$email) {
             throw new BadRequestHttpException('Email is required to resend verification email.');
@@ -239,8 +242,8 @@ class AuthController extends Controller
     public function actionResetPassword(): array
     {
 
-        $email = \Yii::$app->request->post('email');
-        $token = \Yii::$app->request->post('token');
+        $email = Yii::$app->request->post('email');
+        $token = Yii::$app->request->post('token');
 
         // send the reset password email if email is provided and token is not provided
         // otherwise, reset the password using the token
@@ -280,7 +283,7 @@ class AuthController extends Controller
             throw new BadRequestHttpException('Password reset token has expired.', 400);
         }
 
-        $newPassword = \Yii::$app->request->post('password');
+        $newPassword = Yii::$app->request->post('password');
 
         if (!$newPassword) {
             throw new BadRequestHttpException('New password is required.', 400);
