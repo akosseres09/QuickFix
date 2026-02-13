@@ -33,6 +33,11 @@ class ProjectMemberQuery extends ActiveQuery
         return $this->andWhere(['project_id' => $projectId]);
     }
 
+    public function byProjectKey(string $projectKey): ProjectMemberQuery
+    {
+        return $this->joinWith('project')->andWhere(['project.key' => $projectKey]);
+    }
+
     /**
      * Filter by user
      * @param string $userId

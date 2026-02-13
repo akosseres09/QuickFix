@@ -26,7 +26,15 @@ class MemberController extends BaseRestController
             throw new \yii\web\BadRequestHttpException('Project ID is required.');
         }
 
-        $query = ProjectMember::find()->byProject($projectId);
+        $query = ProjectMember::find();
+
+        // by UUID
+        if (strlen($projectId) === 36) {
+            $query->byProject($projectId);
+        } else {
+            $query->byProjectKey($projectId);
+        }
+
         return new \yii\data\ActiveDataProvider([
             'query' => $query,
         ]);
