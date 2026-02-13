@@ -32,11 +32,20 @@ export class DateService {
      * Returns a Date object parsed from the given date string.
      * If the string is invalid, returns the current date.
      */
-    parseDate(urlDate: any): Date {
+    parseDate(urlDate: string): Date {
         const date = Date.parse(urlDate);
         if (isNaN(date)) {
             return new Date();
         }
         return new Date(date);
+    }
+
+    /**
+     * Returns a Date object parsed from the given timestamp (in seconds).
+     * @param timestamp the timestamp to parse, in seconds
+     * @returns a Date object representing the given timestamp
+     */
+    parseTimestamp(timestamp: number): Date {
+        return new Date(timestamp * 1000);
     }
 }

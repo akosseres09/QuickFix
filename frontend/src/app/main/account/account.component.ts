@@ -81,7 +81,8 @@ export class AccountComponent {
             .pipe(takeUntilDestroyed())
             .subscribe((userData) => {
                 this.user.set(userData);
-                this.profilePictureUrl.set(userData.profilePictureUrl);
+
+                this.profilePictureUrl.set(this.getProfilePicture());
                 this.initialFormSnapshot.set({
                     username: userData.username || '',
                     email: userData.email || '',
@@ -90,6 +91,24 @@ export class AccountComponent {
                 });
                 this.setProfileFormValues();
             });
+    }
+
+    getProfilePicture(): string {
+        const user = this.user();
+        if (!user) return '';
+
+        if (user.profilePictureUrl) {
+            return user.profilePictureUrl;
+        }
+
+        const initials = `${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}`;
+
+        if (initials) {
+            return `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=random&size=128`;
+        }
+
+        const usernameInitial = user.username.charAt(0);
+        return `https://ui-avatars.com/api/?name=${encodeURIComponent(usernameInitial)}&background=random&size=128`;
     }
 
     setProfileFormValues(): void {
@@ -171,7 +190,7 @@ export class AccountComponent {
     }
 
     createDate(timestamp: number) {
-        const date = this.dateService.parseDate(timestamp);
+        const date = this.dateService.parseTimestamp(timestamp);
         return this.dateService.toLocaleISOString(date).split('T')[0];
     }
 

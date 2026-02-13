@@ -30,9 +30,11 @@
                                 (change)="onFileSelected($event)"
                             />
                         </div>
-                        <h2 class="text-xl font-semibold mt-4">
-                            {{ user.firstName + ' ' + user.lastName }}
-                        </h2>
+                        @if (user.firstName && user.lastName) {
+                            <h2 class="text-xl font-semibold mt-4">
+                                {{ user.firstName + ' ' + user.lastName }}
+                            </h2>
+                        }
                         <p class="opacity-90">{{ '@' + user.username }}</p>
                         <p class="text-sm opacity-70">{{ user.email }}</p>
 
@@ -228,14 +230,16 @@
                         <h3 class="text-lg font-medium mb-3">Account Details</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                             <div
-                                class="flex items-center gap-2 p-3 rounded-lg bg-light-background dark:bg-dark-background"
+                                class="flex items-center gap-2 p-3 rounded-lg bg-light-background dark:bg-dark-background overflow-hidden"
                             >
                                 <mat-icon class="text-light-primary dark:text-dark-primary"
                                     >badge</mat-icon
                                 >
-                                <div>
+                                <div class="w-full min-w-0">
                                     <p class="opacity-70">User ID</p>
-                                    <p class="font-medium">{{ user?.id }}</p>
+                                    <p class="font-medium truncate block" [title]="user?.id">
+                                        {{ user?.id }}
+                                    </p>
                                 </div>
                             </div>
                             <div
