@@ -2,6 +2,9 @@
 
 @import 'tailwindcss';
 
+/* Quill Editor Theme */
+@import 'quill/dist/quill.snow.css';
+
 :root {
     --color-dark-primary-lighter: #bcb7e6;
     --color-dark-primary-darker: #7e73b4;
@@ -102,4 +105,34 @@ body {
 
 .mat-expansion-panel-body {
     padding: 0 24px !important;
+}
+
+.rich-text {
+    .ql-editor.ql-blank::before {
+        @apply text-light-text dark:before:text-dark-text;
+    }
+
+    .ql-toolbar {
+        @apply bg-light-secondary dark:bg-dark-secondary border-2 border-[#73707b] rounded-tr-md rounded-tl-md;
+
+        .ql-stroke {
+            @apply fill-none stroke-white hover:stroke-amber-300;
+        }
+
+        .ql-fill {
+            @apply stroke-none fill-white hover:fill-amber-300;
+        }
+
+        .ql-picker .ql-picker-label {
+            @apply text-white hover:text-[#06c];
+        }
+
+        .ql-picker .ql-picker-options {
+            @apply bg-light-secondary dark:bg-dark-secondary border-2 border-[#73707b] text-white;
+        }
+    }
+
+    .ql-container.ql-snow {
+        @apply border-2 border-[#73707b] rounded-bl-md rounded-br-md;
+    }
 }

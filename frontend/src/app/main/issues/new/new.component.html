@@ -9,9 +9,9 @@
         <form [formGroup]="issueForm" (ngSubmit)="onSubmit()">
             <div class="flex flex-col lg:flex-row gap-6">
                 <!-- Left Column - Main Content -->
-                <div class="flex-1 space-y-4">
+                <div class="space-y-4">
                     <!-- Title -->
-                    <mat-form-field class="w-full" appearance="outline">
+                    <mat-form-field class="w-full" appearance="fill">
                         <mat-label>Title</mat-label>
                         <input
                             formControlName="title"
@@ -33,19 +33,14 @@
                     </mat-form-field>
 
                     <!-- Description -->
-                    <mat-form-field class="w-full" appearance="outline">
+                    <app-text-editor formControlName="description"></app-text-editor>
+                    <!-- <mat-form-field class="w-full" appearance="outline">
                         <mat-label>Description</mat-label>
-                        <textarea
-                            formControlName="description"
-                            matInput
-                            rows="12"
-                            placeholder="Add a description..."
-                        ></textarea>
-                    </mat-form-field>
+                    </mat-form-field> -->
                 </div>
 
                 <!-- Right Sidebar - Metadata -->
-                <div class="lg:w-80 space-y-3">
+                <div class="space-y-3">
                     <!-- Assignee -->
                     <div>
                         <label

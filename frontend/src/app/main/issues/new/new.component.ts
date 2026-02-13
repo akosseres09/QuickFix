@@ -29,6 +29,7 @@ import { ProjectMemberService } from '../../../shared/services/project-member/pr
 import { ProjectMember } from '../../../shared/model/ProjectMember';
 import { Claims } from '../../../shared/constants/Claims';
 import { AuthService } from '../../../shared/services/auth/auth.service';
+import { TextEditorComponent } from '../../../common/text-editor/text-editor.component';
 
 @Component({
     selector: 'app-new',
@@ -43,6 +44,7 @@ import { AuthService } from '../../../shared/services/auth/auth.service';
         MatDatepickerModule,
         MatNativeDateModule,
         MatProgressSpinnerModule,
+        TextEditorComponent,
     ],
     templateUrl: './new.component.html',
     styleUrl: './new.component.css',
