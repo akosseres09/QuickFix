@@ -23,6 +23,11 @@ class ProjectQuery extends ActiveQuery
         return parent::one($db);
     }
 
+    public function byId(string $id): ProjectQuery
+    {
+        return $this->andWhere(['id' => $id]);
+    }
+
     /**
      * Filter by active projects
      * @return ProjectQuery

@@ -89,6 +89,46 @@ class Issue extends ActiveRecord
         ];
     }
 
+    public function beforeValidate()
+    {
+        if (!parent::beforeValidate()) {
+            return false;
+        }
+
+        // Ensure that the issue key is generated before validation
+        if ($this->isNewRecord && empty($this->issue_key)) {
+            $this->issue_key = $this->generateIssueKey();
+        }
+
+        if (!$this->isNewRecord) {
+            return true;
+        }
+
+        $projectId = Yii::$app->request->get('project_id');
+        if ($projectId === null) {
+            $this->addError('project_id', 'Project ID is required.');
+            return false;
+        }
+
+        $query = Project::find();
+
+        if (strlen($projectId) === 36) {
+            $query->byId($projectId);
+        } else {
+            $query->byKey($projectId);
+        }
+
+        $project = $query->one();
+
+        if (!$project) {
+            $this->addError('project_id', 'The specified project does not exist.');
+            return false;
+        }
+
+        $this->project_id = $project->id;
+        return true;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -235,7 +275,7 @@ class Issue extends ActiveRecord
             return null;
         }
 
-        $count = Issue::find()->byProject($this->project_id)->count();
+        $count = Issue::find()->byProjectId($this->project_id)->count();
         $nextNumber = $count + 1;
         return strtoupper($project->key) . '-' . $nextNumber;
     }
