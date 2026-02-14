@@ -1,0 +1,44 @@
+<mat-card
+    class="!rounded-xl p-4 cursor-move hover:shadow-md transition-shadow mb-3 !bg-light-text-hover/50 dark:!bg-dark-background dark:text-white"
+    cdkDrag
+    (click)="onCardClick()"
+>
+    <div class="flex justify-between items-start mb-2">
+        <span class="text-sm font-medium">{{ issue().issueKey }}</span>
+        <span
+            class="px-2 py-0.5 rounded text-xs font-medium"
+            [ngClass]="PRIORITY_COLOR_MAP[issue().priority]"
+        >
+            {{ PRIORITY_MAP[issue().priority] }}
+        </span>
+    </div>
+
+    <h3 class="text-base font-semibold mb-3 line-clamp-2">
+        <a class="hover:underline underline-offset-2" routerLink="issue/{{ issue().id }}">{{
+            issue().title
+        }}</a>
+    </h3>
+
+    <div class="flex justify-between items-center">
+        <span
+            class="px-2 py-0.5 rounded text-xs font-medium flex items-center justify-center gap-1"
+            [ngClass]="TYPE_COLOR_MAP[issue().type]"
+        >
+            <mat-icon class="!flex !items-center !justify-center !text-lg !w-6 !h-6">{{
+                getTypeIcon()
+            }}</mat-icon>
+            {{ TYPE_MAP[issue().type] }}
+        </span>
+
+        @if (issue().assignee) {
+            <app-avatar [user]="issue().assignee!" size="sm"></app-avatar>
+        } @else {
+            <div
+                class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center"
+                title="Unassigned"
+            >
+                <mat-icon class="!text-sm !w-4 !h-4 text-gray-500">person_outline</mat-icon>
+            </div>
+        }
+    </div>
+</mat-card>

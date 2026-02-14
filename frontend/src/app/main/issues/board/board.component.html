@@ -1,1 +1,51 @@
-<p>board works!</p>
+<div class="h-full flex flex-col px-4">
+    @if (isLoading()) {
+        <div class="flex justify-center items-center h-64">
+            <div class="text-gray-500">Loading issues...</div>
+        </div>
+    } @else {
+        <div class="flex-1 flex flex-col" cdkDropListGroup>
+            <div class="flex flex-1 gap-4 overflow-x-auto pb-4">
+                <app-board-column
+                    [columnTitle]="STATUS_MAP[STATUS_OPEN]"
+                    [issues]="openIssues()"
+                    [status]="STATUS_OPEN"
+                    [connectedLists]="columnIds"
+                    (dropEvent)="onDrop($event, STATUS_OPEN)"
+                ></app-board-column>
+
+                <app-board-column
+                    [columnTitle]="STATUS_MAP[STATUS_IN_PROGRESS]"
+                    [issues]="inProgressIssues()"
+                    [status]="STATUS_IN_PROGRESS"
+                    [connectedLists]="columnIds"
+                    (dropEvent)="onDrop($event, STATUS_IN_PROGRESS)"
+                ></app-board-column>
+
+                <app-board-column
+                    [columnTitle]="STATUS_MAP[STATUS_REVIEW]"
+                    [issues]="reviewIssues()"
+                    [status]="STATUS_REVIEW"
+                    [connectedLists]="columnIds"
+                    (dropEvent)="onDrop($event, STATUS_REVIEW)"
+                ></app-board-column>
+
+                <app-board-column
+                    [columnTitle]="STATUS_MAP[STATUS_RESOLVED]"
+                    [issues]="resolvedIssues()"
+                    [status]="STATUS_RESOLVED"
+                    [connectedLists]="columnIds"
+                    (dropEvent)="onDrop($event, STATUS_RESOLVED)"
+                ></app-board-column>
+
+                <app-board-column
+                    [columnTitle]="STATUS_MAP[STATUS_CLOSED]"
+                    [issues]="closedIssues()"
+                    [status]="STATUS_CLOSED"
+                    [connectedLists]="columnIds"
+                    (dropEvent)="onDrop($event, STATUS_CLOSED)"
+                ></app-board-column>
+            </div>
+        </div>
+    }
+</div>
