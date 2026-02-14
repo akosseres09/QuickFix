@@ -37,7 +37,7 @@ export class TextEditorComponent implements ControlValueAccessor {
     placeholder = input<string>('Write something...');
     readonly = input<boolean>(false);
     minHeight = input<string>('200px');
-    maxHeight = input<string>('400px');
+    maxHeight = input<string>('700px');
 
     // Editor state
     quillEditor = signal<Quill | null>(null);
