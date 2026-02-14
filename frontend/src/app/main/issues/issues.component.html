@@ -11,8 +11,9 @@
         [isLoading]="isLoading()"
         (sortChange)="onSortChange($event)"
         (pageChange)="onPageChange($event)"
+        (selectedRowChange)="onRowChange($event)"
     ></app-table>
     <div class="fixed right-6 bottom-6 z-50">
-        <app-speed-dial [buttons]="speedDialButtons"></app-speed-dial>
+        <app-speed-dial #speedDial [buttons]="speedDialButtons()"></app-speed-dial>
     </div>
 </div>

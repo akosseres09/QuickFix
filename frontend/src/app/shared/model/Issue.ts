@@ -71,7 +71,7 @@ export const PRIORITY_COLOR_MAP: { [key: number]: string } = {
 };
 
 export interface Issue extends BaseModel {
-    id: number;
+    id: string;
     projectId: string;
     issueKey: string;
     title: string;

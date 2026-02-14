@@ -91,7 +91,14 @@
 
                     <tr mat-header-row *matHeaderRowDef="columnIds()"></tr>
                     <tr
-                        class="odd:!bg-light-text-hover/20 dark:odd:!bg-dark-hover/20 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                        (click)="toggleRow(row.id)"
+                        class="cursor-pointer transition-colors"
+                        [ngClass]="{
+                            '!bg-light-primary !text-white hover:!bg-light-primary/70 dark:!bg-dark-hover dark:hover:!bg-dark-hover/50':
+                                selectedRowId() === row.id,
+                            'odd:!bg-light-text-hover/20 hover:!bg-light-text-hover/40 dark:odd:!bg-dark-hover/20 dark:hover:!bg-dark-hover/50':
+                                selectedRowId() !== row.id,
+                        }"
                         mat-row
                         *matRowDef="let row; columns: columnIds()"
                     ></tr>

@@ -1,4 +1,4 @@
-import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, signal, viewChild } from '@angular/core';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import {
@@ -40,6 +40,7 @@ export class IssuesComponent {
     private readonly dateService = inject(DateService);
 
     projectId = signal<string>(this.getProjectId());
+    selectedRowId = signal<string | null>(null);
 
     pageSize = signal<number>(20);
     pageIndex = signal<number>(0);
@@ -105,17 +106,44 @@ export class IssuesComponent {
             },
         },
     ];
-    speedDialButtons: SpeedDialButton[] = [
-        {
-            iconName: 'add',
-            label: 'Create Issue',
-            action: () => {
-                this.router.navigate(['add'], {
-                    relativeTo: this.activeRoute,
-                });
+    // Transform the signal into a computed signal
+    speedDialButtons = computed<SpeedDialButton[]>(() => {
+        const selectedId = this.selectedRowId();
+        const currentProjectId = this.projectId();
+
+        return [
+            {
+                iconName: 'add',
+                label: 'Create Issue',
+                shown: selectedId === null,
+                action: () => {
+                    this.router.navigate(['add'], { relativeTo: this.activeRoute });
+                },
             },
-        },
-    ];
+            {
+                iconName: 'edit',
+                label: 'Edit Issue',
+                shown: selectedId !== null,
+                action: () => {
+                    const selectedIssueId = this.selectedRowId();
+                    if (!selectedIssueId) {
+                        this.snackbarService.open('Please select a valid issue to edit!');
+                        return;
+                    }
+
+                    this.router.navigate([
+                        '/project',
+                        currentProjectId,
+                        'issue',
+                        selectedIssueId,
+                        'edit',
+                    ]);
+                },
+            },
+        ];
+    });
+
+    speedDial = viewChild<SpeedDialComponent>('speedDial');
 
     constructor() {
         const pageSizeParam = this.activeRoute.snapshot.queryParamMap.get('pageSize');
@@ -220,5 +248,11 @@ export class IssuesComponent {
     onDelete(issue: Issue) {
         this.snackbarService.open('Issue deleted');
         // Not implemented
+    }
+
+    onRowChange(id: string | null) {
+        this.selectedRowId.set(id);
+        if (id && this.speedDial()?.isOpen()) return;
+        this.speedDial()?.onTogglerClick();
     }
 }
