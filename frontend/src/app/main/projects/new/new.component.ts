@@ -17,7 +17,7 @@ import { MatSliderModule } from '@angular/material/slider';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { CommonModule, formatDate } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ProjectService } from '../../../shared/services/project/project.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -48,6 +48,7 @@ import { AuthService } from '../../../shared/services/auth/auth.service';
         MatSliderModule,
         MatDatepickerModule,
         MatNativeDateModule,
+        RouterLink,
     ],
     templateUrl: './new.component.html',
     styleUrl: './new.component.css',
@@ -98,7 +99,15 @@ export class NewComponent implements OnInit {
     }
 
     onSubmit(): void {
-        if (this.projectForm.invalid || !this.userId) return;
+        if (!this.userId) {
+            console.error('User ID is required to create a project.');
+            return;
+        }
+
+        if (this.projectForm.invalid) {
+            this.projectForm.markAllAsTouched();
+            return;
+        }
 
         const formValue = {
             ...this.projectForm.value,
@@ -117,7 +126,7 @@ export class NewComponent implements OnInit {
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
                 next: (project) => {
-                    this.router.navigate(['/projects', project.id]);
+                    this.router.navigate(['/project', project.key]);
                 },
                 error: (error) => {
                     console.error('Error creating project:', error);
