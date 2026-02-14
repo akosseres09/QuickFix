@@ -19,7 +19,9 @@ export class SpeedDialComponent {
     mainIconName = input<string>('add');
     buttons = input<SpeedDialButton[]>([]);
     protected dialState = signal<'open' | 'closed'>('closed');
-    protected shownButtons = computed(() => (this.isDialOpen() ? this.buttons() : []));
+    protected shownButtons = computed(() =>
+        this.isDialOpen() ? this.buttons().filter((b) => b.shown) : []
+    );
     private isDialOpen = computed(() => this.dialState() === 'open');
 
     togglerClick = output<void>();
@@ -35,5 +37,13 @@ export class SpeedDialComponent {
         }
 
         this.dialState.set(this.isDialOpen() ? 'closed' : 'open');
+    }
+
+    getDialState(): 'open' | 'closed' {
+        return this.dialState();
+    }
+
+    isOpen(): boolean {
+        return this.isDialOpen();
     }
 }

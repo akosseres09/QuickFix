@@ -4,19 +4,21 @@
     </button>
     <div [@speedDialStagger]="shownButtons().length" class="flex flex-col gap-2">
         @for (button of shownButtons(); track $index) {
-            <button
-                mat-fab
-                extended
-                color="primary"
-                class="!justify-between !text-dark-text"
-                [ngClass]="{
-                    'md:gap-2': button.label,
-                }"
-                (click)="button.action()"
-            >
-                <mat-icon class="!mx-0">{{ button.iconName }}</mat-icon>
-                <span class="hidden md:block">{{ button.label }}</span>
-            </button>
+            @if (button.shown) {
+                <button
+                    mat-fab
+                    extended
+                    color="primary"
+                    class="!justify-between !text-dark-text"
+                    [ngClass]="{
+                        'md:gap-2': button.label,
+                    }"
+                    (click)="button.action()"
+                >
+                    <mat-icon class="!mx-0">{{ button.iconName }}</mat-icon>
+                    <span class="hidden md:block">{{ button.label }}</span>
+                </button>
+            }
         }
     </div>
 </div>
