@@ -117,7 +117,7 @@ export class IssuesComponent {
                 label: 'Create Issue',
                 shown: selectedId === null,
                 action: () => {
-                    this.router.navigate(['add'], { relativeTo: this.activeRoute });
+                    return ['add'];
                 },
             },
             {
@@ -128,16 +128,10 @@ export class IssuesComponent {
                     const selectedIssueId = this.selectedRowId();
                     if (!selectedIssueId) {
                         this.snackbarService.open('Please select a valid issue to edit!');
-                        return;
+                        return null;
                     }
 
-                    this.router.navigate([
-                        '/project',
-                        currentProjectId,
-                        'issue',
-                        selectedIssueId,
-                        'edit',
-                    ]);
+                    return ['/project', currentProjectId, 'issue', selectedIssueId, 'edit'];
                 },
             },
         ];

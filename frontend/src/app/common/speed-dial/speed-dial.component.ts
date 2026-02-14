@@ -7,10 +7,11 @@ import {
     speedDialTogglerAnimation,
 } from '../../shared/utils/animations';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 @Component({
     selector: 'app-speed-dial',
-    imports: [MatFabButton, MatIcon, CommonModule],
+    imports: [MatFabButton, MatIcon, CommonModule, RouterLink],
     templateUrl: './speed-dial.component.html',
     styleUrl: './speed-dial.component.css',
     animations: [speedDialTogglerAnimation, speedDialStaggerAnimation],
@@ -23,6 +24,7 @@ export class SpeedDialComponent {
         this.isDialOpen() ? this.buttons().filter((b) => b.shown) : []
     );
     private isDialOpen = computed(() => this.dialState() === 'open');
+    noButtonsLink = input<string | any[] | null>(null);
 
     togglerClick = output<void>();
 

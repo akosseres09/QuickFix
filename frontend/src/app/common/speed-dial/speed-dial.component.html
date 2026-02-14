@@ -1,23 +1,30 @@
 <div class="flex flex-col-reverse gap-2 items-end">
-    <button mat-fab color="secondary" (click)="onTogglerClick()" aria-label="Add Project">
-        <mat-icon [@speedDialToggler]="dialState()">{{ mainIconName() }}</mat-icon>
-    </button>
+    @if (buttons().length > 0) {
+        <button mat-fab color="secondary" (click)="onTogglerClick()" aria-label="Add Project">
+            <mat-icon [@speedDialToggler]="dialState()">{{ mainIconName() }}</mat-icon>
+        </button>
+    } @else {
+        <a
+            class="flex justify-between items-center text-dark-text bg-light-secondary hover:bg-light-secondary-hover dark:bg-dark-secondary dark:hover:bg-dark-secondary-hover p-4 rounded-full shadow-md cursor-pointer transition-colors duration-200"
+            [routerLink]="noButtonsLink()"
+        >
+            <mat-icon [@speedDialToggler]="dialState()">{{ mainIconName() }}</mat-icon>
+        </a>
+    }
     <div [@speedDialStagger]="shownButtons().length" class="flex flex-col gap-2">
         @for (button of shownButtons(); track $index) {
             @if (button.shown) {
-                <button
-                    mat-fab
-                    extended
+                <a
                     color="primary"
-                    class="!justify-between !text-dark-text"
+                    class="flex justify-between items-center text-dark-text bg-light-primary hover:bg-light-primary-hover dark:bg-dark-primary dark:hover:bg-dark-primary/80 md:px-4 md:py-2 p-4 rounded-full shadow-md cursor-pointer transition-colors duration-200"
                     [ngClass]="{
                         'md:gap-2': button.label,
                     }"
-                    (click)="button.action()"
+                    [routerLink]="button.action()"
                 >
                     <mat-icon class="!mx-0">{{ button.iconName }}</mat-icon>
                     <span class="hidden md:block">{{ button.label }}</span>
-                </button>
+                </a>
             }
         }
     </div>
