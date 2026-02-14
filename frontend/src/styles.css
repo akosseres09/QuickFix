@@ -67,15 +67,6 @@
     --color-success: var(--color-success);
 }
 
-@utility custom-scrollbar {
-    @apply [&::-webkit-scrollbar]:w-[6px]
-  [&::-webkit-scrollbar-track]:rounded-full
-  [&::-webkit-scrollbar-thumb]:rounded-full
-  [&::-webkit-scrollbar-thumb]:bg-light-secondary
-  dark:[&::-webkit-scrollbar-track]:bg-dark-background
-  dark:[&::-webkit-scrollbar-thumb]:bg-dark-primary/80;
-}
-
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
 /* fixes border-right issue with angular form fields with appearance outline */
@@ -110,7 +101,6 @@ body {
     .ql-editor {
         flex: 1;
         overflow-y: auto;
-        @apply custom-scrollbar;
 
         &.ql-blank::before {
             @apply text-light-text dark:before:text-dark-text;

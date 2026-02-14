@@ -16,7 +16,7 @@
             </div>
             <app-navitem [routes]="sideNavRoutes()"></app-navitem>
         </mat-sidenav>
-        <mat-sidenav-content class="custom-scrollbar">
+        <mat-sidenav-content>
             <app-navbar
                 [showMenuLogo]="false"
                 [isSidebarOpened]="isSidebarOpened()"
@@ -24,7 +24,7 @@
                 (imageSourceChange)="imageSource.set($event)"
                 class="row-span-1 col-span-2"
             ></app-navbar>
-            <section class="row-start-2 col-start-2 p-4 overflow-y-auto">
+            <section class="flex-1 p-4 flex flex-col">
                 <router-outlet></router-outlet>
             </section>
         </mat-sidenav-content>

@@ -66,7 +66,10 @@ export class IssuesComponent {
             label: 'Author',
             sortable: false,
             value: (e: Issue) => e.creator?.username || '',
-            routerLink: (e: Issue) => ['/users', e.createdBy],
+            routerLink: (e: Issue) => {
+                if (!e.creator?.username) return null;
+                return ['/users/', '@' + e.creator.username];
+            },
         },
 
         {
@@ -74,6 +77,10 @@ export class IssuesComponent {
             label: 'Assignee',
             sortable: false,
             value: (e: Issue) => e.assignee?.username || 'None',
+            routerLink: (e: Issue) => {
+                if (!e.assignee?.username) return null;
+                return ['/users/', '@' + e.assignee.username];
+            },
         },
         {
             id: 'status',
