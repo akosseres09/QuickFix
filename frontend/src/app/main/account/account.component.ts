@@ -27,6 +27,8 @@ import {
 } from '../../shared/validators/dateValidator/dateValidator';
 import { phoneValidator } from '../../shared/validators/phoneValidator/phoneValidator';
 import { AuthService } from '../../shared/services/auth/auth.service';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { provideNativeDateAdapter } from '@angular/material/core';
 
 @Component({
     selector: 'app-account',
@@ -40,7 +42,9 @@ import { AuthService } from '../../shared/services/auth/auth.service';
         MatIconModule,
         MatDividerModule,
         MatChipsModule,
+        MatDatepickerModule,
     ],
+    providers: [provideNativeDateAdapter()],
     templateUrl: './account.component.html',
     styleUrl: './account.component.css',
 })
@@ -75,6 +79,8 @@ export class AccountComponent {
         return this.canEdit() && (current !== initial || this.selectedFile() !== null);
     });
 
+    minDate = signal<Date>(this.getMinDate());
+
     constructor() {
         this.userService
             .getUser()
@@ -91,6 +97,12 @@ export class AccountComponent {
                 });
                 this.setProfileFormValues();
             });
+    }
+
+    getMinDate(): Date {
+        const today = new Date();
+        const minYear = today.getFullYear() - 13;
+        return new Date(minYear, today.getMonth(), today.getDate());
     }
 
     getProfilePicture(): string {
@@ -161,10 +173,15 @@ export class AccountComponent {
         this.userService
             .updateUser(this.profileForm.value as Partial<User>)
             .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe((response) => {
-                this.user.set(response);
-                this.initialFormSnapshot.set(this.profileForm.value);
-                this.snackbarService.open('Profile updated successfully!');
+            .subscribe({
+                next: (response) => {
+                    this.user.set(response);
+                    this.initialFormSnapshot.set(this.profileForm.value);
+                    this.snackbarService.open('Profile updated successfully!');
+                },
+                error: (error) => {
+                    this.snackbarService.open('Failed to update profile', ['snackbar-error']);
+                },
             });
 
         this.selectedFile.set(null);

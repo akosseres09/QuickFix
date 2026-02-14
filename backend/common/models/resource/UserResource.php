@@ -12,11 +12,13 @@ class UserResource extends User
             'id',
             'username',
             'email',
-            'first_name',
-            'last_name',
-            'phone_number',
-            'date_of_birth',
-            'profile_picture_url',
+            'firstName' => 'first_name',
+            'lastName' => 'last_name',
+            'phoneNumber' => 'phone_number',
+            'dateOfBirth' => 'date_of_birth',
+            'profilePictureUrl' => 'profile_picture_url',
+            'createdAt' => 'created_at',
+            'updatedAt' => 'updated_at',
         ];
     }
 }
