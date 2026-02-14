@@ -1,6 +1,6 @@
 <div class="min-h-full">
     <form [formGroup]="filterForm" class="flex gap-2 items-center">
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="fill">
             <mat-label>Project Name</mat-label>
             <input
                 type="text"
@@ -38,7 +38,7 @@
         <app-speed-dial
             #speedDial
             (togglerClick)="createProject()"
-            [noButtonsLink]="speedDialNoButtonsLink"
+            [buttons]="speedDialButtons()"
         ></app-speed-dial>
     </div>
 </div>

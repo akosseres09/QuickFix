@@ -24,7 +24,6 @@ export class SpeedDialComponent {
         this.isDialOpen() ? this.buttons().filter((b) => b.shown) : []
     );
     private isDialOpen = computed(() => this.dialState() === 'open');
-    noButtonsLink = input<string | any[] | null>(null);
 
     togglerClick = output<void>();
 

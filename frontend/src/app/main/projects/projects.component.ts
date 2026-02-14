@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnInit, signal, viewChild } from '@angular/core';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TableComponent } from '../../common/table/table.component';
@@ -30,6 +30,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DateService } from '../../shared/services/date/date.service';
 import { Sort, SortDirection } from '@angular/material/sort';
 import { ApiQueryParams } from '../../shared/constants/api/ApiQueryParams';
+import { SpeedDialButton } from '../../shared/constants/SpeedDialButton';
+import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 
 @Component({
     selector: 'app-projects',
@@ -61,7 +63,9 @@ export class ProjectsComponent implements OnInit {
     private readonly destroyRef = inject(DestroyRef);
     private readonly dateService = inject(DateService);
     private readonly router = inject(Router);
+    private readonly snackbarService = inject(SnackbarService);
     projects = signal<Project[]>([]);
+    selectedRowId = signal<string | null>(null);
 
     // Table state
     pageSize = signal<number>(10);
@@ -124,6 +128,38 @@ export class ProjectsComponent implements OnInit {
             },
         },
     ]);
+
+    speedDialButtons = computed<SpeedDialButton[]>(() => {
+        const selectedId = this.selectedRowId();
+
+        return [
+            {
+                iconName: 'add',
+                label: 'Create Project',
+                shown: selectedId === null,
+                action: () => {
+                    return ['new'];
+                },
+            },
+            {
+                iconName: 'edit',
+                label: 'Edit Project',
+                shown: selectedId !== null,
+                action: () => {
+                    const selectedProjectId = this.selectedRowId();
+                    if (!selectedProjectId) {
+                        this.snackbarService.open('Please select a valid project to edit!');
+                        return null;
+                    }
+
+                    return ['/project', selectedProjectId, 'edit'];
+                },
+            },
+        ];
+    });
+
+    speedDial = viewChild<SpeedDialComponent>('speedDial');
+    speedDialNoButtonsLink = ['/projects/new'];
 
     constructor() {
         this.filterForm.valueChanges
@@ -254,6 +290,12 @@ export class ProjectsComponent implements OnInit {
         });
 
         this.getProjects();
+    }
+
+    onRowChange(id: string | null) {
+        this.selectedRowId.set(id);
+        if (id && this.speedDial()?.isOpen()) return;
+        this.speedDial()?.onTogglerClick();
     }
 
     createProject() {
