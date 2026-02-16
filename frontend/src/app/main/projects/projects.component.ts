@@ -12,19 +12,11 @@ import {
 } from '../../shared/model/Project';
 import { DisplayedColumn } from '../../shared/constants/DisplayedColumn';
 import { ProjectService } from '../../shared/services/project/project.service';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import {
-    MAT_FORM_FIELD_DEFAULT_OPTIONS,
-    MatFormField,
-    MatLabel,
-} from '@angular/material/form-field';
 import { MatOptionModule } from '@angular/material/core';
-import { MatInput } from '@angular/material/input';
-import { debounce } from 'rxjs';
 import { UrlService } from '../../shared/services/url/url.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatButton } from '@angular/material/button';
 import { SpeedDialComponent } from '../../common/speed-dial/speed-dial.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DateService } from '../../shared/services/date/date.service';
@@ -32,6 +24,8 @@ import { Sort, SortDirection } from '@angular/material/sort';
 import { ApiQueryParams } from '../../shared/constants/api/ApiQueryParams';
 import { SpeedDialButton } from '../../shared/constants/SpeedDialButton';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
+import { Filter } from '../../shared/constants/Filter';
+import { FilterComponent } from '../../common/filter/filter.component';
 
 @Component({
     selector: 'app-projects',
@@ -40,17 +34,10 @@ import { SnackbarService } from '../../shared/services/snackbar/snackbar.service
         MatPaginatorModule,
         CommonModule,
         TableComponent,
-        ReactiveFormsModule,
         MatAutocompleteModule,
         MatOptionModule,
-        MatFormField,
-        MatInput,
-        MatLabel,
-        MatButton,
         SpeedDialComponent,
-    ],
-    providers: [
-        { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { subscriptSizing: 'dynamic' } },
+        FilterComponent,
     ],
     templateUrl: './projects.component.html',
     styleUrl: './projects.component.css',
@@ -73,14 +60,11 @@ export class ProjectsComponent implements OnInit {
     sortActive = signal<string>('');
     sortDirection = signal<SortDirection>('asc');
 
+    filters = signal<ApiQueryParams>({});
+
     // Pagination metadata from server
     totalCount = signal<number>(0);
     isLoading = signal<boolean>(false);
-
-    filterForm = this.fb.group({
-        name: [this.activeRoute.snapshot.queryParamMap.get('name') || ''],
-    });
-    showFilterReset = signal<boolean>(this.activeRoute.snapshot.queryParamMap.has('name'));
     filteredProjects = signal<Project[]>([]);
     shownProjects = computed(() => new MatTableDataSource<Project>(this.filteredProjects()));
     displayedColumns = signal<DisplayedColumn<Project>[]>([
@@ -158,29 +142,25 @@ export class ProjectsComponent implements OnInit {
         ];
     });
 
+    filterFields: Filter[] = [
+        {
+            name: 'name',
+            type: 'input',
+        },
+        {
+            name: 'status',
+            type: 'select',
+            options: Object.entries(STATUS_MAP).map(([value, label]) => ({ value, label })),
+        },
+        {
+            name: 'priority',
+            type: 'select',
+            options: Object.entries(PRIORITY_MAP).map(([value, label]) => ({ value, label })),
+        },
+    ];
+
     speedDial = viewChild<SpeedDialComponent>('speedDial');
     speedDialNoButtonsLink = ['/projects/new'];
-
-    constructor() {
-        this.filterForm.valueChanges
-            .pipe(debounce(() => new Promise((resolve) => setTimeout(resolve, 300))))
-            .subscribe((filters) => {
-                // Update URL with filter params
-                const urlFilters: Record<string, any> = { ...filters };
-                Object.entries(urlFilters).forEach(([key, value]) => {
-                    if (!value) {
-                        urlFilters[key] = null;
-                    }
-                });
-
-                this.showFilterReset.set(
-                    Object.values(filters).some((value) => value !== null && value !== '')
-                );
-
-                this.urlService.addQueryParams(urlFilters);
-                this.getProjects();
-            });
-    }
 
     ngOnInit(): void {
         // Initialize pagination and sorting from query params
@@ -203,11 +183,6 @@ export class ProjectsComponent implements OnInit {
         this.getProjects();
     }
 
-    resetFilters() {
-        this.filterForm.reset();
-        this.showFilterReset.set(false);
-    }
-
     /**
      * Builds unified query params from all sources:
      * - Filter form values
@@ -217,10 +192,8 @@ export class ProjectsComponent implements OnInit {
      */
     private buildQueryParams(): ApiQueryParams {
         const params: ApiQueryParams = {
-            // Spread filter form values
-            ...this.filterForm.value,
-
-            // Add pagination (only if not default values)
+            ...this.filters(),
+            // Add pagination
             page: this.pageIndex() > 0 ? this.pageIndex() + 1 : null,
             pageSize: this.pageSize() !== 20 ? this.pageSize() : null,
 
@@ -237,15 +210,34 @@ export class ProjectsComponent implements OnInit {
     }
 
     /**
+     * Builds query params for URL (excludes 'expand' and filters out null/empty values)
+     */
+    private buildUrlParams(): ApiQueryParams {
+        const params = this.buildQueryParams();
+        const { expand, ...urlParams } = params;
+
+        // Filter out null/undefined/empty values
+        const cleanParams: ApiQueryParams = {};
+        Object.entries(urlParams).forEach(([key, value]) => {
+            if (value !== null && value !== undefined && value !== '') {
+                cleanParams[key] = value;
+            } else {
+                cleanParams[key] = null;
+            }
+        });
+
+        return cleanParams;
+    }
+
+    /**
      * Fetches projects from the server using current query params.
      * Updates the projects signal and pagination metadata.
      */
     getProjects() {
         this.isLoading.set(true);
-        const queryParams = this.buildQueryParams();
 
         this.projectService
-            .getProjects(queryParams)
+            .getProjects(this.buildQueryParams())
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe((response) => {
                 this.projects.set(response.items);
@@ -289,9 +281,13 @@ export class ProjectsComponent implements OnInit {
             pageSize: event.pageSize,
         });
 
-        this.getProjects();
+        this.onFilterChange(this.filters());
     }
 
+    /**
+     * Handles row selection changes from the custom table.
+     * @param project The currently selected project. If null, it means the selection was cleared.
+     */
     onRowChange(project: Project | null) {
         if (!project) {
             this.selectedRowId.set(null);
@@ -303,6 +299,24 @@ export class ProjectsComponent implements OnInit {
         if (project.key && this.speedDial()?.isOpen()) return;
 
         this.speedDial()?.onTogglerClick();
+    }
+
+    /**
+     * Handles filter changes emitted from the ProjectFilterComponent.
+     * Updates the filters signal, resets pagination, updates URL and fetches new data.
+     * @param filterParams
+     */
+    onFilterChange(filterParams: ApiQueryParams) {
+        this.filters.set(filterParams);
+
+        this.pageIndex.set(0);
+        this.setQueryParams();
+
+        this.getProjects();
+    }
+
+    setQueryParams() {
+        this.urlService.addQueryParams(this.buildUrlParams());
     }
 
     createProject() {

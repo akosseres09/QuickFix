@@ -1,0 +1,74 @@
+<button mat-flat-button color="primary" class="!text-white" (click)="toggleBox()">
+    {{ filterBoxOpen() ? 'Hide filters' : 'Show filters' }}
+</button>
+<form
+    [@filterBoxAnimation]="showFilters()"
+    [formGroup]="filterForm"
+    class="mt-5 space-y-4 w-full"
+    (submit)="filter()"
+>
+    <div class="flex flex-col sm:flex-row gap-4">
+        @for (field of filterFields(); track field.name) {
+            <div class="flex-1">
+                @if (field.type === 'input') {
+                    <mat-form-field appearance="fill" class="w-full">
+                        <mat-label>{{ field.name | titlecase }}</mat-label>
+                        <input
+                            type="text"
+                            [placeholder]="'Enter ' + (field.name | titlecase)"
+                            matInput
+                            [formControlName]="field.name"
+                        />
+                        @if (filterForm.get(field.name)?.value) {
+                            <mat-icon
+                                class="cursor-pointer"
+                                (click)="resetFormField(field.name)"
+                                matSuffix
+                                >close</mat-icon
+                            >
+                        }
+                    </mat-form-field>
+                }
+                @if (field.type === 'select') {
+                    <mat-form-field appearance="fill" class="w-full">
+                        <mat-label>{{ field.name | titlecase }}</mat-label>
+                        <mat-select [formControlName]="field.name">
+                            @for (option of field.options; track option.value) {
+                                <mat-option [value]="option.value">
+                                    {{ option.label }}
+                                </mat-option>
+                            }
+                        </mat-select>
+                        @if (filterForm.get(field.name)?.value) {
+                            <mat-icon
+                                class="cursor-pointer"
+                                (click)="resetFormField(field.name)"
+                                matSuffix
+                                >close</mat-icon
+                            >
+                        }
+                    </mat-form-field>
+                }
+            </div>
+        }
+    </div>
+    <div class="flex flex-col sm:flex-row items-end sm:items-center justify-end gap-4">
+        <button
+            type="button"
+            mat-stroked-button
+            class="!border-red-500 !text-red-500 disabled:!border-red-300 disabled:!text-red-300"
+            (click)="resetFilters()"
+        >
+            Reset filters {{ activeFiltersCount() > 0 ? `(${activeFiltersCount()})` : '' }}
+        </button>
+        <button
+            [disabled]="!hasChanges()"
+            class="!text-white"
+            type="submit"
+            mat-flat-button
+            color="primary"
+        >
+            Apply filters
+        </button>
+    </div>
+</form>
