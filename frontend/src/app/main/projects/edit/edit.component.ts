@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, Signal, signal, TemplateRef, viewChild } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProjectFormComponent } from '../../../common/form/project-form/project-form.component';
@@ -6,6 +6,7 @@ import { Project } from '../../../shared/model/Project';
 import { ProjectService } from '../../../shared/services/project/project.service';
 import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { DialogService } from '../../../shared/services/dialog/dialog.service';
 
 @Component({
     selector: 'app-edit',
@@ -18,8 +19,12 @@ export class EditComponent {
     private readonly projectService = inject(ProjectService);
     private readonly router = inject(Router);
     private readonly snackbar = inject(SnackbarService);
+    private readonly dialogService = inject(DialogService);
+
     projectId = signal<string>('');
     project = signal<Project | null>(null);
+
+    infoDialogRef: Signal<TemplateRef<any> | undefined> = viewChild('infoDialog');
 
     constructor() {
         this.projectId.set(this.activeRoute.snapshot.parent?.paramMap.get('projectId') || '');
@@ -40,5 +45,11 @@ export class EditComponent {
         });
     }
 
-    openInfo() {}
+    openInfo(): void {
+        const dialogRef = this.infoDialogRef();
+        if (!dialogRef) return;
+        this.dialogService.openConfirmDialog('Project Information', dialogRef, {
+            width: '600px',
+        });
+    }
 }

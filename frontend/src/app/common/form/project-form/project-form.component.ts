@@ -84,16 +84,21 @@ export class ProjectFormComponent implements OnInit {
             budget: [this.project()?.budget || 0, [Validators.min(0)]],
         });
 
-        // Auto-generate key from name
-        this.projectForm.get('name')?.valueChanges.subscribe((name) => {
-            if (name && !this.projectForm.get('key')?.dirty) {
-                const key = name
-                    .toUpperCase()
-                    .replace(/[^A-Z0-9]/g, '')
-                    .substring(0, 10);
-                this.projectForm.get('key')?.setValue(key, { emitEvent: false });
-            }
-        });
+        if (this.project()) return;
+
+        // Auto-generate key from name if there is no project
+        this.projectForm
+            .get('name')
+            ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe((name) => {
+                if (name && !this.projectForm.get('key')?.dirty) {
+                    const key = name
+                        .toUpperCase()
+                        .replace(/[^A-Z0-9]/g, '')
+                        .substring(0, 10);
+                    this.projectForm.get('key')?.setValue(key, { emitEvent: false });
+                }
+            });
     }
 
     getPriorityLabel(priority: number): string {

@@ -22,3 +22,59 @@
         }
     </div>
 </div>
+
+<ng-template #infoDialog>
+    <div class="space-y-4">
+        <p>
+            Creating a new project allows you to organize and manage your tasks, team members, and
+            resources effectively. Fill in the required fields to set up your project.
+        </p>
+        <ul class="list-disc list-inside space-y-2">
+            <li>
+                <strong class="dark:text-white text-light-text">Project Name:</strong> The name of
+                your project. This is a required field.
+            </li>
+            <li>
+                <strong class="dark:text-white text-light-text">Project Key:</strong> A unique
+                identifier for your project, typically used in URLs and references. Must be
+                uppercase letters and numbers only.
+            </li>
+            <li>
+                <strong class="dark:text-white text-light-text">Description:</strong> A brief
+                overview of the project's purpose and goals.
+            </li>
+            <li>
+                <strong class="dark:text-white text-light-text">Status:</strong> The current state
+                of the project (e.g., Active, Archived, On Hold, Completed).
+            </li>
+            <li>
+                <strong class="dark:text-white text-light-text">Visibility:</strong> Determines who
+                can see the project (e.g., Public, Private, Team (Invite only)).
+            </li>
+            <li>
+                <strong class="dark:text-white text-light-text">Priority:</strong> Indicates the
+                importance of the project relative to others.
+            </li>
+            <li>
+                <strong class="dark:text-white text-light-text">Start and End Dates:</strong> Define
+                the timeline for your project.
+            </li>
+            <li>
+                <strong class="dark:text-white text-light-text">Color:</strong> Choose a color to
+                represent your project visually.
+            </li>
+            <li>
+                <strong class="dark:text-white text-light-text">Budget:</strong> Set a financial
+                limit for the project's expenses.
+            </li>
+            <li>
+                <strong class="dark:text-white text-light-text">Progress:</strong> Indicate the
+                initial completion percentage of the project.
+            </li>
+        </ul>
+        <p>
+            Once you've filled out the form, click "Create Project" to add it to your dashboard. You
+            can always edit these details later as your project evolves.
+        </p>
+    </div>
+</ng-template>
