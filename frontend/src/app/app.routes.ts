@@ -85,7 +85,7 @@ export const routes: Routes = [
         ],
     },
     {
-        path: 'project/:projectId',
+        path: 'project/:projectId/edit',
         loadComponent: () =>
             import('./layouts/base-layout/base-layout.component').then(
                 (c) => c.BaseLayoutComponent
@@ -93,11 +93,6 @@ export const routes: Routes = [
         children: [
             {
                 path: '',
-                pathMatch: 'full',
-                redirectTo: 'edit',
-            },
-            {
-                path: 'edit',
                 loadComponent: () =>
                     import('./main/projects/edit/edit.component').then((c) => c.EditComponent),
                 title: 'QuickFix - Edit Project',

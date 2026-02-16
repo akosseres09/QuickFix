@@ -251,9 +251,17 @@ export class IssuesComponent {
         // Not implemented
     }
 
-    onRowChange(id: string | null) {
-        this.selectedRowId.set(id);
-        if (id && this.speedDial()?.isOpen()) return;
+    onRowChange(issue: Issue | null) {
+        if (!issue) {
+            this.selectedRowId.set(null);
+            this.speedDial()?.close();
+            return;
+        }
+
+        this.selectedRowId.set(issue.id);
+
+        if (issue && this.speedDial()?.isOpen()) return;
+
         this.speedDial()?.onTogglerClick();
     }
 }
