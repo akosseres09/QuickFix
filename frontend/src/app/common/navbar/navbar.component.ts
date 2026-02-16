@@ -170,8 +170,6 @@ export class NavbarComponent implements AfterViewInit {
     }
 
     toggleSidebar(value: boolean = !this.isSidebarOpened()): void {
-        console.log('toggled');
-
         this.isSidebarOpened.set(value);
     }
 

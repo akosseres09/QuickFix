@@ -47,8 +47,6 @@ export class VerifyComponent implements OnDestroy {
     }
 
     onSubmit() {
-        console.log(this.verifyForm.invalid);
-
         if (this.verifyForm.invalid) return;
 
         const token = this.getControl('token')?.value;
