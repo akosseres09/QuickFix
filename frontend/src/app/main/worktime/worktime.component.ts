@@ -29,7 +29,7 @@ import { DateService } from '../../shared/services/date/date.service';
 
 const MOCK_DATA: WorktimeEntry[] = [
     {
-        id: 1,
+        id: '1',
         issue: 'Fix login bug',
         issueId: 1234,
         date: '2025-12-28',
@@ -38,7 +38,7 @@ const MOCK_DATA: WorktimeEntry[] = [
         user: 'John Doe',
     },
     {
-        id: 2,
+        id: '2',
         issue: 'Update dashboard UI',
         issueId: 1235,
         date: '2025-12-28',
@@ -47,7 +47,7 @@ const MOCK_DATA: WorktimeEntry[] = [
         user: 'John Doe',
     },
     {
-        id: 3,
+        id: '3',
         issue: 'API integration',
         issueId: 1236,
         date: '2025-12-27',
@@ -56,7 +56,7 @@ const MOCK_DATA: WorktimeEntry[] = [
         user: 'John Doe',
     },
     {
-        id: 4,
+        id: '4',
         issue: 'Database optimization',
         issueId: 1237,
         date: '2025-12-27',
@@ -65,7 +65,7 @@ const MOCK_DATA: WorktimeEntry[] = [
         user: 'Jane Smith',
     },
     {
-        id: 5,
+        id: '5',
         issue: 'Mobile responsive fixes',
         issueId: 1238,
         date: '2025-12-26',
@@ -74,7 +74,7 @@ const MOCK_DATA: WorktimeEntry[] = [
         user: 'John Doe',
     },
     {
-        id: 6,
+        id: '6',
         issue: 'Security audit',
         issueId: 1239,
         date: '2025-12-26',
@@ -83,7 +83,7 @@ const MOCK_DATA: WorktimeEntry[] = [
         user: 'Jane Smith',
     },
     {
-        id: 7,
+        id: '7',
         issue: 'Documentation update',
         issueId: 1240,
         date: '2025-12-25',
@@ -92,7 +92,7 @@ const MOCK_DATA: WorktimeEntry[] = [
         user: 'John Doe',
     },
     {
-        id: 8,
+        id: '8',
         issue: 'Code review',
         issueId: 1241,
         date: '2025-12-24',
@@ -318,7 +318,7 @@ export class WorktimeComponent implements OnDestroy {
         });
     }
 
-    deleteEntry(id: number) {
+    deleteEntry(id: string) {
         this.worktimeEntries.update((entries) => entries.filter((e) => e.id !== id));
     }
 
@@ -348,7 +348,7 @@ export class WorktimeComponent implements OnDestroy {
             if (result && result.action === 'save') {
                 const formValue = dialog.worktimeForm.value;
                 const newEntry: WorktimeEntry = {
-                    id: Math.max(...this.worktimeEntries().map((e) => e.id), 0) + 1,
+                    id: Math.max(...this.worktimeEntries().map((e) => parseInt(e.id)), 0) + 1 + '',
                     issueId: parseInt(formValue.issueId as string),
                     issue: formValue.issue as string,
                     date: new Date(formValue.date).toISOString(),

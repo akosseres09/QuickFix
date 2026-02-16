@@ -292,9 +292,16 @@ export class ProjectsComponent implements OnInit {
         this.getProjects();
     }
 
-    onRowChange(id: string | null) {
-        this.selectedRowId.set(id);
-        if (id && this.speedDial()?.isOpen()) return;
+    onRowChange(project: Project | null) {
+        if (!project) {
+            this.selectedRowId.set(null);
+            this.speedDial()?.close();
+            return;
+        }
+
+        this.selectedRowId.set(project.key);
+        if (project.key && this.speedDial()?.isOpen()) return;
+
         this.speedDial()?.onTogglerClick();
     }
 

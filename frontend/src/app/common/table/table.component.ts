@@ -58,12 +58,12 @@ export class TableComponent<T extends BaseModel> {
     name = output<T>();
     sortChange = output<Sort>();
     pageChange = output<PageEvent>();
-    selectedRowChange = output<string | null>();
+    selectedRowChange = output<T | null>();
 
     private readonly authService = inject(AuthService);
     private readonly destroyRef = inject(DestroyRef);
 
-    selectedRowId = signal<string | null>(null);
+    selectedRow = signal<T | null>(null);
     user = signal<Claims | null>(this.authService.currentUserClaims());
 
     columnIds = computed<Array<String>>(() => {
@@ -108,14 +108,15 @@ export class TableComponent<T extends BaseModel> {
         this.name.emit(element);
     }
 
-    toggleRow(rowId: string): void {
-        if (this.selectedRowId() === rowId) {
-            this.selectedRowId.set(null);
+    toggleRow(row: T): void {
+        const rowId = row.id;
+        if (this.selectedRow()?.id === rowId) {
+            this.selectedRow.set(null);
             this.selectedRowChange.emit(null);
             return;
         }
 
-        this.selectedRowId.set(rowId);
-        this.selectedRowChange.emit(rowId);
+        this.selectedRow.set(row);
+        this.selectedRowChange.emit(row);
     }
 }

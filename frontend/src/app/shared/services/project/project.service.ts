@@ -41,6 +41,10 @@ export class ProjectService {
         return this.getProjects(queryParams).pipe(map((response) => response.items));
     }
 
+    getProject(identifier: string): Observable<Project> {
+        return this.http.get<Project>(`${this.url}/project/${identifier}`);
+    }
+
     /**
      * Creates a new project
      */

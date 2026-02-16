@@ -1,0 +1,224 @@
+<form [formGroup]="projectForm" (ngSubmit)="onSubmit()">
+    <div class="flex flex-col sm:flex-row gap-6">
+        <div class="flex-1 space-y-4">
+            <mat-form-field class="w-full" appearance="fill">
+                <mat-label>Project Name</mat-label>
+                <mat-icon matPrefix>folder</mat-icon>
+                <input
+                    formControlName="name"
+                    matInput
+                    type="text"
+                    placeholder="My Awesome Project"
+                    required
+                />
+                @if (projectForm.get('name')?.invalid && projectForm.get('name')?.touched) {
+                    <mat-error>
+                        @if (projectForm.get('name')?.hasError('required')) {
+                            <span>Project name is required</span>
+                        }
+                        @if (projectForm.get('name')?.hasError('maxlength')) {
+                            <span>Name must not exceed 255 characters</span>
+                        }
+                    </mat-error>
+                }
+            </mat-form-field>
+
+            <mat-form-field class="w-full" appearance="fill">
+                <mat-label>Project Key</mat-label>
+                <mat-icon matPrefix>key</mat-icon>
+                <input
+                    formControlName="key"
+                    matInput
+                    type="text"
+                    placeholder="PROJ"
+                    required
+                    maxlength="10"
+                    style="text-transform: uppercase"
+                />
+                @if (projectForm.get('key')?.invalid && projectForm.get('key')?.touched) {
+                    <mat-error>
+                        @if (projectForm.get('key')?.hasError('required')) {
+                            <span>Project key is required</span>
+                        }
+                        @if (projectForm.get('key')?.hasError('pattern')) {
+                            <span>Only uppercase letters and numbers allowed</span>
+                        }
+                        @if (projectForm.get('key')?.hasError('maxlength')) {
+                            <span>Key must not exceed 10 characters</span>
+                        }
+                    </mat-error>
+                }
+            </mat-form-field>
+
+            <mat-form-field class="w-full" appearance="fill">
+                <mat-label>Description</mat-label>
+                <textarea
+                    formControlName="description"
+                    matInput
+                    rows="4"
+                    placeholder="Describe your project..."
+                ></textarea>
+            </mat-form-field>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Status
+                </label>
+                <mat-form-field class="w-full" appearance="fill">
+                    <mat-icon matPrefix>flag</mat-icon>
+                    <mat-select formControlName="status" required>
+                        @for (status of statusList; track status) {
+                            <mat-option [value]="status">
+                                {{ getStatusLabel(status) }}
+                            </mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Visibility
+                </label>
+                <mat-form-field class="w-full" appearance="fill">
+                    <mat-icon matPrefix>visibility</mat-icon>
+                    <mat-select formControlName="visibility" required>
+                        @for (visibility of visibilityList; track visibility) {
+                            <mat-option [value]="visibility">
+                                {{ getVisibilityLabel(visibility) }}
+                            </mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Priority
+                </label>
+                <mat-form-field class="w-full" appearance="fill">
+                    <mat-icon matPrefix>priority_high</mat-icon>
+                    <mat-select formControlName="priority" required>
+                        @for (priority of priorityList; track priority) {
+                            <mat-option [value]="priority">
+                                {{ getPriorityLabel(priority) }}
+                            </mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+            </div>
+        </div>
+
+        <div class="space-y-2">
+            <div>
+                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Start Date
+                </label>
+                <mat-form-field class="w-full" appearance="fill">
+                    <mat-icon matPrefix>event</mat-icon>
+                    <input
+                        formControlName="startDate"
+                        matInput
+                        [matDatepicker]="startPicker"
+                        placeholder="Select start date"
+                    />
+                    <mat-datepicker-toggle
+                        matIconSuffix
+                        [for]="startPicker"
+                    ></mat-datepicker-toggle>
+                    <mat-datepicker #startPicker></mat-datepicker>
+                </mat-form-field>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    End Date
+                </label>
+                <mat-form-field class="w-full" appearance="fill">
+                    <mat-icon matPrefix>event</mat-icon>
+                    <input
+                        formControlName="endDate"
+                        matInput
+                        [matDatepicker]="endPicker"
+                        placeholder="Select end date"
+                    />
+                    <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #endPicker></mat-datepicker>
+                </mat-form-field>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Project Color
+                </label>
+                <mat-form-field class="w-full" appearance="fill">
+                    <mat-icon matPrefix>palette</mat-icon>
+                    <input formControlName="color" matInput type="color" />
+                    @if (projectForm.get('color')?.invalid && projectForm.get('color')?.touched) {
+                        <mat-error>
+                            @if (projectForm.get('color')?.hasError('pattern')) {
+                                <span>Invalid color format</span>
+                            }
+                        </mat-error>
+                    }
+                </mat-form-field>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Budget
+                </label>
+                <mat-form-field class="w-full" appearance="fill">
+                    <mat-icon matPrefix>attach_money</mat-icon>
+                    <input
+                        formControlName="budget"
+                        matInput
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="0.00"
+                    />
+                    @if (projectForm.get('budget')?.invalid && projectForm.get('budget')?.touched) {
+                        <mat-error>
+                            @if (projectForm.get('budget')?.hasError('min')) {
+                                <span>Budget must be positive</span>
+                            }
+                        </mat-error>
+                    }
+                </mat-form-field>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Initial Progress: {{ projectForm.get('progress')?.value }}%
+                </label>
+                <mat-slider
+                    class="!w-[-webkit-fill-available]"
+                    [min]="0"
+                    [max]="100"
+                    [step]="0.5"
+                    [discrete]="true"
+                    [showTickMarks]="true"
+                >
+                    <input formControlName="progress" class="!p-0 !left-0" matSliderThumb />
+                </mat-slider>
+            </div>
+        </div>
+    </div>
+
+    <div
+        class="flex flex-col sm:flex-row gap-3 justify-start mt-6 pt-6 border-t border-slate-200 dark:border-slate-700"
+    >
+        <button
+            type="submit"
+            mat-raised-button
+            color="primary"
+            [disabled]="projectForm.invalid"
+            class="!px-6 !py-2"
+        >
+            <mat-icon class="mr-1">add</mat-icon>
+            Create Project
+        </button>
+        <a mat-button routerLink="/projects" class="!px-6 !py-2"> Cancel </a>
+    </div>
+</form>

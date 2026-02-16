@@ -80,6 +80,28 @@ export const routes: Routes = [
                 pathMatch: 'full',
                 loadComponent: () =>
                     import('./main/home/home.component').then((c) => c.HomeComponent),
+                title: 'QuickFix - Home',
+            },
+        ],
+    },
+    {
+        path: 'project/:projectId',
+        loadComponent: () =>
+            import('./layouts/base-layout/base-layout.component').then(
+                (c) => c.BaseLayoutComponent
+            ),
+        children: [
+            {
+                path: '',
+                pathMatch: 'full',
+                redirectTo: 'edit',
+            },
+            {
+                path: 'edit',
+                loadComponent: () =>
+                    import('./main/projects/edit/edit.component').then((c) => c.EditComponent),
+                title: 'QuickFix - Edit Project',
+                canActivate: [authenticatedGuard],
             },
         ],
     },
@@ -178,36 +200,42 @@ export const routes: Routes = [
                 loadComponent: () =>
                     import('./main/projects/projects.component').then((c) => c.ProjectsComponent),
                 canActivate: [authenticatedGuard],
+                title: 'QuickFix - Projects',
             },
             {
                 path: 'projects/new',
                 loadComponent: () =>
                     import('./main/projects/new/new.component').then((c) => c.NewComponent),
                 canActivate: [authenticatedGuard],
+                title: 'QuickFix - New Project',
             },
             {
                 path: 'worktime',
                 loadComponent: () =>
                     import('./main/worktime/worktime.component').then((c) => WorktimeComponent),
                 canActivate: [authenticatedGuard],
+                title: 'QuickFix - Worktime',
             },
             {
                 path: 'account',
                 loadComponent: () =>
                     import('./main/account/account.component').then((c) => c.AccountComponent),
                 canActivate: [authenticatedGuard],
+                title: 'QuickFix - Account',
             },
             {
                 path: 'settings',
                 loadComponent: () =>
                     import('./main/settings/settings.component').then((c) => c.SettingsComponent),
                 canActivate: [authenticatedGuard],
+                title: 'QuickFix - Settings',
             },
             {
                 path: '**',
                 loadComponent: () =>
                     import('./auth/not-found/not-found.component').then((c) => c.NotFoundComponent),
                 canActivate: [authenticatedGuard],
+                title: 'QuickFix - Not Found',
             },
         ],
     },

@@ -1,1 +1,3 @@
-export interface BaseModel {}
+export interface BaseModel {
+    id: string;
+}

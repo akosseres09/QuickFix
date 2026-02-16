@@ -40,6 +40,18 @@ export class SpeedDialComponent {
         this.dialState.set(this.isDialOpen() ? 'closed' : 'open');
     }
 
+    close(): void {
+        if (!this.isDialOpen()) return;
+
+        this.dialState.set('closed');
+    }
+
+    open(): void {
+        if (this.isDialOpen()) return;
+
+        this.dialState.set('open');
+    }
+
     getDialState(): 'open' | 'closed' {
         return this.dialState();
     }
