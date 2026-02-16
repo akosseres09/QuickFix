@@ -155,6 +155,7 @@ export class IssuesComponent {
     speedDial = viewChild<SpeedDialComponent>('speedDial');
 
     filters = signal<ApiQueryParams>({});
+    isInitialFilterLoad = true;
     filteredFields: Filter[] = [
         {
             name: 'title',
@@ -187,7 +188,8 @@ export class IssuesComponent {
         }
 
         if (pageIndexParam) {
-            this.pageIndex.set(+pageIndexParam);
+            // Convert from 1-based (URL/API) to 0-based (Material table)
+            this.pageIndex.set(+pageIndexParam - 1);
         }
 
         if (sortActiveParam) {
@@ -195,8 +197,8 @@ export class IssuesComponent {
             this.sortActive.set(isAsc ? sortActiveParam : sortActiveParam.substring(1));
             this.sortDirection.set(isAsc ? 'asc' : 'desc');
         }
+
         this.issueService.setProjectId(this.projectId());
-        this.getIssues();
     }
 
     private getProjectId(): string {
@@ -292,9 +294,14 @@ export class IssuesComponent {
     onFilterChange(filterParams: ApiQueryParams) {
         this.filters.set(filterParams);
 
-        this.pageIndex.set(0);
-        this.setQueryParams();
+        // Reset to first page on filter change, but not on initial load
+        if (!this.isInitialFilterLoad) {
+            this.pageIndex.set(0);
+            this.urlService.removeQueryParams(['page']);
+        }
+        this.isInitialFilterLoad = false;
 
+        this.setQueryParams();
         this.getIssues();
     }
 
@@ -312,6 +319,7 @@ export class IssuesComponent {
     private buildQueryParams(): ApiQueryParams {
         const params: ApiQueryParams = {
             ...this.filters(),
+            // Convert from 0-based (Material table) to 1-based (API)
             page: this.pageIndex() > 0 ? this.pageIndex() + 1 : null,
             pageSize: this.pageSize() !== 20 ? this.pageSize() : null,
             sort: this.sortDirection()

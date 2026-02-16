@@ -140,6 +140,7 @@ export class ProjectsComponent implements OnInit {
         ];
     });
 
+    initialFilterLoad = true;
     filterFields: Filter[] = [
         {
             name: 'name',
@@ -177,8 +178,6 @@ export class ProjectsComponent implements OnInit {
             this.sortActive.set(isAsc ? sortParam : sortParam.substring(1));
             this.sortDirection.set(isAsc ? 'asc' : 'desc');
         }
-
-        this.getProjects();
     }
 
     /**
@@ -261,9 +260,13 @@ export class ProjectsComponent implements OnInit {
     onFilterChange(filterParams: ApiQueryParams) {
         this.filters.set(filterParams);
 
-        this.pageIndex.set(0);
-        this.setQueryParams();
+        if (!this.initialFilterLoad) {
+            this.pageIndex.set(0);
+            this.urlService.removeQueryParams(['page']);
+        }
+        this.initialFilterLoad = false;
 
+        this.setQueryParams();
         this.getProjects();
     }
 
@@ -286,7 +289,7 @@ export class ProjectsComponent implements OnInit {
         const params: ApiQueryParams = {
             ...this.filters(),
             // Add pagination
-            page: this.pageIndex() > 0 ? this.pageIndex() + 1 : null,
+            page: this.pageIndex() > 0 ? this.pageIndex() : null,
             pageSize: this.pageSize() !== 20 ? this.pageSize() : null,
 
             // Add sorting (only if sortDirection is not '')
