@@ -11,8 +11,8 @@ class ProjectSearch extends Project
     public function rules(): array
     {
         return [
-            [['id', 'owner_id'], 'string'],
-            [['status'], 'integer'],
+            [['id', 'owner_id', 'status'], 'string'],
+            [['priority'], 'integer'],
             [['name', 'description'], 'safe'],
         ];
     }
@@ -92,6 +92,7 @@ class ProjectSearch extends Project
             'p.id' => $this->id,
             'p.owner_id' => $this->owner_id,
             'p.status' => $this->status,
+            'p.priority' => $this->priority,
         ]);
 
         $query->andFilterWhere(['like', 'p.name', $this->name])
