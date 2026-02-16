@@ -1,4 +1,8 @@
 <div class="max-w-7xl mx-auto">
+    <app-filter
+        [filterFields]="filteredFields"
+        (onFilterChange)="onFilterChange($event)"
+    ></app-filter>
     <app-table
         [dataSource]="shownIssues()"
         [displayedColumns]="displayedColumns"

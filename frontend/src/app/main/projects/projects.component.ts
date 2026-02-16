@@ -12,7 +12,6 @@ import {
 } from '../../shared/model/Project';
 import { DisplayedColumn } from '../../shared/constants/DisplayedColumn';
 import { ProjectService } from '../../shared/services/project/project.service';
-import { FormBuilder } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatOptionModule } from '@angular/material/core';
 import { UrlService } from '../../shared/services/url/url.service';
@@ -44,7 +43,6 @@ import { FilterComponent } from '../../common/filter/filter.component';
 })
 export class ProjectsComponent implements OnInit {
     private readonly urlService = inject(UrlService);
-    private readonly fb = inject(FormBuilder);
     private readonly projectService = inject(ProjectService);
     private readonly activeRoute = inject(ActivatedRoute);
     private readonly destroyRef = inject(DestroyRef);
@@ -184,52 +182,6 @@ export class ProjectsComponent implements OnInit {
     }
 
     /**
-     * Builds unified query params from all sources:
-     * - Filter form values
-     * - Pagination state
-     * - Sorting state
-     * - Expansion requirements
-     */
-    private buildQueryParams(): ApiQueryParams {
-        const params: ApiQueryParams = {
-            ...this.filters(),
-            // Add pagination
-            page: this.pageIndex() > 0 ? this.pageIndex() + 1 : null,
-            pageSize: this.pageSize() !== 20 ? this.pageSize() : null,
-
-            // Add sorting (only if sortDirection is not '')
-            sort: this.sortDirection()
-                ? `${this.sortDirection() === 'desc' ? '-' : ''}${this.sortActive()}`
-                : null,
-
-            // Add expansion
-            expand: 'owner,members',
-        };
-
-        return params;
-    }
-
-    /**
-     * Builds query params for URL (excludes 'expand' and filters out null/empty values)
-     */
-    private buildUrlParams(): ApiQueryParams {
-        const params = this.buildQueryParams();
-        const { expand, ...urlParams } = params;
-
-        // Filter out null/undefined/empty values
-        const cleanParams: ApiQueryParams = {};
-        Object.entries(urlParams).forEach(([key, value]) => {
-            if (value !== null && value !== undefined && value !== '') {
-                cleanParams[key] = value;
-            } else {
-                cleanParams[key] = null;
-            }
-        });
-
-        return cleanParams;
-    }
-
-    /**
      * Fetches projects from the server using current query params.
      * Updates the projects signal and pagination metadata.
      */
@@ -315,11 +267,57 @@ export class ProjectsComponent implements OnInit {
         this.getProjects();
     }
 
-    setQueryParams() {
+    createProject() {
+        this.router.navigate(['/projects/new']);
+    }
+
+    private setQueryParams() {
         this.urlService.addQueryParams(this.buildUrlParams());
     }
 
-    createProject() {
-        this.router.navigate(['/projects/new']);
+    /**
+     * Builds unified query params from all sources:
+     * - Filter form values
+     * - Pagination state
+     * - Sorting state
+     * - Expansion requirements
+     */
+    private buildQueryParams(): ApiQueryParams {
+        const params: ApiQueryParams = {
+            ...this.filters(),
+            // Add pagination
+            page: this.pageIndex() > 0 ? this.pageIndex() + 1 : null,
+            pageSize: this.pageSize() !== 20 ? this.pageSize() : null,
+
+            // Add sorting (only if sortDirection is not '')
+            sort: this.sortDirection()
+                ? `${this.sortDirection() === 'desc' ? '-' : ''}${this.sortActive()}`
+                : null,
+
+            // Add expansion
+            expand: 'owner,members',
+        };
+
+        return params;
+    }
+
+    /**
+     * Builds query params for URL (excludes 'expand' and filters out null/empty values)
+     */
+    private buildUrlParams(): ApiQueryParams {
+        const params = this.buildQueryParams();
+        const { expand, ...urlParams } = params;
+
+        // Filter out null/undefined/empty values
+        const cleanParams: ApiQueryParams = {};
+        Object.entries(urlParams).forEach(([key, value]) => {
+            if (value !== null && value !== undefined && value !== '') {
+                cleanParams[key] = value;
+            } else {
+                cleanParams[key] = null;
+            }
+        });
+
+        return cleanParams;
     }
 }

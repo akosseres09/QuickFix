@@ -80,6 +80,8 @@ class IssueSearch extends Issue
             'is_archived' => $this->is_archived
         ]);
 
+        $query->andFilterWhere(['like','title', $this->title]);
+
         return $dataProvider;
     }
 }

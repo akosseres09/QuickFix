@@ -23,10 +23,19 @@ import { Sort, SortDirection } from '@angular/material/sort';
 import { ApiQueryParams } from '../../shared/constants/api/ApiQueryParams';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DateService } from '../../shared/services/date/date.service';
+import { Filter } from '../../shared/constants/Filter';
+import { FilterComponent } from '../../common/filter/filter.component';
 
 @Component({
     selector: 'app-issues',
-    imports: [MatTableModule, MatPaginatorModule, CommonModule, TableComponent, SpeedDialComponent],
+    imports: [
+        MatTableModule,
+        MatPaginatorModule,
+        CommonModule,
+        TableComponent,
+        SpeedDialComponent,
+        FilterComponent,
+    ],
     templateUrl: './issues.component.html',
     styleUrl: './issues.component.css',
 })
@@ -34,7 +43,6 @@ export class IssuesComponent {
     private readonly urlService = inject(UrlService);
     private readonly snackbarService = inject(SnackbarService);
     private readonly issueService = inject(IssueService);
-    private readonly router = inject(Router);
     private readonly activeRoute = inject(ActivatedRoute);
     private readonly destroyRef = inject(DestroyRef);
     private readonly dateService = inject(DateService);
@@ -146,6 +154,29 @@ export class IssuesComponent {
 
     speedDial = viewChild<SpeedDialComponent>('speedDial');
 
+    filters = signal<ApiQueryParams>({});
+    filteredFields: Filter[] = [
+        {
+            name: 'title',
+            type: 'input',
+        },
+        {
+            name: 'status',
+            type: 'select',
+            options: Object.entries(STATUS_MAP).map(([value, label]) => ({ value, label })),
+        },
+        {
+            name: 'priority',
+            type: 'select',
+            options: Object.entries(PRIORITY_MAP).map(([value, label]) => ({ value, label })),
+        },
+        {
+            name: 'type',
+            type: 'select',
+            options: Object.entries(TYPE_MAP).map(([value, label]) => ({ value, label })),
+        },
+    ];
+
     constructor() {
         const pageSizeParam = this.activeRoute.snapshot.queryParamMap.get('pageSize');
         const pageIndexParam = this.activeRoute.snapshot.queryParamMap.get('page');
@@ -172,19 +203,6 @@ export class IssuesComponent {
         return this.activeRoute.parent?.parent?.snapshot.paramMap.get('projectId') || '';
     }
 
-    private buildQueryParams(): ApiQueryParams {
-        const params: ApiQueryParams = {
-            page: this.pageIndex() > 0 ? this.pageIndex() + 1 : null,
-            pageSize: this.pageSize() !== 20 ? this.pageSize() : null,
-            sort: this.sortDirection()
-                ? `${this.sortDirection() === 'desc' ? '-' : ''}${this.sortActive()}`
-                : null,
-            expand: 'creator,assignee',
-        };
-
-        return params;
-    }
-
     getIssues() {
         if (!this.projectId()) {
             this.snackbarService.open('Project ID is missing');
@@ -192,10 +210,9 @@ export class IssuesComponent {
         }
 
         this.isLoading.set(true);
-        const queryParams = this.buildQueryParams();
 
         this.issueService
-            .getIssues(queryParams)
+            .getIssues(this.buildQueryParams())
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
                 next: (response) => {
@@ -212,6 +229,10 @@ export class IssuesComponent {
             });
     }
 
+    /**
+     * Handles sort change events from the table, updates the URL and fetches new data.
+     * @param event Sort event emitted from the table when user changes sorting.
+     */
     onSortChange(event: Sort) {
         this.sortActive.set(event.active);
         this.sortDirection.set(event.direction);
@@ -229,6 +250,10 @@ export class IssuesComponent {
         this.getIssues();
     }
 
+    /**
+     * Handles page change events from the paginator, updates the URL and fetches new data.
+     * @param event PageEvent emitted from paginator. Holds the new page index and size.
+     */
     onPageChange(event: PageEvent) {
         this.pageIndex.set(event.pageIndex);
         this.pageSize.set(event.pageSize);
@@ -241,16 +266,10 @@ export class IssuesComponent {
         this.getIssues();
     }
 
-    onEdit(issue: Issue) {
-        this.snackbarService.open('Navigating to issue ' + issue.id);
-        //this.router.navigate(['/issues', issue.id]);
-    }
-
-    onDelete(issue: Issue) {
-        this.snackbarService.open('Issue deleted');
-        // Not implemented
-    }
-
+    /**
+     * Handles row selection changes from the custom table.
+     * @param project The currently selected project. If null, it means the selection was cleared.
+     */
     onRowChange(issue: Issue | null) {
         if (!issue) {
             this.selectedRowId.set(null);
@@ -263,5 +282,64 @@ export class IssuesComponent {
         if (issue && this.speedDial()?.isOpen()) return;
 
         this.speedDial()?.onTogglerClick();
+    }
+
+    /**
+     * Handles filter changes emitted from the ProjectFilterComponent.
+     * Updates the filters signal, resets pagination, updates URL and fetches new data.
+     * @param filterParams
+     */
+    onFilterChange(filterParams: ApiQueryParams) {
+        this.filters.set(filterParams);
+
+        this.pageIndex.set(0);
+        this.setQueryParams();
+
+        this.getIssues();
+    }
+
+    private setQueryParams() {
+        this.urlService.addQueryParams(this.buildUrlParams());
+    }
+
+    /**
+     * Builds unified query params from all sources:
+     * - Filter form values
+     * - Pagination state
+     * - Sorting state
+     * - Expansion requirements
+     */
+    private buildQueryParams(): ApiQueryParams {
+        const params: ApiQueryParams = {
+            ...this.filters(),
+            page: this.pageIndex() > 0 ? this.pageIndex() + 1 : null,
+            pageSize: this.pageSize() !== 20 ? this.pageSize() : null,
+            sort: this.sortDirection()
+                ? `${this.sortDirection() === 'desc' ? '-' : ''}${this.sortActive()}`
+                : null,
+            expand: 'creator,assignee',
+        };
+
+        return params;
+    }
+
+    /**
+     * Builds query params for URL (excludes 'expand' and filters out null/empty values)
+     */
+    private buildUrlParams(): ApiQueryParams {
+        const params = this.buildQueryParams();
+        const { expand, ...urlParams } = params;
+
+        // Filter out null/undefined/empty values
+        const cleanParams: ApiQueryParams = {};
+        Object.entries(urlParams).forEach(([key, value]) => {
+            if (value !== null && value !== undefined && value !== '') {
+                cleanParams[key] = value;
+            } else {
+                cleanParams[key] = null;
+            }
+        });
+
+        return cleanParams;
     }
 }
