@@ -48,7 +48,7 @@ export class IssuesComponent {
     private readonly dateService = inject(DateService);
 
     projectId = signal<string>(this.getProjectId());
-    selectedRowId = signal<string | null>(null);
+    selectedRow = signal<Issue | null>(null);
 
     pageSize = signal<number>(20);
     pageIndex = signal<number>(0);
@@ -123,14 +123,14 @@ export class IssuesComponent {
     ];
     // Transform the signal into a computed signal
     speedDialButtons = computed<SpeedDialButton[]>(() => {
-        const selectedId = this.selectedRowId();
+        const selectedRow = this.selectedRow();
         const currentProjectId = this.projectId();
 
         return [
             {
                 iconName: 'add',
                 label: 'Create Issue',
-                shown: selectedId === null,
+                shown: selectedRow === null,
                 action: () => {
                     return ['add'];
                 },
@@ -138,9 +138,9 @@ export class IssuesComponent {
             {
                 iconName: 'edit',
                 label: 'Edit Issue',
-                shown: selectedId !== null,
+                shown: selectedRow !== null,
                 action: () => {
-                    const selectedIssueId = this.selectedRowId();
+                    const selectedIssueId = this.selectedRow()?.id;
                     if (!selectedIssueId) {
                         this.snackbarService.open('Please select a valid issue to edit!');
                         return null;
@@ -270,16 +270,16 @@ export class IssuesComponent {
 
     /**
      * Handles row selection changes from the custom table.
-     * @param project The currently selected project. If null, it means the selection was cleared.
+     * @param issue The currently selected issue. If null, it means the selection was cleared.
      */
     onRowChange(issue: Issue | null) {
         if (!issue) {
-            this.selectedRowId.set(null);
+            this.selectedRow.set(null);
             this.speedDial()?.close();
             return;
         }
 
-        this.selectedRowId.set(issue.id);
+        this.selectedRow.set(issue);
 
         if (issue && this.speedDial()?.isOpen()) return;
 

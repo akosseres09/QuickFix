@@ -4,5 +4,6 @@ export interface SpeedDialButton {
     iconName: string;
     label: string;
     shown?: boolean;
-    action: () => string | any[] | UrlTree | null | undefined;
+    action?: () => string | any[] | UrlTree | null | undefined;
+    onClick?: () => void;
 }

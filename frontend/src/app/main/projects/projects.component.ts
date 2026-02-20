@@ -1,5 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, DestroyRef, inject, OnInit, signal, viewChild } from '@angular/core';
+import {
+    Component,
+    computed,
+    DestroyRef,
+    inject,
+    OnInit,
+    signal,
+    TemplateRef,
+    viewChild,
+} from '@angular/core';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TableComponent } from '../../common/table/table.component';
@@ -25,6 +34,7 @@ import { SpeedDialButton } from '../../shared/constants/SpeedDialButton';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 import { Filter } from '../../shared/constants/Filter';
 import { FilterComponent } from '../../common/filter/filter.component';
+import { DialogService } from '../../shared/services/dialog/dialog.service';
 
 @Component({
     selector: 'app-projects',
@@ -49,8 +59,10 @@ export class ProjectsComponent implements OnInit {
     private readonly dateService = inject(DateService);
     private readonly router = inject(Router);
     private readonly snackbarService = inject(SnackbarService);
+    private readonly dialogService = inject(DialogService);
+
     projects = signal<Project[]>([]);
-    selectedRowId = signal<string | null>(null);
+    selectedRow = signal<Project | null>(null);
 
     // Table state
     pageSize = signal<number>(10);
@@ -112,7 +124,7 @@ export class ProjectsComponent implements OnInit {
     ]);
 
     speedDialButtons = computed<SpeedDialButton[]>(() => {
-        const selectedId = this.selectedRowId();
+        const selectedId = this.selectedRow();
 
         return [
             {
@@ -124,11 +136,27 @@ export class ProjectsComponent implements OnInit {
                 },
             },
             {
+                iconName: 'delete',
+                label: 'Delete Project',
+                shown: selectedId !== null,
+                onClick: () => {
+                    this.openDeleteConfirmation();
+                },
+            },
+            {
+                iconName: 'archive',
+                label: 'Archive Project',
+                shown: selectedId !== null,
+                onClick: () => {
+                    this.openArchiveConfirmation();
+                },
+            },
+            {
                 iconName: 'edit',
                 label: 'Edit Project',
                 shown: selectedId !== null,
                 action: () => {
-                    const selectedProjectId = this.selectedRowId();
+                    const selectedProjectId = this.selectedRow();
                     if (!selectedProjectId) {
                         this.snackbarService.open('Please select a valid project to edit!');
                         return null;
@@ -138,6 +166,13 @@ export class ProjectsComponent implements OnInit {
                 },
             },
         ];
+    });
+
+    selectedProjectName = computed(() => {
+        const selectedRow = this.selectedRow();
+        if (!selectedRow) return '';
+        const project = this.projects().find((p) => p.key === selectedRow.key);
+        return project?.name || '';
     });
 
     initialFilterLoad = true;
@@ -158,7 +193,10 @@ export class ProjectsComponent implements OnInit {
         },
     ];
 
+    // template reference variables
     speedDial = viewChild<SpeedDialComponent>('speedDial');
+    deleteConfirmTemplate = viewChild<TemplateRef<any>>('deleteConfirmTemplate');
+    archiveConfirmTemplate = viewChild<TemplateRef<any>>('archiveConfirmTemplate');
     speedDialNoButtonsLink = ['/projects/new'];
 
     ngOnInit(): void {
@@ -241,12 +279,12 @@ export class ProjectsComponent implements OnInit {
      */
     onRowChange(project: Project | null) {
         if (!project) {
-            this.selectedRowId.set(null);
+            this.selectedRow.set(null);
             this.speedDial()?.close();
             return;
         }
 
-        this.selectedRowId.set(project.key);
+        this.selectedRow.set(project);
         if (project.key && this.speedDial()?.isOpen()) return;
 
         this.speedDial()?.onTogglerClick();
@@ -272,6 +310,74 @@ export class ProjectsComponent implements OnInit {
 
     createProject() {
         this.router.navigate(['/projects/new']);
+    }
+
+    openDeleteConfirmation() {
+        const template = this.deleteConfirmTemplate();
+        if (!template) {
+            this.snackbarService.open('Error opening confirmation dialog', ['snackbar-error']);
+            return;
+        }
+
+        const dialogRef = this.dialogService.openConfirmDialog('Delete Project', template, {
+            confirmLabel: 'Delete',
+            cancelLabel: 'Cancel',
+            width: '450px',
+        });
+
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result && result.action === 'save') {
+                this.deleteProject();
+            }
+        });
+    }
+
+    deleteProject() {
+        const projectId = this.selectedRow();
+        if (!projectId) {
+            this.snackbarService.open('No project selected', ['snackbar-error']);
+            return;
+        }
+
+        // TODO: Implement actual delete API call
+        this.snackbarService.open(`Project "${this.selectedProjectName()}" deleted successfully!`);
+        this.selectedRow.set(null);
+        this.speedDial()?.close();
+        // After successful deletion, refresh the projects list
+        // this.getProjects();
+    }
+
+    openArchiveConfirmation() {
+        const template = this.archiveConfirmTemplate();
+        if (!template) {
+            this.snackbarService.open('Error opening confirmation dialog', ['snackbar-error']);
+            return;
+        }
+
+        const dialogRef = this.dialogService.openConfirmDialog('Archive Project', template, {
+            confirmLabel: 'Archive',
+            cancelLabel: 'Cancel',
+            width: '450px',
+        });
+
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result && result.action === 'save') {
+                this.archiveProject();
+            }
+        });
+    }
+
+    archiveProject() {
+        const projectId = this.selectedRow();
+        if (!projectId) {
+            this.snackbarService.open('No project selected', ['snackbar-error']);
+            return;
+        }
+
+        // TODO: Implement actual archive API call
+        this.snackbarService.open(`Project "${this.selectedProjectName()}" archived successfully!`);
+        this.selectedRow.set(null);
+        this.speedDial()?.close();
     }
 
     private setQueryParams() {

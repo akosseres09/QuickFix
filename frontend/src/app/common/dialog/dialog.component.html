@@ -15,18 +15,16 @@
         @if (data.showSaveButton) {
             <button
                 mat-raised-button
+                color="primary"
                 (click)="onSave()"
                 [disabled]="data.saveDisabled"
-                class="px-6 py-2 bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed rounded-md transition-colors duration-200 shadow-sm"
+                [class]="data.saveButtonClass"
             >
                 {{ data.saveLabel }}
             </button>
-        } @else if (data.showCancelButton) {
-            <button
-                mat-button
-                (click)="onCancel()"
-                class="px-6 py-2 text-gray-700 hover:bg-gray-100 rounded-md transition-colors duration-200"
-            >
+        }
+        @if (data.showCancelButton) {
+            <button mat-button (click)="onCancel()" [class]="data.cancelButtonClass">
                 {{ data.cancelLabel }}
             </button>
         }

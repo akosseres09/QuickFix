@@ -1,4 +1,4 @@
-import { Component, computed, input, output, signal } from '@angular/core';
+import { Component, computed, input, model, output, signal } from '@angular/core';
 import { MatFabButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { SpeedDialButton } from '../../shared/constants/SpeedDialButton';
@@ -27,6 +27,9 @@ export class SpeedDialComponent {
 
     togglerClick = output<void>();
 
+    // Data is not important. Sets it to null when dialog is closed so table row is not highlighted.
+    selectedRow = model<any>(null);
+
     /**
      * Toggles the speed dial open/closed state if there are any buttons.
      * Emits togglerClick event if no buttons provided.
@@ -38,12 +41,16 @@ export class SpeedDialComponent {
         }
 
         this.dialState.set(this.isDialOpen() ? 'closed' : 'open');
+        if (this.dialState() === 'closed') {
+            this.selectedRow.set(null);
+        }
     }
 
     close(): void {
         if (!this.isDialOpen()) return;
 
         this.dialState.set('closed');
+        this.selectedRow.set(null);
     }
 
     open(): void {
