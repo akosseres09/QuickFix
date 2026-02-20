@@ -20,10 +20,10 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 @Component({
     selector: 'app-edit',
     imports: [MatIconModule, RouterLink, ProjectFormComponent, MatProgressSpinnerModule],
-    templateUrl: './edit.component.html',
-    styleUrl: './edit.component.css',
+    templateUrl: './edit-project.component.html',
+    styleUrl: './edit-project.component.css',
 })
-export class EditComponent {
+export class EditProjectComponent {
     private readonly activeRoute = inject(ActivatedRoute);
     private readonly projectService = inject(ProjectService);
     private readonly router = inject(Router);

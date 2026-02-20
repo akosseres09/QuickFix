@@ -94,7 +94,9 @@ export const routes: Routes = [
             {
                 path: '',
                 loadComponent: () =>
-                    import('./main/projects/edit/edit.component').then((c) => c.EditComponent),
+                    import('./main/projects/edit-project/edit-project.component').then(
+                        (c) => c.EditProjectComponent
+                    ),
                 title: 'QuickFix - Edit Project',
                 canActivate: [authenticatedGuard],
             },
