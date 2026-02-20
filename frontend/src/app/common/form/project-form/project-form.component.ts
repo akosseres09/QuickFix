@@ -1,5 +1,5 @@
 import { CommonModule, formatDate } from '@angular/common';
-import { Component, DestroyRef, inject, input, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, input, model, OnInit, output } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatOptionModule, provideNativeDateAdapter } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -18,10 +18,9 @@ import {
     VISIBILITY_PUBLIC,
 } from '../../../shared/model/Project';
 import { MatIconModule } from '@angular/material/icon';
-import { ProjectService } from '../../../shared/services/project/project.service';
 import { AuthService } from '../../../shared/services/auth/auth.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
@@ -47,10 +46,8 @@ import { MatButtonModule } from '@angular/material/button';
 })
 export class ProjectFormComponent implements OnInit {
     private readonly fb = inject(FormBuilder);
-    private readonly projectService = inject(ProjectService);
     private readonly destroyRef = inject(DestroyRef);
     private readonly authService = inject(AuthService);
-    private readonly router = inject(Router);
 
     readonly userId = this.authService.currentUserClaims()?.uid;
 
@@ -59,6 +56,11 @@ export class ProjectFormComponent implements OnInit {
     readonly visibilityList = VISIBILITY_LIST;
 
     project = input<Project | null>(null);
+    buttonText = input<string>('Create Project');
+    icon = input<string>('add');
+    isSubmitting = model<boolean>(false);
+
+    formSubmitted = output<Partial<Project>>();
 
     projectForm!: FormGroup;
 
@@ -138,6 +140,8 @@ export class ProjectFormComponent implements OnInit {
             return;
         }
 
+        this.isSubmitting.set(true);
+
         const projectData: Partial<Project> = {
             name: this.projectForm.value.name,
             key: this.projectForm.value.key,
@@ -157,16 +161,6 @@ export class ProjectFormComponent implements OnInit {
             ownerId: this.userId,
         };
 
-        this.projectService
-            .createProject(projectData)
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe({
-                next: (project) => {
-                    this.router.navigate(['/project', project.key]);
-                },
-                error: (error) => {
-                    console.error('Error creating project:', error);
-                },
-            });
+        this.formSubmitted.emit(projectData);
     }
 }

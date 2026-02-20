@@ -16,7 +16,14 @@
         </div>
 
         @if (project()) {
-            <app-project-form [project]="project()"></app-project-form>
+            <app-project-form
+                buttonText="Edit Project"
+                icon="edit"
+                [project]="project()"
+                (formSubmitted)="onProjectEdited($event)"
+                [isSubmitting]="isSubmitting()"
+                (isSubmittingChange)="isSubmitting.set($event)"
+            ></app-project-form>
         } @else {
             <mat-spinner class="mx-auto"></mat-spinner>
         }

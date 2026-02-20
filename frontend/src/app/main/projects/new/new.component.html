@@ -15,7 +15,11 @@
             <mat-icon class="cursor-pointer !overflow-visible" (click)="openInfo()">info</mat-icon>
         </div>
 
-        <app-project-form></app-project-form>
+        <app-project-form
+            (formSubmitted)="onProjectCreated($event)"
+            [isSubmitting]="isSubmitting()"
+            (isSubmittingChange)="isSubmitting.set($event)"
+        ></app-project-form>
     </div>
 </div>
 

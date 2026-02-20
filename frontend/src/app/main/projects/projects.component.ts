@@ -156,13 +156,13 @@ export class ProjectsComponent implements OnInit {
                 label: 'Edit Project',
                 shown: selectedId !== null,
                 action: () => {
-                    const selectedProjectId = this.selectedRow();
-                    if (!selectedProjectId) {
+                    const selectedProject = this.selectedRow();
+                    if (!selectedProject) {
                         this.snackbarService.open('Please select a valid project to edit!');
                         return null;
                     }
 
-                    return ['/project', selectedProjectId, 'edit'];
+                    return ['/project', selectedProject.key, 'edit'];
                 },
             },
         ];

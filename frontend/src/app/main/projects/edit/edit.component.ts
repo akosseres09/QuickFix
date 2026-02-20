@@ -1,4 +1,12 @@
-import { Component, inject, Signal, signal, TemplateRef, viewChild } from '@angular/core';
+import {
+    Component,
+    DestroyRef,
+    inject,
+    Signal,
+    signal,
+    TemplateRef,
+    viewChild,
+} from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProjectFormComponent } from '../../../common/form/project-form/project-form.component';
@@ -7,6 +15,7 @@ import { ProjectService } from '../../../shared/services/project/project.service
 import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DialogService } from '../../../shared/services/dialog/dialog.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'app-edit',
@@ -20,9 +29,12 @@ export class EditComponent {
     private readonly router = inject(Router);
     private readonly snackbar = inject(SnackbarService);
     private readonly dialogService = inject(DialogService);
+    private readonly destroyRef = inject(DestroyRef);
 
     projectId = signal<string>('');
     project = signal<Project | null>(null);
+
+    isSubmitting = signal<boolean>(false);
 
     infoDialogRef: Signal<TemplateRef<any> | undefined> = viewChild('infoDialog');
 
@@ -51,5 +63,25 @@ export class EditComponent {
         this.dialogService.openConfirmDialog('Project Information', dialogRef, {
             width: '600px',
         });
+    }
+
+    onProjectEdited(project: Partial<Project>) {
+        const projectId = this.projectId();
+
+        if (!projectId) return;
+
+        this.projectService
+            .updateProject(projectId, project)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+                next: (project) => {
+                    this.router.navigate(['/project', project.key]);
+                    this.isSubmitting.set(false);
+                },
+                error: (error) => {
+                    console.error('Error creating project:', error);
+                    this.isSubmitting.set(false);
+                },
+            });
     }
 }

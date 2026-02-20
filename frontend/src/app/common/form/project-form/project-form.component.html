@@ -213,11 +213,20 @@
             type="submit"
             mat-raised-button
             color="primary"
-            [disabled]="projectForm.invalid"
-            class="!px-6 !py-2"
+            [disabled]="projectForm.invalid || isSubmitting()"
+            class="!px-6 !py-2 !flex !items-center"
         >
-            <mat-icon class="mr-1">add</mat-icon>
-            Create Project
+            <ng-container>
+                <span class="flex items-center gap-2">
+                    @if (isSubmitting()) {
+                        <mat-icon class="animate-spin">sync</mat-icon>
+                        <span>{{ buttonText() }}...</span>
+                    } @else {
+                        <mat-icon class="mr-1">{{ icon() }}</mat-icon>
+                        {{ buttonText() }}
+                    }
+                </span>
+            </ng-container>
         </button>
         <a mat-button routerLink="/projects" class="!px-6 !py-2"> Cancel </a>
     </div>

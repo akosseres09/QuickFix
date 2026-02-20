@@ -179,14 +179,17 @@
             class="!px-6 !py-2"
             [disabled]="isSubmitting() || issueForm.invalid"
         >
-            @if (isSubmitting()) {
-                <ng-container>
-                    <mat-icon class="!mr-2 animate-spin">sync</mat-icon>
-                    <span>{{ buttonText() }}...</span>
-                </ng-container>
-            } @else {
-                <span>{{ buttonText() }}</span>
-            }
+            <ng-container>
+                <span class="flex items-center gap-2">
+                    @if (isSubmitting()) {
+                        <mat-icon class="animate-spin">sync</mat-icon>
+                        <span>{{ buttonText() }}...</span>
+                    } @else {
+                        <mat-icon>{{ icon() }}</mat-icon>
+                        <span>{{ buttonText() }}</span>
+                    }
+                </span>
+            </ng-container>
         </button>
         <button
             mat-button

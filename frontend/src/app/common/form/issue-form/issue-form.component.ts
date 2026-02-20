@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, inject, input, model, OnInit, output, signal } from '@angular/core';
+import { Component, inject, input, model, OnInit, output, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -24,10 +24,8 @@ import { Claims } from '../../../shared/constants/Claims';
 import { ProjectMember } from '../../../shared/model/ProjectMember';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
-import { IssueService } from '../../../shared/services/issue/issue.service';
 import { ProjectMemberService } from '../../../shared/services/project-member/project-member.service';
 import { AuthService } from '../../../shared/services/auth/auth.service';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
 
@@ -53,8 +51,6 @@ export class IssueFormComponent implements OnInit {
     private readonly fb = inject(FormBuilder);
     private readonly router = inject(Router);
     private readonly snackbarService = inject(SnackbarService);
-    private readonly issueService = inject(IssueService);
-    private readonly destroyRef = inject(DestroyRef);
     private readonly memberService = inject(ProjectMemberService);
     private readonly activeRoute = inject(ActivatedRoute);
     private readonly authService = inject(AuthService);
@@ -62,6 +58,7 @@ export class IssueFormComponent implements OnInit {
     projectId = input<string>('');
     issue = input<Issue | null>(null);
     buttonText = input<string>('Create Issue');
+    icon = input<string>('add');
 
     minDate = signal<Date>(new Date());
     isUsersLoading = signal<boolean>(true);
