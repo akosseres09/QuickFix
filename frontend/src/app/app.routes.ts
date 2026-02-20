@@ -184,7 +184,9 @@ export const routes: Routes = [
             {
                 path: 'issue/:issueId/edit',
                 loadComponent: () =>
-                    import('./main/issues/edit/edit.component').then((c) => c.EditComponent),
+                    import('./main/issues/edit-issue/edit-issue.component').then(
+                        (c) => c.EditIssueComponent
+                    ),
                 title: 'QuickFix - Edit Issue',
                 canActivate: [authenticatedGuard],
             },

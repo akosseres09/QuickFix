@@ -9,10 +9,10 @@ import { SnackbarService } from '../../../shared/services/snackbar/snackbar.serv
 @Component({
     selector: 'app-edit',
     imports: [IssueFormComponent, MatProgressSpinnerModule],
-    templateUrl: './edit.component.html',
-    styleUrl: './edit.component.css',
+    templateUrl: './edit-issue.component.html',
+    styleUrl: './edit-issue.component.css',
 })
-export class EditComponent {
+export class EditIssueComponent {
     private readonly activateRoute = inject(ActivatedRoute);
     private readonly issueService = inject(IssueService);
     private readonly router = inject(Router);
