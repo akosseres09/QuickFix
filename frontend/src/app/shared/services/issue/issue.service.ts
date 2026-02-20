@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { Issue } from '../../model/Issue';
 import { PaginatedResponse } from '../../constants/api/PaginatedResponse';
 import { HttpClient, HttpParams } from '@angular/common/http';
@@ -12,7 +12,7 @@ import { map, Observable } from 'rxjs';
 export class IssueService {
     private readonly http = inject(HttpClient);
     private readonly url = environment.apiUrl;
-    private projectId = 'QF_IT';
+    private projectId = signal<string>('');
 
     /**
      * Creates a new issue
@@ -20,7 +20,9 @@ export class IssueService {
      * @returns Observable of the created Issue
      */
     createIssue(issue: Partial<Issue>): Observable<Issue> {
-        return this.http.post<Issue>(`${this.url}/${this.projectId}/issue`, issue);
+        this.checkIfProjectIdSet();
+
+        return this.http.post<Issue>(`${this.url}/${this.projectId()}/issue`, issue);
     }
 
     /**
@@ -29,6 +31,8 @@ export class IssueService {
      * Returns paginated response with metadata
      */
     getIssues(queryParams: ApiQueryParams = {}): Observable<PaginatedResponse<Issue>> {
+        this.checkIfProjectIdSet();
+
         let params = new HttpParams();
 
         Object.entries(queryParams).forEach(([key, value]) => {
@@ -38,9 +42,15 @@ export class IssueService {
             }
         });
 
-        return this.http.get<PaginatedResponse<Issue>>(`${this.url}/${this.projectId}/issue`, {
+        return this.http.get<PaginatedResponse<Issue>>(`${this.url}/${this.projectId()}/issue`, {
             params: params,
         });
+    }
+
+    getIssueById(id: string): Observable<Issue> {
+        this.checkIfProjectIdSet();
+
+        return this.http.get<Issue>(`${this.url}/${this.projectId()}/issue/${id}`);
     }
 
     /**
@@ -50,6 +60,8 @@ export class IssueService {
      * @returns Observable of an array of Issues
      */
     getIssuesSimple(queryParams: ApiQueryParams = {}): Observable<Issue[]> {
+        this.checkIfProjectIdSet();
+
         return this.getIssues(queryParams).pipe(map((response) => response.items));
     }
 
@@ -60,7 +72,9 @@ export class IssueService {
      * @returns Observable of the updated Issue
      */
     updateIssue(id: string, issue: Partial<Issue>): Observable<Issue> {
-        return this.http.put<Issue>(`${this.url}/${this.projectId}/issue/${id}`, issue);
+        this.checkIfProjectIdSet();
+
+        return this.http.put<Issue>(`${this.url}/${this.projectId()}/issue/${id}`, issue);
     }
 
     /**
@@ -69,10 +83,30 @@ export class IssueService {
      * @returns Observable of void
      */
     deleteIssue(id: string): Observable<void> {
-        return this.http.delete<void>(`${this.url}/${this.projectId}/issue/${id}`);
+        this.checkIfProjectIdSet();
+
+        return this.http.delete<void>(`${this.url}/${this.projectId()}/issue/${id}`);
     }
 
+    /**
+     * Should be called before using any of the service methods to set the current project context
+     * @param projectId the id of the project to set for this service instance (e.g., 'QF_IT')
+     */
     setProjectId(projectId: string) {
-        this.projectId = projectId;
+        this.projectId.set(projectId);
+    }
+
+    /**
+     * Internal method to check if projectId is set before making API calls
+     * @throws Error if projectId is not set
+     */
+    private checkIfProjectIdSet(): void {
+        const projectId = this.projectId();
+
+        if (!projectId || projectId.trim() === '') {
+            throw new Error(
+                'Project ID is not set. Please call setProjectId(projectId) before using the service methods.'
+            );
+        }
     }
 }

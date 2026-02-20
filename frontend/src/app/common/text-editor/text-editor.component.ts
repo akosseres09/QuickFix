@@ -43,6 +43,7 @@ export class TextEditorComponent implements ControlValueAccessor {
     quillEditor = signal<Quill | null>(null);
     isDisabled = signal<boolean>(false);
     content = signal<Delta | null>(null);
+    private pendingValue: string | null = null;
 
     // Quill modules configuration
     modules = {
@@ -71,6 +72,12 @@ export class TextEditorComponent implements ControlValueAccessor {
     onEditorCreated(quill: any): void {
         // Using 'any' for the quill instance here simplifies module access
         this.quillEditor.set(quill);
+
+        // Apply pending value if it exists
+        if (this.pendingValue !== null) {
+            this.applyValue(this.pendingValue);
+            this.pendingValue = null;
+        }
 
         // 1. Properly access the Toolbar Module
         const toolbar = quill.getModule('toolbar');
@@ -112,6 +119,17 @@ export class TextEditorComponent implements ControlValueAccessor {
 
     // ControlValueAccessor implementation
     writeValue(value: string | null): void {
+        const editor = this.quillEditor();
+        if (!editor) {
+            // Store the value to apply when editor is ready
+            this.pendingValue = value;
+            return;
+        }
+
+        this.applyValue(value);
+    }
+
+    private applyValue(value: string | null): void {
         const editor = this.quillEditor();
         if (!editor) {
             return;
