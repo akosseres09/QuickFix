@@ -159,7 +159,9 @@ export const routes: Routes = [
                     {
                         path: 'add',
                         loadComponent: () =>
-                            import('./main/issues/new/new.component').then((c) => c.NewComponent),
+                            import('./main/issues/new-issue/new-issue.component').then(
+                                (c) => c.NewIssueComponent
+                            ),
                         title: 'QuickFix - New Issue',
                         canActivate: [authenticatedGuard],
                     },

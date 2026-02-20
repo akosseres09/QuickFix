@@ -31,10 +31,10 @@ import { SnackbarService } from '../../../shared/services/snackbar/snackbar.serv
         MatProgressSpinnerModule,
         IssueFormComponent,
     ],
-    templateUrl: './new.component.html',
-    styleUrl: './new.component.css',
+    templateUrl: './new-issue.component.html',
+    styleUrl: './new-issue.component.css',
 })
-export class NewComponent {
+export class NewIssueComponent {
     private readonly activeRoute = inject(ActivatedRoute);
     private readonly issueService = inject(IssueService);
     private readonly destroyRef = inject(DestroyRef);
