@@ -11,4 +11,9 @@ type SelectFilter = {
     options: { value: string | number; label: string }[];
 };
 
-export type Filter = BaseFilter & (InputFilter | SelectFilter);
+type CheckBoxFilter = {
+    type: 'checkbox';
+    label: string;
+};
+
+export type Filter = BaseFilter & (InputFilter | SelectFilter | CheckBoxFilter);

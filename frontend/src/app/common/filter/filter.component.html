@@ -9,7 +9,7 @@
 >
     <div class="flex flex-col sm:flex-row sm:flex-wrap gap-4">
         @for (field of filterFields(); track field.name) {
-            <div class="flex-1 min-w-[200px]">
+            <div class="flex-1 min-w-[200px] flex items-center">
                 @if (field.type === 'input') {
                     <mat-form-field appearance="fill" class="w-full">
                         <mat-label>{{ field.name | titlecase }}</mat-label>
@@ -28,8 +28,7 @@
                             >
                         }
                     </mat-form-field>
-                }
-                @if (field.type === 'select') {
+                } @else if (field.type === 'select') {
                     <mat-form-field appearance="fill" class="w-full">
                         <mat-label>{{ field.name | titlecase }}</mat-label>
                         <mat-select [formControlName]="field.name">
@@ -48,6 +47,10 @@
                             >
                         }
                     </mat-form-field>
+                } @else if (field.type === 'checkbox') {
+                    <mat-checkbox [formControlName]="field.name">
+                        {{ field.label }}
+                    </mat-checkbox>
                 }
             </div>
         }

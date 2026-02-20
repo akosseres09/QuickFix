@@ -13,9 +13,17 @@ class IssueSearch extends Issue
             ['project_id', 'required'],
             [['id', 'project_id'], 'string'],
             [['status', 'type', 'priority'], 'integer'],
-            ['is_archived', 'boolean'],
+            ['is_archived', 'filter', 'filter' => function ($value) {
+                if ($value === 'true') return true;
+                if ($value === 'false') return false;
+                return $value;
+            }],
             [['title', 'description'], 'safe'],
         ];
+    }
+
+    public function fields(): array {
+        return parent::fields();
     }
 
     public function search($params)
@@ -73,11 +81,15 @@ class IssueSearch extends Issue
             return $dataProvider;
         }
 
+        if ($this->is_archived === null) {
+            $this->is_archived = false;
+        }
+
         $query->andFilterWhere([
             'status' => $this->status,
             'type' => $this->type,
             'priority' => $this->priority,
-            'is_archived' => $this->is_archived
+            'is_archived' => $this->is_archived 
         ]);
 
         $query->andFilterWhere(['like','title', $this->title]);

@@ -25,6 +25,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DateService } from '../../shared/services/date/date.service';
 import { Filter } from '../../shared/constants/Filter';
 import { FilterComponent } from '../../common/filter/filter.component';
+import { DialogService } from '../../shared/services/dialog/dialog.service';
+import { finalize } from 'rxjs';
 
 @Component({
     selector: 'app-issues',
@@ -46,6 +48,7 @@ export class IssuesComponent {
     private readonly activeRoute = inject(ActivatedRoute);
     private readonly destroyRef = inject(DestroyRef);
     private readonly dateService = inject(DateService);
+    private readonly dialogService = inject(DialogService);
 
     projectId = signal<string>(this.getProjectId());
     selectedRow = signal<Issue | null>(null);
@@ -136,6 +139,14 @@ export class IssuesComponent {
                 },
             },
             {
+                iconName: 'archive',
+                label: 'Archive Issue',
+                shown: selectedRow !== null,
+                onClick: () => {
+                    this.openArchiveConfirmation();
+                },
+            },
+            {
                 iconName: 'edit',
                 label: 'Edit Issue',
                 shown: selectedRow !== null,
@@ -151,8 +162,6 @@ export class IssuesComponent {
             },
         ];
     });
-
-    speedDial = viewChild<SpeedDialComponent>('speedDial');
 
     filters = signal<ApiQueryParams>({});
     isInitialFilterLoad = true;
@@ -176,7 +185,16 @@ export class IssuesComponent {
             type: 'select',
             options: Object.entries(TYPE_MAP).map(([value, label]) => ({ value, label })),
         },
+        {
+            name: 'is_archived',
+            type: 'checkbox',
+            label: 'Is Archived?',
+        },
     ];
+
+    // template refs
+    speedDial = viewChild<SpeedDialComponent>('speedDial');
+    archiveConfirmTemplate = viewChild<any>('archiveConfirmTemplate');
 
     constructor() {
         const pageSizeParam = this.activeRoute.snapshot.queryParamMap.get('pageSize');
@@ -303,6 +321,53 @@ export class IssuesComponent {
 
         this.setQueryParams();
         this.getIssues();
+    }
+
+    openArchiveConfirmation() {
+        const template = this.archiveConfirmTemplate();
+        if (!template) {
+            this.snackbarService.open('Error opening confirmation dialog', ['snackbar-error']);
+            return;
+        }
+
+        const dialogRef = this.dialogService.openConfirmDialog('Archive Issue', template, {
+            confirmLabel: 'Archive',
+            cancelLabel: 'Cancel',
+            width: '450px',
+        });
+
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result && result.action === 'save') {
+                this.archiveIssue();
+            }
+        });
+    }
+
+    archiveIssue() {
+        const issue = this.selectedRow();
+        if (!issue) {
+            this.snackbarService.open('No Issue selected', ['snackbar-error']);
+            return;
+        }
+
+        this.issueService
+            .updateIssue(issue.id, {
+                isArchived: true,
+            })
+            .pipe(
+                finalize(() => {
+                    this.selectedRow.set(null);
+                    this.speedDial()?.close();
+                })
+            )
+            .subscribe({
+                next: () => {
+                    this.snackbarService.open('Issue archived successfully!');
+                },
+                error: (err) => {
+                    this.snackbarService.open('Failed to archive issue!', ['snackbar-error']);
+                },
+            });
     }
 
     private setQueryParams() {
