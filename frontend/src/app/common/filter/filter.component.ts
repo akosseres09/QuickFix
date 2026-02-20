@@ -62,6 +62,7 @@ export class FilterComponent implements OnInit {
 
     filterBoxOpen = signal(false);
     showFilters = computed(() => (this.filterBoxOpen() ? 'open' : 'closed'));
+    isFirstFiltering = signal<boolean>(true);
 
     ngOnInit(): void {
         this.filterForm = this.createFilterForm();
@@ -119,6 +120,12 @@ export class FilterComponent implements OnInit {
                 filteredValue[key] = null;
             }
         });
+
+        if (!this.isFirstFiltering()) {
+            this.toggleBox();
+        } else {
+            this.isFirstFiltering.set(false);
+        }
 
         this.onFilterChange.emit(filteredValue);
         this.baseFormValues.set(this.filterForm.value);
