@@ -1,20 +1,12 @@
 import { Component, computed, DestroyRef, inject, signal, viewChild } from '@angular/core';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import {
-    Issue,
-    PRIORITY_COLOR_MAP,
-    PRIORITY_MAP,
-    STATUS_COLOR_MAP,
-    STATUS_MAP,
-    TYPE_COLOR_MAP,
-    TYPE_MAP,
-} from '../../shared/model/Issue';
+import { Issue, PRIORITY_MAP, STATUS_MAP, TYPE_MAP } from '../../shared/model/Issue';
 import { IssueService } from '../../shared/services/issue/issue.service';
 import { CommonModule } from '@angular/common';
 import { DisplayedColumn } from '../../shared/constants/DisplayedColumn';
 import { TableComponent } from '../../common/table/table.component';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 import { SpeedDialComponent } from '../../common/speed-dial/speed-dial.component';
 import { SpeedDialButton } from '../../shared/constants/SpeedDialButton';
@@ -22,11 +14,12 @@ import { UrlService } from '../../shared/services/url/url.service';
 import { Sort, SortDirection } from '@angular/material/sort';
 import { ApiQueryParams } from '../../shared/constants/api/ApiQueryParams';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DateService } from '../../shared/services/date/date.service';
 import { Filter } from '../../shared/constants/Filter';
 import { FilterComponent } from '../../common/filter/filter.component';
 import { DialogService } from '../../shared/services/dialog/dialog.service';
 import { finalize } from 'rxjs';
+import { DisplayedColumnService } from '../../shared/services/displayed-column/displayed-column.service';
+import { FilterService } from '../../shared/services/filter/filter.service';
 
 @Component({
     selector: 'app-issues',
@@ -47,8 +40,9 @@ export class IssuesComponent {
     private readonly issueService = inject(IssueService);
     private readonly activeRoute = inject(ActivatedRoute);
     private readonly destroyRef = inject(DestroyRef);
-    private readonly dateService = inject(DateService);
     private readonly dialogService = inject(DialogService);
+    private readonly displayedColumService = inject(DisplayedColumnService);
+    private readonly filterService = inject(FilterService);
 
     projectId = signal<string>(this.getProjectId());
     selectedRow = signal<Issue | null>(null);
@@ -64,66 +58,9 @@ export class IssuesComponent {
     issues = signal<Issue[]>([]);
     filteredIssues = signal<Issue[]>(this.issues());
     shownIssues = computed(() => new MatTableDataSource<Issue>(this.filteredIssues()));
-    displayedColumns: Array<DisplayedColumn<Issue>> = [
-        {
-            id: 'title',
-            label: 'Title',
-            sortable: false,
-            value: (e: Issue) => e.title,
-            routerLink: (e: Issue) => ['/issues', e.id],
-        },
-        {
-            id: 'author',
-            label: 'Author',
-            sortable: false,
-            value: (e: Issue) => e.creator?.username || '',
-            routerLink: (e: Issue) => {
-                if (!e.creator?.username) return null;
-                return ['/users/', '@' + e.creator.username];
-            },
-        },
+    displayedColumns: Array<DisplayedColumn<Issue>> =
+        this.displayedColumService.getIssueDisplayColumns();
 
-        {
-            id: 'assignee',
-            label: 'Assignee',
-            sortable: false,
-            value: (e: Issue) => e.assignee?.username || 'None',
-            routerLink: (e: Issue) => {
-                if (!e.assignee?.username) return null;
-                return ['/users/', '@' + e.assignee.username];
-            },
-        },
-        {
-            id: 'status',
-            label: 'Status',
-            sortable: true,
-            badge: (e: Issue) => STATUS_COLOR_MAP[e.status],
-            value: (e: Issue) => STATUS_MAP[e.status],
-        },
-        {
-            id: 'priority',
-            label: 'Priority',
-            sortable: true,
-            badge: (e: Issue) => PRIORITY_COLOR_MAP[e.priority],
-            value: (e: Issue) => PRIORITY_MAP[e.priority],
-        },
-        {
-            id: 'type',
-            label: 'Type',
-            sortable: true,
-            badge: (e: Issue) => TYPE_COLOR_MAP[e.type],
-            value: (e: Issue) => TYPE_MAP[e.type],
-        },
-        {
-            id: 'createdAt',
-            label: 'Created At',
-            sortable: true,
-            value: (e: Issue) => {
-                const date = this.dateService.parseTimestamp(e.createdAt);
-                return this.dateService.toLocaleISOString(date).split('T')[0];
-            },
-        },
-    ];
     // Transform the signal into a computed signal
     speedDialButtons = computed<SpeedDialButton[]>(() => {
         const selectedRow = this.selectedRow();
@@ -173,32 +110,7 @@ export class IssuesComponent {
 
     filters = signal<ApiQueryParams>({});
     isInitialFilterLoad = true;
-    filteredFields: Filter[] = [
-        {
-            name: 'title',
-            type: 'input',
-        },
-        {
-            name: 'status',
-            type: 'select',
-            options: Object.entries(STATUS_MAP).map(([value, label]) => ({ value, label })),
-        },
-        {
-            name: 'priority',
-            type: 'select',
-            options: Object.entries(PRIORITY_MAP).map(([value, label]) => ({ value, label })),
-        },
-        {
-            name: 'type',
-            type: 'select',
-            options: Object.entries(TYPE_MAP).map(([value, label]) => ({ value, label })),
-        },
-        {
-            name: 'is_archived',
-            type: 'checkbox',
-            label: 'Is Archived?',
-        },
-    ];
+    filteredFields: Filter[] = this.filterService.getIssueFilters();
 
     // template refs
     speedDial = viewChild<SpeedDialComponent>('speedDial');

@@ -35,6 +35,8 @@ import { SnackbarService } from '../../shared/services/snackbar/snackbar.service
 import { Filter } from '../../shared/constants/Filter';
 import { FilterComponent } from '../../common/filter/filter.component';
 import { DialogService } from '../../shared/services/dialog/dialog.service';
+import { FilterService } from '../../shared/services/filter/filter.service';
+import { DisplayedColumnService } from '../../shared/services/displayed-column/displayed-column.service';
 
 @Component({
     selector: 'app-projects',
@@ -60,6 +62,8 @@ export class ProjectsComponent implements OnInit {
     private readonly router = inject(Router);
     private readonly snackbarService = inject(SnackbarService);
     private readonly dialogService = inject(DialogService);
+    private readonly filterService = inject(FilterService);
+    private readonly displayedColumnService = inject(DisplayedColumnService);
 
     projects = signal<Project[]>([]);
     selectedRow = signal<Project | null>(null);
@@ -77,51 +81,9 @@ export class ProjectsComponent implements OnInit {
     isLoading = signal<boolean>(false);
     filteredProjects = signal<Project[]>([]);
     shownProjects = computed(() => new MatTableDataSource<Project>(this.filteredProjects()));
-    displayedColumns = signal<DisplayedColumn<Project>[]>([
-        {
-            id: 'name',
-            label: 'Name',
-            sortable: true,
-            value: (e: Project) => e.name,
-            routerLink: (e: Project) => ['/project', e.key],
-        },
-        {
-            id: 'owner',
-            label: 'Owner',
-            sortable: false,
-            value: (e: Project) => e.owner?.username || 'N/A',
-            routerLink: (e: Project) => (e.owner?.id ? ['/user', '@' + e.owner.username] : []),
-        },
-        {
-            id: 'users',
-            label: '# of users',
-            sortable: true,
-            value: (e: Project) => (e.members?.length || 0) + 1,
-        },
-        {
-            id: 'status',
-            label: 'Status',
-            sortable: true,
-            badge: (e: Project) => STATUS_COLOR_MAP[e.status],
-            value: (e: Project) => STATUS_MAP[e.status],
-        },
-        {
-            id: 'priority',
-            label: 'Priority',
-            sortable: true,
-            badge: (e: Project) => PRIORITY_COLOR_MAP[e.priority],
-            value: (e: Project) => PRIORITY_MAP[e.priority],
-        },
-        {
-            id: 'createdAt',
-            label: 'Created At',
-            sortable: true,
-            value: (e: Project) => {
-                const date = this.dateService.parseTimestamp(e.createdAt);
-                return this.dateService.toLocaleISOString(date).split('T')[0];
-            },
-        },
-    ]);
+    displayedColumns = signal<DisplayedColumn<Project>[]>(
+        this.displayedColumnService.getProjectColumns()
+    );
 
     speedDialButtons = computed<SpeedDialButton[]>(() => {
         const selectedId = this.selectedRow();
@@ -176,22 +138,7 @@ export class ProjectsComponent implements OnInit {
     });
 
     initialFilterLoad = true;
-    filterFields: Filter[] = [
-        {
-            name: 'name',
-            type: 'input',
-        },
-        {
-            name: 'status',
-            type: 'select',
-            options: Object.entries(STATUS_MAP).map(([value, label]) => ({ value, label })),
-        },
-        {
-            name: 'priority',
-            type: 'select',
-            options: Object.entries(PRIORITY_MAP).map(([value, label]) => ({ value, label })),
-        },
-    ];
+    filterFields: Filter[] = this.filterService.getProjectFilters();
 
     // template reference variables
     speedDial = viewChild<SpeedDialComponent>('speedDial');
