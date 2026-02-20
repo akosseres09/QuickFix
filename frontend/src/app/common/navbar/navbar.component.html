@@ -3,7 +3,7 @@
 >
     <div class="relative md:flex md:items-center mx-auto">
         <div class="mr-auto flex items-center justify-between gap-6">
-            @if (showSidebarToggleButton()) {
+            @if (showSidebarToggleButton() && sidebarToggleButton()) {
                 <button
                     (click)="toggleSidebar()"
                     class="flex p-2 rounded cursor-pointer hover:bg-light-text-hover dark:hover:bg-dark-hover transition-[background-color]"

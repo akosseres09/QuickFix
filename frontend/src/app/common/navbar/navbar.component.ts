@@ -53,23 +53,27 @@ export class NavbarComponent implements AfterViewInit {
     htmlElement = signal<HTMLElement | null>(document.documentElement);
     routes = signal<AppRoute[]>(this.getAppRoutes().filter((route) => route.show));
     theme = signal<'light' | 'dark'>(this.themeService.getTheme() || 'light');
-    showSidebarToggleButton = signal<boolean>(window.innerWidth <= 767);
+    showSidebarToggleButton = model<boolean>(true);
+    sidebarToggleButton = signal<boolean>(window.innerWidth <= 767);
     logo = this.themeService.logos;
 
     constructor() {
         this.setTheme(this.theme());
-        fromEvent(window, 'resize')
-            .pipe(takeUntilDestroyed())
-            .subscribe(() => {
-                if (window.innerWidth <= 767) {
-                    this.showSidebarToggleButton.set(true);
-                    this.isMenuOpen.set(false);
-                    this.isSidebarOpened.set(false);
-                } else {
-                    this.showSidebarToggleButton.set(false);
-                    this.isSidebarOpened.set(true);
-                }
-            });
+
+        if (this.showSidebarToggleButton()) {
+            fromEvent(window, 'resize')
+                .pipe(takeUntilDestroyed())
+                .subscribe(() => {
+                    if (window.innerWidth <= 767) {
+                        this.sidebarToggleButton.set(true);
+                        this.isMenuOpen.set(false);
+                        this.isSidebarOpened.set(false);
+                    } else {
+                        this.sidebarToggleButton.set(false);
+                        this.isSidebarOpened.set(true);
+                    }
+                });
+        }
 
         this.router.events
             .pipe(
