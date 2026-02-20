@@ -36,10 +36,10 @@ export const PRIORITY_MAP: { [key: number]: string } = {
     [PRIORITY_CRITICAL]: 'Critical',
 };
 
-export const TYPE_BUG = 0;
+export const TYPE_TASK = 0;
 export const TYPE_FEATURE = 1;
-export const TYPE_TASK = 2;
-export const TYPE_INCIDENT = 3;
+export const TYPE_INCIDENT = 2;
+export const TYPE_BUG = 3;
 export const TYPES = [TYPE_BUG, TYPE_FEATURE, TYPE_TASK, TYPE_INCIDENT];
 export const TYPE_MAP: { [key: number]: string } = {
     [TYPE_BUG]: 'Bug',

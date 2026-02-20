@@ -33,10 +33,10 @@ use yii\db\ActiveRecord;
  */
 class Issue extends ActiveRecord
 {
-    const TYPE_BUG = 0;
+    const TYPE_TASK = 0;
     const TYPE_FEATURE = 1;
-    const TYPE_TASK = 2;
-    const TYPE_INCIDENT = 3;
+    const TYPE_INCIDENT = 2;
+    const TYPE_BUG = 3;
     const TYPES = [
         self::TYPE_BUG,
         self::TYPE_FEATURE,

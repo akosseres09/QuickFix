@@ -58,7 +58,7 @@ class ProjectSearch extends Project
                 'pageParam' => 'page',
             ],
             'sort' => [
-                'defaultOrder' => ['name' => SORT_ASC],
+                'defaultOrder' => ['name' => SORT_ASC, 'priority' => SORT_ASC],
                 'enableMultiSort' => true,
                 'sortParam' => 'sort',
                 'attributes' => [
@@ -74,6 +74,7 @@ class ProjectSearch extends Project
                         'asc' => ['p.status' => SORT_ASC],
                         'desc' => ['p.status' => SORT_DESC],
                     ],
+                    'priority',
                     'users' => [
                         'asc' => [$memberCountSql => SORT_ASC],
                         'desc' => [$memberCountSql => SORT_DESC],
