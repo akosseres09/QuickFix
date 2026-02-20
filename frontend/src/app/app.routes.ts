@@ -213,7 +213,9 @@ export const routes: Routes = [
             {
                 path: 'projects/new',
                 loadComponent: () =>
-                    import('./main/projects/new/new.component').then((c) => c.NewComponent),
+                    import('./main/projects/new-project/new-project.component').then(
+                        (c) => c.NewProjectComponent
+                    ),
                 canActivate: [authenticatedGuard],
                 title: 'QuickFix - New Project',
             },

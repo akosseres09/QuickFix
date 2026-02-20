@@ -19,10 +19,10 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 @Component({
     selector: 'app-new',
     imports: [CommonModule, MatIconModule, RouterLink, ProjectFormComponent],
-    templateUrl: './new.component.html',
-    styleUrl: './new.component.css',
+    templateUrl: './new-project.component.html',
+    styleUrl: './new-project.component.css',
 })
-export class NewComponent {
+export class NewProjectComponent {
     private readonly dialogService = inject(DialogService);
     private readonly projectService = inject(ProjectService);
     private readonly destroyRef = inject(DestroyRef);
