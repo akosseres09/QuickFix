@@ -141,9 +141,17 @@ export class IssuesComponent {
             {
                 iconName: 'archive',
                 label: 'Archive Issue',
-                shown: selectedRow !== null,
+                shown: selectedRow !== null && !selectedRow.isArchived,
                 onClick: () => {
                     this.openArchiveConfirmation();
+                },
+            },
+            {
+                iconName: 'unarchive',
+                label: 'Unarchive Issue',
+                shown: selectedRow !== null && selectedRow.isArchived,
+                onClick: () => {
+                    this.openUnarchiveConfirmation();
                 },
             },
             {
@@ -195,6 +203,7 @@ export class IssuesComponent {
     // template refs
     speedDial = viewChild<SpeedDialComponent>('speedDial');
     archiveConfirmTemplate = viewChild<any>('archiveConfirmTemplate');
+    unarchiveConfirmTemplate = viewChild<any>('unarchiveConfirmTemplate');
 
     constructor() {
         const pageSizeParam = this.activeRoute.snapshot.queryParamMap.get('pageSize');
@@ -343,6 +352,26 @@ export class IssuesComponent {
         });
     }
 
+    openUnarchiveConfirmation() {
+        const template = this.unarchiveConfirmTemplate();
+        if (!template) {
+            this.snackbarService.open('Error opening confirmation dialog', ['snackbar-error']);
+            return;
+        }
+
+        const dialogRef = this.dialogService.openConfirmDialog('Unarchive Issue', template, {
+            confirmLabel: 'Unarchive',
+            cancelLabel: 'Cancel',
+            width: '450px',
+        });
+
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result && result.action === 'save') {
+                this.unarchiveIssue();
+            }
+        });
+    }
+
     archiveIssue() {
         const issue = this.selectedRow();
         if (!issue) {
@@ -358,6 +387,7 @@ export class IssuesComponent {
                 finalize(() => {
                     this.selectedRow.set(null);
                     this.speedDial()?.close();
+                    this.getIssues();
                 })
             )
             .subscribe({
@@ -366,6 +396,34 @@ export class IssuesComponent {
                 },
                 error: (err) => {
                     this.snackbarService.open('Failed to archive issue!', ['snackbar-error']);
+                },
+            });
+    }
+
+    unarchiveIssue() {
+        const issue = this.selectedRow();
+        if (!issue) {
+            this.snackbarService.open('No Issue selected', ['snackbar-error']);
+            return;
+        }
+
+        this.issueService
+            .updateIssue(issue.id, {
+                isArchived: false,
+            })
+            .pipe(
+                finalize(() => {
+                    this.selectedRow.set(null);
+                    this.speedDial()?.close();
+                    this.getIssues();
+                })
+            )
+            .subscribe({
+                next: () => {
+                    this.snackbarService.open('Issue unarchived successfully!');
+                },
+                error: (err) => {
+                    this.snackbarService.open('Failed to unarchive issue!', ['snackbar-error']);
                 },
             });
     }
