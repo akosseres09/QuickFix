@@ -7,9 +7,9 @@
     class="mt-5 space-y-4 w-full"
     (submit)="filter()"
 >
-    <div class="flex flex-col sm:flex-row gap-4">
+    <div class="flex flex-col sm:flex-row sm:flex-wrap gap-4">
         @for (field of filterFields(); track field.name) {
-            <div class="flex-1">
+            <div class="flex-1 min-w-[200px]">
                 @if (field.type === 'input') {
                     <mat-form-field appearance="fill" class="w-full">
                         <mat-label>{{ field.name | titlecase }}</mat-label>
