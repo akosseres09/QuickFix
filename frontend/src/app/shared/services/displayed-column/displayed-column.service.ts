@@ -30,7 +30,7 @@ export class DisplayedColumnService {
                 label: 'Title',
                 sortable: false,
                 value: (e: Issue) => e.title,
-                routerLink: (e: Issue) => ['/issues', e.id],
+                routerLink: (e: Issue) => ['../issue', e.id],
             },
             {
                 id: 'author',
@@ -106,7 +106,7 @@ export class DisplayedColumnService {
                 id: 'users',
                 label: '# of users',
                 sortable: true,
-                value: (e: Project) => (e.members?.length || 0) + 1,
+                value: (e: Project) => e.members?.length || 0,
             },
             {
                 id: 'status',

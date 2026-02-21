@@ -47,10 +47,14 @@ export class IssueService {
         });
     }
 
-    getIssueById(id: string): Observable<Issue> {
+    getIssueById(id: string, expand: string = 'creator,assignee,updator'): Observable<Issue> {
         this.checkIfProjectIdSet();
 
-        return this.http.get<Issue>(`${this.url}/${this.projectId()}/issue/${id}`);
+        return this.http.get<Issue>(`${this.url}/${this.projectId()}/issue/${id}`, {
+            params: {
+                expand: expand,
+            },
+        });
     }
 
     /**
