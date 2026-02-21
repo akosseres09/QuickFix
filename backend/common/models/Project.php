@@ -96,6 +96,16 @@ class Project extends ActiveRecord
     }
 
     /**
+     * 
+     * {@inheritDoc}
+     */
+    public function transactions(): array {
+        return [
+            self::SCENARIO_DEFAULT => self::OP_ALL,
+        ];
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function beforeSave($insert)
@@ -113,6 +123,39 @@ class Project extends ActiveRecord
         }
 
         return true;
+    }
+
+   /**
+    * After saving a new project, we need to create a corresponding ProjectMember record to assign 
+    * the owner as a member of the project with the appropriate role. 
+    * This ensures that the owner has the necessary permissions to manage the project and its related entities. 
+    * If the save operation for the ProjectMember fails, we log the error and throw an exception 
+    * to trigger a transaction rollback, maintaining data integrity.
+    * 
+    * Documentation:
+    *
+    * {@inheritdoc}
+    */
+   public function afterSave($insert, $changedAttributes) {
+        parent::afterSave($insert, $changedAttributes);
+
+        if (!$insert) {
+            return true;
+        }
+
+        $owner = new ProjectMember();
+        $owner->project_id = $this->id;
+        $owner->user_id = $this->owner_id; // Your intentional error might be here
+        $owner->role = ProjectMember::ROLE_OWNER;
+        
+        if (!$owner->save()) {
+            $errors = json_encode($owner->getErrors());
+            Yii::error("Failed to create project owner. Errors: " . $errors, __METHOD__);
+            
+            // Throwing an exception here alerts the transaction manager that 
+            // something went critically wrong, forcing it to execute a ROLLBACK.
+            throw new \yii\db\Exception("Transaction aborted: Could not save Project Member. " . $errors);
+        }
     }
 
     /**
