@@ -1,7 +1,7 @@
 import { Component, computed, input, model, output, signal } from '@angular/core';
 import { MatFabButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { SpeedDialButton } from '../../shared/constants/SpeedDialButton';
+import { SpeedDialButton } from '../../shared/constants/speed-dial/SpeedDialButton';
 import {
     speedDialStaggerAnimation,
     speedDialTogglerAnimation,

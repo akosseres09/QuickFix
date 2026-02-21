@@ -9,7 +9,7 @@ import { TableComponent } from '../../common/table/table.component';
 import { ActivatedRoute } from '@angular/router';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 import { SpeedDialComponent } from '../../common/speed-dial/speed-dial.component';
-import { SpeedDialButton } from '../../shared/constants/SpeedDialButton';
+import { SpeedDialButton } from '../../shared/constants/speed-dial/SpeedDialButton';
 import { Sort } from '@angular/material/sort';
 import { ApiQueryParams } from '../../shared/constants/api/ApiQueryParams';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';

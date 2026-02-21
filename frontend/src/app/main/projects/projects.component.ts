@@ -21,7 +21,7 @@ import { SpeedDialComponent } from '../../common/speed-dial/speed-dial.component
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Sort } from '@angular/material/sort';
 import { ApiQueryParams } from '../../shared/constants/api/ApiQueryParams';
-import { SpeedDialButton } from '../../shared/constants/SpeedDialButton';
+import { SpeedDialButton } from '../../shared/constants/speed-dial/SpeedDialButton';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 import { Filter } from '../../shared/constants/Filter';
 import { FilterComponent } from '../../common/filter/filter.component';

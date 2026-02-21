@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { SpeedDialButton } from '../../constants/SpeedDialButton';
+import { SpeedDialButton } from '../../constants/speed-dial/SpeedDialButton';
 
 /**
  * Configuration for entity-related speed dial buttons

@@ -24,7 +24,7 @@ import { minAgeValidator } from '../../shared/validators/dateValidator/dateValid
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 import { errorResponse } from '../../shared/model/Response';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { SignupData } from '../../shared/constants/SignupData';
+import { SignupData } from '../../shared/constants/user/SignupData';
 
 @Component({
     selector: 'app-signup',
