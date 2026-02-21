@@ -20,7 +20,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { BaseModel } from '../../shared/model/BaseModel';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { RouterLink } from '@angular/router';
-import { Claims } from '../../shared/constants/Claims';
+import { Claims } from '../../shared/constants/user/Claims';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 

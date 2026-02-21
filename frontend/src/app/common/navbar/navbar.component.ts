@@ -18,7 +18,7 @@ import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { AppRoute } from '../../shared/constants/Routes';
 import { filter, fromEvent } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Claims } from '../../shared/constants/Claims';
+import { Claims } from '../../shared/constants/user/Claims';
 import { AuthService } from '../../shared/services/auth/auth.service';
 
 @Component({

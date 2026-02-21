@@ -20,7 +20,7 @@ import {
     TYPE_MAP,
     TYPES,
 } from '../../../shared/model/Issue';
-import { Claims } from '../../../shared/constants/Claims';
+import { Claims } from '../../../shared/constants/user/Claims';
 import { ProjectMember } from '../../../shared/model/ProjectMember';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';

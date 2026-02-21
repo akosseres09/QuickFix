@@ -3,8 +3,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { errorResponse, successResponse } from '../../model/Response';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../../../environments/environment.development';
-import { Claims } from '../../constants/Claims';
-import { DecodedToken } from '../../constants/DecodedToken';
+import { Claims } from '../../constants/user/Claims';
+import { DecodedToken } from '../../constants/user/DecodedToken';
 import { SignupData } from '../../constants/SignupData';
 
 @Injectable({
