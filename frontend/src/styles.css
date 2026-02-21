@@ -137,3 +137,39 @@ body {
         }
     }
 }
+
+quill-view {
+    .ql-editor {
+        @apply p-0;
+    }
+}
+
+quill-view .ql-editor,
+.rich-text .ql-editor {
+    p,
+    li,
+    ul,
+    ol {
+        @apply mb-4 text-[0.875rem];
+    }
+
+    a {
+        @apply text-blue-600 hover:underline;
+    }
+
+    h1 {
+        @apply text-3xl font-bold mb-4;
+    }
+
+    h2 {
+        @apply text-2xl font-bold mb-4;
+    }
+
+    h3 {
+        @apply text-xl font-bold mb-4;
+    }
+
+    h4 {
+        @apply text-lg font-bold mb-4;
+    }
+}

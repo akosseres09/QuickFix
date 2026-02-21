@@ -379,6 +379,21 @@ $dark-theme: mat.m2-define-dark-theme(
                 ),
         )
     );
+
+    @include mat.tooltip-overrides(
+        (
+            container-color: if(
+                    $is-light-theme,
+                    var-color(--color-light-text-hover),
+                    var-color(--color-dark-hover)
+                ),
+            supporting-text-color: if(
+                    $is-light-theme,
+                    var-color(--color-light-text),
+                    var-color(--color-dark-text)
+                ),
+        )
+    );
 }
 
 html[data-theme='light'] {

@@ -186,13 +186,32 @@ export const routes: Routes = [
                 title: 'QuickFix - Labels',
             },
             {
-                path: 'issue/:issueId/edit',
-                loadComponent: () =>
-                    import('./main/issues/edit-issue/edit-issue.component').then(
-                        (c) => c.EditIssueComponent
-                    ),
-                title: 'QuickFix - Edit Issue',
-                canActivate: [authenticatedGuard],
+                path: 'issue/:issueId',
+                children: [
+                    {
+                        path: '',
+                        pathMatch: 'full',
+                        redirectTo: 'view',
+                    },
+                    {
+                        path: 'view',
+                        loadComponent: () =>
+                            import('./main/issues/view-issue/view-issue.component').then(
+                                (c) => c.ViewIssueComponent
+                            ),
+                        title: 'QuickFix - View Issue',
+                        canActivate: [authenticatedGuard],
+                    },
+                    {
+                        path: 'edit',
+                        loadComponent: () =>
+                            import('./main/issues/edit-issue/edit-issue.component').then(
+                                (c) => c.EditIssueComponent
+                            ),
+                        title: 'QuickFix - Edit Issue',
+                        canActivate: [authenticatedGuard],
+                    },
+                ],
             },
         ],
     },
