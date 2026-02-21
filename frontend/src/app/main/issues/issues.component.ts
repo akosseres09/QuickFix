@@ -4,7 +4,7 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { Issue } from '../../shared/model/Issue';
 import { IssueService } from '../../shared/services/issue/issue.service';
 import { CommonModule } from '@angular/common';
-import { DisplayedColumn } from '../../shared/constants/DisplayedColumn';
+import { DisplayedColumn } from '../../shared/constants/table/DisplayedColumn';
 import { TableComponent } from '../../common/table/table.component';
 import { ActivatedRoute } from '@angular/router';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';

@@ -1,5 +1,5 @@
 import { Component, inject, input } from '@angular/core';
-import { AppRoute, ChildRoute } from '../../../shared/constants/Routes';
+import { AppRoute, ChildRoute } from '../../../shared/constants/route/Routes';
 import {
     ActivatedRoute,
     IsActiveMatchOptions,

@@ -23,7 +23,7 @@ import { LineChartComponent } from '../../common/line-chart/line-chart.component
 import { TableComponent } from '../../common/table/table.component';
 import { WorktimeDialogComponent } from './worktime-dialog/worktime-dialog.component';
 import { Stat } from '../../shared/constants/Stat';
-import { DisplayedColumn } from '../../shared/constants/DisplayedColumn';
+import { DisplayedColumn } from '../../shared/constants/table/DisplayedColumn';
 import { DialogService } from '../../shared/services/dialog/dialog.service';
 import { DateService } from '../../shared/services/date/date.service';
 

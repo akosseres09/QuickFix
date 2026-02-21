@@ -15,7 +15,7 @@ import { MatIcon } from '@angular/material/icon';
 import { Event, NavigationStart, Router, RouterLink, RouterModule } from '@angular/router';
 import { ThemeService } from '../../shared/services/theme/theme.service';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
-import { AppRoute } from '../../shared/constants/Routes';
+import { AppRoute } from '../../shared/constants/route/Routes';
 import { filter, fromEvent } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Claims } from '../../shared/constants/user/Claims';

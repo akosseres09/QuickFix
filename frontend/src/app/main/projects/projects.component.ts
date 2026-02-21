@@ -12,7 +12,7 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TableComponent } from '../../common/table/table.component';
 import { Project } from '../../shared/model/Project';
-import { DisplayedColumn } from '../../shared/constants/DisplayedColumn';
+import { DisplayedColumn } from '../../shared/constants/table/DisplayedColumn';
 import { ProjectService } from '../../shared/services/project/project.service';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatOptionModule } from '@angular/material/core';

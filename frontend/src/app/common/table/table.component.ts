@@ -11,7 +11,7 @@ import {
     DestroyRef,
 } from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { DisplayedColumn } from '../../shared/constants/DisplayedColumn';
+import { DisplayedColumn } from '../../shared/constants/table/DisplayedColumn';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatSort, MatSortHeader, Sort, SortDirection } from '@angular/material/sort';
 import { CommonModule } from '@angular/common';

@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { NavbarComponent } from '../../common/navbar/navbar.component';
 import { MatSidenavContainer, MatSidenav, MatSidenavContent } from '@angular/material/sidenav';
-import { AppRoute } from '../../shared/constants/Routes';
+import { AppRoute } from '../../shared/constants/route/Routes';
 import { NavitemComponent } from '../../common/sidenav/navitem/navitem.component';
 import { ThemeService } from '../../shared/services/theme/theme.service';
 import { fromEvent } from 'rxjs';
