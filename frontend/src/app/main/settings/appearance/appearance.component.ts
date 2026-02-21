@@ -8,7 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSliderModule } from '@angular/material/slider';
 import { ThemeService } from '../../../shared/services/theme/theme.service';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { AppearanceSettings } from '../../../shared/constants/AppearanceSettings';
+import { AppearanceSettings } from '../../../shared/constants/settings/AppearanceSettings';
 
 @Component({
     selector: 'app-appearance',
