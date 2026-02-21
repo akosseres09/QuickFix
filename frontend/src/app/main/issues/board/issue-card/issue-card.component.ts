@@ -9,10 +9,7 @@ import {
     PRIORITY_MAP,
     TYPE_COLOR_MAP,
     TYPE_MAP,
-    TYPE_BUG,
-    TYPE_FEATURE,
-    TYPE_TASK,
-    TYPE_INCIDENT,
+    IssueType,
 } from '../../../../shared/model/Issue';
 import { AvatarComponent } from '../../../../common/avatar/avatar.component';
 import { RouterLink } from '@angular/router';
@@ -38,13 +35,13 @@ export class IssueCardComponent {
 
     getTypeIcon(): string {
         switch (this.issue().type) {
-            case TYPE_BUG:
+            case IssueType.BUG:
                 return 'bug_report';
-            case TYPE_FEATURE:
+            case IssueType.FEATURE:
                 return 'star';
-            case TYPE_TASK:
+            case IssueType.TASK:
                 return 'task_alt';
-            case TYPE_INCIDENT:
+            case IssueType.INCIDENT:
                 return 'warning';
             default:
                 return 'help_outline';

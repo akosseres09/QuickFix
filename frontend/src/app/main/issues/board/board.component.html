@@ -7,43 +7,43 @@
         <div class="flex-1 flex flex-col" cdkDropListGroup>
             <div class="flex flex-1 gap-4 overflow-x-auto pb-4">
                 <app-board-column
-                    [columnTitle]="STATUS_MAP[STATUS_OPEN]"
+                    [columnTitle]="STATUS_MAP[StatusEnum.OPEN]"
                     [issues]="openIssues()"
-                    [status]="STATUS_OPEN"
+                    [status]="StatusEnum.OPEN"
                     [connectedLists]="columnIds"
-                    (dropEvent)="onDrop($event, STATUS_OPEN)"
+                    (dropEvent)="onDrop($event, StatusEnum.OPEN)"
                 ></app-board-column>
 
                 <app-board-column
-                    [columnTitle]="STATUS_MAP[STATUS_IN_PROGRESS]"
+                    [columnTitle]="STATUS_MAP[StatusEnum.IN_PROGRESS]"
                     [issues]="inProgressIssues()"
-                    [status]="STATUS_IN_PROGRESS"
+                    [status]="StatusEnum.IN_PROGRESS"
                     [connectedLists]="columnIds"
-                    (dropEvent)="onDrop($event, STATUS_IN_PROGRESS)"
+                    (dropEvent)="onDrop($event, StatusEnum.IN_PROGRESS)"
                 ></app-board-column>
 
                 <app-board-column
-                    [columnTitle]="STATUS_MAP[STATUS_REVIEW]"
+                    [columnTitle]="STATUS_MAP[StatusEnum.REVIEW]"
                     [issues]="reviewIssues()"
-                    [status]="STATUS_REVIEW"
+                    [status]="StatusEnum.REVIEW"
                     [connectedLists]="columnIds"
-                    (dropEvent)="onDrop($event, STATUS_REVIEW)"
+                    (dropEvent)="onDrop($event, StatusEnum.REVIEW)"
                 ></app-board-column>
 
                 <app-board-column
-                    [columnTitle]="STATUS_MAP[STATUS_RESOLVED]"
+                    [columnTitle]="STATUS_MAP[StatusEnum.RESOLVED]"
                     [issues]="resolvedIssues()"
-                    [status]="STATUS_RESOLVED"
+                    [status]="StatusEnum.RESOLVED"
                     [connectedLists]="columnIds"
-                    (dropEvent)="onDrop($event, STATUS_RESOLVED)"
+                    (dropEvent)="onDrop($event, StatusEnum.RESOLVED)"
                 ></app-board-column>
 
                 <app-board-column
-                    [columnTitle]="STATUS_MAP[STATUS_CLOSED]"
+                    [columnTitle]="STATUS_MAP[StatusEnum.CLOSED]"
                     [issues]="closedIssues()"
-                    [status]="STATUS_CLOSED"
+                    [status]="StatusEnum.CLOSED"
                     [connectedLists]="columnIds"
-                    (dropEvent)="onDrop($event, STATUS_CLOSED)"
+                    (dropEvent)="onDrop($event, StatusEnum.CLOSED)"
                 ></app-board-column>
             </div>
         </div>

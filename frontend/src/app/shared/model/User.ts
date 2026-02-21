@@ -1,11 +1,16 @@
 import { BaseModel } from './BaseModel';
 
-export const DELETED = 0;
-export const INACTIVE = 9;
-export const ACTIVE = 10;
-export const SYS_ADMIN = 2;
-export const ADMIN = 1;
-export const USER = 0;
+export enum UserStatus {
+    DELETED = 0,
+    INACTIVE = 9,
+    ACTIVE = 10,
+}
+
+export enum UserRole {
+    USER = 0,
+    ADMIN = 1,
+    SYS_ADMIN = 2,
+}
 
 export interface User extends BaseModel {
     id: string;
@@ -16,8 +21,8 @@ export interface User extends BaseModel {
     phoneNumber: string | null;
     dateOfBirth: string | null;
     profilePictureUrl: string;
-    status: typeof DELETED | typeof INACTIVE | typeof ACTIVE;
-    isAdmin: typeof ADMIN | typeof USER | typeof SYS_ADMIN;
+    status: UserStatus;
+    isAdmin: UserRole;
     authKey?: string;
     passwordHash?: string;
     passwordResetToken?: string;

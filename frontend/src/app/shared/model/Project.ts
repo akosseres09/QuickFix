@@ -1,50 +1,78 @@
 import { BaseModel } from './BaseModel';
 import { User } from './User';
 
-export const STATUS_ACTIVE = 'active';
-export const STATUS_ARCHIVED = 'archived';
-export const STATUS_ON_HOLD = 'on_hold';
-export const STATUS_COMPLETED = 'completed';
+export enum ProjectStatus {
+    ACTIVE = 'active',
+    ARCHIVED = 'archived',
+    ON_HOLD = 'on_hold',
+    COMPLETED = 'completed',
+}
 
-export const VISIBILITY_PUBLIC = 'public';
-export const VISIBILITY_PRIVATE = 'private';
-export const VISIBILITY_TEAM = 'team';
-
-export const PRIORITY_LOW = 0;
-export const PRIORITY_MEDIUM = 1;
-export const PRIORITY_HIGH = 2;
-export const PRIORITY_CRITICAL = 3;
-
-export const PRIORITY_LIST = [PRIORITY_LOW, PRIORITY_MEDIUM, PRIORITY_HIGH, PRIORITY_CRITICAL];
-export const VISIBILITY_LIST = [VISIBILITY_PUBLIC, VISIBILITY_PRIVATE, VISIBILITY_TEAM];
-export const STATUS_LIST = [STATUS_ACTIVE, STATUS_ARCHIVED, STATUS_ON_HOLD, STATUS_COMPLETED];
-
-export const PRIORITY_MAP: { [key: number]: string } = {
-    [PRIORITY_LOW]: 'Low',
-    [PRIORITY_MEDIUM]: 'Medium',
-    [PRIORITY_HIGH]: 'High',
-    [PRIORITY_CRITICAL]: 'Critical',
-};
+export const STATUS_LIST = [
+    ProjectStatus.ACTIVE,
+    ProjectStatus.ARCHIVED,
+    ProjectStatus.ON_HOLD,
+    ProjectStatus.COMPLETED,
+];
 
 export const STATUS_MAP: { [key: string]: string } = {
-    [STATUS_ACTIVE]: 'Active',
-    [STATUS_ARCHIVED]: 'Archived',
-    [STATUS_ON_HOLD]: 'On Hold',
-    [STATUS_COMPLETED]: 'Completed',
+    [ProjectStatus.ACTIVE]: 'Active',
+    [ProjectStatus.ARCHIVED]: 'Archived',
+    [ProjectStatus.ON_HOLD]: 'On Hold',
+    [ProjectStatus.COMPLETED]: 'Completed',
 };
 
 export const STATUS_COLOR_MAP: { [key: string]: string } = {
-    [STATUS_ACTIVE]: 'text-emerald-700 bg-emerald-100',
-    [STATUS_ARCHIVED]: 'text-slate-600 bg-slate-100',
-    [STATUS_ON_HOLD]: 'text-amber-700 bg-amber-100',
-    [STATUS_COMPLETED]: 'text-blue-700 bg-blue-100',
+    [ProjectStatus.ACTIVE]: 'text-emerald-700 bg-emerald-100',
+    [ProjectStatus.ARCHIVED]: 'text-slate-600 bg-slate-100',
+    [ProjectStatus.ON_HOLD]: 'text-amber-700 bg-amber-100',
+    [ProjectStatus.COMPLETED]: 'text-blue-700 bg-blue-100',
+};
+
+export enum ProjectVisibility {
+    PUBLIC = 'public',
+    PRIVATE = 'private',
+    TEAM = 'team',
+}
+
+export const VISIBILITY_LIST = [
+    ProjectVisibility.PUBLIC,
+    ProjectVisibility.PRIVATE,
+    ProjectVisibility.TEAM,
+];
+
+export const VISIBILITY_MAP: { [key: string]: string } = {
+    [ProjectVisibility.PUBLIC]: 'Public',
+    [ProjectVisibility.PRIVATE]: 'Private',
+    [ProjectVisibility.TEAM]: 'Team',
+};
+
+export enum ProjectPriority {
+    LOW = 0,
+    MEDIUM = 1,
+    HIGH = 2,
+    CRITICAL = 3,
+}
+
+export const PRIORITY_LIST = [
+    ProjectPriority.LOW,
+    ProjectPriority.MEDIUM,
+    ProjectPriority.HIGH,
+    ProjectPriority.CRITICAL,
+];
+
+export const PRIORITY_MAP: { [key: number]: string } = {
+    [ProjectPriority.LOW]: 'Low',
+    [ProjectPriority.MEDIUM]: 'Medium',
+    [ProjectPriority.HIGH]: 'High',
+    [ProjectPriority.CRITICAL]: 'Critical',
 };
 
 export const PRIORITY_COLOR_MAP: { [key: number]: string } = {
-    [PRIORITY_LOW]: 'text-green-900 bg-green-200',
-    [PRIORITY_MEDIUM]: 'text-yellow-900 bg-yellow-200',
-    [PRIORITY_HIGH]: 'text-orange-900 bg-orange-200',
-    [PRIORITY_CRITICAL]: 'text-red-900 bg-red-200',
+    [ProjectPriority.LOW]: 'text-green-900 bg-green-200',
+    [ProjectPriority.MEDIUM]: 'text-yellow-900 bg-yellow-200',
+    [ProjectPriority.HIGH]: 'text-orange-900 bg-orange-200',
+    [ProjectPriority.CRITICAL]: 'text-red-900 bg-red-200',
 };
 
 export interface Project extends BaseModel {
@@ -52,12 +80,12 @@ export interface Project extends BaseModel {
     name: string;
     key: string;
     description: string;
-    status: string;
+    status: ProjectStatus;
     startDate: string | null;
     endDate: string | null;
     ownerId: string;
-    visibility: string;
-    priority: number;
+    visibility: ProjectVisibility;
+    priority: ProjectPriority;
     color: string;
     progress: number;
     budget: number;

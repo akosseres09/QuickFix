@@ -10,12 +10,15 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import {
     Issue,
+    IssuePriority,
+    IssueStatus,
+    IssueType,
     PRIORITIES,
     PRIORITY_COLOR_MAP,
     PRIORITY_MAP,
-    PRIORITY_MEDIUM,
+    STATUS_COLOR_MAP,
     STATUS_LIST,
-    TYPE_BUG,
+    STATUS_MAP,
     TYPE_COLOR_MAP,
     TYPE_MAP,
     TYPES,
@@ -71,19 +74,24 @@ export class IssueFormComponent implements OnInit {
     issueForm!: FormGroup;
 
     readonly typeList = TYPES;
-    readonly priorityList = PRIORITIES;
-    readonly statusList = STATUS_LIST;
     readonly typeMap = TYPE_MAP;
-    readonly priorityMap = PRIORITY_MAP;
     readonly typeColorMap = TYPE_COLOR_MAP;
+
+    readonly priorityList = PRIORITIES;
+    readonly priorityMap = PRIORITY_MAP;
     readonly priorityColorMap = PRIORITY_COLOR_MAP;
+
+    readonly statusList = STATUS_LIST;
+    readonly statusMap = STATUS_MAP;
+    readonly statusColorMap = STATUS_COLOR_MAP;
 
     ngOnInit(): void {
         this.issueForm = this.fb.group({
             title: [this.issue()?.title || '', [Validators.required, Validators.maxLength(255)]],
             description: [this.issue()?.description || '', [Validators.maxLength(5000)]],
-            type: [this.issue()?.type || TYPE_BUG, Validators.required],
-            priority: [this.issue()?.priority || PRIORITY_MEDIUM, Validators.required],
+            type: [this.issue()?.type ?? IssueType.TASK, Validators.required],
+            status: [this.issue()?.status ?? IssueStatus.OPEN, Validators.required],
+            priority: [this.issue()?.priority ?? IssuePriority.MEDIUM, Validators.required],
             assignedTo: [this.issue()?.assignedTo || (null as string | null)],
             dueDate: [
                 this.issue()?.dueDate
@@ -132,8 +140,8 @@ export class IssueFormComponent implements OnInit {
         const issueData: Partial<Issue> = {
             title: formValue.title || '',
             description: formValue.description || '',
-            type: (formValue.type ?? TYPE_BUG) as Issue['type'],
-            priority: (formValue.priority ?? PRIORITY_MEDIUM) as Issue['priority'],
+            type: (formValue.type ?? IssueType.BUG) as Issue['type'],
+            priority: (formValue.priority ?? IssuePriority.MEDIUM) as Issue['priority'],
             assignedTo: formValue.assignedTo || null,
             dueDate: formValue.dueDate ? new Date(formValue.dueDate).getTime() / 1000 : null,
         };

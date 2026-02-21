@@ -2,15 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CdkDropListGroup, CdkDragDrop, transferArrayItem } from '@angular/cdk/drag-drop';
-import {
-    Issue,
-    STATUS_OPEN,
-    STATUS_IN_PROGRESS,
-    STATUS_REVIEW,
-    STATUS_RESOLVED,
-    STATUS_CLOSED,
-    STATUS_MAP,
-} from '../../../shared/model/Issue';
+import { Issue, IssueStatus, STATUS_MAP } from '../../../shared/model/Issue';
 import { IssueService } from '../../../shared/services/issue/issue.service';
 import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
 import { BoardColumnComponent } from './board-column/board-column.component';
@@ -31,11 +23,7 @@ export class BoardComponent implements OnInit {
     isLoading = signal<boolean>(true);
 
     // Status constants for template
-    STATUS_OPEN = STATUS_OPEN;
-    STATUS_IN_PROGRESS = STATUS_IN_PROGRESS;
-    STATUS_REVIEW = STATUS_REVIEW;
-    STATUS_RESOLVED = STATUS_RESOLVED;
-    STATUS_CLOSED = STATUS_CLOSED;
+    StatusEnum = IssueStatus;
     STATUS_MAP = STATUS_MAP;
 
     // Issue arrays grouped by status
@@ -81,11 +69,13 @@ export class BoardComponent implements OnInit {
     }
 
     groupIssuesByStatus(issues: Issue[]) {
-        this.openIssues.set(issues.filter((issue) => issue.status === STATUS_OPEN));
-        this.inProgressIssues.set(issues.filter((issue) => issue.status === STATUS_IN_PROGRESS));
-        this.reviewIssues.set(issues.filter((issue) => issue.status === STATUS_REVIEW));
-        this.resolvedIssues.set(issues.filter((issue) => issue.status === STATUS_RESOLVED));
-        this.closedIssues.set(issues.filter((issue) => issue.status === STATUS_CLOSED));
+        this.openIssues.set(issues.filter((issue) => issue.status === IssueStatus.OPEN));
+        this.inProgressIssues.set(
+            issues.filter((issue) => issue.status === IssueStatus.IN_PROGRESS)
+        );
+        this.reviewIssues.set(issues.filter((issue) => issue.status === IssueStatus.REVIEW));
+        this.resolvedIssues.set(issues.filter((issue) => issue.status === IssueStatus.RESOLVED));
+        this.closedIssues.set(issues.filter((issue) => issue.status === IssueStatus.CLOSED));
     }
 
     onDrop(event: CdkDragDrop<Issue[]>, newStatus: number) {
@@ -136,15 +126,15 @@ export class BoardComponent implements OnInit {
 
     getIssueArrayByStatus(status: number): Issue[] {
         switch (status) {
-            case STATUS_OPEN:
+            case IssueStatus.OPEN:
                 return this.openIssues();
-            case STATUS_IN_PROGRESS:
+            case IssueStatus.IN_PROGRESS:
                 return this.inProgressIssues();
-            case STATUS_REVIEW:
+            case IssueStatus.REVIEW:
                 return this.reviewIssues();
-            case STATUS_RESOLVED:
+            case IssueStatus.RESOLVED:
                 return this.resolvedIssues();
-            case STATUS_CLOSED:
+            case IssueStatus.CLOSED:
                 return this.closedIssues();
             default:
                 return [];

@@ -6,16 +6,18 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSliderModule } from '@angular/material/slider';
 import {
-    PRIORITY_CRITICAL,
-    PRIORITY_HIGH,
+    PRIORITY_COLOR_MAP,
     PRIORITY_LIST,
-    PRIORITY_LOW,
-    PRIORITY_MEDIUM,
+    PRIORITY_MAP,
     Project,
-    STATUS_ACTIVE,
+    ProjectPriority,
+    ProjectStatus,
+    ProjectVisibility,
+    STATUS_COLOR_MAP,
     STATUS_LIST,
+    STATUS_MAP,
     VISIBILITY_LIST,
-    VISIBILITY_PUBLIC,
+    VISIBILITY_MAP,
 } from '../../../shared/model/Project';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../../shared/services/auth/auth.service';
@@ -52,8 +54,15 @@ export class ProjectFormComponent implements OnInit {
     readonly userId = this.authService.currentUserClaims()?.uid;
 
     readonly priorityList = PRIORITY_LIST;
+    readonly priorityMap = PRIORITY_MAP;
+    readonly priorityColorMap = PRIORITY_COLOR_MAP;
+
     readonly statusList = STATUS_LIST;
+    readonly statusMap = STATUS_MAP;
+    readonly statusColorMap = STATUS_COLOR_MAP;
+
     readonly visibilityList = VISIBILITY_LIST;
+    readonly visibilityMap = VISIBILITY_MAP;
 
     project = input<Project | null>(null);
     buttonText = input<string>('Create Project');
@@ -76,11 +85,14 @@ export class ProjectFormComponent implements OnInit {
                 ],
             ],
             description: [this.project()?.description || ''],
-            status: [this.project()?.status || STATUS_ACTIVE, Validators.required],
             startDate: [this.project()?.startDate || (null as string | null)],
             endDate: [this.project()?.endDate || (null as string | null)],
-            visibility: [this.project()?.visibility || VISIBILITY_PUBLIC, Validators.required],
-            priority: [this.project()?.priority || PRIORITY_MEDIUM, Validators.required],
+            visibility: [
+                this.project()?.visibility ?? ProjectVisibility.PRIVATE,
+                Validators.required,
+            ],
+            status: [this.project()?.status ?? ProjectStatus.ACTIVE, Validators.required],
+            priority: [this.project()?.priority ?? ProjectPriority.MEDIUM, Validators.required],
             color: [this.project()?.color || '#3b82f6', [Validators.pattern(/^#[0-9A-Fa-f]{6}$/)]],
             progress: [this.project()?.progress || 0, [Validators.min(0), Validators.max(100)]],
             budget: [this.project()?.budget || 0, [Validators.min(0)]],
@@ -105,13 +117,13 @@ export class ProjectFormComponent implements OnInit {
 
     getPriorityLabel(priority: number): string {
         switch (priority) {
-            case PRIORITY_LOW:
+            case ProjectPriority.LOW:
                 return 'Low';
-            case PRIORITY_MEDIUM:
+            case ProjectPriority.MEDIUM:
                 return 'Medium';
-            case PRIORITY_HIGH:
+            case ProjectPriority.HIGH:
                 return 'High';
-            case PRIORITY_CRITICAL:
+            case ProjectPriority.CRITICAL:
                 return 'Critical';
             default:
                 return 'Unknown';
