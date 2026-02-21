@@ -8,12 +8,12 @@
         [dataSource]="shownProjects()"
         [displayedColumns]="displayedColumns()"
         tableHeader="Projects"
-        [initialPageSize]="pageSize()"
-        [initialPageIndex]="pageIndex()"
-        [initialSortActive]="sortActive()"
-        [initialSortDirection]="sortDirection()"
-        [totalCount]="totalCount()"
-        [isLoading]="isLoading()"
+        [initialPageSize]="listState.pageSize()"
+        [initialPageIndex]="listState.pageIndex()"
+        [initialSortActive]="listState.sortActive()"
+        [initialSortDirection]="listState.sortDirection()"
+        [totalCount]="listState.totalCount()"
+        [isLoading]="listState.isLoading()"
         (sortChange)="onSortChange($event)"
         (pageChange)="onPageChange($event)"
         [selectedRow]="selectedRow()"
@@ -22,7 +22,6 @@
     <div class="fixed right-6 bottom-6 z-50">
         <app-speed-dial
             #speedDial
-            (togglerClick)="createProject()"
             [buttons]="speedDialButtons()"
             [selectedRow]="selectedRow()"
             (selectedRowChange)="selectedRow.set($event)"

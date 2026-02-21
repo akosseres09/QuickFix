@@ -1,7 +1,7 @@
 import { Component, computed, DestroyRef, inject, signal, viewChild } from '@angular/core';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { Issue, PRIORITY_MAP, STATUS_MAP, TYPE_MAP } from '../../shared/model/Issue';
+import { Issue } from '../../shared/model/Issue';
 import { IssueService } from '../../shared/services/issue/issue.service';
 import { CommonModule } from '@angular/common';
 import { DisplayedColumn } from '../../shared/constants/DisplayedColumn';
@@ -10,8 +10,7 @@ import { ActivatedRoute } from '@angular/router';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 import { SpeedDialComponent } from '../../common/speed-dial/speed-dial.component';
 import { SpeedDialButton } from '../../shared/constants/SpeedDialButton';
-import { UrlService } from '../../shared/services/url/url.service';
-import { Sort, SortDirection } from '@angular/material/sort';
+import { Sort } from '@angular/material/sort';
 import { ApiQueryParams } from '../../shared/constants/api/ApiQueryParams';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Filter } from '../../shared/constants/Filter';
@@ -20,6 +19,9 @@ import { DialogService } from '../../shared/services/dialog/dialog.service';
 import { finalize } from 'rxjs';
 import { DisplayedColumnService } from '../../shared/services/displayed-column/displayed-column.service';
 import { FilterService } from '../../shared/services/filter/filter.service';
+import { SpeedDialButtonFactory } from '../../shared/services/speed-dial/speed-dial-button.factory';
+import { ListState } from '../../shared/constants/table/ListState';
+import { ListStateService } from '../../shared/services/list-state/list-state.service';
 
 @Component({
     selector: 'app-issues',
@@ -35,25 +37,24 @@ import { FilterService } from '../../shared/services/filter/filter.service';
     styleUrl: './issues.component.css',
 })
 export class IssuesComponent {
-    private readonly urlService = inject(UrlService);
     private readonly snackbarService = inject(SnackbarService);
     private readonly issueService = inject(IssueService);
     private readonly activeRoute = inject(ActivatedRoute);
     private readonly destroyRef = inject(DestroyRef);
-    private readonly dialogService = inject(DialogService);
     private readonly displayedColumService = inject(DisplayedColumnService);
     private readonly filterService = inject(FilterService);
+    private readonly listStateService = inject(ListStateService);
+    private readonly dialogService = inject(DialogService);
+    private readonly buttonFactory = inject(SpeedDialButtonFactory);
+
+    // List state (pagination, sorting, filtering)
+    readonly listState: ListState = this.listStateService.create(this.activeRoute, {
+        defaultPageSize: 20,
+        expand: 'creator,assignee',
+    });
 
     projectId = signal<string>(this.getProjectId());
     selectedRow = signal<Issue | null>(null);
-
-    pageSize = signal<number>(20);
-    pageIndex = signal<number>(0);
-    sortActive = signal<string>('');
-    sortDirection = signal<SortDirection>('asc');
-
-    totalCount = signal<number>(0);
-    isLoading = signal<boolean>(false);
 
     issues = signal<Issue[]>([]);
     filteredIssues = signal<Issue[]>(this.issues());
@@ -63,53 +64,27 @@ export class IssuesComponent {
 
     // Transform the signal into a computed signal
     speedDialButtons = computed<SpeedDialButton[]>(() => {
-        const selectedRow = this.selectedRow();
+        const selected = this.selectedRow();
         const currentProjectId = this.projectId();
 
-        return [
-            {
-                iconName: 'add',
-                label: 'Create Issue',
-                shown: selectedRow === null,
-                action: () => {
-                    return ['add'];
-                },
+        return this.buttonFactory.createArchivableButtons({
+            entityName: 'Issue',
+            hasSelection: selected !== null,
+            isArchived: selected?.isArchived ?? false,
+            createRoute: ['add'],
+            editRouteBuilder: () => {
+                const issueId = this.selectedRow()?.id;
+                if (!issueId) {
+                    this.snackbarService.open('Please select a valid issue to edit!');
+                    return null;
+                }
+                return ['/project', currentProjectId, 'issue', issueId, 'edit'];
             },
-            {
-                iconName: 'archive',
-                label: 'Archive Issue',
-                shown: selectedRow !== null && !selectedRow.isArchived,
-                onClick: () => {
-                    this.openArchiveConfirmation();
-                },
-            },
-            {
-                iconName: 'unarchive',
-                label: 'Unarchive Issue',
-                shown: selectedRow !== null && selectedRow.isArchived,
-                onClick: () => {
-                    this.openUnarchiveConfirmation();
-                },
-            },
-            {
-                iconName: 'edit',
-                label: 'Edit Issue',
-                shown: selectedRow !== null,
-                action: () => {
-                    const selectedIssueId = this.selectedRow()?.id;
-                    if (!selectedIssueId) {
-                        this.snackbarService.open('Please select a valid issue to edit!');
-                        return null;
-                    }
-
-                    return ['/project', currentProjectId, 'issue', selectedIssueId, 'edit'];
-                },
-            },
-        ];
+            onArchive: () => this.openArchiveConfirmation(),
+            onUnarchive: () => this.openUnarchiveConfirmation(),
+        });
     });
 
-    filters = signal<ApiQueryParams>({});
-    isInitialFilterLoad = true;
     filteredFields: Filter[] = this.filterService.getIssueFilters();
 
     // template refs
@@ -118,25 +93,6 @@ export class IssuesComponent {
     unarchiveConfirmTemplate = viewChild<any>('unarchiveConfirmTemplate');
 
     constructor() {
-        const pageSizeParam = this.activeRoute.snapshot.queryParamMap.get('pageSize');
-        const pageIndexParam = this.activeRoute.snapshot.queryParamMap.get('page');
-        const sortActiveParam = this.activeRoute.snapshot.queryParamMap.get('sort');
-
-        if (pageSizeParam) {
-            this.pageSize.set(+pageSizeParam);
-        }
-
-        if (pageIndexParam) {
-            // Convert from 1-based (URL/API) to 0-based (Material table)
-            this.pageIndex.set(+pageIndexParam - 1);
-        }
-
-        if (sortActiveParam) {
-            const isAsc = !sortActiveParam.startsWith('-');
-            this.sortActive.set(isAsc ? sortActiveParam : sortActiveParam.substring(1));
-            this.sortDirection.set(isAsc ? 'asc' : 'desc');
-        }
-
         this.issueService.setProjectId(this.projectId());
     }
 
@@ -150,61 +106,38 @@ export class IssuesComponent {
             return;
         }
 
-        this.isLoading.set(true);
+        this.listState.isLoading.set(true);
 
         this.issueService
-            .getIssues(this.buildQueryParams())
+            .getIssues(this.listState.buildQueryParams())
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
                 next: (response) => {
                     this.issues.set(response.items);
                     this.filteredIssues.set(response.items);
-                    this.totalCount.set(response._meta.totalCount);
-                    this.isLoading.set(false);
+                    this.listState.totalCount.set(response._meta.totalCount);
+                    this.listState.isLoading.set(false);
                 },
                 error: (error) => {
                     console.error('Error fetching issues:', error);
                     this.snackbarService.open('Failed to load issues');
-                    this.isLoading.set(false);
+                    this.listState.isLoading.set(false);
                 },
             });
     }
 
     /**
      * Handles sort change events from the table, updates the URL and fetches new data.
-     * @param event Sort event emitted from the table when user changes sorting.
      */
     onSortChange(event: Sort) {
-        this.sortActive.set(event.active);
-        this.sortDirection.set(event.direction);
-
-        if (event.direction === '') {
-            this.urlService.removeQueryParams(['sort']);
-        } else {
-            const direction = event.direction === 'asc' ? '' : '-';
-            this.urlService.addQueryParams({
-                sort: `${direction}${event.active}`,
-            });
-        }
-
-        this.pageIndex.set(0);
-        this.getIssues();
+        this.listState.onSortChange(event, () => this.getIssues());
     }
 
     /**
      * Handles page change events from the paginator, updates the URL and fetches new data.
-     * @param event PageEvent emitted from paginator. Holds the new page index and size.
      */
     onPageChange(event: PageEvent) {
-        this.pageIndex.set(event.pageIndex);
-        this.pageSize.set(event.pageSize);
-
-        this.urlService.addQueryParams({
-            page: event.pageIndex + 1,
-            pageSize: event.pageSize,
-        });
-
-        this.getIssues();
+        this.listState.onPageChange(event, () => this.getIssues());
     }
 
     /**
@@ -227,21 +160,9 @@ export class IssuesComponent {
 
     /**
      * Handles filter changes emitted from the ProjectFilterComponent.
-     * Updates the filters signal, resets pagination, updates URL and fetches new data.
-     * @param filterParams
      */
     onFilterChange(filterParams: ApiQueryParams) {
-        this.filters.set(filterParams);
-
-        // Reset to first page on filter change, but not on initial load
-        if (!this.isInitialFilterLoad) {
-            this.pageIndex.set(0);
-            this.urlService.removeQueryParams(['page']);
-        }
-        this.isInitialFilterLoad = false;
-
-        this.setQueryParams();
-        this.getIssues();
+        this.listState.onFilterChange(filterParams, () => this.getIssues());
     }
 
     openArchiveConfirmation() {
@@ -338,51 +259,5 @@ export class IssuesComponent {
                     this.snackbarService.open('Failed to unarchive issue!', ['snackbar-error']);
                 },
             });
-    }
-
-    private setQueryParams() {
-        this.urlService.addQueryParams(this.buildUrlParams());
-    }
-
-    /**
-     * Builds unified query params from all sources:
-     * - Filter form values
-     * - Pagination state
-     * - Sorting state
-     * - Expansion requirements
-     */
-    private buildQueryParams(): ApiQueryParams {
-        const params: ApiQueryParams = {
-            ...this.filters(),
-            // Convert from 0-based (Material table) to 1-based (API)
-            page: this.pageIndex() > 0 ? this.pageIndex() + 1 : null,
-            pageSize: this.pageSize() !== 20 ? this.pageSize() : null,
-            sort: this.sortDirection()
-                ? `${this.sortDirection() === 'desc' ? '-' : ''}${this.sortActive()}`
-                : null,
-            expand: 'creator,assignee',
-        };
-
-        return params;
-    }
-
-    /**
-     * Builds query params for URL (excludes 'expand' and filters out null/empty values)
-     */
-    private buildUrlParams(): ApiQueryParams {
-        const params = this.buildQueryParams();
-        const { expand, ...urlParams } = params;
-
-        // Filter out null/undefined/empty values
-        const cleanParams: ApiQueryParams = {};
-        Object.entries(urlParams).forEach(([key, value]) => {
-            if (value !== null && value !== undefined && value !== '') {
-                cleanParams[key] = value;
-            } else {
-                cleanParams[key] = null;
-            }
-        });
-
-        return cleanParams;
     }
 }
