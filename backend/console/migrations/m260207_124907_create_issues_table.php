@@ -22,6 +22,7 @@ class m260207_124907_create_issues_table extends Migration
             'status' => $this->smallInteger()->notNull()->defaultValue(Issue::STATUS_OPEN),
             'priority' => $this->smallInteger()->notNull()->defaultValue(Issue::PRIORITY_MEDIUM),
             'created_by' => $this->string(36)->notNull(),
+            'updated_by' => $this->string(36)->null(),
             'assigned_to' => $this->string(36)->null(),
             'created_at' => $this->integer()->notNull(),
             'updated_at' => $this->integer()->null(),
@@ -50,6 +51,15 @@ class m260207_124907_create_issues_table extends Migration
             '{{%user}}',
             'id',
             'CASCADE'
+        );
+
+        $this->addForeignKey(
+            'fk-issue-updated_by',
+            '{{%issue}}',
+            'updated_by',
+            '{{%user}}',
+            'id',
+            'SET NULL'
         );
 
         $this->addForeignKey(

@@ -20,6 +20,7 @@ use yii\db\ActiveRecord;
  * @property int $status
  * @property int $priority
  * @property string $created_by
+ * @property string $updated_by
  * @property string|null $assigned_to
  * @property int $created_at
  * @property int|null $updated_at
@@ -30,6 +31,7 @@ use yii\db\ActiveRecord;
  * @property Project $project
  * @property UserResource $creator
  * @property UserResource|null $assignee
+ * @property UserResource $updator
  */
 class Issue extends ActiveRecord
 {
@@ -83,10 +85,7 @@ class Issue extends ActiveRecord
     {
         return [
             TimestampBehavior::class,
-            [
-                'class' => BlameableBehavior::class,
-                'updatedByAttribute' => false
-            ]
+            BlameableBehavior::class,
         ];
     }
 
@@ -215,7 +214,8 @@ class Issue extends ActiveRecord
             'project',
             'owner',
             'creator',
-            'assignee'
+            'assignee',
+            'updator'
         ];
     }
 
@@ -247,6 +247,15 @@ class Issue extends ActiveRecord
     public function getAssignee()
     {
         return $this->hasOne(UserResource::class, ['id' => 'assigned_to']);
+    }
+
+    /**
+     * Gets query for [[Updator]].
+     * @return Yii\db\ActiveQuery
+     */
+    public function getUpdator()
+    {
+        return $this->hasOne(UserResource::class, ['id' => 'updated_by']);
     }
 
     public function canAccess(string $userId): bool
