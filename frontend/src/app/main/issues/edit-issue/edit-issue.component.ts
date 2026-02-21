@@ -18,12 +18,16 @@ export class EditIssueComponent {
     private readonly router = inject(Router);
     private readonly snackbarService = inject(SnackbarService);
 
-    projectId = signal<string>(this.activateRoute.snapshot.parent?.paramMap.get('projectId') || '');
+    projectId = signal<string>(
+        this.activateRoute.snapshot.parent?.parent?.paramMap.get('projectId') || ''
+    );
     issueId = signal<string>(this.activateRoute.snapshot.paramMap.get('issueId') || '');
     issue = signal<Issue | null>(null);
     isSubmitting = signal<boolean>(false);
 
     constructor() {
+        console.log(this.projectId());
+
         this.issueService.setProjectId(this.projectId());
         this.issueService.getIssueById(this.issueId()).subscribe({
             next: (issue) => {

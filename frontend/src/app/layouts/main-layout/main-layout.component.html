@@ -5,6 +5,7 @@
             [mode]="sidebarMode()"
             [opened]="isSidebarOpened()"
             (openedChange)="isSidebarOpened.set($event)"
+            [disableClose]="sidebarMode() === 'side' ? true : false"
             position="start"
             class="!w-64 px-2 py-4 overflow-hidden"
         >
