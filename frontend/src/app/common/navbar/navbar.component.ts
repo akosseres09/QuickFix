@@ -20,6 +20,7 @@ import { filter, fromEvent } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Claims } from '../../shared/constants/user/Claims';
 import { AuthService } from '../../shared/services/auth/auth.service';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
     selector: 'app-navbar',
@@ -32,6 +33,7 @@ import { AuthService } from '../../shared/services/auth/auth.service';
         MatMenu,
         MatMenuTrigger,
         MatMenuItem,
+        MatButtonModule,
     ],
     templateUrl: './navbar.component.html',
     styleUrl: './navbar.component.css',

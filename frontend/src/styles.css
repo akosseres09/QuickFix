@@ -97,6 +97,10 @@ body {
     padding: 0 24px !important;
 }
 
+.mat-expansion-indicator {
+    height: 30px;
+}
+
 .rich-text {
     .ql-editor {
         flex: 1;

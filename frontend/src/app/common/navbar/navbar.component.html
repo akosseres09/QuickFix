@@ -6,7 +6,7 @@
             @if (showSidebarToggleButton() && sidebarToggleButton()) {
                 <button
                     (click)="toggleSidebar()"
-                    class="flex p-2 rounded cursor-pointer hover:bg-light-text-hover dark:hover:bg-dark-hover transition-[background-color]"
+                    class="flex p-2 rounded-md cursor-pointer hover:bg-light-text-hover dark:hover:bg-dark-hover transition-[background-color]"
                     [attr.aria-label]="isSidebarOpened() ? 'Collapse sidebar' : 'Expand sidebar'"
                 >
                     <mat-icon [class.rotate-180]="isSidebarOpened()"> double_arrow_right </mat-icon>
@@ -19,7 +19,7 @@
                 </a>
             }
             <button
-                class="md:hidden inline-flex items-center p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer"
+                class="md:hidden inline-flex items-center p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md cursor-pointer"
                 (click)="toggleMenu()"
                 aria-label="Toggle menu"
             >
@@ -44,14 +44,14 @@
                                 [routerLink]="route.path"
                                 routerLinkActive="dark:bg-dark-hover bg-light-text-hover"
                                 [routerLinkActiveOptions]="{ exact: route.exact ?? false }"
-                                class="block py-2 px-3 border border-transparent rounded-xl dark:hover:bg-dark-hover hover:bg-light-text-hover duration-200"
+                                class="block py-2 px-3 border border-transparent rounded-md dark:hover:bg-dark-hover hover:bg-light-text-hover duration-200"
                                 >{{ route.name }}</a
                             >
                         </li>
                     } @else if (route.type === 'menu') {
                         <li class="hidden md:flex items-center justify-start">
                             <button
-                                class="p-2 rounded-2xl flex items-center justify-center cursor-pointer dark:hover:bg-dark-hover hover:bg-light-text-hover transition-[background-color] duration-200"
+                                class="p-2 rounded-md flex items-center justify-center cursor-pointer dark:hover:!bg-dark-hover hover:!bg-light-text-hover transition-[background-color] duration-200"
                                 matButton
                                 [matMenuTriggerFor]="menu"
                             >
@@ -88,25 +88,25 @@
                                     [routerLink]="child.path"
                                     routerLinkActive="dark:bg-dark-hover bg-light-text-hover"
                                     [routerLinkActiveOptions]="{ exact: true }"
-                                    class="block py-2 px-3 border border-transparent rounded-xl dark:hover:bg-dark-hover hover:bg-light-text-hover duration-200"
+                                    class="block py-2 px-3 border border-transparent rounded-md dark:hover:bg-dark-hover hover:bg-light-text-hover duration-200"
                                     >{{ child.name }}</a
                                 >
                             </li>
                         }
                         <li class="block md:hidden">
-                            <button
-                                class="block py-2 px-3 border border-transparent rounded-xl dark:hover:bg-dark-hover hover:bg-light-text-hover duration-200"
+                            <a
+                                class="cursor-pointer block py-2 px-3 border border-transparent rounded-md dark:hover:bg-dark-hover hover:bg-light-text-hover duration-200"
                                 (click)="logout()"
                             >
                                 Logout
-                            </button>
+                            </a>
                         </li>
                     }
                 }
 
                 <li class="hidden md:flex items-center justify-start">
                     <button
-                        class="p-2 rounded-2xl flex items-center justify-center cursor-pointer dark:hover:bg-dark-hover hover:bg-light-text-hover transition-[background-color] duration-200"
+                        class="p-2 rounded-md flex items-center justify-center cursor-pointer dark:hover:bg-dark-hover hover:bg-light-text-hover transition-[background-color] duration-200"
                         matButton
                         [matMenuTriggerFor]="menu"
                     >
