@@ -88,7 +88,7 @@ export class IssueFormComponent implements OnInit {
     ngOnInit(): void {
         this.issueForm = this.fb.group({
             title: [this.issue()?.title || '', [Validators.required, Validators.maxLength(255)]],
-            description: [this.issue()?.description || '', [Validators.maxLength(5000)]],
+            description: [this.issue()?.description || '', [Validators.maxLength(15000)]],
             type: [this.issue()?.type ?? IssueType.TASK, Validators.required],
             status: [this.issue()?.status ?? IssueStatus.OPEN, Validators.required],
             priority: [this.issue()?.priority ?? IssuePriority.MEDIUM, Validators.required],
