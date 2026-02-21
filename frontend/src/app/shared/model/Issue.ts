@@ -95,6 +95,7 @@ export interface Issue extends BaseModel {
     status: IssueStatus;
     priority: IssuePriority;
     createdBy: string;
+    updatedBy: string | null;
     assignedTo: string | null;
     createdAt: number;
     updatedAt: number | null;
@@ -104,4 +105,5 @@ export interface Issue extends BaseModel {
     creator?: User;
     assignee?: User | null;
     project?: Project;
+    updator?: User | null;
 }
