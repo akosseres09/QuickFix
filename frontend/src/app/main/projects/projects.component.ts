@@ -183,18 +183,26 @@ export class ProjectsComponent {
     }
 
     deleteProject() {
-        const projectId = this.selectedRow();
-        if (!projectId) {
+        const project = this.selectedRow();
+        if (!project) {
             this.snackbarService.open('No project selected', ['snackbar-error']);
             return;
         }
 
         // TODO: Implement actual delete API call
-        this.snackbarService.open(`Project "${this.selectedProjectName()}" deleted successfully!`);
-        this.selectedRow.set(null);
-        this.speedDial()?.close();
-        // After successful deletion, refresh the projects list
-        // this.getProjects();
+        this.projectService.deleteProject(project.key).subscribe({
+            next: () => {
+                this.snackbarService.open(
+                    `Project "${this.selectedProjectName()}" deleted successfully!`
+                );
+                this.selectedRow.set(null);
+                this.speedDial()?.close();
+                this.getProjects();
+            },
+            error: (error) => {
+                this.snackbarService.open('Error deleting project', ['snackbar-error']);
+            },
+        });
     }
 
     openArchiveConfirmation() {
