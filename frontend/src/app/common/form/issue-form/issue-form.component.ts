@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { Component, inject, input, model, OnInit, output, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -57,6 +57,7 @@ export class IssueFormComponent implements OnInit {
     private readonly memberService = inject(ProjectMemberService);
     private readonly activeRoute = inject(ActivatedRoute);
     private readonly authService = inject(AuthService);
+    private readonly location = inject(Location);
 
     projectId = input<string>('');
     issue = input<Issue | null>(null);
@@ -101,7 +102,7 @@ export class IssueFormComponent implements OnInit {
         });
 
         if (!this.projectId()) {
-            this.snackbarService.open('Project ID is missing. Cannot create issue.', [
+            this.snackbarService.open('Project ID is missing. Cannot create or edit issue.', [
                 'snackbar-error',
             ]);
             this.router.navigate(['../'], { relativeTo: this.activeRoute });
@@ -150,6 +151,6 @@ export class IssueFormComponent implements OnInit {
     }
 
     onCancel(): void {
-        this.router.navigate(['/project', this.projectId(), 'issues']);
+        this.location.back();
     }
 }
