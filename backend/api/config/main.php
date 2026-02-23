@@ -69,6 +69,15 @@ return [
                         '{id}' => '<id:[A-Za-z0-9_\-]+>',
                     ]
                 ],
+                [
+                    'class' => UrlRule::class,
+                    'controller' => ['comment'],
+                    'pluralize' => false,
+                    'prefix' => '<project_id:[A-Za-z0-9_\-]+>/<issue_id:[A-Za-z0-9_\-]+>/',
+                    'tokens' => [
+                        '{id}' => '<id:[A-Za-z0-9_\-]+>'
+                    ]
+                ],
                 'auth/login' => 'auth/login',
                 'auth/signup' => 'auth/signup',
                 'auth/logout' => 'auth/logout',
