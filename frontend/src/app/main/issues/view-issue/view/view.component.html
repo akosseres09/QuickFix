@@ -1,31 +1,61 @@
 <div class="max-w-6xl mx-auto">
-    <div class="flex justify-between items-center">
-        <div class="flex flex-col mb-6">
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+    <div class="flex flex-col justify-between items-start mb-6 gap-2">
+        <div class="flex flex-col md:flex-row gap-2 md:gap-0">
+            <h1 class="flex-2/3 text-3xl font-bold text-gray-900 dark:text-white">
                 {{ issue().title }}
             </h1>
-            <div class="flex gap-1 text-gray-500 dark:text-gray-400 text-sm">
-                <span>{{ issue().issueKey }}</span>
-                <span matTooltipShowDelay="500" [matTooltip]="issue().createdAt * 1000 | gmt"
-                    >Created {{ issue().createdAt * 1000 | relativeTime }}</span
+            <div class="md:flex-auto flex md:justify-end items-start gap-3">
+                <a
+                    mat-button
+                    class="!bg-light-text-hover dark:!bg-light-background-hover"
+                    [routerLink]="['../edit']"
                 >
-                <span
-                    >by:
-                    <a
-                        class="text-black dark:text-white hover:underline hover:underline-offset-2"
-                        [routerLink]="'/users/@' + issue().creator?.username"
-                        >{{ creatorName }}</a
-                    ></span
+                    Edit
+                </a>
+                <button
+                    class="!bg-transparent !hover:bg-light-text-hover dark:hover:!bg-light-background-hover !shadow-none !rounded-md"
+                    mat-mini-fab
+                    [matMenuTriggerFor]="menu"
                 >
+                    <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #menu="matMenu">
+                    <button (click)="copyIssueId()" mat-menu-item>
+                        <mat-icon>content_copy</mat-icon>
+                        Copy Issue ID
+                    </button>
+                    <button (click)="copyIssueLink()" mat-menu-item>
+                        <mat-icon>link</mat-icon>
+                        Copy Issue Link
+                    </button>
+                    @if (issue().status !== issueStatuses.CLOSED) {
+                        <button (click)="updateIssueStatus(issueStatuses.CLOSED)" mat-menu-item>
+                            <mat-icon>close</mat-icon>
+                            Close Issue
+                        </button>
+                    } @else {
+                        <button (click)="updateIssueStatus(issueStatuses.OPEN)" mat-menu-item>
+                            <mat-icon>play_circle_outline</mat-icon>
+                            Reopen Issue
+                        </button>
+                    }
+                </mat-menu>
             </div>
         </div>
-        <a
-            mat-button
-            class="!bg-light-text-hover dark:!bg-light-background-hover"
-            [routerLink]="['../edit']"
-        >
-            Edit
-        </a>
+        <div class="flex gap-1 text-gray-500 dark:text-gray-400 text-sm">
+            <span>{{ issue().issueKey }}</span>
+            <span matTooltipShowDelay="500" [matTooltip]="issue().createdAt * 1000 | gmt"
+                >Created {{ issue().createdAt * 1000 | relativeTime }}</span
+            >
+            <span
+                >by:
+                <a
+                    class="text-black dark:text-white hover:underline hover:underline-offset-2"
+                    [routerLink]="'/users/@' + issue().creator?.username"
+                    >{{ creatorName }}</a
+                ></span
+            >
+        </div>
     </div>
     <div class="flex flex-col lg:flex-row gap-8">
         <div class="flex-1 min-w-0">
@@ -66,7 +96,16 @@
                 }
             </div>
 
-            <div class="pt-2">
+            <div class="pt-2 space-y-2">
+                @if (issue().closedAt) {
+                    <div class="flex gap-1 text-gray-500 dark:text-gray-400 text-sm">
+                        <span
+                            matTooltipShowDelay="500"
+                            [matTooltip]="issue().closedAt! * 1000 | gmt"
+                            >Closed {{ issue().closedAt! * 1000 | relativeTime }}</span
+                        >
+                    </div>
+                }
                 @if (issue().updatedAt && issue().updatedAt !== issue().createdAt) {
                     <div class="flex gap-1 text-gray-500 dark:text-gray-400 text-sm">
                         <span
@@ -82,16 +121,6 @@
                                 >{{ updatorName }}</a
                             ></span
                         >
-                    </div>
-                }
-
-                @if (issue().closedAt) {
-                    <div class="flex items-center gap-3 mt-4 ml-11">
-                        <mat-icon class="!text-sm text-green-600">check_circle</mat-icon>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">
-                            Closed
-                            {{ issue().closedAt! * 1000 | relativeTime }}
-                        </p>
                     </div>
                 }
             </div>

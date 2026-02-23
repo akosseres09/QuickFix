@@ -1,6 +1,7 @@
-import { Component, computed, input, signal } from '@angular/core';
+import { Component, computed, inject, input, model, signal } from '@angular/core';
 import {
     Issue,
+    IssueStatus,
     IssueType,
     PRIORITY_COLOR_MAP,
     PRIORITY_MAP,
@@ -18,6 +19,9 @@ import { QuillModule } from 'ngx-quill';
 import { MatIconModule } from '@angular/material/icon';
 import { AvatarComponent } from '../../../../common/avatar/avatar.component';
 import { MatButtonModule } from '@angular/material/button';
+import { MatMenuModule } from '@angular/material/menu';
+import { IssueService } from '../../../../shared/services/issue/issue.service';
+import { SnackbarService } from '../../../../shared/services/snackbar/snackbar.service';
 
 @Component({
     selector: 'app-view',
@@ -26,6 +30,7 @@ import { MatButtonModule } from '@angular/material/button';
         MatTooltipModule,
         MatIconModule,
         MatButtonModule,
+        MatMenuModule,
         AvatarComponent,
         QuillModule,
         RouterLink,
@@ -36,11 +41,15 @@ import { MatButtonModule } from '@angular/material/button';
     styleUrl: './view.component.css',
 })
 export class ViewComponent {
-    issue = input.required<Issue>();
+    private readonly issueService = inject(IssueService);
+    private readonly snackbarService = inject(SnackbarService);
+
+    issueStatuses = IssueStatus;
+
+    issue = model.required<Issue>();
     descriptionExpanded = signal<boolean>(false);
     showDescriptionExpandButton = computed(() => {
         const issue = this.issue();
-
         return issue?.description && issue.description.length / 2 > 1000;
     });
 
@@ -72,6 +81,57 @@ export class ViewComponent {
         const issue = this.issue();
         if (!issue?.dueDate) return false;
         return issue.dueDate * 1000 < Date.now() && issue.status < 3;
+    }
+
+    updateIssueStatus(status: IssueStatus): void {
+        this.issueService
+            .updateIssue(this.issue().id, {
+                status: status,
+                closedAt: status === IssueStatus.CLOSED ? Math.floor(Date.now() / 1000) : null,
+            })
+            .subscribe({
+                next: (updatedIssue) => {
+                    this.issue.set({
+                        ...this.issue(),
+                        ...updatedIssue,
+                    });
+                    this.snackbarService.open('Issue status updated successfully');
+                },
+                error: (err) => {
+                    console.error('Failed to update issue status:', err);
+                    this.snackbarService.open('Failed to update issue status', ['snackbar-error']);
+                },
+            });
+    }
+
+    copyIssueId(): void {
+        const issue = this.issue();
+        if (!issue) return;
+
+        navigator.clipboard.writeText(issue.id).then(
+            () => {
+                this.snackbarService.open('Issue ID copied to clipboard');
+            },
+            (err) => {
+                console.error('Failed to copy issue ID:', err);
+                this.snackbarService.open('Failed to copy issue ID', ['snackbar-error']);
+            }
+        );
+    }
+
+    copyIssueLink(): void {
+        const issue = this.issue();
+        if (!issue) return;
+
+        navigator.clipboard.writeText(window.location.href).then(
+            () => {
+                this.snackbarService.open('Issue link copied to clipboard');
+            },
+            (err) => {
+                console.error('Failed to copy issue link:', err);
+                this.snackbarService.open('Failed to copy issue link', ['snackbar-error']);
+            }
+        );
     }
 
     get creatorName(): string {

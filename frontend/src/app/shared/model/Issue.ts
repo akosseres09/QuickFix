@@ -31,7 +31,7 @@ export const STATUS_COLOR_MAP: { [key: number]: string } = {
     [IssueStatus.IN_PROGRESS]: 'text-indigo-700 bg-indigo-100',
     [IssueStatus.REVIEW]: 'text-fuchsia-700 bg-fuchsia-100',
     [IssueStatus.RESOLVED]: 'text-teal-700 bg-teal-100',
-    [IssueStatus.CLOSED]: 'text-gray-500 bg-gray-200',
+    [IssueStatus.CLOSED]: 'text-orange-500 bg-orange-200',
 };
 
 export enum IssuePriority {
