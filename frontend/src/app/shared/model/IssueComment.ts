@@ -5,8 +5,8 @@ export interface IssueComment {
     id: string;
     issueId: string;
     content: string;
-    createdAt: string;
-    updatedAt: string;
+    createdAt: number;
+    updatedAt: number;
     createdBy: string;
     updatedBy: string;
     issue?: Issue;

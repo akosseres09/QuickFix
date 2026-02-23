@@ -3,6 +3,7 @@
 namespace api\controllers;
 
 use common\models\Comment;
+use common\models\search\CommentSearch;
 use Yii;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
@@ -15,6 +16,11 @@ class CommentController extends BaseRestController
 
     public function actions() {
         $actions = parent::actions();
+
+        $actions["index"]['prepareDataProvider'] = function ($action, $filter) {
+            $commentSearch = new CommentSearch();
+            return $commentSearch->search(Yii::$app->request->queryParams);
+        };;
 
         $actions['view']['findModel'] = [$this, 'findModel'];
         $actions['update']['findModel'] = [$this, 'findModel'];

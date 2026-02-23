@@ -27,7 +27,7 @@ class CommentSearch extends Comment implements SearchInterface {
         $dataProvider = new ActiveDataProvider([
             'query'=> $query,
             'pagination' => [
-                'page' => $page,
+                'page' => $page - 1,
                 'pageSize' => $pageSize,
                 'pageSizeParam' => 'pageSize',
                 'pageParam' => 'page' 

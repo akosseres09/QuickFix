@@ -41,7 +41,7 @@ class IssueSearch extends Issue implements SearchInterface
 
         $query = Issue::find()->byProject( $projectId);
 
-        $dataProvider = new \yii\data\ActiveDataProvider([
+        $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'pagination' => [
                 'page' => $page - 1,
