@@ -3,9 +3,10 @@
 namespace common\models\search;
 
 use common\models\Issue;
-use common\models\Project;
+use yii\data\ActiveDataProvider;
+use yii\web\BadRequestHttpException;
 
-class IssueSearch extends Issue
+class IssueSearch extends Issue implements SearchInterface
 {
     public function rules(): array
     {
@@ -26,7 +27,7 @@ class IssueSearch extends Issue
         return parent::fields();
     }
 
-    public function search($params)
+    public function search($params): ActiveDataProvider
     {
         $page = isset($params['page']) ? (int)$params['page'] : 1;
         $pageSize = isset($params['pageSize']) ? (int)$params['pageSize'] : 20;
@@ -35,19 +36,10 @@ class IssueSearch extends Issue
         // Can be the project ID or project key
         $projectId = $params['project_id'] ?? null;
         if (!$projectId) {
-            throw new \InvalidArgumentException('Project ID is required for issue search.');
+            throw new BadRequestHttpException('Project ID is required for issue search.');
         }
 
-        $project = null;
-        // if $projectId is not project.id then try to find project by key
-        if (strlen($projectId) !== 36) {
-            $project = Project::find()->byKey($projectId)->one();
-            if (!$project) {
-                throw new \InvalidArgumentException('Project not found with the given ID or key.');
-            }
-        }
-
-        $query = Issue::find()->byProjectId($project ? $project->id : $projectId);
+        $query = Issue::find()->byProject( $projectId);
 
         $dataProvider = new \yii\data\ActiveDataProvider([
             'query' => $query,

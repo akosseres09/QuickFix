@@ -6,7 +6,7 @@ use common\models\Project;
 use yii\data\ActiveDataProvider;
 use Yii;
 
-class ProjectSearch extends Project
+class ProjectSearch extends Project implements SearchInterface
 {
     public function rules(): array
     {
@@ -17,7 +17,7 @@ class ProjectSearch extends Project
         ];
     }
 
-    public function search($params)
+    public function search($params): ActiveDataProvider
     {
         $userId = Yii::$app->user->id;
 
@@ -38,9 +38,6 @@ class ProjectSearch extends Project
                     ['is not', 'pm.id', null]
                 ]
             ]);
-
-        // 2. REMOVED: $query->groupBy('p.id'); 
-        // Since the Left Join only matches the distinct current user, rows are already unique.
 
         // Extract pagination params from request
         $page = isset($params['page']) ? (int)$params['page'] : 1;

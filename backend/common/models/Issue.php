@@ -95,14 +95,15 @@ class Issue extends ActiveRecord
             return false;
         }
 
-        // Ensure that the issue key is generated before validation
-        if ($this->isNewRecord && empty($this->issue_key)) {
-            $this->issue_key = $this->generateIssueKey();
-        }
-
         if (!$this->isNewRecord) {
             return true;
         }
+
+        // Ensure that the issue key is generated before validation
+        if (empty($this->issue_key)) {
+            $this->issue_key = $this->generateIssueKey();
+        }
+
 
         $projectId = Yii::$app->request->get('project_id');
         if ($projectId === null) {
@@ -286,7 +287,7 @@ class Issue extends ActiveRecord
             return null;
         }
 
-        $count = Issue::find()->byProjectId($this->project_id)->count();
+        $count = Issue::find()->byProject($this->project_id)->count();
         $nextNumber = $count + 1;
         return strtoupper($project->key) . '-' . $nextNumber;
     }
