@@ -22,20 +22,31 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { IssueService } from '../../../../shared/services/issue/issue.service';
 import { SnackbarService } from '../../../../shared/services/snackbar/snackbar.service';
+import { TextEditorComponent } from '../../../../common/text-editor/text-editor.component';
+import { ViewCommentComponent } from '../view-comment/view-comment.component';
+import { IssueCommentService } from '../../../../shared/services/issue-comment/issue-comment.service';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { IssueComment } from '../../../../shared/model/IssueComment';
+import { finalize } from 'rxjs';
 
 @Component({
     selector: 'app-view',
     imports: [
+        ReactiveFormsModule,
         CommonModule,
         MatTooltipModule,
         MatIconModule,
         MatButtonModule,
         MatMenuModule,
+        MatFormFieldModule,
         AvatarComponent,
         QuillModule,
         RouterLink,
         RelativeTimePipe,
         GMTPipe,
+        TextEditorComponent,
+        ViewCommentComponent,
     ],
     templateUrl: './view.component.html',
     styleUrl: './view.component.css',
@@ -43,16 +54,29 @@ import { SnackbarService } from '../../../../shared/services/snackbar/snackbar.s
 export class ViewComponent {
     private readonly issueService = inject(IssueService);
     private readonly snackbarService = inject(SnackbarService);
+    private readonly issueCommentService = inject(IssueCommentService);
+    private readonly fb = inject(FormBuilder);
 
-    issueStatuses = IssueStatus;
-
+    // inputs
+    issueId = input.required<string>();
+    projectId = input.required<string>();
     issue = model.required<Issue>();
+
+    // signals
     descriptionExpanded = signal<boolean>(false);
     showDescriptionExpandButton = computed(() => {
         const issue = this.issue();
         return issue?.description && issue.description.length / 2 > 1000;
     });
 
+    // from
+
+    commentForm = this.fb.group({
+        content: ['', [Validators.required, Validators.maxLength(15000)]],
+    });
+
+    // constants
+    issueStatuses = IssueStatus;
     PRIORITY_COLOR_MAP = PRIORITY_COLOR_MAP;
     PRIORITY_MAP = PRIORITY_MAP;
     STATUS_COLOR_MAP = STATUS_COLOR_MAP;
@@ -134,6 +158,37 @@ export class ViewComponent {
         );
     }
 
+    createComment() {
+        if (this.commentForm.invalid) {
+            this.commentForm.markAllAsTouched();
+            return;
+        }
+
+        const newComment: Partial<IssueComment> = {
+            content: this.comment.value as string,
+        };
+        this.issueCommentService
+            .createComment({
+                projectId: this.projectId(),
+                issueId: this.issueId(),
+                data: newComment,
+            })
+            .pipe(
+                finalize(() => {
+                    this.commentForm.reset();
+                    this.commentForm.markAsUntouched();
+                })
+            )
+            .subscribe({
+                next: (result) => {
+                    console.log(result);
+                },
+                error: (error) => {
+                    this.snackbarService.open('Failed to add comment!', ['snackbar-error']);
+                },
+            });
+    }
+
     get creatorName(): string {
         const issue = this.issue();
         if (!issue) return 'Unknown';
@@ -165,5 +220,9 @@ export class ViewComponent {
         }
 
         return updator.username;
+    }
+
+    get comment() {
+        return this.commentForm.get('content')!;
     }
 }

@@ -1,0 +1,20 @@
+<div class="space-y-8">
+    @for (comment of comments(); track comment.id) {
+        <div
+            [ngClass]="{
+                'before:content-[\'\'] before:bg-gray-700 before:absolute before:block before:h-8 before:w-[1px] before:top-[-2rem] before:left-20':
+                    !$first,
+            }"
+            class="relative flex gap-4 comment"
+        >
+            <app-avatar [user]="comment.creator!"></app-avatar>
+            <div class="w-full border border-gray-700 p-4 rounded-md">
+                <quill-view
+                    class="!w-full border-red-500"
+                    format="json"
+                    [content]="comment.content"
+                ></quill-view>
+            </div>
+        </div>
+    }
+</div>

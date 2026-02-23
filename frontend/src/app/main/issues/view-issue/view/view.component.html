@@ -1,5 +1,5 @@
 <div class="max-w-6xl mx-auto">
-    <div class="flex flex-col justify-between items-start mb-6 gap-2">
+    <div class="flex flex-col justify-between items-start mb-6 py-2 gap-2">
         <div class="flex flex-col md:flex-row gap-2 md:gap-0">
             <h1 class="flex-2/3 text-3xl font-bold text-gray-900 dark:text-white">
                 {{ issue().title }}
@@ -58,7 +58,8 @@
         </div>
     </div>
     <div class="flex flex-col lg:flex-row gap-8">
-        <div class="flex-1 min-w-0">
+        <!-- Left side -->
+        <div class="flex-1 min-w-0 order-2 lg:order-1">
             <div class="mb-4">
                 <div
                     class="h-full transition-[max-height] duration-300 ease-in-out"
@@ -96,7 +97,7 @@
                 }
             </div>
 
-            <div class="pt-2 space-y-2">
+            <div class="mt-2 mb-6 space-y-2">
                 @if (issue().closedAt) {
                     <div class="flex gap-1 text-gray-500 dark:text-gray-400 text-sm">
                         <span
@@ -124,11 +125,42 @@
                     </div>
                 }
             </div>
+            <app-view-comment [issueId]="issueId()" [projectId]="projectId()"></app-view-comment>
+            <form
+                [formGroup]="commentForm"
+                class="flex mt-12 my-4 gap-6 flex-col items-end"
+                (submit)="createComment()"
+            >
+                <div class="flex flex-col gap-2">
+                    <label class="font-semibold">Add a Comment</label>
+                    <app-text-editor formControlName="content"></app-text-editor>
+                    @if (comment.invalid && (comment.touched || comment.dirty)) {
+                        <mat-error class="text-[var(--mat-form-field-error-text-color)]">
+                            @if (comment.getError('required')) {
+                                <span>Comment is required</span>
+                            }
+                            @if (comment.getError('maxlength')) {
+                                <span>Comment is too long</span>
+                            }
+                        </mat-error>
+                    }
+                </div>
+                <button
+                    class="!text-white"
+                    [disabled]="commentForm.invalid"
+                    mat-flat-button
+                    color="primary"
+                >
+                    <mat-icon>add</mat-icon>
+                    Add comment
+                </button>
+            </form>
         </div>
 
-        <div class="lg:w-72 shrink-0 lg:sticky lg:top-4 lg:self-start">
+        <!-- Right side -->
+        <div class="lg:order-2 order-1 lg:w-60 xl:w-72 shrink-0 lg:sticky lg:top-8 lg:self-start">
             <div class="space-y-3">
-                <div class="border-b border-light-text-hover py-5">
+                <div class="border-b border-gray-700 py-5">
                     <h3 class="text-xs font-semibold uppercase tracking-wide mb-4">Status</h3>
                     <span
                         class="inline-flex px-3 py-1 rounded-full text-sm font-medium"
@@ -138,7 +170,7 @@
                     </span>
                 </div>
 
-                <div class="border-b border-light-text-hover py-5">
+                <div class="border-b border-gray-700 py-5">
                     <h3 class="text-xs font-semibold uppercase tracking-wide mb-4">Priority</h3>
                     <span
                         class="inline-flex px-3 py-1 rounded-full text-sm font-medium"
@@ -148,7 +180,7 @@
                     </span>
                 </div>
 
-                <div class="border-b border-light-text-hover py-5">
+                <div class="border-b border-gray-700 py-5">
                     <h3 class="text-xs font-semibold uppercase tracking-wide mb-4">Assignee</h3>
                     @if (issue().assignee) {
                         <div class="flex items-center gap-2">
@@ -173,7 +205,7 @@
                     }
                 </div>
 
-                <div class="border-b border-light-text-hover py-5">
+                <div class="border-b border-gray-700 py-5">
                     <h3 class="text-xs font-semibold uppercase tracking-wide mb-4">Due Date</h3>
                     @if (issue().dueDate) {
                         <div

@@ -1,6 +1,5 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, input, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
 import { IssueService } from '../../../shared/services/issue/issue.service';
 import { Issue } from '../../../shared/model/Issue';
@@ -12,18 +11,17 @@ import { ViewComponent } from './view/view.component';
     templateUrl: './view-issue.component.html',
     styleUrl: './view-issue.component.css',
 })
-export class ViewIssueComponent {
-    private readonly activeRoute = inject(ActivatedRoute);
+export class ViewIssueComponent implements OnInit {
     private readonly issueService = inject(IssueService);
 
-    issueId = signal<string | null>(this.activeRoute.snapshot.paramMap.get('issueId'));
-    projectId = signal<string | null>(
-        this.activeRoute.parent?.parent?.snapshot.paramMap.get('projectId') || null
-    );
+    // angular automatically binds the URL parameters to these signals
+    issueId = input.required<string>();
+    projectId = input.required<string>();
+
     issue = signal<Issue | null>(null);
     loading = signal<boolean>(true);
 
-    constructor() {
+    ngOnInit() {
         const id = this.issueId();
         const projectId = this.projectId();
 
