@@ -33,7 +33,7 @@ class CommentSearch extends Comment implements SearchInterface {
                 'pageParam' => 'page' 
             ],
             'sort' => [
-                'defaultOrder' => ['createdAt' => SORT_DESC],
+                'defaultOrder' => ['createdAt' => SORT_ASC],
                 'attributes' => [
                     'createdAt' => [
                         'asc' => ['created_at' => SORT_ASC],
