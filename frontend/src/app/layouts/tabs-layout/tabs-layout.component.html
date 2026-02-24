@@ -1,4 +1,9 @@
-<nav mat-tab-nav-bar [tabPanel]="tabPanel">
+<nav
+    mat-tab-nav-bar
+    [mat-stretch-tabs]="false"
+    [tabPanel]="tabPanel"
+    class="border-b border-gray-700"
+>
     @for (tab of tabs(); track $index) {
         <a
             mat-tab-link
@@ -7,6 +12,7 @@
             [routerLinkActiveOptions]="{ exact: true }"
             #rla="routerLinkActive"
             [active]="rla.isActive"
+            class="w-[12.5rem]"
         >
             {{ tab.label }}
         </a>
