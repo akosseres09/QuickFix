@@ -33,4 +33,21 @@
             </div>
         </div>
     }
+
+    @if (hasMore()) {
+        <div class="flex justify-center mt-4">
+            <button
+                mat-flat-button
+                (click)="loadMore()"
+                [disabled]="isLoading()"
+                class="!bg-transparent !rounded-md"
+            >
+                @if (isLoading()) {
+                    Loading...
+                } @else {
+                    Load More
+                }
+            </button>
+        </div>
+    }
 </div>
