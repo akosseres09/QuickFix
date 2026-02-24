@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { IssueComment } from '../../model/IssueComment';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../../environments/environment.development';
-import { map, Observable } from 'rxjs';
+import { map, Observable, Subject, tap } from 'rxjs';
 import { PaginatedResponse } from '../../constants/api/PaginatedResponse';
 
 export type CommentRequestParams = {
@@ -25,6 +25,7 @@ export type CursorPaginatedResponse<T> = {
 export class IssueCommentService {
     private readonly http = inject(HttpClient);
     private readonly url = environment.apiUrl;
+    readonly commentCreated$ = new Subject<IssueComment>();
 
     getCommentsToIssue(
         data: CommentRequestParams
@@ -51,10 +52,21 @@ export class IssueCommentService {
             );
     }
 
-    createComment(data: Omit<Required<CommentRequestParams>, 'expand' | 'cursor'>) {
-        return this.http.post<IssueComment>(
-            `${this.url}/${data.projectId}/${data.issueId}/comment`,
-            data.data
-        );
+    createComment(data: Omit<Required<CommentRequestParams>, 'cursor'>) {
+        const params = new HttpParams().set('expand', data.expand);
+
+        return this.http
+            .post<IssueComment>(
+                `${this.url}/${data.projectId}/${data.issueId}/comment`,
+                data.data,
+                {
+                    params: params,
+                }
+            )
+            .pipe(
+                tap((result) => {
+                    this.commentCreated$.next(result);
+                })
+            );
     }
 }

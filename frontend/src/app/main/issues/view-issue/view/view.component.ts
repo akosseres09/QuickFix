@@ -172,17 +172,17 @@ export class ViewComponent {
                 projectId: this.projectId(),
                 issueId: this.issueId(),
                 data: newComment,
+                expand: 'creator,updator',
             })
             .pipe(
                 finalize(() => {
                     this.commentForm.reset();
                     this.commentForm.markAsUntouched();
+                    this.commentForm.markAsPristine();
                 })
             )
             .subscribe({
-                next: (result) => {
-                    console.log(result);
-                },
+                next: (result) => {},
                 error: (error) => {
                     this.snackbarService.open('Failed to add comment!', ['snackbar-error']);
                 },

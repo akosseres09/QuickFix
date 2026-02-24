@@ -1,4 +1,4 @@
-import { Component, inject, input, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, inject, input, OnInit, signal } from '@angular/core';
 import { IssueCommentService } from '../../../../shared/services/issue-comment/issue-comment.service';
 import { IssueComment } from '../../../../shared/model/IssueComment';
 import { AvatarComponent } from '../../../../common/avatar/avatar.component';
@@ -9,6 +9,8 @@ import { RouterLink } from '@angular/router';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { GMTPipe } from '../../../../shared/pipes/gmt/gmt.pipe';
 import { MatButton } from '@angular/material/button';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { SnackbarService } from '../../../../shared/services/snackbar/snackbar.service';
 
 @Component({
     selector: 'app-view-comment',
@@ -27,6 +29,8 @@ import { MatButton } from '@angular/material/button';
 })
 export class ViewCommentComponent implements OnInit {
     private readonly issueCommentService = inject(IssueCommentService);
+    private readonly destroyRef = inject(DestroyRef);
+    private readonly snackbarSerivce = inject(SnackbarService);
 
     issueId = input.required<string>();
     projectId = input.required<string>();
@@ -38,6 +42,22 @@ export class ViewCommentComponent implements OnInit {
 
     ngOnInit(): void {
         this.loadComments();
+
+        this.issueCommentService.commentCreated$
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+                next: (comment) => {
+                    if (!this.hasMore()) {
+                        this.comments.update((current) => [...current, comment]);
+                        this.nextCursor.set(comment.id);
+                    }
+                    this.snackbarSerivce.open('Comment added!');
+                },
+                error: (error) => {
+                    console.error('Error in updating UI', error);
+                    this.snackbarSerivce.open('Failed to add comment!', ['snackbar-error']);
+                },
+            });
     }
 
     loadComments(cursor?: string): void {
