@@ -20,7 +20,7 @@ class CommentController extends BaseRestController
         $actions["index"]['prepareDataProvider'] = function ($action, $filter) {
             $commentSearch = new CommentSearch();
             return $commentSearch->search(Yii::$app->request->queryParams);
-        };;
+        };
 
         $actions['view']['findModel'] = [$this, 'findModel'];
         $actions['update']['findModel'] = [$this, 'findModel'];
