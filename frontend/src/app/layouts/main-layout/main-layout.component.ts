@@ -1,13 +1,15 @@
 import { Component, inject, input, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { NavbarComponent } from '../../common/navbar/navbar.component';
 import { MatSidenavContainer, MatSidenav, MatSidenavContent } from '@angular/material/sidenav';
-import { AppRoute } from '../../shared/constants/route/Routes';
+import { SidenavRoute } from '../../shared/constants/route/Routes';
 import { NavitemComponent } from '../../common/sidenav/navitem/navitem.component';
 import { ThemeService } from '../../shared/services/theme/theme.service';
 import { fromEvent } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../shared/services/auth/auth.service';
+import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 
 @Component({
     selector: 'app-main-layout',
@@ -24,11 +26,16 @@ import { CommonModule } from '@angular/common';
     styleUrl: './main-layout.component.css',
 })
 export class MainLayoutComponent implements OnInit {
+    private readonly themeService = inject(ThemeService);
+    private readonly authService = inject(AuthService);
+    private readonly router = inject(Router);
+    private readonly snackbarService = inject(SnackbarService);
+
     projectId = input.required<string>();
 
-    private themeService = inject(ThemeService);
     isSidebarOpened = signal<boolean>(window.innerWidth > 767);
-    sideNavRoutes = signal<AppRoute[]>([]);
+    sidenavRoutes = signal<SidenavRoute[]>([]);
+    bottomSidenavRoutes = signal<SidenavRoute[]>([]);
     imageSource = signal<string>(this.themeService.logos[this.themeService.getTheme()]);
     sidebarMode = signal<'over' | 'push' | 'side'>(window.innerWidth < 768 ? 'over' : 'side');
 
@@ -42,10 +49,11 @@ export class MainLayoutComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.sideNavRoutes.set(this.getSideNavRoutes());
+        this.sidenavRoutes.set(this.getSidenavRoutes());
+        this.bottomSidenavRoutes.set(this.getBottomSidenavRoutes());
     }
 
-    getSideNavRoutes(): Array<AppRoute> {
+    getSidenavRoutes(): SidenavRoute[] {
         return [
             {
                 name: this.projectId(),
@@ -117,5 +125,42 @@ export class MainLayoutComponent implements OnInit {
                 icon: 'access_time',
             },
         ];
+    }
+
+    getBottomSidenavRoutes(): SidenavRoute[] {
+        return [
+            {
+                name: 'Account',
+                path: '/account',
+                type: 'menu',
+                icon: 'account_box',
+                children: [
+                    {
+                        name: 'Settings',
+                        path: '/settings',
+                        icon: 'settings',
+                    },
+                    {
+                        name: 'Logout',
+                        onClick: () => {
+                            this.logout();
+                        },
+                        icon: 'logout',
+                    },
+                ],
+            },
+        ];
+    }
+
+    logout() {
+        this.authService.logout().subscribe({
+            next: () => {
+                this.router.navigate(['/auth/login']);
+            },
+            error: (error) => {
+                console.error(error);
+                this.snackbarService.open('Failed to log out!', ['snackbar-error']);
+            },
+        });
     }
 }

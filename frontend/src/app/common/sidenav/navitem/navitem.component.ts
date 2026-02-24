@@ -1,5 +1,5 @@
 import { Component, inject, input } from '@angular/core';
-import { AppRoute, ChildRoute } from '../../../shared/constants/route/Routes';
+import { SidenavRoute, ChildRoute } from '../../../shared/constants/route/Routes';
 import {
     ActivatedRoute,
     IsActiveMatchOptions,
@@ -14,6 +14,7 @@ import {
     MatExpansionPanelTitle,
 } from '@angular/material/expansion';
 import { CommonModule } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
     selector: 'app-navitem',
@@ -25,12 +26,13 @@ import { CommonModule } from '@angular/common';
         MatExpansionPanelHeader,
         MatExpansionPanelTitle,
         CommonModule,
+        MatButtonModule,
     ],
     templateUrl: './navitem.component.html',
     styleUrl: './navitem.component.css',
 })
 export class NavitemComponent {
-    routes = input<Array<AppRoute>>([]);
+    routes = input<Array<SidenavRoute>>([]);
     isCollapsed = input<boolean>(false);
     route = inject(ActivatedRoute);
     router = inject(Router);
@@ -42,6 +44,8 @@ export class NavitemComponent {
     };
 
     isChildrenActive(children: Array<ChildRoute>): boolean {
-        return children.some((child) => this.router.isActive(child.path, this.matchOption));
+        return children.some((child) =>
+            this.router.isActive(child.path as string, this.matchOption)
+        );
     }
 }

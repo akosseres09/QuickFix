@@ -15,18 +15,31 @@
                     </mat-panel-title>
                 </mat-expansion-panel-header>
                 @for (child of route.children; track $index) {
-                    <a
-                        class="flex items-center gap-3 w-full ms-2 px-3 py-2 rounded-md hover:bg-light-text-hover dark:hover:bg-dark-hover transition-[background-color] duration-100"
-                        [class.my-2]="!$last"
-                        [routerLink]="child.path"
-                        routerLinkActive="bg-light-text-hover dark:bg-dark-hover"
-                        [routerLinkActiveOptions]="{ exact: true }"
-                    >
-                        @if (child.icon) {
-                            <mat-icon> {{ child.icon }} </mat-icon>
-                        }
-                        {{ child.name }}
-                    </a>
+                    @if (child.path) {
+                        <a
+                            class="flex items-center gap-3 w-full ms-2 px-3 py-2 rounded-md hover:bg-light-text-hover dark:hover:bg-dark-hover transition-[background-color] duration-100"
+                            [class.my-2]="!$last"
+                            [routerLink]="child.path"
+                            routerLinkActive="bg-light-text-hover dark:bg-dark-hover"
+                            [routerLinkActiveOptions]="{ exact: true }"
+                        >
+                            @if (child.icon) {
+                                <mat-icon> {{ child.icon }} </mat-icon>
+                            }
+                            {{ child.name }}
+                        </a>
+                    } @else {
+                        <button
+                            class="cursor-pointer flex items-center justify-start gap-3 w-full ms-2 px-3 py-2 rounded-md hover:bg-light-text-hover dark:hover:bg-dark-hover transition-[background-color] duration-100"
+                            [class.my-2]="!$last"
+                            (click)="child.onClick?.()"
+                        >
+                            @if (child.icon) {
+                                <mat-icon> {{ child.icon }} </mat-icon>
+                            }
+                            {{ child.name }}
+                        </button>
+                    }
                 }
             </mat-expansion-panel>
         } @else if (isCollapsed()) {

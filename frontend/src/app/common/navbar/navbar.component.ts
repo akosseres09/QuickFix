@@ -15,7 +15,7 @@ import { MatIcon } from '@angular/material/icon';
 import { Event, NavigationStart, Router, RouterLink, RouterModule } from '@angular/router';
 import { ThemeService } from '../../shared/services/theme/theme.service';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
-import { AppRoute } from '../../shared/constants/route/Routes';
+import { SidenavRoute } from '../../shared/constants/route/Routes';
 import { filter, fromEvent } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Claims } from '../../shared/constants/user/Claims';
@@ -53,7 +53,7 @@ export class NavbarComponent implements AfterViewInit {
     isMenuOpen = signal<boolean>(false);
     user = signal<Claims | null>(this.authService.currentUserClaims());
     htmlElement = signal<HTMLElement | null>(document.documentElement);
-    routes = signal<AppRoute[]>(this.getAppRoutes().filter((route) => route.show));
+    routes = signal<SidenavRoute[]>(this.getAppRoutes().filter((route) => route.show));
     theme = signal<'light' | 'dark'>(this.themeService.getTheme() || 'light');
     showSidebarToggleButton = model<boolean>(true);
     sidebarToggleButton = signal<boolean>(window.innerWidth <= 767);
@@ -100,7 +100,7 @@ export class NavbarComponent implements AfterViewInit {
         el.dataset['theme'] = this.theme();
     }
 
-    getAppRoutes(): Array<AppRoute> {
+    getAppRoutes(): Array<SidenavRoute> {
         return [
             {
                 path: '/auth/login',

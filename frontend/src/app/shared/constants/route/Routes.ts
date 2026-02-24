@@ -1,6 +1,6 @@
 import { UrlTree } from '@angular/router';
 
-export type AppRoute =
+export type SidenavRoute =
     | {
           type: 'menu';
           name: string;
@@ -20,8 +20,17 @@ export type AppRoute =
           exact?: boolean;
       };
 
+type LinkChild = {
+    path: string;
+    onClick?: never;
+};
+
+type ActionChild = {
+    path?: never;
+    onClick: () => void;
+};
+
 export type ChildRoute = {
     name: string;
-    path: string;
     icon: string;
-};
+} & (LinkChild | ActionChild);
