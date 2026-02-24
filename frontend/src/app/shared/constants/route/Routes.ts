@@ -1,3 +1,5 @@
+import { UrlTree } from '@angular/router';
+
 export type AppRoute =
     | {
           type: 'menu';
@@ -11,7 +13,7 @@ export type AppRoute =
     | {
           type: 'button';
           name: string;
-          path: string;
+          path: string | any[] | UrlTree | null | undefined;
           show?: boolean;
           icon?: string;
           children?: never;

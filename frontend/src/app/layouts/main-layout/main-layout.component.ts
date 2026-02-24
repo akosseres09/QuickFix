@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, input, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { NavbarComponent } from '../../common/navbar/navbar.component';
 import { MatSidenavContainer, MatSidenav, MatSidenavContent } from '@angular/material/sidenav';
@@ -23,12 +23,12 @@ import { CommonModule } from '@angular/common';
     templateUrl: './main-layout.component.html',
     styleUrl: './main-layout.component.css',
 })
-export class MainLayoutComponent {
-    private activeRoute = inject(ActivatedRoute);
+export class MainLayoutComponent implements OnInit {
+    projectId = input.required<string>();
+
     private themeService = inject(ThemeService);
     isSidebarOpened = signal<boolean>(window.innerWidth > 767);
-    projectId = signal<string | null>(this.activeRoute.snapshot.paramMap.get('projectId'));
-    sideNavRoutes = signal<AppRoute[]>(this.getSideNavRoutes());
+    sideNavRoutes = signal<AppRoute[]>([]);
     imageSource = signal<string>(this.themeService.logos[this.themeService.getTheme()]);
     sidebarMode = signal<'over' | 'push' | 'side'>(window.innerWidth < 768 ? 'over' : 'side');
 
@@ -41,8 +41,24 @@ export class MainLayoutComponent {
             });
     }
 
+    ngOnInit(): void {
+        this.sideNavRoutes.set(this.getSideNavRoutes());
+    }
+
     getSideNavRoutes(): Array<AppRoute> {
         return [
+            {
+                name: this.projectId(),
+                type: 'button',
+                path: `/project/${this.projectId()}`,
+                icon: 'bolt',
+            },
+            {
+                name: 'Projects',
+                type: 'button',
+                path: '/projects',
+                icon: 'folder_open',
+            },
             {
                 name: 'Issues',
                 type: 'menu',
@@ -72,10 +88,33 @@ export class MainLayoutComponent {
                 ],
             },
             {
-                name: 'Labels',
+                name: 'Manage',
+                type: 'menu',
+                icon: 'manage_accounts',
+                path: `project/${this.projectId()}/manage`,
+                children: [
+                    {
+                        name: 'Users',
+                        path: `project/${this.projectId()}/users`,
+                        icon: 'person',
+                    },
+                    {
+                        name: 'Activity',
+                        path: `project/${this.projectId()}/activity`,
+                        icon: 'local_activity',
+                    },
+                    {
+                        name: 'Labels',
+                        icon: 'label',
+                        path: `/project/${this.projectId()}/labels`,
+                    },
+                ],
+            },
+            {
+                name: 'Worktime',
+                path: '/worktime',
                 type: 'button',
-                icon: 'label',
-                path: `/project/${this.projectId()}/labels`,
+                icon: 'access_time',
             },
         ];
     }
