@@ -4,6 +4,7 @@ namespace common\models;
 
 use common\models\query\CommentQuery;
 use common\models\resource\UserResource;
+use Symfony\Component\Uid\Uuid;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -105,7 +106,8 @@ class Comment extends ActiveRecord
         }
 
         if (empty($this->id)) {
-            $this->id = Yii::$app->security->generateRandomString(36);
+            // sortable uid, good for cursor based pagination
+            $this->id = (string)Uuid::v7();
         }
 
         return true;
@@ -119,7 +121,7 @@ class Comment extends ActiveRecord
         }
 
         if ($this->issue->status === Issue::STATUS_CLOSED) {
-            $this->issue->status = Issue::STATUS_OPEN;
+            $this->issue->openIssue();
             if (!$this->issue->save()) {
                 Yii::error('Failed to update issue status after adding comment: ' . json_encode($this->issue->errors));
                 throw new yii\db\Exception('Failed to update issue status after adding comment.');

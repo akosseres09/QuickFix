@@ -291,4 +291,22 @@ class Issue extends ActiveRecord
         $nextNumber = $count + 1;
         return strtoupper($project->key) . '-' . $nextNumber;
     }
+    
+    /**
+     * Opens an issue
+     * @return void
+     */
+    public function openIssue() {
+        $this->status = Issue::STATUS_OPEN;
+        $this->closed_at = null;
+    }
+
+    /**
+     * Closes an issue
+     * @return void
+     */
+    public function closeIssue() {
+        $this->status = Issue::STATUS_CLOSED;
+        $this->closed_at = time();
+    }
 }
