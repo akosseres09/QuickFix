@@ -99,16 +99,16 @@ export class MainLayoutComponent implements OnInit {
                 name: 'Manage',
                 type: 'menu',
                 icon: 'manage_accounts',
-                path: `project/${this.projectId()}/manage`,
+                path: `/project/${this.projectId()}/manage`,
                 children: [
                     {
-                        name: 'Users',
-                        path: `project/${this.projectId()}/users`,
+                        name: 'Members',
+                        path: `/project/${this.projectId()}/members`,
                         icon: 'person',
                     },
                     {
                         name: 'Activity',
-                        path: `project/${this.projectId()}/activity`,
+                        path: `/project/${this.projectId()}/activity`,
                         icon: 'local_activity',
                     },
                     {

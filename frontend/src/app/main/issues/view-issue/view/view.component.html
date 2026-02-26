@@ -66,7 +66,7 @@
                     [ngClass]="{
                         'max-h-[30rem] overflow-hidden':
                             showDescriptionExpandButton() && !descriptionExpanded(),
-                        'max-h-[100rem] overflow-visible':
+                        'max-h-[1000rem] overflow-visible':
                             showDescriptionExpandButton() && descriptionExpanded(),
                     }"
                 >
@@ -194,12 +194,7 @@
                             </a>
                         </div>
                     } @else {
-                        <div class="flex items-center gap-2 text-gray-400 dark:text-gray-500">
-                            <div
-                                class="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center"
-                            >
-                                <mat-icon class="!text-sm">person_outline</mat-icon>
-                            </div>
+                        <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                             <span class="text-sm italic">Unassigned</span>
                         </div>
                     }
@@ -225,7 +220,7 @@
                             </span>
                         </div>
                     } @else {
-                        <span class="text-sm text-gray-400 dark:text-gray-500 italic">Not set</span>
+                        <span class="text-sm text-gray-600 dark:text-gray-400 italic">Not set</span>
                     }
                 </div>
 

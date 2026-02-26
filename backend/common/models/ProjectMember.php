@@ -19,7 +19,7 @@ use yii\db\ActiveRecord;
  * @property integer $created_at
  * 
  * @property Project $project
- * @property User $user
+ * @property UserResource $user
  */
 class ProjectMember extends ActiveRecord
 {

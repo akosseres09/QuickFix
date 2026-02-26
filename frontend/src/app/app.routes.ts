@@ -179,13 +179,6 @@ export const routes: Routes = [
                 ],
             },
             {
-                path: 'labels',
-                loadComponent: () =>
-                    import('./main/labels/labels.component').then((c) => c.LabelsComponent),
-                canActivate: [authenticatedGuard],
-                title: 'QuickFix - Labels',
-            },
-            {
                 path: 'issue/:issueId',
                 children: [
                     {
@@ -212,6 +205,31 @@ export const routes: Routes = [
                         canActivate: [authenticatedGuard],
                     },
                 ],
+            },
+            {
+                path: 'members',
+                loadComponent: () =>
+                    import('./main/manage/members/members.component').then(
+                        (c) => c.MembersComponent
+                    ),
+                canActivate: [authenticatedGuard],
+                title: 'QuickFix - Members',
+            },
+            {
+                path: 'activity',
+                loadComponent: () =>
+                    import('./main/manage/activity/activity.component').then(
+                        (c) => c.ActivityComponent
+                    ),
+                canActivate: [authenticatedGuard],
+                title: 'QuickFix - Activity',
+            },
+            {
+                path: 'labels',
+                loadComponent: () =>
+                    import('./main/manage/labels/labels.component').then((c) => c.LabelsComponent),
+                canActivate: [authenticatedGuard],
+                title: 'QuickFix - Labels',
             },
         ],
     },

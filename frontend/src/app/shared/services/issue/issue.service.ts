@@ -1,10 +1,11 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { Issue } from '../../model/Issue';
 import { PaginatedResponse } from '../../constants/api/PaginatedResponse';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment.development';
 import { ApiQueryParams } from '../../constants/api/ApiQueryParams';
 import { map, Observable } from 'rxjs';
+import { ParamsHandler } from '../../utils/paramsHandler';
 
 @Injectable({
     providedIn: 'root',
@@ -33,14 +34,7 @@ export class IssueService {
     getIssues(queryParams: ApiQueryParams = {}): Observable<PaginatedResponse<Issue>> {
         this.checkIfProjectIdSet();
 
-        let params = new HttpParams();
-
-        Object.entries(queryParams).forEach(([key, value]) => {
-            // Only add non-null, non-undefined, non-empty values
-            if (value !== null && value !== undefined && value !== '') {
-                params = params.set(key, value.toString());
-            }
-        });
+        const params = ParamsHandler.convertToHttpParams(queryParams);
 
         return this.http.get<PaginatedResponse<Issue>>(`${this.url}/${this.projectId()}/issue`, {
             params: params,
