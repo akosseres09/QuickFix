@@ -1,0 +1,47 @@
+<div
+    class="bg-white dark:bg-dark-background-hover rounded-md shadow-md hover:shadow-xl dark:shadow-gray-900 border border-gray-200 dark:border-gray-700 p-6 transition-shadow duration-300"
+>
+    <!-- Avatar Section -->
+    <div class="flex flex-col items-center text-center">
+        <div class="relative mb-4">
+            <app-avatar
+                [user]="member().user!"
+                size="xl"
+                styleClass="ring-4 ring-light-primary/20 dark:ring-dark-primary/20"
+            />
+            <!-- Role Badge -->
+            <span
+                class="absolute -bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 text-xs font-semibold rounded-full whitespace-nowrap"
+                [class]="getRoleBadgeClass(member().role)"
+            >
+                {{ RoleLabels[member().role] }}
+            </span>
+        </div>
+
+        <!-- member Info -->
+        <div class="mt-4 w-full">
+            <h4 class="font-semibold text-lg text-light-text dark:text-dark-text truncate">
+                {{ member().user!.firstName }} {{ member().user!.lastName }}
+                @if (member().userId === currentUser()?.uid) {
+                    <span
+                        class="ml-2 text-xs bg-light-accent dark:bg-dark-accent text-white px-2 py-1 rounded-full"
+                        >You</span
+                    >
+                }
+            </h4>
+            <p class="text-sm text-light-text/60 dark:text-dark-text/60 truncate mt-1">
+                &#64;{{ member().user!.username }}
+            </p>
+            <p class="text-sm text-light-text/50 dark:text-dark-text/50 truncate mt-1">
+                {{ member().user!.email }}
+            </p>
+        </div>
+
+        <!-- Joined Date -->
+        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 w-full">
+            <p class="text-xs text-light-text/40 dark:text-dark-text/40">
+                Joined {{ member().user!.createdAt * 1000 | date: 'mediumDate' }}
+            </p>
+        </div>
+    </div>
+</div>

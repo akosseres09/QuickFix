@@ -13,13 +13,13 @@ import { RouterLink } from '@angular/router';
                 <img
                     [src]="user().profilePictureUrl"
                     [alt]="user().username || 'User avatar'"
-                    [class]="avatarClasses"
-                    class="rounded-full object-cover"
+                    [class]="avatarClasses + ' ' + styleClass()"
+                    class=" object-cover"
                 />
             </a>
         } @else {
             <div
-                [class]="avatarClasses"
+                [class]="avatarClasses + ' ' + styleClass()"
                 class="rounded-full bg-gray-300 flex items-center justify-center"
             >
                 <mat-icon [class]="iconSizeClass">person</mat-icon>
@@ -30,13 +30,15 @@ import { RouterLink } from '@angular/router';
 })
 export class AvatarComponent {
     user = input.required<User>();
-    size = input<'sm' | 'md' | 'lg'>('md');
+    size = input<'sm' | 'md' | 'lg' | 'xl'>('md');
+    styleClass = input<string>('');
 
     get avatarClasses(): string {
         const sizeMap = {
             sm: 'w-6 h-6',
             md: 'w-8 h-8',
             lg: 'w-12 h-12',
+            xl: 'w-16 h-16',
         };
         return sizeMap[this.size()];
     }
@@ -46,6 +48,7 @@ export class AvatarComponent {
             sm: 'text-sm',
             md: 'text-base',
             lg: 'text-xl',
+            xl: 'text-2xl',
         };
         return iconSizeMap[this.size()];
     }
