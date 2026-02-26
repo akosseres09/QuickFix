@@ -2,6 +2,7 @@
 
 namespace api\controllers;
 
+use api\filters\ProjectKeyTranslatorFilter;
 use common\models\Project;
 use common\models\search\ProjectSearch;
 use Yii;
@@ -11,6 +12,18 @@ use yii\web\NotFoundHttpException;
 class ProjectController extends BaseRestController
 {
     public $modelClass = Project::class;
+
+    public function behaviors(): array
+    {
+        $behaviors = parent::behaviors();
+        $behaviors["projectTranslator"] = [
+            'class' => ProjectKeyTranslatorFilter::class,
+            'identifierParamName' => 'id',
+            'actions' => ['view', 'update', 'delete'],
+        ];
+
+        return $behaviors;
+    }
 
     public function actions(): array
     {
@@ -68,7 +81,13 @@ class ProjectController extends BaseRestController
      */
     public function findModel($id): Project
     {
-        $project = Project::find()->byKeyOrId($id)->one();
+        $project_id = Yii::$app->request->get('id');
+
+        if (!$project_id) {
+            throw new NotFoundHttpException('Project ID is required!');
+        }
+
+        $project = Project::find()->byId($project_id)->one();
 
         if (!$project) {
             throw new NotFoundHttpException('Project not found!');

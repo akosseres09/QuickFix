@@ -13,11 +13,13 @@ class MemberController extends BaseRestController
 
     public function behaviors(): array
     {
-        return [
-            'projectTranslator' => [
-                'class' => ProjectKeyTranslatorFilter::class,
-            ],
+        $behaviors = parent::behaviors();
+        $behaviors["projectTranslator"] = [
+            'class' => ProjectKeyTranslatorFilter::class,
+            'identifierParamName' => 'project_id',
         ];
+
+        return $behaviors;
     }
 
     public function actions()
@@ -33,22 +35,12 @@ class MemberController extends BaseRestController
     public function findModel($id)
     {
         $projectId = Yii::$app->request->get('project_id');
-        dd($projectId);
 
         if (!$projectId) {
             throw new \yii\web\BadRequestHttpException('Project ID is required.');
         }
 
-        $query = ProjectMember::find()->andWhere(['id' => $id]);
-
-        // by UUID
-        if (strlen($projectId) === 36) {
-            $query->byProject($projectId);
-        } else {
-            $query->byProjectKey($projectId);
-        }
-
-        $model = $query->one();
+        $model = ProjectMember::find()->andWhere(['id' => $id])->byProjectId($projectId)->one();
 
         if (!$model) {
             throw new \yii\web\NotFoundHttpException('The requested member does not exist.');

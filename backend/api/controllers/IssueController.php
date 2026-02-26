@@ -16,11 +16,13 @@ class IssueController extends BaseRestController
 
     public function behaviors(): array
     {
-        return [
-            'projectTranslator' => [
-                'class' => ProjectKeyTranslatorFilter::class,
-            ],
+        $behaviors = parent::behaviors();
+        $behaviors["projectTranslator"] = [
+            'class' => ProjectKeyTranslatorFilter::class,
+            'identifierParamName' => 'project_id',
         ];
+
+        return $behaviors;
     }
 
     public function actions(): array

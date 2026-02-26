@@ -6,6 +6,7 @@ use common\models\query\ProjectQuery;
 use common\models\resource\UserResource;
 use Symfony\Component\Uid\Uuid;
 use Yii;
+use yii\base\Event;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -72,6 +73,34 @@ class Project extends ActiveRecord
         self::STATUS_ON_HOLD,
         self::STATUS_COMPLETED
     ];
+
+    public function init()
+    {
+        parent::init();
+
+        $this->on(self::EVENT_BEFORE_UPDATE, [self::class, 'clearCache']);
+        $this->on(self::EVENT_BEFORE_DELETE, [self::class, 'clearCache']);
+        $this->on(self::EVENT_AFTER_INSERT, [self::class, 'clearCache']);
+    }
+
+    public static function clearCache(Event $event)
+    {
+        /**
+         * @var Project
+         */
+        $project = $event->sender;
+        self::deleteCache(self::getKeyToIdCacheKey($project->key));
+    }
+
+    public static function deleteCache(mixed $key)
+    {
+        Yii::$app->cache->delete($key);
+    }
+
+    public static function getKeyToIdCacheKey($key)
+    {
+        return 'project_key_to_id_' . $key;
+    }
 
     /**
      * {@inheritdoc}
