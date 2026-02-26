@@ -23,18 +23,10 @@ class ProjectMemberQuery extends ActiveQuery
         return parent::one($db);
     }
 
-    /**
-     * Filter by project
-     * @param string $projectId
-     * @return ProjectMemberQuery
-     */
-    public function byProject(string $projectId): ProjectMemberQuery
+
+    public function byProjectId(string $project_id): ProjectMemberQuery
     {
-        return $this->with('project')->andWhere([
-            'or',
-            ['project_member.project_id' => $projectId],
-            ['project.key' => $projectId]
-        ]);
+        return $this->andWhere(['project_id' => $project_id]);
     }
 
     public function byProjectKey(string $projectKey): ProjectMemberQuery

@@ -2,20 +2,29 @@
 
 namespace api\controllers;
 
+use api\filters\ProjectKeyTranslatorFilter;
 use common\models\ProjectMember;
-use common\models\search\ProjectSearch;
+use common\models\search\ProjectMemberSearch;
 use Yii;
 
 class MemberController extends BaseRestController
 {
     public $modelClass = ProjectMember::class;
 
+    public function behaviors(): array
+    {
+        return [
+            'projectTranslator' => [
+                'class' => ProjectKeyTranslatorFilter::class,
+            ],
+        ];
+    }
+
     public function actions()
     {
         $actions = parent::actions();
-        unset($actions['view']);
         $actions['index']['prepareDataProvider'] = function () {
-            $searchModel = new ProjectSearch();
+            $searchModel = new ProjectMemberSearch();
             return $searchModel->search(Yii::$app->request->queryParams);
         };
         return $actions;
@@ -24,6 +33,7 @@ class MemberController extends BaseRestController
     public function findModel($id)
     {
         $projectId = Yii::$app->request->get('project_id');
+        dd($projectId);
 
         if (!$projectId) {
             throw new \yii\web\BadRequestHttpException('Project ID is required.');

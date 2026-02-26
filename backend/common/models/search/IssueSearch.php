@@ -14,23 +14,30 @@ class IssueSearch extends Issue implements SearchInterface
             ['project_id', 'required'],
             [['id', 'project_id'], 'string'],
             [['status', 'type', 'priority'], 'integer'],
-            ['is_archived', 'filter', 'filter' => function ($value) {
-                if ($value === 'true') return true;
-                if ($value === 'false') return false;
-                return $value;
-            }],
+            [
+                'is_archived',
+                'filter',
+                'filter' => function ($value) {
+                    if ($value === 'true')
+                        return true;
+                    if ($value === 'false')
+                        return false;
+                    return $value;
+                }
+            ],
             [['title', 'description'], 'safe'],
         ];
     }
 
-    public function fields(): array {
+    public function fields(): array
+    {
         return parent::fields();
     }
 
     public function search($params): ActiveDataProvider
     {
-        $page = isset($params['page']) ? (int)$params['page'] : 1;
-        $pageSize = isset($params['pageSize']) ? (int)$params['pageSize'] : 20;
+        $page = isset($params['page']) ? (int) $params['page'] : 1;
+        $pageSize = isset($params['pageSize']) ? (int) $params['pageSize'] : 20;
         $pageSize = min($pageSize, 100);
 
         // Can be the project ID or project key
@@ -39,7 +46,7 @@ class IssueSearch extends Issue implements SearchInterface
             throw new BadRequestHttpException('Project ID is required for issue search.');
         }
 
-        $query = Issue::find()->byProject( $projectId);
+        $query = Issue::find()->byProjectId($projectId);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -81,10 +88,10 @@ class IssueSearch extends Issue implements SearchInterface
             'status' => $this->status,
             'type' => $this->type,
             'priority' => $this->priority,
-            'is_archived' => $this->is_archived 
+            'is_archived' => $this->is_archived
         ]);
 
-        $query->andFilterWhere(['like','title', $this->title]);
+        $query->andFilterWhere(['like', 'title', $this->title]);
 
         return $dataProvider;
     }

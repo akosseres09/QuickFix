@@ -288,7 +288,7 @@ class Issue extends ActiveRecord
             return null;
         }
 
-        $count = Issue::find()->byProject($this->project_id)->count();
+        $count = Issue::find()->byProjectId($this->project_id)->count();
         $nextNumber = $count + 1;
         return strtoupper($project->key) . '-' . $nextNumber;
     }

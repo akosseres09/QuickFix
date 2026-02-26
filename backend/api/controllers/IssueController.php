@@ -2,6 +2,7 @@
 
 namespace api\controllers;
 
+use api\filters\ProjectKeyTranslatorFilter;
 use common\models\Issue;
 use common\models\search\IssueSearch;
 use Yii;
@@ -12,6 +13,15 @@ use yii\web\NotFoundHttpException;
 class IssueController extends BaseRestController
 {
     public $modelClass = Issue::class;
+
+    public function behaviors(): array
+    {
+        return [
+            'projectTranslator' => [
+                'class' => ProjectKeyTranslatorFilter::class,
+            ],
+        ];
+    }
 
     public function actions(): array
     {
@@ -47,7 +57,7 @@ class IssueController extends BaseRestController
             throw new BadRequestHttpException('Project ID is required to access issues.');
         }
 
-        $issue = Issue::find()->byProject($projectId)->byId($id)->one();
+        $issue = Issue::find()->byProjectId($projectId)->byId($id)->one();
         if (!$issue) {
             throw new NotFoundHttpException('The requested issue does not exist.');
         }

@@ -28,11 +28,7 @@ class ProjectMemberSearch extends ProjectMember implements SearchInterface
         $query = ProjectMember::find();
 
         // by UUID
-        if (Uuid::isValid($projectId)) {
-            $query->byProject($projectId);
-        } else {
-            $query->byProjectKey($projectId);
-        }
+        $query->byProjectId($projectId);
 
         return new ActiveDataProvider([
             'query' => $query,

@@ -16,13 +16,9 @@ class IssueQuery extends ActiveQuery
         return parent::one($db);
     }
 
-    public function byProject(string $projectIdentifier)
+    public function byProjectId(string $projectId)
     {
-        return $this->joinWith('project')
-                ->andWhere(['or', 
-                ['issue.project_id' => $projectIdentifier], 
-                ['project.key' => $projectIdentifier]]
-        );
+        return $this->andWhere(['issue.project_id' => $projectId]);
     }
 
     public function byId(string $id)
