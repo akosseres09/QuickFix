@@ -4,6 +4,7 @@ namespace common\models;
 
 use common\models\query\IssueQuery;
 use common\models\resource\UserResource;
+use Symfony\Component\Uid\Uuid;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -144,7 +145,7 @@ class Issue extends ActiveRecord
         }
 
         if (empty($this->id)) {
-            $this->id = Yii::$app->security->generateRandomString(36);
+            $this->id = Uuid::v7()->toString();
         }
 
         if (!empty($this->issue_key)) {
@@ -291,12 +292,13 @@ class Issue extends ActiveRecord
         $nextNumber = $count + 1;
         return strtoupper($project->key) . '-' . $nextNumber;
     }
-    
+
     /**
      * Opens an issue
      * @return void
      */
-    public function openIssue() {
+    public function openIssue()
+    {
         $this->status = Issue::STATUS_OPEN;
         $this->closed_at = null;
     }
@@ -305,7 +307,8 @@ class Issue extends ActiveRecord
      * Closes an issue
      * @return void
      */
-    public function closeIssue() {
+    public function closeIssue()
+    {
         $this->status = Issue::STATUS_CLOSED;
         $this->closed_at = time();
     }

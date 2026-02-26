@@ -30,7 +30,11 @@ class ProjectMemberQuery extends ActiveQuery
      */
     public function byProject(string $projectId): ProjectMemberQuery
     {
-        return $this->andWhere(['project_id' => $projectId]);
+        return $this->with('project')->andWhere([
+            'or',
+            ['project_member.project_id' => $projectId],
+            ['project.key' => $projectId]
+        ]);
     }
 
     public function byProjectKey(string $projectKey): ProjectMemberQuery

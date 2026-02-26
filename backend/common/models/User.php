@@ -5,6 +5,7 @@ namespace common\models;
 use api\models\UserRefreshToken;
 use common\models\query\UserQuery;
 use Lcobucci\JWT\UnencryptedToken;
+use Symfony\Component\Uid\Uuid;
 use Throwable;
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -109,7 +110,7 @@ class User extends ActiveRecord implements IdentityInterface
         }
 
         if (empty($this->id)) {
-            $this->id = Yii::$app->security->generateRandomString(36);
+            $this->id = Uuid::v7()->toString();
         }
 
         if (empty($this->profile_picture_url)) {

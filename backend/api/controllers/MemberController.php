@@ -3,6 +3,7 @@
 namespace api\controllers;
 
 use common\models\ProjectMember;
+use common\models\search\ProjectSearch;
 use Yii;
 
 class MemberController extends BaseRestController
@@ -13,31 +14,11 @@ class MemberController extends BaseRestController
     {
         $actions = parent::actions();
         unset($actions['view']);
-        $actions['index']['prepareDataProvider'] = [$this, 'prepareDataProvider'];
+        $actions['index']['prepareDataProvider'] = function () {
+            $searchModel = new ProjectSearch();
+            return $searchModel->search(Yii::$app->request->queryParams);
+        };
         return $actions;
-    }
-
-
-    public function prepareDataProvider()
-    {
-        $projectId = Yii::$app->request->get('project_id');
-
-        if (!$projectId) {
-            throw new \yii\web\BadRequestHttpException('Project ID is required.');
-        }
-
-        $query = ProjectMember::find();
-
-        // by UUID
-        if (strlen($projectId) === 36) {
-            $query->byProject($projectId);
-        } else {
-            $query->byProjectKey($projectId);
-        }
-
-        return new \yii\data\ActiveDataProvider([
-            'query' => $query,
-        ]);
     }
 
     public function findModel($id)

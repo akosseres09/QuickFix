@@ -4,6 +4,7 @@ namespace common\models;
 
 use common\models\query\ProjectMemberQuery;
 use common\models\resource\UserResource;
+use Symfony\Component\Uid\Uuid;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -139,7 +140,7 @@ class ProjectMember extends ActiveRecord
         }
 
         if (empty($this->id)) {
-            $this->id = Yii::$app->security->generateRandomString(36);
+            $this->id = Uuid::v7()->toString();
         }
 
         return true;

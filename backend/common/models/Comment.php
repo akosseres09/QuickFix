@@ -42,14 +42,16 @@ class Comment extends ActiveRecord
         ];
     }
 
-    public function behaviors() {
+    public function behaviors()
+    {
         return [
             TimestampBehavior::class,
             BlameableBehavior::class
         ];
     }
 
-    public function transactions() {
+    public function transactions()
+    {
         return [
             self::SCENARIO_DEFAULT => self::OP_ALL,
         ];
@@ -58,9 +60,10 @@ class Comment extends ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function beforeValidate() {
+    public function beforeValidate()
+    {
         if (!parent::beforeValidate()) {
-            return false; 
+            return false;
         }
 
         // if not a new record then no need to create anything
@@ -96,7 +99,8 @@ class Comment extends ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function beforeSave($insert) {
+    public function beforeSave($insert)
+    {
         if (!parent::beforeSave($insert)) {
             return false;
         }
@@ -107,13 +111,14 @@ class Comment extends ActiveRecord
 
         if (empty($this->id)) {
             // sortable uid, good for cursor based pagination
-            $this->id = (string)Uuid::v7();
+            $this->id = Uuid::v7()->toString();
         }
 
         return true;
     }
 
-    public function afterSave($insert, $changedAttributes) {
+    public function afterSave($insert, $changedAttributes)
+    {
         parent::afterSave($insert, $changedAttributes);
 
         if (!$insert) {
@@ -132,7 +137,8 @@ class Comment extends ActiveRecord
     /**
      * {@inheritdoc} 
      */
-    public function fields() {
+    public function fields()
+    {
         return [
             'id',
             'issueId' => 'issue_id',
@@ -147,7 +153,8 @@ class Comment extends ActiveRecord
     /**
      * {@inheritdoc} 
      */
-    public function extraFields() {
+    public function extraFields()
+    {
         return [
             'issue',
             'creator',
@@ -160,15 +167,18 @@ class Comment extends ActiveRecord
         return $this->hasOne(Issue::class, ['id' => 'issue_id']);
     }
 
-    public function getCreator() {
+    public function getCreator()
+    {
         return $this->hasOne(UserResource::class, ['id' => 'created_by']);
     }
 
-    public function getUpdator() {
+    public function getUpdator()
+    {
         return $this->hasOne(UserResource::class, ['id' => 'updated_by']);
     }
 
-    public function canAccess(string $userId): bool {
+    public function canAccess(string $userId): bool
+    {
         if (!$this->issue) {
             return false;
         }
@@ -180,7 +190,8 @@ class Comment extends ActiveRecord
         return $this->issue->project->canAccess($userId);
     }
 
-    public static function find(): CommentQuery {
+    public static function find(): CommentQuery
+    {
         return new CommentQuery(get_called_class());
     }
 }

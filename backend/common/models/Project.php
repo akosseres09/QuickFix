@@ -4,6 +4,7 @@ namespace common\models;
 
 use common\models\query\ProjectQuery;
 use common\models\resource\UserResource;
+use Symfony\Component\Uid\Uuid;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -99,7 +100,8 @@ class Project extends ActiveRecord
      * 
      * {@inheritDoc}
      */
-    public function transactions(): array {
+    public function transactions(): array
+    {
         return [
             self::SCENARIO_DEFAULT => self::OP_ALL,
         ];
@@ -119,24 +121,25 @@ class Project extends ActiveRecord
         }
 
         if ($insert && empty($this->id)) {
-            $this->id = Yii::$app->security->generateRandomString(36);
+            $this->id = Uuid::v7()->toString();
         }
 
         return true;
     }
 
-   /**
-    * After saving a new project, we need to create a corresponding ProjectMember record to assign 
-    * the owner as a member of the project with the appropriate role. 
-    * This ensures that the owner has the necessary permissions to manage the project and its related entities. 
-    * If the save operation for the ProjectMember fails, we log the error and throw an exception 
-    * to trigger a transaction rollback, maintaining data integrity.
-    * 
-    * Documentation:
-    *
-    * {@inheritdoc}
-    */
-   public function afterSave($insert, $changedAttributes) {
+    /**
+     * After saving a new project, we need to create a corresponding ProjectMember record to assign 
+     * the owner as a member of the project with the appropriate role. 
+     * This ensures that the owner has the necessary permissions to manage the project and its related entities. 
+     * If the save operation for the ProjectMember fails, we log the error and throw an exception 
+     * to trigger a transaction rollback, maintaining data integrity.
+     * 
+     * Documentation:
+     *
+     * {@inheritdoc}
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
         parent::afterSave($insert, $changedAttributes);
 
         if (!$insert) {
@@ -147,11 +150,11 @@ class Project extends ActiveRecord
         $owner->project_id = $this->id;
         $owner->user_id = $this->owner_id; // Your intentional error might be here
         $owner->role = ProjectMember::ROLE_OWNER;
-        
+
         if (!$owner->save()) {
             $errors = json_encode($owner->getErrors());
             Yii::error("Failed to create project owner. Errors: " . $errors, __METHOD__);
-            
+
             // Throwing an exception here alerts the transaction manager that 
             // something went critically wrong, forcing it to execute a ROLLBACK.
             throw new \yii\db\Exception("Transaction aborted: Could not save Project Member. " . $errors);
@@ -167,12 +170,28 @@ class Project extends ActiveRecord
             [['name', 'key', 'owner_id'], 'required'],
             [['description'], 'string'],
             [['start_date', 'end_date'], 'date', 'format' => 'php:Y-m-d'],
-            ['start_date', 'compare', 'compareAttribute' => 'end_date', 'operator' => '<=', 'type' => 'date', 'when' => function ($model) {
-                return !empty($model->end_date);
-            }, 'message' => 'Start Date must be less than or equal to End Date.'],
-            ['end_date', 'compare', 'compareAttribute' => 'start_date', 'operator' => '>=', 'type' => 'date', 'when' => function ($model) {
-                return !empty($model->start_date);
-            }, 'message' => 'End Date must be greater than or equal to Start Date.'],
+            [
+                'start_date',
+                'compare',
+                'compareAttribute' => 'end_date',
+                'operator' => '<=',
+                'type' => 'date',
+                'when' => function ($model) {
+                    return !empty($model->end_date);
+                },
+                'message' => 'Start Date must be less than or equal to End Date.'
+            ],
+            [
+                'end_date',
+                'compare',
+                'compareAttribute' => 'start_date',
+                'operator' => '>=',
+                'type' => 'date',
+                'when' => function ($model) {
+                    return !empty($model->start_date);
+                },
+                'message' => 'End Date must be greater than or equal to Start Date.'
+            ],
             [['created_at', 'updated_at'], 'integer'],
             [['budget'], 'number'],
             [['name'], 'string', 'max' => 255],
