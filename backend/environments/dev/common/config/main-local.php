@@ -1,5 +1,9 @@
 <?php
 
+use yii\redis\Cache;
+use yii\redis\Connection;
+
+
 return [
     'components' => [
         'db' => [
@@ -8,6 +12,15 @@ return [
             'username' => '', // fill in with your username
             'password' => '', // fill in with your password
             'charset' => 'utf8',
+        ],
+        'cache' => [
+            'class' => Cache::class,
+            'redis' => [
+                'class' => Connection::class,
+                'hostname' => 'redis',
+                'port' => 6379,
+                'database' => 0,
+            ]
         ],
         'mailer' => [
             'class' => \yii\symfonymailer\Mailer::class,
