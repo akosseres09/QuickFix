@@ -12,6 +12,7 @@ use yii\db\ActiveRecord;
  * @property string $id
  * @property string $project_id
  * @property string $name
+ * @property string $description
  * @property string|null $color
  * 
  * @property Project $project
@@ -26,8 +27,9 @@ class Label extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['name', 'project_id'], 'required'],
+            [['name', 'project_id', 'description'], 'required'],
             ['name', 'string', 'max' => 24],
+            ['description', 'string', 'max' => 64],
             ['color', 'string', 'max' => 7],
             ['color', 'match', 'pattern' => '/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/'],
             [['project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['project_id' => 'id']],

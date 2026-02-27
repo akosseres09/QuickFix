@@ -2,7 +2,7 @@
 
 use yii\db\Migration;
 
-class m260226_215831_craete_label_table extends Migration
+class m260226_215831_create_label_table extends Migration
 {
     /**
      * {@inheritdoc}
@@ -13,6 +13,7 @@ class m260226_215831_craete_label_table extends Migration
             'id' => $this->string(36)->notNull(),
             'project_id' => $this->string(36)->notNull(),
             'name' => $this->string(24)->notNull(),
+            'description' => $this->string(64)->notNull(),
             'color' => $this->string(7)->null(),
         ]);
 
