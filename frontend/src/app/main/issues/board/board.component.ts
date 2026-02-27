@@ -33,9 +33,6 @@ export class BoardComponent implements OnInit {
     resolvedIssues = signal<Issue[]>([]);
     closedIssues = signal<Issue[]>([]);
 
-    // Connected drop list IDs
-    columnIds = ['status-0', 'status-1', 'status-2', 'status-3', 'status-4'];
-
     ngOnInit() {
         const id = this.route.parent?.parent?.snapshot.paramMap.get('projectId');
 

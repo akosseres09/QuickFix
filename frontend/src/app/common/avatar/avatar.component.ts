@@ -31,7 +31,7 @@ import { RouterLink } from '@angular/router';
 export class AvatarComponent {
     user = input.required<User>();
     size = input<'sm' | 'md' | 'lg' | 'xl'>('md');
-    styleClass = input<string>('');
+    styleClass = input<string>('rounded-md');
 
     get avatarClasses(): string {
         const sizeMap = {

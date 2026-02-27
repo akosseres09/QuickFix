@@ -14,7 +14,6 @@ export class BoardColumnComponent {
     columnTitle = input.required<string>();
     issues = input.required<Issue[]>();
     status = input.required<number>();
-    connectedLists = input<string[]>([]);
     issueClick = output<Issue>();
     dropEvent = output<CdkDragDrop<Issue[]>>();
 

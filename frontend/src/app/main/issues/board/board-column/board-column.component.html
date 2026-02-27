@@ -13,7 +13,7 @@
         cdkDropList
         [id]="dropListId"
         [cdkDropListData]="issues()"
-        [cdkDropListConnectedTo]="connectedLists()"
+        [cdkDropListConnectedTo]="dropListId"
         (cdkDropListDropped)="onDrop($event)"
     >
         @for (issue of issues(); track issue.id) {

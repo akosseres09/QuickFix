@@ -10,7 +10,6 @@
                     [columnTitle]="STATUS_MAP[StatusEnum.OPEN]"
                     [issues]="openIssues()"
                     [status]="StatusEnum.OPEN"
-                    [connectedLists]="columnIds"
                     (dropEvent)="onDrop($event, StatusEnum.OPEN)"
                 ></app-board-column>
 
@@ -18,7 +17,6 @@
                     [columnTitle]="STATUS_MAP[StatusEnum.IN_PROGRESS]"
                     [issues]="inProgressIssues()"
                     [status]="StatusEnum.IN_PROGRESS"
-                    [connectedLists]="columnIds"
                     (dropEvent)="onDrop($event, StatusEnum.IN_PROGRESS)"
                 ></app-board-column>
 
@@ -26,7 +24,6 @@
                     [columnTitle]="STATUS_MAP[StatusEnum.REVIEW]"
                     [issues]="reviewIssues()"
                     [status]="StatusEnum.REVIEW"
-                    [connectedLists]="columnIds"
                     (dropEvent)="onDrop($event, StatusEnum.REVIEW)"
                 ></app-board-column>
 
@@ -34,7 +31,6 @@
                     [columnTitle]="STATUS_MAP[StatusEnum.RESOLVED]"
                     [issues]="resolvedIssues()"
                     [status]="StatusEnum.RESOLVED"
-                    [connectedLists]="columnIds"
                     (dropEvent)="onDrop($event, StatusEnum.RESOLVED)"
                 ></app-board-column>
 
@@ -42,7 +38,6 @@
                     [columnTitle]="STATUS_MAP[StatusEnum.CLOSED]"
                     [issues]="closedIssues()"
                     [status]="StatusEnum.CLOSED"
-                    [connectedLists]="columnIds"
                     (dropEvent)="onDrop($event, StatusEnum.CLOSED)"
                 ></app-board-column>
             </div>
