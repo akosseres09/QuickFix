@@ -29,7 +29,7 @@ use yii\base\ActionFilter;
 class ProjectKeyTranslatorFilter extends ActionFilter
 {
     public $identifierParamName = "project_id";
-    public $actions = ['index', 'view', 'update', 'delete']; // Actions to apply the filter to
+    public $actions = ['index', 'view', 'update', 'delete', 'create']; // Actions to apply the filter to
 
     public function beforeAction($action): bool
     {

@@ -34,6 +34,7 @@ use yii\db\ActiveRecord;
  * @property ProjectMember[] $projectMembers
  * @property User[] $members
  * @property Issue[] $issues
+ * @property Label[] $labels
  */
 class Project extends ActiveRecord
 {
@@ -292,7 +293,7 @@ class Project extends ActiveRecord
 
     public function extraFields()
     {
-        return ['members', 'owner', 'projectMembers', 'issues'];
+        return ['members', 'owner', 'projectMembers', 'issues', 'labels'];
     }
 
     /**
@@ -334,6 +335,11 @@ class Project extends ActiveRecord
     public function getIssues()
     {
         return $this->hasMany(Issue::class, ['project_id' => 'id']);
+    }
+
+    public function getLabels()
+    {
+        return $this->hasMany(Label::class, ['project_id' => 'id']);
     }
 
     /**

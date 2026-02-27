@@ -174,7 +174,7 @@ class User extends ActiveRecord implements IdentityInterface
             $userId = $parsedToken->claims()->get('uid');
 
             return static::findIdentity($userId);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             Yii::error('Error parsing access token: ' . $e->getMessage(), __METHOD__);
             return null;
         }

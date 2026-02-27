@@ -112,22 +112,8 @@ class Issue extends ActiveRecord
             return false;
         }
 
-        $query = Project::find();
 
-        if (strlen($projectId) === 36) {
-            $query->byId($projectId);
-        } else {
-            $query->byKey($projectId);
-        }
-
-        $project = $query->one();
-
-        if (!$project) {
-            $this->addError('project_id', 'The specified project does not exist.');
-            return false;
-        }
-
-        $this->project_id = $project->id;
+        $this->project_id = $projectId;
         return true;
     }
 

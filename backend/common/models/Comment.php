@@ -39,6 +39,7 @@ class Comment extends ActiveRecord
             [['id', 'issue_id', 'created_by', 'updated_by'], 'string', 'max' => 36],
             [['created_at', 'updated_at'], 'integer'],
             [['content'], 'safe'],
+            [['issue_id'], 'exist', 'skipOnError' => true, 'targetClass' => Issue::class, 'targetAttribute' => ['issue_id' => 'id']],
         ];
     }
 
@@ -80,15 +81,6 @@ class Comment extends ActiveRecord
         $issueId = Yii::$app->request->get('issue_id');
         if (!$issueId) {
             $this->addError('issue_id', 'Issue ID is required.');
-            return false;
-        }
-
-
-        // check if the issue exists and belongs to the project
-        $issueQuery = Issue::find()->byProject($projectId)->byId($issueId);
-        $issue = $issueQuery->one();
-        if (!$issue) {
-            $this->addError('issue_id', 'The specified issue does not exist.');
             return false;
         }
 

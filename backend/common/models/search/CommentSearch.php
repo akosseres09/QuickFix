@@ -7,10 +7,12 @@ use Yii;
 use yii\data\ActiveDataProvider;
 use yii\web\BadRequestHttpException;
 
-class CommentSearch extends Comment implements SearchInterface {
-    public function search($params): ActiveDataProvider {
-        $page = isset($params['page']) ? (int)$params['page'] : 1;
-        $pageSize = isset($params['pageSize']) ? (int)$params['pageSize'] : 10;
+class CommentSearch extends Comment implements SearchInterface
+{
+    public function search($params): ActiveDataProvider
+    {
+        $page = isset($params['page']) ? (int) $params['page'] : 1;
+        $pageSize = isset($params['pageSize']) ? (int) $params['pageSize'] : 10;
         $pageSize = min($pageSize, 100);
 
         $cursor = $params['cursor'] ?? null;
@@ -25,7 +27,7 @@ class CommentSearch extends Comment implements SearchInterface {
             throw new BadRequestHttpException('Issue ID is required to search for comments!');
         }
 
-        $query = Comment::find()->byProject($projectId)->byIssueId($issueId);
+        $query = Comment::find()->byProjectId($projectId)->byIssueId($issueId);
 
         if ($cursor) {
             $query->andWhere(['>', 'comment.id', $cursor]);
@@ -35,7 +37,7 @@ class CommentSearch extends Comment implements SearchInterface {
         $query->limit($pageSize);
 
         $dataProvider = new ActiveDataProvider([
-            'query'=> $query,
+            'query' => $query,
             'pagination' => false,
             'sort' => false
         ]);

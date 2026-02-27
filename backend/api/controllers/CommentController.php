@@ -14,7 +14,8 @@ class CommentController extends BaseRestController
 {
     public $modelClass = Comment::class;
 
-    public function actions() {
+    public function actions()
+    {
         $actions = parent::actions();
 
         $actions["index"]['prepareDataProvider'] = function ($action, $filter) {
@@ -24,18 +25,20 @@ class CommentController extends BaseRestController
 
         $actions['view']['findModel'] = [$this, 'findModel'];
         $actions['update']['findModel'] = [$this, 'findModel'];
-        $actions ['delete']['findModel'] = [$this, 'findModel'];
+        $actions['delete']['findModel'] = [$this, 'findModel'];
 
         return $actions;
     }
 
-    public function checkAccess($action, $model = null, $params = []) {
+    public function checkAccess($action, $model = null, $params = [])
+    {
         if ($model && !$model->canAccess(Yii::$app->user->id)) {
             throw new ForbiddenHttpException('You do not have permission to access this comment.');
         }
     }
 
-    public function findModel($id) {
+    public function findModel($id)
+    {
         $projectId = Yii::$app->request->get('project_id');
         if (!$projectId) {
             throw new BadRequestHttpException('Project ID is required to access comments.');
@@ -47,8 +50,8 @@ class CommentController extends BaseRestController
         }
 
         $comment = Comment::find()->byIssueId($issueId)
-                    ->byProject($projectId)
-                    ->byId($id)->one();
+            ->byProject($projectId)
+            ->byId($id)->one();
 
         if (!$comment) {
             throw new NotFoundHttpException('The requested comment does not exist!');
