@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, model, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, model, signal } from '@angular/core';
 import {
     Issue,
     IssueStatus,
@@ -61,6 +61,7 @@ export class ViewComponent {
     issueId = input.required<string>();
     projectId = input.required<string>();
     issue = model.required<Issue>();
+    editingComment = signal<IssueComment | null>(null);
 
     // signals
     descriptionExpanded = signal<boolean>(false);
@@ -69,9 +70,8 @@ export class ViewComponent {
         return issue?.description && issue.description.length / 2 > 1000;
     });
 
-    // from
-
     commentForm = this.fb.group({
+        commentId: [''],
         content: ['', [Validators.required, Validators.maxLength(15000)]],
     });
 
@@ -83,6 +83,23 @@ export class ViewComponent {
     STATUS_MAP = STATUS_MAP;
     TYPE_COLOR_MAP = TYPE_COLOR_MAP;
     TYPE_MAP = TYPE_MAP;
+
+    constructor() {
+        effect(() => {
+            const comment = this.editingComment();
+
+            const content = this.commentForm.get('content')!;
+            const id = this.commentForm.get('commentId')!;
+
+            if (!comment) {
+                content.setValue(null);
+                id.setValue(null);
+            } else {
+                content.setValue(comment.content);
+                id.setValue(comment.id);
+            }
+        });
+    }
 
     getTypeIcon(): string {
         const issue = this.issue();
@@ -158,15 +175,55 @@ export class ViewComponent {
         );
     }
 
-    createComment() {
+    onSubmit() {
         if (this.commentForm.invalid) {
             this.commentForm.markAllAsTouched();
             return;
         }
 
+        const commentId = this.commentForm.get('commentId')?.value;
+
+        if (commentId && commentId.trim()) {
+            this.editIssue();
+        } else {
+            this.createIssue();
+        }
+    }
+
+    private editIssue() {
+        const content = this.comment.value;
+        const commentId = this.commentId.value;
+
+        if (!content || !commentId) return;
+
+        const editContent: Partial<IssueComment> = {
+            content: this.comment.value as string,
+        };
+
+        this.issueCommentService
+            .editComment({
+                projectId: this.projectId(),
+                issueId: this.issueId(),
+                data: editContent,
+                expand: 'creator,updator',
+                commentId: commentId,
+            })
+            .subscribe({
+                next: (result) => {
+                    this.editingComment.set(null);
+                    console.log(result);
+                },
+                error: (error) => {
+                    console.error(error);
+                },
+            });
+    }
+
+    private createIssue() {
         const newComment: Partial<IssueComment> = {
             content: this.comment.value as string,
         };
+
         this.issueCommentService
             .createComment({
                 projectId: this.projectId(),
@@ -187,6 +244,14 @@ export class ViewComponent {
                     this.snackbarService.open('Failed to add comment!', ['snackbar-error']);
                 },
             });
+    }
+
+    onCommentEdit(comment: IssueComment | null) {
+        this.editingComment.set(comment);
+    }
+
+    onCommentEditCancel() {
+        this.editingComment.set(null);
     }
 
     get creatorName(): string {
@@ -224,5 +289,9 @@ export class ViewComponent {
 
     get comment() {
         return this.commentForm.get('content')!;
+    }
+
+    get commentId() {
+        return this.commentForm.get('commentId')!;
     }
 }

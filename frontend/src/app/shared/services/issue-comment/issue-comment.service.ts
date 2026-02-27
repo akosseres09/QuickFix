@@ -11,6 +11,7 @@ export type CommentRequestParams = {
     expand: string;
     cursor?: string;
     data?: Partial<IssueComment>;
+    commentId?: string;
 };
 
 export type CursorPaginatedResponse<T> = {
@@ -26,6 +27,7 @@ export class IssueCommentService {
     private readonly http = inject(HttpClient);
     private readonly url = environment.apiUrl;
     readonly commentCreated$ = new Subject<IssueComment>();
+    readonly commentUpdated$ = new Subject<void>();
 
     getCommentsToIssue(
         data: CommentRequestParams
@@ -52,7 +54,7 @@ export class IssueCommentService {
             );
     }
 
-    createComment(data: Omit<Required<CommentRequestParams>, 'cursor'>) {
+    createComment(data: Omit<Required<CommentRequestParams>, 'cursor' | 'commentId'>) {
         const params = new HttpParams().set('expand', data.expand);
 
         return this.http
@@ -66,6 +68,24 @@ export class IssueCommentService {
             .pipe(
                 tap((result) => {
                     this.commentCreated$.next(result);
+                })
+            );
+    }
+
+    editComment(data: Omit<Required<CommentRequestParams>, 'cursor'>) {
+        const params = new HttpParams().set('expand', data.expand);
+
+        return this.http
+            .put<IssueComment>(
+                `${this.url}/${data.projectId}/${data.issueId}/comment/${data.commentId}`,
+                data.data,
+                {
+                    params: params,
+                }
+            )
+            .pipe(
+                tap((result) => {
+                    this.commentUpdated$.next();
                 })
             );
     }

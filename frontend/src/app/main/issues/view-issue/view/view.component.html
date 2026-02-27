@@ -1,10 +1,10 @@
 <div class="max-w-6xl mx-auto">
     <div class="flex flex-col justify-between items-start mb-6 py-2 gap-2">
-        <div class="flex flex-col md:flex-row gap-2 md:gap-0">
+        <div class="flex w-full flex-col md:flex-row md:justify-between gap-2 md:gap-0">
             <h1 class="flex-2/3 text-3xl font-bold text-gray-900 dark:text-white">
                 {{ issue().title }}
             </h1>
-            <div class="md:flex-auto flex md:justify-end items-start gap-3">
+            <div class="md:flex-1 flex md:justify-end items-start gap-3">
                 <a
                     mat-button
                     class="!bg-light-text-hover dark:!bg-light-background-hover"
@@ -125,11 +125,15 @@
                     </div>
                 }
             </div>
-            <app-view-comment [issueId]="issueId()" [projectId]="projectId()"></app-view-comment>
+            <app-view-comment
+                (editingComment)="onCommentEdit($event)"
+                [issueId]="issueId()"
+                [projectId]="projectId()"
+            ></app-view-comment>
             <form
                 [formGroup]="commentForm"
                 class="flex my-6 gap-6 flex-col items-end"
-                (submit)="createComment()"
+                (submit)="onSubmit()"
             >
                 <div class="flex flex-col gap-2">
                     <label class="font-semibold">Add a Comment</label>
@@ -145,15 +149,29 @@
                         </mat-error>
                     }
                 </div>
-                <button
-                    class="!text-white"
-                    [disabled]="commentForm.invalid"
-                    mat-flat-button
-                    color="primary"
-                >
-                    <mat-icon>add</mat-icon>
-                    Add comment
-                </button>
+                <div class="flex gap-2">
+                    <button
+                        class="!text-white"
+                        [disabled]="commentForm.invalid"
+                        mat-flat-button
+                        color="primary"
+                    >
+                        <ng-container>
+                            @if (this.editingComment()) {
+                                <mat-icon>edit</mat-icon>
+                                Edit
+                            } @else {
+                                <mat-icon>add</mat-icon>
+                                Add comment
+                            }
+                        </ng-container>
+                    </button>
+                    @if (this.editingComment()) {
+                        <button mat-flat-button type="button" (click)="onCommentEditCancel()">
+                            Cancel
+                        </button>
+                    }
+                </div>
             </form>
         </div>
 

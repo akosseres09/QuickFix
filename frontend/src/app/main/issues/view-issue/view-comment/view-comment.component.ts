@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, input, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, inject, input, OnInit, output, signal } from '@angular/core';
 import { IssueCommentService } from '../../../../shared/services/issue-comment/issue-comment.service';
 import { IssueComment } from '../../../../shared/model/IssueComment';
 import { AvatarComponent } from '../../../../common/avatar/avatar.component';
@@ -11,6 +11,10 @@ import { GMTPipe } from '../../../../shared/pipes/gmt/gmt.pipe';
 import { MatButton } from '@angular/material/button';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SnackbarService } from '../../../../shared/services/snackbar/snackbar.service';
+import { AuthService } from '../../../../shared/services/auth/auth.service';
+import { MatIcon } from '@angular/material/icon';
+import { finalize } from 'rxjs';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
     selector: 'app-view-comment',
@@ -23,6 +27,8 @@ import { SnackbarService } from '../../../../shared/services/snackbar/snackbar.s
         RelativeTimePipe,
         GMTPipe,
         MatButton,
+        MatIcon,
+        MatProgressSpinnerModule,
     ],
     templateUrl: './view-comment.component.html',
     styleUrl: './view-comment.component.css',
@@ -31,14 +37,27 @@ export class ViewCommentComponent implements OnInit {
     private readonly issueCommentService = inject(IssueCommentService);
     private readonly destroyRef = inject(DestroyRef);
     private readonly snackbarSerivce = inject(SnackbarService);
+    private readonly authService = inject(AuthService);
 
     issueId = input.required<string>();
     projectId = input.required<string>();
+
+    editingComment = output<IssueComment>();
 
     comments = signal<IssueComment[]>([]);
     nextCursor = signal<string | null>(null);
     hasMore = signal<boolean>(false);
     isLoading = signal<boolean>(false);
+
+    currentUser = this.authService.currentUserClaims;
+
+    constructor() {
+        this.issueCommentService.commentUpdated$.pipe(takeUntilDestroyed()).subscribe({
+            next: () => {
+                this.loadComments();
+            },
+        });
+    }
 
     ngOnInit(): void {
         this.loadComments();
@@ -69,6 +88,11 @@ export class ViewCommentComponent implements OnInit {
                 expand: 'creator,updator',
                 cursor,
             })
+            .pipe(
+                finalize(() => {
+                    this.isLoading.set(false);
+                })
+            )
             .subscribe({
                 next: (result) => {
                     if (cursor) {
@@ -78,11 +102,9 @@ export class ViewCommentComponent implements OnInit {
                     }
                     this.nextCursor.set(result.nextCursor);
                     this.hasMore.set(result.hasMore);
-                    this.isLoading.set(false);
                 },
                 error: (error) => {
                     console.error(error);
-                    this.isLoading.set(false);
                 },
             });
     }
@@ -92,5 +114,9 @@ export class ViewCommentComponent implements OnInit {
         if (cursor && !this.isLoading()) {
             this.loadComments(cursor);
         }
+    }
+
+    editComment(comment: IssueComment) {
+        this.editingComment.emit(comment);
     }
 }
