@@ -4,6 +4,7 @@ namespace api\controllers;
 
 use api\filters\ProjectKeyTranslatorFilter;
 use common\models\Label;
+use common\models\search\LabelSearch;
 use Yii;
 use yii\web\ForbiddenHttpException;
 
@@ -27,6 +28,11 @@ class LabelController extends BaseRestController
         $actions = parent::actions();
 
         unset($actions['view']);
+
+        $actions['index']['prepareDataProvider'] = function () {
+            $searchModel = new LabelSearch();
+            return $searchModel->search(Yii::$app->request->queryParams);
+        };
 
         $actions['update']['findModel'] = [$this, 'findModel'];
         $actions['delete']['findModel'] = [$this, 'findModel'];

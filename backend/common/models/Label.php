@@ -27,7 +27,7 @@ class Label extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['name', 'project_id', 'description'], 'required'],
+            [['name', 'project_id', 'description', 'color'], 'required'],
             ['name', 'string', 'max' => 24],
             ['description', 'string', 'max' => 64],
             ['color', 'string', 'max' => 7],
@@ -77,6 +77,7 @@ class Label extends ActiveRecord
             'projectId' => 'project_id',
             'name',
             'color',
+            'description'
         ];
     }
 
