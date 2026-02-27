@@ -6,7 +6,7 @@ use yii\filters\Cors;
 use yii\rest\ActiveController;
 use yii\web\Response;
 
-class BaseRestController extends ActiveController
+abstract class BaseRestController extends ActiveController
 {
     public $serializer = [
         'class' => 'yii\rest\Serializer',
@@ -40,4 +40,6 @@ class BaseRestController extends ActiveController
 
         return $behaviors;
     }
+
+    abstract public function findModel($id);
 }
