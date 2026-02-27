@@ -1,4 +1,5 @@
 import { BaseModel } from './BaseModel';
+import { Label } from './Label';
 import { User } from './User';
 
 export enum ProjectStatus {
@@ -94,4 +95,5 @@ export interface Project extends BaseModel {
     owner?: User;
     projectMembers?: Array<User>;
     members?: Array<User>;
+    labels?: Array<Label>;
 }
