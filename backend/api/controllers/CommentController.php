@@ -2,6 +2,7 @@
 
 namespace api\controllers;
 
+use api\filters\ProjectKeyTranslatorFilter;
 use common\models\Comment;
 use common\models\search\CommentSearch;
 use Yii;
@@ -13,6 +14,18 @@ use yii\web\NotFoundHttpException;
 class CommentController extends BaseRestController
 {
     public $modelClass = Comment::class;
+
+    public function behaviors(): array
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors["projectTranslator"] = [
+            'class' => ProjectKeyTranslatorFilter::class,
+            'identifierParamName' => 'project_id',
+        ];
+
+        return $behaviors;
+    }
 
     public function actions()
     {
@@ -50,7 +63,7 @@ class CommentController extends BaseRestController
         }
 
         $comment = Comment::find()->byIssueId($issueId)
-            ->byProject($projectId)
+            ->byProjectId($projectId)
             ->byId($id)->one();
 
         if (!$comment) {

@@ -18,22 +18,22 @@ class CommentQuery extends ActiveQuery
 
     public function byIssueId(string $issueId)
     {
-        return $this->andWhere(['issue_id' => $issueId]);
+        return $this->andWhere(['comment.issue_id' => $issueId]);
     }
 
     public function byId(string $id)
     {
-        return $this->andWhere(['id' => $id]);
+        return $this->andWhere(['comment.id' => $id]);
     }
 
     public function byCreatorId(string $creatorId)
     {
-        return $this->andWhere(['created_by' => $creatorId]);
+        return $this->andWhere(['comment.created_by' => $creatorId]);
     }
 
     public function byUpdatorId(string $updatorId)
     {
-        return $this->andWhere(['updated_by' => $updatorId]);
+        return $this->andWhere(['comment.updated_by' => $updatorId]);
     }
 
     /**
