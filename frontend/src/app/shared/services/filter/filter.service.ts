@@ -75,4 +75,13 @@ export class FilterService {
             },
         ];
     }
+
+    getLabelFilters(): Filter[] {
+        return [
+            {
+                name: 'name',
+                type: 'input',
+            },
+        ];
+    }
 }

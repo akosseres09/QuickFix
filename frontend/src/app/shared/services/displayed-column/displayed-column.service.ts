@@ -16,6 +16,8 @@ import {
     STATUS_COLOR_MAP as project_status_color_map,
     STATUS_MAP as project_status_map,
 } from '../../model/Project';
+import { DisplayedColumn } from '../../constants/table/DisplayedColumn';
+import { Label } from '../../model/Label';
 
 @Injectable({
     providedIn: 'root',
@@ -130,6 +132,24 @@ export class DisplayedColumnService {
                     const date = this.dateService.parseTimestamp(e.createdAt);
                     return this.dateService.toLocaleISOString(date).split('T')[0];
                 },
+            },
+        ];
+    }
+
+    getLabelColumns(): DisplayedColumn<Label>[] {
+        return [
+            {
+                id: 'name',
+                label: 'Name',
+                sortable: true,
+                badge: (e: Label) => e.color,
+                value: (e: Label) => e.name,
+            },
+            {
+                id: 'description',
+                label: 'Description',
+                sortable: false,
+                value: (e: Label) => e.description,
             },
         ];
     }

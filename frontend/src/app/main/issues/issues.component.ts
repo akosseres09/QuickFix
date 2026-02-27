@@ -120,7 +120,7 @@ export class IssuesComponent {
                 },
                 error: (error) => {
                     console.error('Error fetching issues:', error);
-                    this.snackbarService.open('Failed to load issues');
+                    this.snackbarService.open('Failed to load issues', ['snackbar-error']);
                     this.listState.isLoading.set(false);
                 },
             });

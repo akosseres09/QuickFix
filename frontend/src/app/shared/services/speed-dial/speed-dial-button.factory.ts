@@ -99,6 +99,24 @@ export class SpeedDialButtonFactory {
     }
 
     /**
+     * Create a standard set of CRUD buttons for entities with create, edit, delete
+     * @param config Configuration for the button set
+     */
+    createBaseCrudButtons(config: {
+        entityName: string;
+        hasSelection: boolean;
+        createRoute: string | any[];
+        editRouteBuilder: () => string | any[] | null;
+        onDelete: () => void;
+    }): SpeedDialButton[] {
+        return [
+            this.createButton(config.entityName, !config.hasSelection, config.createRoute),
+            this.deleteButton(config.entityName, config.hasSelection, config.onDelete),
+            this.editButton(config.entityName, config.hasSelection, config.editRouteBuilder),
+        ];
+    }
+
+    /**
      * Create a standard set of CRUD buttons for entities with create, edit, delete, archive
      * @param config Configuration for the button set
      */

@@ -75,12 +75,23 @@
                                     </a>
                                 } @else if (typeof col.badge === 'function') {
                                     <div class="flex justify-center items-center">
-                                        <span
-                                            class="px-3 py-1 rounded-full font-semibold text-sm border-2"
-                                            [ngClass]="col.badge!(element)"
-                                        >
-                                            {{ col.value(element) }}
-                                        </span>
+                                        @if (col.badge!(element)?.includes('#')) {
+                                            <span
+                                                class="px-3 py-1 rounded-full font-semibold text-sm border-2"
+                                                [style.backgroundColor]="col.badge!(element) + '33'"
+                                                [style.borderColor]="col.badge!(element)"
+                                                [style.color]="col.badge!(element)"
+                                            >
+                                                {{ col.value(element) }}
+                                            </span>
+                                        } @else {
+                                            <span
+                                                class="px-3 py-1 rounded-full font-semibold text-sm border-2"
+                                                [ngClass]="col.badge!(element)"
+                                            >
+                                                {{ col.value(element) }}
+                                            </span>
+                                        }
                                     </div>
                                 } @else {
                                     {{ col.value(element) }}
