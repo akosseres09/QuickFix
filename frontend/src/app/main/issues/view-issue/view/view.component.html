@@ -136,7 +136,13 @@
                 (submit)="onSubmit()"
             >
                 <div class="flex flex-col gap-2">
-                    <label class="font-semibold">Add a Comment</label>
+                    <label class="font-semibold">
+                        @if (editingComment()) {
+                            Edit Comment
+                        } @else {
+                            Add a Comment
+                        }
+                    </label>
                     <app-text-editor formControlName="content"></app-text-editor>
                     @if (comment.invalid && (comment.touched || comment.dirty)) {
                         <mat-error class="text-[var(--mat-form-field-error-text-color)]">
