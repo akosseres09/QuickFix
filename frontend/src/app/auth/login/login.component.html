@@ -10,7 +10,6 @@
             <mat-icon matPrefix>email</mat-icon>
             <input
                 formControlName="email"
-                class="focus:border-dark-primary foe"
                 matInput
                 type="email"
                 autocomplete="email"
@@ -30,10 +29,11 @@
             }
         </mat-form-field>
 
-        <mat-form-field class="w-full" color="accent" appearance="outline">
+        <mat-form-field class="w-full" appearance="outline">
             <mat-label>Password</mat-label>
             <mat-icon matPrefix class="!text-light-text dark:!text-inherit">lock</mat-icon>
             <input
+                class="focus:border-dark-primary"
                 formControlName="password"
                 matInput
                 type="password"
