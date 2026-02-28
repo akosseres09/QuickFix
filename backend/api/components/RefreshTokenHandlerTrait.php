@@ -16,7 +16,7 @@ trait RefreshTokenHandlerTrait
             ->byToken($token);
     }
 
-    protected function getRefreshToken(string $token, bool $withUser = true): UserRefreshToken | null
+    protected function getRefreshToken(string $token, bool $withUser = true): UserRefreshToken|null
     {
         $ip = Yii::$app->request->getUserIP();
         $query = UserRefreshToken::find()
@@ -45,7 +45,7 @@ trait RefreshTokenHandlerTrait
      * If $credential is a string (user ID), it creates a new refresh token.
      * Both cases will add the token to the response cookies.
      */
-    protected function createRefreshToken(string|UserRefreshToken $credential, int $expiresInSeconds = 300): UserRefreshToken | null
+    protected function createRefreshToken(string|UserRefreshToken $credential, int $expiresInSeconds = 60 * 60 * 24 * 14): UserRefreshToken|null
     {
         $credentialOptions = [
             'token' => Yii::$app->security->generateRandomString(64),

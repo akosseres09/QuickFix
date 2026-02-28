@@ -27,7 +27,7 @@ trait AccessTokenHandler
             ->identifiedBy(bin2hex(random_bytes(16)))
             ->issuedAt($now)
             ->canOnlyBeUsedAfter($now)
-            ->expiresAt($now->modify('+ 300 minutes'))
+            ->expiresAt($now->modify('+ 20 minutes'))
             ->withClaim('uid', $userId)
             ->withClaim('role', $role)
             ->withClaim('email', $email)

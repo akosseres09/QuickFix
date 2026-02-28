@@ -125,9 +125,9 @@ class AuthController extends Controller
 
         $token = $this->createAccessToken($user->id, $user->is_admin, $user->email);
 
-        return [
+        return ResponseMaker::asSuccess([
             'access_token' => $token->toString(),
-        ];
+        ]);
     }
 
     public function actionLogout()
