@@ -29,12 +29,13 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     standalone: true,
 })
 export class VerifyComponent implements OnDestroy {
-    private authService = inject(AuthService);
-    private router = inject(Router);
-    private fb = inject(FormBuilder);
-    private snackbar = inject(SnackbarService);
-    private destroyRef = inject(DestroyRef);
-    currentRoute = inject(ActivatedRoute);
+    private readonly authService = inject(AuthService);
+    private readonly router = inject(Router);
+    private readonly fb = inject(FormBuilder);
+    private readonly snackbar = inject(SnackbarService);
+    private readonly destroyRef = inject(DestroyRef);
+    private readonly currentRoute = inject(ActivatedRoute);
+
     token = signal(this.currentRoute.snapshot.queryParamMap.get('token') ?? '');
     verifyPage = signal(true);
     verifyForm = this.fb.group({
@@ -61,12 +62,12 @@ export class VerifyComponent implements OnDestroy {
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
                 next: (response) => {
-                    this.snackbar.open('Account Verified!');
+                    this.snackbar.success('Account Verified!');
                     this.router.navigateByUrl('/auth/login');
                 },
                 error: (error) => {
                     console.error(error);
-                    this.snackbar.open('Failed to verify account!', ['snackbar-error']);
+                    this.snackbar.error('Failed to verify account!');
                 },
             });
     }

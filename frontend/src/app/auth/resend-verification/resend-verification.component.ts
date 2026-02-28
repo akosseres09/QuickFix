@@ -14,10 +14,10 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     styleUrl: './resend-verification.component.css',
 })
 export class ResendVerificationComponent {
-    private authService = inject(AuthService);
-    private router = inject(Router);
-    private snackbar = inject(SnackbarService);
-    private destroyRef = inject(DestroyRef);
+    private readonly authService = inject(AuthService);
+    private readonly router = inject(Router);
+    private readonly snackbar = inject(SnackbarService);
+    private readonly destroyRef = inject(DestroyRef);
 
     resend(email: string) {
         if (!email) return;
@@ -27,7 +27,7 @@ export class ResendVerificationComponent {
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
                 next: (response) => {
-                    this.snackbar.open('Verification email sent successfully!');
+                    this.snackbar.success('Verification email sent successfully!');
                     this.router.navigateByUrl('/auth/verify');
                 },
                 error: (error) => {
@@ -35,7 +35,7 @@ export class ResendVerificationComponent {
                         error.error.message ||
                         'An error occurred while sending the verification email.';
 
-                    this.snackbar.open(message, ['snackbar-error']);
+                    this.snackbar.error(message);
                 },
             });
     }

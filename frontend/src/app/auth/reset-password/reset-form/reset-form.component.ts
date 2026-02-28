@@ -29,8 +29,8 @@ import { MatButton } from '@angular/material/button';
     styleUrl: './reset-form.component.css',
 })
 export class ResetFormComponent {
-    private fb = inject(FormBuilder);
-    private activeRoute = inject(ActivatedRoute);
+    private readonly fb = inject(FormBuilder);
+    private readonly activeRoute = inject(ActivatedRoute);
 
     sendForm = output<{ token: string; password: string }>();
 

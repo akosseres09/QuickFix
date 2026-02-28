@@ -46,11 +46,11 @@ import { SignupData } from '../../shared/constants/user/SignupData';
     standalone: true,
 })
 export class SignupComponent {
-    private router = inject(Router);
-    private fb = inject(FormBuilder);
-    private authService = inject(AuthService);
-    private snackbar = inject(SnackbarService);
-    private destroyRef = inject(DestroyRef);
+    private readonly router = inject(Router);
+    private readonly fb = inject(FormBuilder);
+    private readonly authService = inject(AuthService);
+    private readonly snackbar = inject(SnackbarService);
+    private readonly destroyRef = inject(DestroyRef);
 
     pwVisible = signal(false);
     rePwVisible = signal(false);
@@ -111,7 +111,9 @@ export class SignupComponent {
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
                 next: (result) => {
-                    this.snackbar.open('Account created successfully! Please verify your email.');
+                    this.snackbar.success(
+                        'Account created successfully! Please verify your email.'
+                    );
                     this.router.navigateByUrl('/auth/verify');
                 },
                 error: (error) => {
@@ -120,10 +122,9 @@ export class SignupComponent {
                         Array<string>
                     >;
                     this.setServerValidationErrors(errorObj);
-                    this.snackbar.open(
+                    this.snackbar.error(
                         (error.error as errorResponse).error.message ||
-                            'Signup failed. Please try again.',
-                        ['snackbar-error']
+                            'Signup failed. Please try again.'
                     );
                 },
             });

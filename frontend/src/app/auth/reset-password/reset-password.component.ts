@@ -15,11 +15,11 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     styleUrl: './reset-password.component.css',
 })
 export class ResetPasswordComponent {
-    private currentRoute = inject(ActivatedRoute);
-    private snackBar = inject(SnackbarService);
-    private destroyRef = inject(DestroyRef);
-    private authService = inject(AuthService);
-    private router = inject(Router);
+    private readonly currentRoute = inject(ActivatedRoute);
+    private readonly snackBar = inject(SnackbarService);
+    private readonly destroyRef = inject(DestroyRef);
+    private readonly authService = inject(AuthService);
+    private readonly router = inject(Router);
 
     token = signal<string>(this.currentRoute.snapshot.queryParamMap.get('token') ?? '');
     emailSent = signal(false);
@@ -38,14 +38,12 @@ export class ResetPasswordComponent {
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
                 next: (response) => {
-                    this.snackBar.open('Email sent successfully!');
+                    this.snackBar.success('Email sent successfully!');
                     this.emailSent.set(true);
                 },
                 error: (error) => {
-                    this.snackBar.open('Error sending email. Please try again later.', [
-                        'snackbar-error',
-                    ]);
-                    console.error('Error in resend email:', error);
+                    this.snackBar.error('Error sending email. Please try again later.');
+                    console.error('Error in resend email:', error.error?.message || error);
                 },
             });
     }
@@ -56,13 +54,14 @@ export class ResetPasswordComponent {
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
                 next: (response) => {
-                    this.snackBar.open('Password reset successfully!');
+                    this.snackBar.success('Password reset successfully!');
                     this.router.navigateByUrl('/auth/login');
                 },
                 error: (error) => {
-                    this.snackBar.open('Error resetting password. Please try again later.', [
-                        'snackbar-error',
-                    ]);
+                    const message =
+                        error.error?.message || 'Error resetting password. Please try again later.';
+                    this.snackBar.error(message);
+                    console.error('Error in reset password:', message);
                 },
             });
     }

@@ -13,8 +13,8 @@ import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../shared/services/auth/auth.service';
-import { errorResponse } from '../../shared/model/Response';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 
 @Component({
     selector: 'app-login',
@@ -36,10 +36,11 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     standalone: true,
 })
 export class LoginComponent {
-    private fb = inject(FormBuilder);
-    private router = inject(Router);
-    private destroyRef = inject(DestroyRef);
-    private authService = inject(AuthService);
+    private readonly fb = inject(FormBuilder);
+    private readonly router = inject(Router);
+    private readonly destroyRef = inject(DestroyRef);
+    private readonly authService = inject(AuthService);
+    private readonly snackbarService = inject(SnackbarService);
 
     pwVisible = signal(false);
     loginForm = this.fb.group({
@@ -75,13 +76,16 @@ export class LoginComponent {
         this.authService
             .login(email, password)
             .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe((result) => {
-                if (result.success) {
+            .subscribe({
+                next: (result) => {
                     this.router.navigate(['/projects']);
-                } else {
-                    const errorDetails = (result as errorResponse).error.details;
-                    console.error('Login failed:', errorDetails);
-                }
+                },
+                error: (error) => {
+                    console.error('Login error:', error.error?.message);
+                    this.snackbarService.error(
+                        error.error?.message || 'Login failed. Please try again.'
+                    );
+                },
             });
     }
 }

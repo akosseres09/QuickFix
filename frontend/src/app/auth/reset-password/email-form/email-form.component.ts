@@ -22,7 +22,7 @@ import { MatError, MatFormField, MatInput, MatLabel, MatPrefix } from '@angular/
     styleUrl: './email-form.component.css',
 })
 export class EmailFormComponent {
-    private fb = inject(FormBuilder);
+    private readonly fb = inject(FormBuilder);
 
     form = this.fb.group({
         email: ['', [Validators.required, Validators.email]],
