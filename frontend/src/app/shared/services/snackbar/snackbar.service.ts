@@ -13,4 +13,12 @@ export class SnackbarService {
             panelClass: panel,
         });
     }
+
+    success(message: string) {
+        this.open(message, ['snackbar-success']);
+    }
+
+    error(message: string) {
+        this.open(message, ['snackbar-error']);
+    }
 }

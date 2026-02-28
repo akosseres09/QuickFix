@@ -35,7 +35,18 @@
     --color-dark-primary-hover: #c1b7f0;
     --color-dark-secondary-hover: #3f22b8;
     --color-dark-accent-hover: #623cf5;
-    --color-success: #4caf50;
+
+    /* Error palette - Tailwind Red */
+    --color-light-error: #dc2626;
+    --color-light-error-hover: #b91c1c;
+    --color-dark-error: #f87171;
+    --color-dark-error-hover: #fca5a5;
+
+    /* Success palette - Tailwind Emerald */
+    --color-light-success: #059669;
+    --color-light-success-hover: #047857;
+    --color-dark-success: #34d399;
+    --color-dark-success-hover: #6ee7b7;
 }
 
 @theme {
@@ -64,7 +75,16 @@
     --color-dark-primary-hover: var(--color-dark-primary-hover);
     --color-dark-secondary-hover: var(--color-dark-secondary-hover);
     --color-dark-accent-hover: var(--color-dark-accent-hover);
-    --color-success: var(--color-success);
+
+    --color-light-error: var(--color-light-error);
+    --color-light-error-hover: var(--color-light-error-hover);
+    --color-dark-error: var(--color-dark-error);
+    --color-dark-error-hover: var(--color-dark-error-hover);
+
+    --color-light-success: var(--color-light-success);
+    --color-light-success-hover: var(--color-light-success-hover);
+    --color-dark-success: var(--color-dark-success);
+    --color-dark-success-hover: var(--color-dark-success-hover);
 }
 
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
@@ -75,7 +95,13 @@
 }
 
 .snackbar-error {
-    --mdc-snackbar-container-color: rgba(250, 53, 53, 0.74);
+    --mdc-snackbar-container-color: var(--color-light-error);
+    --mdc-snackbar-supporting-text-color: white;
+    --mat-snack-bar-button-color: white;
+}
+
+.snackbar-success {
+    --mdc-snackbar-container-color: var(--color-light-success);
     --mdc-snackbar-supporting-text-color: white;
     --mat-snack-bar-button-color: white;
 }

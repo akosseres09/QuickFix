@@ -138,11 +138,147 @@ $dark-accent: mat.m2-define-palette(
     )
 );
 
+// Error palette - Tailwind Red
+$light-error: mat.m2-define-palette(
+    (
+        100: var-color(--color-light-error),
+        200: var-color(--color-light-error),
+        300: var-color(--color-light-error),
+        400: var-color(--color-light-error),
+        500: var-color(--color-light-error),
+        600: var-color(--color-light-error),
+        700: var-color(--color-light-error),
+        800: var-color(--color-light-error),
+        900: var-color(--color-light-error),
+        A100: var-color(--color-light-error),
+        A200: var-color(--color-light-error),
+        A400: var-color(--color-light-error),
+        A700: var-color(--color-light-error),
+        contrast: (
+            100: #ffffff,
+            200: #ffffff,
+            300: #ffffff,
+            400: #ffffff,
+            500: #ffffff,
+            600: #ffffff,
+            700: #ffffff,
+            800: #ffffff,
+            900: #ffffff,
+            A100: #ffffff,
+            A200: #ffffff,
+            A400: #ffffff,
+            A700: #ffffff,
+        ),
+    )
+);
+
+$dark-error: mat.m2-define-palette(
+    (
+        100: var-color(--color-dark-error),
+        200: var-color(--color-dark-error),
+        300: var-color(--color-dark-error),
+        400: var-color(--color-dark-error),
+        500: var-color(--color-dark-error),
+        600: var-color(--color-dark-error),
+        700: var-color(--color-dark-error),
+        800: var-color(--color-dark-error),
+        900: var-color(--color-dark-error),
+        A100: var-color(--color-dark-error),
+        A200: var-color(--color-dark-error),
+        A400: var-color(--color-dark-error),
+        A700: var-color(--color-dark-error),
+        contrast: (
+            100: #000000,
+            200: #000000,
+            300: #000000,
+            400: #000000,
+            500: #000000,
+            600: #000000,
+            700: #000000,
+            800: #000000,
+            900: #000000,
+            A100: #000000,
+            A200: #000000,
+            A400: #000000,
+            A700: #000000,
+        ),
+    )
+);
+
+// Success palette - Tailwind Emerald
+$light-success: mat.m2-define-palette(
+    (
+        100: var-color(--color-light-success),
+        200: var-color(--color-light-success),
+        300: var-color(--color-light-success),
+        400: var-color(--color-light-success),
+        500: var-color(--color-light-success),
+        600: var-color(--color-light-success),
+        700: var-color(--color-light-success),
+        800: var-color(--color-light-success),
+        900: var-color(--color-light-success),
+        A100: var-color(--color-light-success),
+        A200: var-color(--color-light-success),
+        A400: var-color(--color-light-success),
+        A700: var-color(--color-light-success),
+        contrast: (
+            100: #ffffff,
+            200: #ffffff,
+            300: #ffffff,
+            400: #ffffff,
+            500: #ffffff,
+            600: #ffffff,
+            700: #ffffff,
+            800: #ffffff,
+            900: #ffffff,
+            A100: #ffffff,
+            A200: #ffffff,
+            A400: #ffffff,
+            A700: #ffffff,
+        ),
+    )
+);
+
+$dark-success: mat.m2-define-palette(
+    (
+        100: var-color(--color-dark-success),
+        200: var-color(--color-dark-success),
+        300: var-color(--color-dark-success),
+        400: var-color(--color-dark-success),
+        500: var-color(--color-dark-success),
+        600: var-color(--color-dark-success),
+        700: var-color(--color-dark-success),
+        800: var-color(--color-dark-success),
+        900: var-color(--color-dark-success),
+        A100: var-color(--color-dark-success),
+        A200: var-color(--color-dark-success),
+        A400: var-color(--color-dark-success),
+        A700: var-color(--color-dark-success),
+        contrast: (
+            100: #000000,
+            200: #000000,
+            300: #000000,
+            400: #000000,
+            500: #000000,
+            600: #000000,
+            700: #000000,
+            800: #000000,
+            900: #000000,
+            A100: #000000,
+            A200: #000000,
+            A400: #000000,
+            A700: #000000,
+        ),
+    )
+);
+
 $light-theme: mat.m2-define-light-theme(
     (
         color: (
             primary: $light-primary,
             accent: $light-accent,
+            warn: $light-error,
+            success: $light-success,
             background: (
                 background: var-color(--color-light-background),
                 card: var-color(--color-light-background-hover),
@@ -158,6 +294,8 @@ $dark-theme: mat.m2-define-dark-theme(
         color: (
             primary: $dark-primary,
             accent: $dark-accent,
+            warn: $dark-error,
+            success: $dark-success,
             background: (
                 background: var-color(--color-dark-background),
                 card: var-color(--color-dark-background-hover),

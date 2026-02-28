@@ -161,7 +161,7 @@ class AuthController extends Controller
             'id' => $user->id,
             'email' => $user->email,
             'username' => $user->username,
-            'is_admin' => (bool)$user->is_admin,
+            'is_admin' => (bool) $user->is_admin,
             'status' => $user->status,
             'created_at' => $user->created_at,
         ]);
