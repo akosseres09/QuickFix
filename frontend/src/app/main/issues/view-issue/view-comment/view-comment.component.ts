@@ -70,11 +70,11 @@ export class ViewCommentComponent implements OnInit {
                         this.comments.update((current) => [...current, comment]);
                         this.nextCursor.set(comment.id);
                     }
-                    this.snackbarSerivce.open('Comment added!');
+                    this.snackbarSerivce.success('Comment added!');
                 },
                 error: (error) => {
                     console.error('Error in updating UI', error);
-                    this.snackbarSerivce.open('Failed to add comment!', ['snackbar-error']);
+                    this.snackbarSerivce.error('Failed to add comment!');
                 },
             });
     }
@@ -105,6 +105,7 @@ export class ViewCommentComponent implements OnInit {
                 },
                 error: (error) => {
                     console.error(error);
+                    this.snackbarSerivce.error('Failed to load comments!');
                 },
             });
     }

@@ -102,9 +102,7 @@ export class IssueFormComponent implements OnInit {
         });
 
         if (!this.projectId()) {
-            this.snackbarService.open('Project ID is missing. Cannot create or edit issue.', [
-                'snackbar-error',
-            ]);
+            this.snackbarService.error('Project ID is missing. Cannot create or edit issue.');
             this.router.navigate(['../'], { relativeTo: this.activeRoute });
             return;
         }
@@ -115,7 +113,7 @@ export class IssueFormComponent implements OnInit {
                 this.isUsersLoading.set(false);
             },
             error: (error) => {
-                this.snackbarService.open('Failed to load users', ['snackbar-error']);
+                this.snackbarService.error('Failed to load users');
                 this.isUsersLoading.set(false);
             },
         });
@@ -130,7 +128,7 @@ export class IssueFormComponent implements OnInit {
 
         if (this.issueForm.invalid) {
             this.issueForm.markAllAsTouched();
-            this.snackbarService.open('Please fill in all required fields', ['snackbar-error']);
+            this.snackbarService.error('Please fill in all required fields');
             return;
         }
 

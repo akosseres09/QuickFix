@@ -4,6 +4,8 @@ import { MatIcon } from '@angular/material/icon';
 import { IssueService } from '../../../shared/services/issue/issue.service';
 import { Issue } from '../../../shared/model/Issue';
 import { ViewComponent } from './view/view.component';
+import { finalize } from 'rxjs';
+import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
 
 @Component({
     selector: 'app-view-issue',
@@ -13,6 +15,7 @@ import { ViewComponent } from './view/view.component';
 })
 export class ViewIssueComponent implements OnInit {
     private readonly issueService = inject(IssueService);
+    private readonly snackbarSerivce = inject(SnackbarService);
 
     // angular automatically binds the URL parameters to these signals
     issueId = input.required<string>();
@@ -30,15 +33,17 @@ export class ViewIssueComponent implements OnInit {
             return;
         }
         this.issueService.setProjectId(projectId);
-        this.issueService.getIssueById(id).subscribe({
-            next: (issue) => {
-                this.issue.set(issue);
-                this.loading.set(false);
-            },
-            error: (err) => {
-                console.error('Error fetching issue:', err);
-                this.loading.set(false);
-            },
-        });
+        this.issueService
+            .getIssueById(id)
+            .pipe(finalize(() => this.loading.set(false)))
+            .subscribe({
+                next: (issue) => {
+                    this.issue.set(issue);
+                },
+                error: (err) => {
+                    console.error('Error fetching issue:', err);
+                    this.snackbarSerivce.error('Failed to load issue. Please try again later.');
+                },
+            });
     }
 }

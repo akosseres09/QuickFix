@@ -136,11 +136,11 @@ export class ViewComponent {
                         ...this.issue(),
                         ...updatedIssue,
                     });
-                    this.snackbarService.open('Issue status updated successfully');
+                    this.snackbarService.success('Issue status updated successfully');
                 },
                 error: (err) => {
                     console.error('Failed to update issue status:', err);
-                    this.snackbarService.open('Failed to update issue status', ['snackbar-error']);
+                    this.snackbarService.error('Failed to update issue status');
                 },
             });
     }
@@ -151,11 +151,11 @@ export class ViewComponent {
 
         navigator.clipboard.writeText(issue.id).then(
             () => {
-                this.snackbarService.open('Issue ID copied to clipboard');
+                this.snackbarService.success('Issue ID copied to clipboard');
             },
             (err) => {
                 console.error('Failed to copy issue ID:', err);
-                this.snackbarService.open('Failed to copy issue ID', ['snackbar-error']);
+                this.snackbarService.error('Failed to copy issue ID');
             }
         );
     }
@@ -166,11 +166,11 @@ export class ViewComponent {
 
         navigator.clipboard.writeText(window.location.href).then(
             () => {
-                this.snackbarService.open('Issue link copied to clipboard');
+                this.snackbarService.success('Issue link copied to clipboard');
             },
             (err) => {
                 console.error('Failed to copy issue link:', err);
-                this.snackbarService.open('Failed to copy issue link', ['snackbar-error']);
+                this.snackbarService.error('Failed to copy issue link');
             }
         );
     }
@@ -211,10 +211,10 @@ export class ViewComponent {
             .subscribe({
                 next: (result) => {
                     this.editingComment.set(null);
-                    console.log(result);
                 },
                 error: (error) => {
                     console.error(error);
+                    this.snackbarService.error('Failed to edit comment!');
                 },
             });
     }
@@ -241,7 +241,7 @@ export class ViewComponent {
             .subscribe({
                 next: (result) => {},
                 error: (error) => {
-                    this.snackbarService.open('Failed to add comment!', ['snackbar-error']);
+                    this.snackbarService.error('Failed to add comment!');
                 },
             });
     }

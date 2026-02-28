@@ -1,12 +1,4 @@
-import {
-    Component,
-    DestroyRef,
-    inject,
-    signal,
-    Signal,
-    TemplateRef,
-    viewChild,
-} from '@angular/core';
+import { Component, inject, signal, Signal, TemplateRef, viewChild } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { DialogService } from '../../../shared/services/dialog/dialog.service';
@@ -14,7 +6,8 @@ import { ProjectFormComponent } from '../../../common/form/project-form/project-
 import { Router, RouterLink } from '@angular/router';
 import { ProjectService } from '../../../shared/services/project/project.service';
 import { Project } from '../../../shared/model/Project';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { finalize } from 'rxjs';
+import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
 
 @Component({
     selector: 'app-new',
@@ -25,8 +18,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 export class NewProjectComponent {
     private readonly dialogService = inject(DialogService);
     private readonly projectService = inject(ProjectService);
-    private readonly destroyRef = inject(DestroyRef);
     private readonly router = inject(Router);
+    private readonly snackbarService = inject(SnackbarService);
 
     infoDialogRef: Signal<TemplateRef<any> | undefined> = viewChild('infoDialog');
     isSubmitting = signal<boolean>(false);
@@ -42,15 +35,14 @@ export class NewProjectComponent {
     onProjectCreated(project: Partial<Project>) {
         this.projectService
             .createProject(project)
-            .pipe(takeUntilDestroyed(this.destroyRef))
+            .pipe(finalize(() => this.isSubmitting.set(false)))
             .subscribe({
                 next: (project) => {
                     this.router.navigate(['/project', project.key]);
-                    this.isSubmitting.set(false);
                 },
                 error: (error) => {
                     console.error('Error creating project:', error);
-                    this.isSubmitting.set(false);
+                    this.snackbarService.error('Failed to create project');
                 },
             });
     }

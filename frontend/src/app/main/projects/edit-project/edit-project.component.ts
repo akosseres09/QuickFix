@@ -1,12 +1,4 @@
-import {
-    Component,
-    DestroyRef,
-    inject,
-    Signal,
-    signal,
-    TemplateRef,
-    viewChild,
-} from '@angular/core';
+import { Component, inject, Signal, signal, TemplateRef, viewChild } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProjectFormComponent } from '../../../common/form/project-form/project-form.component';
@@ -15,7 +7,7 @@ import { ProjectService } from '../../../shared/services/project/project.service
 import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DialogService } from '../../../shared/services/dialog/dialog.service';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { finalize } from 'rxjs';
 
 @Component({
     selector: 'app-edit',
@@ -29,7 +21,6 @@ export class EditProjectComponent {
     private readonly router = inject(Router);
     private readonly snackbar = inject(SnackbarService);
     private readonly dialogService = inject(DialogService);
-    private readonly destroyRef = inject(DestroyRef);
 
     projectId = signal<string>('');
     project = signal<Project | null>(null);
@@ -51,8 +42,8 @@ export class EditProjectComponent {
             },
             error: (err) => {
                 console.error('Failed to load project:', err);
+                this.snackbar.error('Failed to load project!');
                 this.router.navigate(['/projects']);
-                this.snackbar.open('Failed to load project', ['snackbar-error']);
             },
         });
     }
@@ -72,15 +63,14 @@ export class EditProjectComponent {
 
         this.projectService
             .updateProject(projectId, project)
-            .pipe(takeUntilDestroyed(this.destroyRef))
+            .pipe(finalize(() => this.isSubmitting.set(false)))
             .subscribe({
                 next: (project) => {
                     this.router.navigate(['/project', project.key]);
-                    this.isSubmitting.set(false);
                 },
                 error: (error) => {
-                    console.error('Error creating project:', error);
-                    this.isSubmitting.set(false);
+                    console.error('Error updating project:', error);
+                    this.snackbar.error('Failed to update project');
                 },
             });
     }

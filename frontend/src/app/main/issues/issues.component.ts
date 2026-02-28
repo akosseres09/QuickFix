@@ -1,4 +1,4 @@
-import { Component, computed, DestroyRef, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, inject, signal, viewChild } from '@angular/core';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { Issue } from '../../shared/model/Issue';
@@ -12,7 +12,6 @@ import { SpeedDialComponent } from '../../common/speed-dial/speed-dial.component
 import { SpeedDialButton } from '../../shared/constants/speed-dial/SpeedDialButton';
 import { Sort } from '@angular/material/sort';
 import { ApiQueryParams } from '../../shared/constants/api/ApiQueryParams';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Filter } from '../../shared/constants/Filter';
 import { FilterComponent } from '../../common/filter/filter.component';
 import { DialogService } from '../../shared/services/dialog/dialog.service';
@@ -40,7 +39,6 @@ export class IssuesComponent {
     private readonly snackbarService = inject(SnackbarService);
     private readonly issueService = inject(IssueService);
     private readonly activeRoute = inject(ActivatedRoute);
-    private readonly destroyRef = inject(DestroyRef);
     private readonly displayedColumService = inject(DisplayedColumnService);
     private readonly filterService = inject(FilterService);
     private readonly listStateService = inject(ListStateService);
@@ -75,7 +73,7 @@ export class IssuesComponent {
             editRouteBuilder: () => {
                 const issueId = this.selectedRow()?.id;
                 if (!issueId) {
-                    this.snackbarService.open('Please select a valid issue to edit!');
+                    this.snackbarService.error('Please select a valid issue to edit!');
                     return null;
                 }
                 return ['/project', currentProjectId, 'issue', issueId, 'edit'];
@@ -102,7 +100,7 @@ export class IssuesComponent {
 
     getIssues() {
         if (!this.projectId()) {
-            this.snackbarService.open('Project ID is missing');
+            this.snackbarService.error('Project ID is missing');
             return;
         }
 
@@ -110,18 +108,16 @@ export class IssuesComponent {
 
         this.issueService
             .getIssues(this.listState.buildQueryParams())
-            .pipe(takeUntilDestroyed(this.destroyRef))
+            .pipe(finalize(() => this.listState.isLoading.set(false)))
             .subscribe({
                 next: (response) => {
                     this.issues.set(response.items);
                     this.filteredIssues.set(response.items);
                     this.listState.totalCount.set(response._meta.totalCount);
-                    this.listState.isLoading.set(false);
                 },
                 error: (error) => {
                     console.error('Error fetching issues:', error);
-                    this.snackbarService.open('Failed to load issues', ['snackbar-error']);
-                    this.listState.isLoading.set(false);
+                    this.snackbarService.error('Failed to load issues');
                 },
             });
     }
@@ -188,7 +184,7 @@ export class IssuesComponent {
     openUnarchiveConfirmation() {
         const template = this.unarchiveConfirmTemplate();
         if (!template) {
-            this.snackbarService.open('Error opening confirmation dialog', ['snackbar-error']);
+            this.snackbarService.error('Error opening confirmation dialog');
             return;
         }
 
@@ -208,7 +204,7 @@ export class IssuesComponent {
     archiveIssue() {
         const issue = this.selectedRow();
         if (!issue) {
-            this.snackbarService.open('No Issue selected', ['snackbar-error']);
+            this.snackbarService.error('No Issue selected');
             return;
         }
 
@@ -225,10 +221,10 @@ export class IssuesComponent {
             )
             .subscribe({
                 next: () => {
-                    this.snackbarService.open('Issue archived successfully!');
+                    this.snackbarService.success('Issue archived successfully!');
                 },
                 error: (err) => {
-                    this.snackbarService.open('Failed to archive issue!', ['snackbar-error']);
+                    this.snackbarService.error('Failed to archive issue!');
                 },
             });
     }
@@ -236,7 +232,7 @@ export class IssuesComponent {
     unarchiveIssue() {
         const issue = this.selectedRow();
         if (!issue) {
-            this.snackbarService.open('No Issue selected', ['snackbar-error']);
+            this.snackbarService.error('No Issue selected');
             return;
         }
 
@@ -253,10 +249,10 @@ export class IssuesComponent {
             )
             .subscribe({
                 next: () => {
-                    this.snackbarService.open('Issue unarchived successfully!');
+                    this.snackbarService.success('Issue unarchived successfully!');
                 },
                 error: (err) => {
-                    this.snackbarService.open('Failed to unarchive issue!', ['snackbar-error']);
+                    this.snackbarService.error('Failed to unarchive issue!');
                 },
             });
     }

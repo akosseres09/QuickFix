@@ -47,7 +47,7 @@ export class MembersComponent implements OnInit {
             },
             error: (err) => {
                 console.error('Failed to fetch members:', err);
-                this.snackbarService.open('Failed to fetch members', ['snackbar-error']);
+                this.snackbarService.error('Failed to fetch members');
             },
         });
     }

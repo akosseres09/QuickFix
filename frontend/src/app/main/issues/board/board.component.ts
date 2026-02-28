@@ -6,6 +6,7 @@ import { Issue, IssueStatus, STATUS_MAP } from '../../../shared/model/Issue';
 import { IssueService } from '../../../shared/services/issue/issue.service';
 import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
 import { BoardColumnComponent } from './board-column/board-column.component';
+import { finalize } from 'rxjs';
 
 @Component({
     selector: 'app-board',
@@ -37,7 +38,7 @@ export class BoardComponent implements OnInit {
         const id = this.route.parent?.parent?.snapshot.paramMap.get('projectId');
 
         if (!id) {
-            this.snackbarService.open('Project ID is missing', ['snackbar-error']);
+            this.snackbarService.error('Project ID is missing');
             return;
         }
 
@@ -52,15 +53,18 @@ export class BoardComponent implements OnInit {
             .getIssuesSimple({
                 expand: 'assignee',
             })
+            .pipe(
+                finalize(() => {
+                    this.isLoading.set(false);
+                })
+            )
             .subscribe({
                 next: (issues) => {
                     this.groupIssuesByStatus(issues);
-                    this.isLoading.set(false);
                 },
                 error: (error) => {
                     console.error('Error loading issues:', error);
-                    this.snackbarService.open('Failed to load issues', ['snackbar-error']);
-                    this.isLoading.set(false);
+                    this.snackbarService.error('Failed to load issues');
                 },
             });
     }
@@ -99,13 +103,13 @@ export class BoardComponent implements OnInit {
         // Update backend
         this.issueService.updateIssue(issue.id, { status: status }).subscribe({
             next: () => {
-                this.snackbarService.open(
+                this.snackbarService.success(
                     `Issue ${issue.issueKey} moved to ${STATUS_MAP[newStatus]}`
                 );
             },
             error: (error) => {
                 console.error('Error updating issue:', error);
-                this.snackbarService.open('Failed to update issue status', ['snackbar-error']);
+                this.snackbarService.error('Failed to update issue status');
 
                 // Rollback on error
                 issue.status = previousStatus;

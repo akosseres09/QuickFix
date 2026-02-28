@@ -1,12 +1,4 @@
-import {
-    Component,
-    computed,
-    DestroyRef,
-    ElementRef,
-    inject,
-    signal,
-    viewChild,
-} from '@angular/core';
+import { Component, computed, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -19,7 +11,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { UserService } from '../../shared/services/user/user.service';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 import { User } from '../../shared/model/User';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { DateService } from '../../shared/services/date/date.service';
 import {
     maxAgeValidator,
@@ -54,7 +46,6 @@ export class AccountComponent {
     private readonly dateService = inject(DateService);
     private readonly authService = inject(AuthService);
     private readonly fb = inject(FormBuilder);
-    private readonly destroyRef = inject(DestroyRef);
 
     user = signal<User | null>(null);
     profileForm = this.fb.group({
@@ -82,10 +73,8 @@ export class AccountComponent {
     minDate = signal<Date>(this.getMinDate());
 
     constructor() {
-        this.userService
-            .getUser()
-            .pipe(takeUntilDestroyed())
-            .subscribe((userData) => {
+        this.userService.getUser().subscribe({
+            next: (userData) => {
                 this.user.set(userData);
 
                 this.profilePictureUrl.set(this.getProfilePicture());
@@ -95,8 +84,13 @@ export class AccountComponent {
                     phoneNumber: userData.phoneNumber || '',
                     dateOfBirth: userData.dateOfBirth,
                 });
+
                 this.setProfileFormValues();
-            });
+            },
+            error: (error) => {
+                this.snackbarService.error('Failed to load user data');
+            },
+        });
     }
 
     getMinDate(): Date {
@@ -160,9 +154,7 @@ export class AccountComponent {
 
     saveChanges(): void {
         if (this.profileForm.invalid) {
-            this.snackbarService.open('Please fill in all required fields correctly', [
-                'snackbar-error',
-            ]);
+            this.snackbarService.error('Please fill in all required fields correctly');
             return;
         }
 
@@ -170,19 +162,16 @@ export class AccountComponent {
             this.profilePictureUrl.set(this.previewUrl() || this.profilePictureUrl());
         }
 
-        this.userService
-            .updateUser(this.profileForm.value as Partial<User>)
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe({
-                next: (response) => {
-                    this.user.set(response);
-                    this.initialFormSnapshot.set(this.profileForm.value);
-                    this.snackbarService.open('Profile updated successfully!');
-                },
-                error: (error) => {
-                    this.snackbarService.open('Failed to update profile', ['snackbar-error']);
-                },
-            });
+        this.userService.updateUser(this.profileForm.value as Partial<User>).subscribe({
+            next: (response) => {
+                this.user.set(response);
+                this.initialFormSnapshot.set(this.profileForm.value);
+                this.snackbarService.success('Profile updated successfully!');
+            },
+            error: (error) => {
+                this.snackbarService.error('Failed to update profile');
+            },
+        });
 
         this.selectedFile.set(null);
         this.previewUrl.set(null);

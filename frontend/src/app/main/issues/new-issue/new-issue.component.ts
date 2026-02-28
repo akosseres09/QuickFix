@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -13,8 +13,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { IssueFormComponent } from '../../../common/form/issue-form/issue-form.component';
 import { Issue } from '../../../shared/model/Issue';
 import { IssueService } from '../../../shared/services/issue/issue.service';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
+import { finalize } from 'rxjs';
 
 @Component({
     selector: 'app-new',
@@ -37,7 +37,6 @@ import { SnackbarService } from '../../../shared/services/snackbar/snackbar.serv
 export class NewIssueComponent {
     private readonly activeRoute = inject(ActivatedRoute);
     private readonly issueService = inject(IssueService);
-    private readonly destroyRef = inject(DestroyRef);
     private readonly router = inject(Router);
     private readonly snackbarService = inject(SnackbarService);
 
@@ -56,14 +55,17 @@ export class NewIssueComponent {
     onIssueCreated(issue: Partial<Issue>): void {
         this.issueService
             .createIssue(issue)
-            .pipe(takeUntilDestroyed(this.destroyRef))
+            .pipe(
+                finalize(() => {
+                    this.isSubmitting.set(false);
+                })
+            )
             .subscribe({
                 next: (issue) => {
                     this.snackbarService.open(`Issue "${issue.title}" created successfully!`);
                     this.router.navigate(['/project', this.projectId(), 'issues']);
                 },
                 error: (error) => {
-                    this.isSubmitting.set(false);
                     this.snackbarService.open(
                         error?.error?.message || 'Failed to create issue. Please try again.',
                         ['snackbar-error']

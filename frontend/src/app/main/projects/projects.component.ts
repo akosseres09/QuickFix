@@ -1,13 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-    Component,
-    computed,
-    DestroyRef,
-    inject,
-    signal,
-    TemplateRef,
-    viewChild,
-} from '@angular/core';
+import { Component, computed, inject, signal, TemplateRef, viewChild } from '@angular/core';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TableComponent } from '../../common/table/table.component';
@@ -18,7 +10,6 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatOptionModule } from '@angular/material/core';
 import { ActivatedRoute } from '@angular/router';
 import { SpeedDialComponent } from '../../common/speed-dial/speed-dial.component';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Sort } from '@angular/material/sort';
 import { ApiQueryParams } from '../../shared/constants/api/ApiQueryParams';
 import { SpeedDialButton } from '../../shared/constants/speed-dial/SpeedDialButton';
@@ -31,6 +22,7 @@ import { SpeedDialButtonFactory } from '../../shared/services/speed-dial/speed-d
 import { ListStateService } from '../../shared/services/list-state/list-state.service';
 import { ListState } from '../../shared/constants/table/ListState';
 import { DialogService } from '../../shared/services/dialog/dialog.service';
+import { finalize } from 'rxjs';
 
 @Component({
     selector: 'app-projects',
@@ -50,7 +42,6 @@ import { DialogService } from '../../shared/services/dialog/dialog.service';
 export class ProjectsComponent {
     private readonly projectService = inject(ProjectService);
     private readonly activeRoute = inject(ActivatedRoute);
-    private readonly destroyRef = inject(DestroyRef);
     private readonly snackbarService = inject(SnackbarService);
     private readonly filterService = inject(FilterService);
     private readonly displayedColumnService = inject(DisplayedColumnService);
@@ -81,7 +72,7 @@ export class ProjectsComponent {
             editRouteBuilder: () => {
                 const project = this.selectedRow();
                 if (!project) {
-                    this.snackbarService.open('Please select a valid project to edit!');
+                    this.snackbarService.error('Please select a valid project to edit!');
                     return null;
                 }
                 return ['/project', project.key, 'edit'];
@@ -115,12 +106,17 @@ export class ProjectsComponent {
 
         this.projectService
             .getProjects(this.listState.buildQueryParams())
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe((response) => {
-                this.projects.set(response.items);
-                this.filteredProjects.set(response.items);
-                this.listState.totalCount.set(response._meta.totalCount);
-                this.listState.isLoading.set(false);
+            .pipe(finalize(() => this.listState.isLoading.set(false)))
+            .subscribe({
+                next: (response) => {
+                    this.projects.set(response.items);
+                    this.filteredProjects.set(response.items);
+                    this.listState.totalCount.set(response._meta.totalCount);
+                },
+                error: (error) => {
+                    console.error('Error fetching projects', error);
+                    this.snackbarService.error('Error fetching projects');
+                },
             });
     }
 
@@ -165,7 +161,7 @@ export class ProjectsComponent {
     openDeleteConfirmation() {
         const template = this.deleteConfirmTemplate();
         if (!template) {
-            this.snackbarService.open('Error opening confirmation dialog', ['snackbar-error']);
+            this.snackbarService.error('Error opening delete confirmation dialog');
             return;
         }
 
@@ -185,14 +181,14 @@ export class ProjectsComponent {
     deleteProject() {
         const project = this.selectedRow();
         if (!project) {
-            this.snackbarService.open('No project selected', ['snackbar-error']);
+            this.snackbarService.error('No project selected');
             return;
         }
 
         // TODO: Implement actual delete API call
         this.projectService.deleteProject(project.key).subscribe({
             next: () => {
-                this.snackbarService.open(
+                this.snackbarService.success(
                     `Project "${this.selectedProjectName()}" deleted successfully!`
                 );
                 this.selectedRow.set(null);
@@ -200,7 +196,8 @@ export class ProjectsComponent {
                 this.getProjects();
             },
             error: (error) => {
-                this.snackbarService.open('Error deleting project', ['snackbar-error']);
+                console.error('Error deleting project', error);
+                this.snackbarService.error('Error deleting project');
             },
         });
     }
@@ -208,7 +205,7 @@ export class ProjectsComponent {
     openArchiveConfirmation() {
         const template = this.archiveConfirmTemplate();
         if (!template) {
-            this.snackbarService.open('Error opening confirmation dialog', ['snackbar-error']);
+            this.snackbarService.error('Error opening archive confirmation dialog');
             return;
         }
 
@@ -228,12 +225,14 @@ export class ProjectsComponent {
     archiveProject() {
         const projectId = this.selectedRow();
         if (!projectId) {
-            this.snackbarService.open('No project selected', ['snackbar-error']);
+            this.snackbarService.error('No project selected');
             return;
         }
 
         // TODO: Implement actual archive API call
-        this.snackbarService.open(`Project "${this.selectedProjectName()}" archived successfully!`);
+        this.snackbarService.success(
+            `Project "${this.selectedProjectName()}" archived successfully!`
+        );
         this.selectedRow.set(null);
         this.speedDial()?.close();
     }

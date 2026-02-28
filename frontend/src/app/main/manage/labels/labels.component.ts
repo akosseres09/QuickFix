@@ -16,6 +16,7 @@ import { ListStateService } from '../../../shared/services/list-state/list-state
 import { ListState } from '../../../shared/constants/table/ListState';
 import { ActivatedRoute } from '@angular/router';
 import { SpeedDialComponent } from '../../../common/speed-dial/speed-dial.component';
+import { finalize } from 'rxjs/internal/operators/finalize';
 
 @Component({
     selector: 'app-labels',
@@ -77,17 +78,16 @@ export class LabelsComponent {
 
         this.labelService
             .getLabelsToProject(this.projectId(), this.listState.buildQueryParams())
+            .pipe(finalize(() => this.listState.isLoading.set(false)))
             .subscribe({
                 next: (response) => {
                     this.labels.set(response.items);
                     this.filteredLabels.set(response.items);
                     this.listState.totalCount.set(response._meta.totalCount);
-                    this.listState.isLoading.set(false);
                 },
                 error: (error) => {
                     console.error(error);
-                    this.snackbarService.open('Failed to load lables!', ['snackbar-error']);
-                    this.listState.isLoading.set(false);
+                    this.snackbarService.error('Failed to load labels!');
                 },
             });
     }
