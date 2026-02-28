@@ -148,6 +148,11 @@ export class AuthService {
         return localStorage.getItem('access_token');
     }
 
+    removeAccessToken() {
+        localStorage.removeItem('access_token');
+        this.currentUserClaims.set(null);
+    }
+
     private getUserFromToken(): Claims | null {
         const decodedToken = this.getDecodedToken();
         if (!decodedToken) return null;
@@ -166,7 +171,7 @@ export class AuthService {
         const decodedToken = this.decodeToken(token);
 
         if (!decodedToken || decodedToken.exp * 1000 < Date.now()) {
-            this.logout();
+            localStorage.removeItem(this.tokenKey);
             return null;
         }
 
