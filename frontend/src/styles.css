@@ -144,8 +144,16 @@ body {
                border border-light-secondary/60 dark:border-dark-primary/20
                rounded-t-lg
                px-2 py-1.5;
+
+        white-space: nowrap;
+        overflow-x: auto;
+        display: flex;
+        flex-wrap: nowrap;
         /* Group separators — Quill wraps each toolbar group in .ql-formats */
         .ql-formats {
+            white-space: nowrap;
+            display: flex;
+            flex-wrap: nowrap;
             margin-right: 0;
             padding-right: 8px;
             position: relative;
