@@ -39,11 +39,7 @@
                     Assignee
                 </label>
                 <mat-form-field class="w-full" appearance="fill">
-                    <mat-select
-                        [disabled]="isUsersLoading()"
-                        formControlName="assignedTo"
-                        placeholder="Select assignee"
-                    >
+                    <mat-select formControlName="assignedTo" placeholder="Select assignee">
                         @if (isUsersLoading()) {
                             <mat-option disabled>
                                 <div class="flex items-center gap-3">

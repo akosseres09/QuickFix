@@ -31,6 +31,7 @@ import { ProjectMemberService } from '../../../shared/services/project-member/pr
 import { AuthService } from '../../../shared/services/auth/auth.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
+import { finalize } from 'rxjs';
 
 @Component({
     selector: 'app-issue-form',
@@ -101,22 +102,30 @@ export class IssueFormComponent implements OnInit {
             ],
         });
 
+        this.issueForm.get('assignedTo')?.disable();
+
         if (!this.projectId()) {
             this.snackbarService.error('Project ID is missing. Cannot create or edit issue.');
             this.router.navigate(['../'], { relativeTo: this.activeRoute });
             return;
         }
 
-        this.memberService.getProjectMembers(this.projectId()).subscribe({
-            next: (response) => {
-                this.pickableUsers.set(response.items);
-                this.isUsersLoading.set(false);
-            },
-            error: (error) => {
-                this.snackbarService.error('Failed to load users');
-                this.isUsersLoading.set(false);
-            },
-        });
+        this.memberService
+            .getProjectMembers(this.projectId())
+            .pipe(
+                finalize(() => {
+                    this.isUsersLoading.set(false);
+                    this.issueForm.get('assignedTo')?.enable();
+                })
+            )
+            .subscribe({
+                next: (response) => {
+                    this.pickableUsers.set(response.items);
+                },
+                error: (error) => {
+                    this.snackbarService.error('Failed to load users');
+                },
+            });
     }
 
     onSubmit() {
