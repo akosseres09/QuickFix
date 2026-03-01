@@ -3,6 +3,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { QuillModule } from 'ngx-quill';
 import Quill, { Delta } from 'quill';
+import Toolbar from 'quill/modules/toolbar';
 
 /**
  * Rich text editor component using Quill.
@@ -48,18 +49,26 @@ export class TextEditorComponent implements ControlValueAccessor {
     // Quill modules configuration
     modules = {
         toolbar: [
+            // Text formatting
             ['bold', 'italic', 'underline', 'strike'],
+
+            // Headings
+            [{ header: [1, 2, 3, 4, false] }],
+
+            // Block elements
             ['blockquote', 'code-block'],
-            [{ header: 1 }, { header: 2 }],
+
+            // Lists & structure
             [{ list: 'ordered' }, { list: 'bullet' }],
             [{ indent: '-1' }, { indent: '+1' }],
-            // --- Add Image & Video here ---
-            ['link', 'image', 'video'],
-            // ------------------------------
-            [{ size: ['small', false, 'large', 'huge'] }],
-            [{ header: [1, 2, 3, 4, 5, 6, false] }],
-            [{ color: [] }, { background: [] }],
+
+            // Alignment
             [{ align: [] }],
+
+            // Media
+            ['link', 'image'],
+
+            // Utility
             ['clean'],
         ],
     };
@@ -69,7 +78,7 @@ export class TextEditorComponent implements ControlValueAccessor {
     private onTouched: () => void = () => {};
 
     // Called when editor is created
-    onEditorCreated(quill: any): void {
+    onEditorCreated(quill: Quill): void {
         // Using 'any' for the quill instance here simplifies module access
         this.quillEditor.set(quill);
 
@@ -80,7 +89,7 @@ export class TextEditorComponent implements ControlValueAccessor {
         }
 
         // 1. Properly access the Toolbar Module
-        const toolbar = quill.getModule('toolbar');
+        const toolbar = quill.getModule('toolbar') as Toolbar;
 
         // We check if toolbar exists, though it always should with your config
         if (toolbar) {
@@ -99,6 +108,9 @@ export class TextEditorComponent implements ControlValueAccessor {
                 }
             });
         }
+
+        // Add tooltips to toolbar buttons and pickers
+        this.addToolbarTooltips(quill);
 
         // Listen to text changes
         quill.on('text-change', () => {
@@ -184,5 +196,65 @@ export class TextEditorComponent implements ControlValueAccessor {
     // Utility method to check if editor is empty
     isEmpty(): boolean {
         return this.getPlainText().trim().length === 0;
+    }
+
+    // Add native title tooltips to all toolbar controls
+    private addToolbarTooltips(quill: Quill): void {
+        const toolbar = quill.getModule('toolbar') as Toolbar;
+        const toolbarEl = toolbar.container;
+        if (!toolbarEl) return;
+
+        const tooltipMap: Record<string, string> = {
+            // Text formatting
+            'ql-bold': 'Bold (Ctrl+B)',
+            'ql-italic': 'Italic (Ctrl+I)',
+            'ql-underline': 'Underline (Ctrl+U)',
+            'ql-strike': 'Strikethrough',
+            // Block
+            'ql-blockquote': 'Blockquote',
+            'ql-code-block': 'Code Block',
+            // Lists
+            'ql-list': 'List',
+            'ql-indent': 'Indent',
+            // Media
+            'ql-link': 'Insert Link',
+            'ql-image': 'Insert Image',
+            // Utility
+            'ql-clean': 'Clear Formatting',
+            // Pickers
+            'ql-header': 'Heading',
+            'ql-align': 'Text Alignment',
+            'ql-color': 'Text Color',
+            'ql-background': 'Background Color',
+        };
+
+        // Buttons
+        toolbarEl.querySelectorAll('button').forEach((btn: HTMLElement) => {
+            for (const [cls, tip] of Object.entries(tooltipMap)) {
+                if (btn.classList.contains(cls)) {
+                    // For buttons with a value attribute, append it
+                    const val = btn.getAttribute('value');
+                    if (val && cls === 'ql-list') {
+                        btn.title = val === 'ordered' ? 'Ordered List' : 'Bullet List';
+                    } else if (val && cls === 'ql-indent') {
+                        btn.title = val === '+1' ? 'Increase Indent' : 'Decrease Indent';
+                    } else {
+                        btn.title = tip;
+                    }
+                    break;
+                }
+            }
+        });
+
+        // Pickers (header, align, color, background)
+        toolbarEl.querySelectorAll('.ql-picker').forEach((picker: Element) => {
+            for (const [cls, tip] of Object.entries(tooltipMap)) {
+                if (picker.classList.contains(cls)) {
+                    const label = picker.querySelector('.ql-picker-label') as HTMLElement;
+                    if (label) label.title = tip;
+                    break;
+                }
+            }
+        });
     }
 }
