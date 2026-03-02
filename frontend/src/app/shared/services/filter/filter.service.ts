@@ -73,6 +73,11 @@ export class FilterService {
                     label,
                 })),
             },
+            {
+                name: 'is_archived',
+                type: 'checkbox',
+                label: 'Archived?',
+            },
         ];
     }
 

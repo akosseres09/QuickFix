@@ -105,12 +105,6 @@ export class DisplayedColumnService {
                 routerLink: (e: Project) => (e.owner?.id ? ['/user', '@' + e.owner.username] : []),
             },
             {
-                id: 'users',
-                label: '# of users',
-                sortable: true,
-                value: (e: Project) => e.members?.length || 0,
-            },
-            {
                 id: 'status',
                 label: 'Status',
                 sortable: true,

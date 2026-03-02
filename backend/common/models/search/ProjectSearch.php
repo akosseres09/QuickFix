@@ -13,6 +13,17 @@ class ProjectSearch extends Project implements SearchInterface
         return [
             [['id', 'owner_id', 'status'], 'string'],
             [['priority'], 'integer'],
+            [
+                'is_archived',
+                'filter',
+                'filter' => function ($value) {
+                    if ($value === 'true')
+                        return true;
+                    if ($value === 'false')
+                        return false;
+                    return $value;
+                }
+            ],
             [['name', 'description'], 'safe'],
         ];
     }
@@ -40,8 +51,8 @@ class ProjectSearch extends Project implements SearchInterface
             ]);
 
         // Extract pagination params from request
-        $page = isset($params['page']) ? (int)$params['page'] : 1;
-        $pageSize = isset($params['pageSize']) ? (int)$params['pageSize'] : 20;
+        $page = isset($params['page']) ? (int) $params['page'] : 1;
+        $pageSize = isset($params['pageSize']) ? (int) $params['pageSize'] : 20;
 
         // Limit pageSize to prevent abuse
         $pageSize = min($pageSize, 100);
@@ -86,11 +97,16 @@ class ProjectSearch extends Project implements SearchInterface
             return $dataProvider;
         }
 
+        if ($this->is_archived === null) {
+            $this->is_archived = false;
+        }
+
         $query->andFilterWhere([
             'p.id' => $this->id,
             'p.owner_id' => $this->owner_id,
             'p.status' => $this->status,
             'p.priority' => $this->priority,
+            'p.is_archived' => $this->is_archived
         ]);
 
         $query->andFilterWhere(['like', 'p.name', $this->name])

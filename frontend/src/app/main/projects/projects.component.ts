@@ -65,7 +65,7 @@ export class ProjectsComponent {
 
     speedDialButtons = computed<SpeedDialButton[]>(() => {
         const selected = this.selectedRow();
-        return this.buttonFactory.createCrudButtons({
+        return this.buttonFactory.createArchivableButtons({
             entityName: 'Project',
             hasSelection: selected !== null,
             createRoute: ['new'],
@@ -77,8 +77,31 @@ export class ProjectsComponent {
                 }
                 return ['/project', project.key, 'edit'];
             },
-            onDelete: () => this.openDeleteConfirmation(),
-            onArchive: () => this.openArchiveConfirmation(),
+            isArchived: !!selected && selected.isArchived,
+            onArchive: () =>
+                this.openConfirmationDialog({
+                    header: 'Archive Project',
+                    confirmLabel: 'Archive',
+                    confirmAction: () =>
+                        this.updateProject({
+                            isArchived: true,
+                        }),
+                }),
+            onUnarchive: () =>
+                this.openConfirmationDialog({
+                    header: 'Unarchive Project',
+                    confirmLabel: 'Unarchive',
+                    confirmAction: () =>
+                        this.updateProject({
+                            isArchived: false,
+                        }),
+                }),
+            onDelete: () =>
+                this.openConfirmationDialog({
+                    header: 'Delete Project',
+                    confirmLabel: 'Delete',
+                    confirmAction: () => this.deleteProject(),
+                }),
         });
     });
 
@@ -158,22 +181,26 @@ export class ProjectsComponent {
         this.listState.onFilterChange(filterParams, () => this.getProjects());
     }
 
-    openDeleteConfirmation() {
-        const template = this.deleteConfirmTemplate();
+    openConfirmationDialog(config: {
+        header: string;
+        confirmLabel: string;
+        confirmAction: () => void;
+    }) {
+        const template = this.archiveConfirmTemplate();
         if (!template) {
-            this.snackbarService.error('Error opening delete confirmation dialog');
+            this.snackbarService.error('Error opening confirmation dialog');
             return;
         }
 
-        const dialogRef = this.dialogService.openConfirmDialog('Delete Project', template, {
-            confirmLabel: 'Delete',
+        const dialogRef = this.dialogService.openConfirmDialog(config.header, template, {
+            confirmLabel: config.confirmLabel,
             cancelLabel: 'Cancel',
             width: '450px',
         });
 
         dialogRef.afterClosed().subscribe((result) => {
             if (result && result.action === 'save') {
-                this.deleteProject();
+                config.confirmAction();
             }
         });
     }
@@ -185,7 +212,6 @@ export class ProjectsComponent {
             return;
         }
 
-        // TODO: Implement actual delete API call
         this.projectService.deleteProject(project.key).subscribe({
             next: () => {
                 this.snackbarService.success(
@@ -202,38 +228,25 @@ export class ProjectsComponent {
         });
     }
 
-    openArchiveConfirmation() {
-        const template = this.archiveConfirmTemplate();
-        if (!template) {
-            this.snackbarService.error('Error opening archive confirmation dialog');
-            return;
-        }
-
-        const dialogRef = this.dialogService.openConfirmDialog('Archive Project', template, {
-            confirmLabel: 'Archive',
-            cancelLabel: 'Cancel',
-            width: '450px',
-        });
-
-        dialogRef.afterClosed().subscribe((result) => {
-            if (result && result.action === 'save') {
-                this.archiveProject();
-            }
-        });
-    }
-
-    archiveProject() {
-        const projectId = this.selectedRow();
-        if (!projectId) {
+    updateProject(data: Partial<Project>) {
+        const project = this.selectedRow();
+        if (!project) {
             this.snackbarService.error('No project selected');
             return;
         }
 
-        // TODO: Implement actual archive API call
-        this.snackbarService.success(
-            `Project "${this.selectedProjectName()}" archived successfully!`
-        );
-        this.selectedRow.set(null);
-        this.speedDial()?.close();
+        this.projectService.updateProject(project.key, data).subscribe({
+            next: () => {
+                this.selectedRow.set(null);
+                this.speedDial()?.close();
+                this.getProjects();
+                this.snackbarService.success(
+                    `Project "${this.selectedProjectName()}" archived successfully!`
+                );
+            },
+            error: (error) => {
+                console.error(error);
+            },
+        });
     }
 }

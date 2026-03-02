@@ -29,8 +29,8 @@ use yii\db\ActiveRecord;
  * @property float $budget
  * @property integer $created_at
  * @property integer $updated_at
- * @property integer $archived_at
- * @property bool $is_archived
+ * @property integer | null $archived_at
+ * @property bool | null $is_archived
  * 
  * @property UserResource $owner
  * @property ProjectMember[] $projectMembers
@@ -148,6 +148,8 @@ class Project extends ActiveRecord
 
         if ($this->is_archived && !$this->getOldAttribute('is_archived')) {
             $this->archived_at = time();
+        } else if (!$this->is_archived && $this->getOldAttribute('is_archived')) {
+            $this->archived_at = null;
         }
 
         if (!$insert) {
@@ -228,6 +230,7 @@ class Project extends ActiveRecord
             ],
             [['created_at', 'updated_at', 'archived_at'], 'integer'],
             ['is_archived', 'boolean'],
+            ['is_archived', 'default', 'value' => false],
             [['budget'], 'number'],
             [['name'], 'string', 'max' => 255],
             [['key'], 'string', 'max' => 10],

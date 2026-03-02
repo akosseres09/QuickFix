@@ -148,8 +148,9 @@ export class SpeedDialButtonFactory {
         editRouteBuilder: () => string | any[] | null;
         onArchive: () => void;
         onUnarchive: () => void;
+        onDelete?: () => void;
     }): SpeedDialButton[] {
-        return [
+        const buttons = [
             this.createButton(config.entityName, !config.hasSelection, config.createRoute),
             this.archiveButton(
                 config.entityName,
@@ -163,5 +164,13 @@ export class SpeedDialButtonFactory {
             ),
             this.editButton(config.entityName, config.hasSelection, config.editRouteBuilder),
         ];
+
+        if (config.onDelete) {
+            buttons.push(
+                this.deleteButton(config.entityName, config.hasSelection, config.onDelete)
+            );
+        }
+
+        return buttons;
     }
 }
