@@ -106,6 +106,10 @@
     --mat-snack-bar-button-color: white;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 html,
 body {
     height: 100%;

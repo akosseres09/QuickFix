@@ -43,7 +43,6 @@ export class BoardComponent implements OnInit {
         }
 
         this.projectId.set(id);
-        this.issueService.setProjectId(id);
         this.loadIssues();
     }
 
@@ -51,7 +50,10 @@ export class BoardComponent implements OnInit {
         this.isLoading.set(true);
         this.issueService
             .getIssuesSimple({
-                expand: 'assignee',
+                projectId: this.projectId(),
+                queryParams: {
+                    expand: 'assignee',
+                },
             })
             .pipe(
                 finalize(() => {
@@ -101,28 +103,34 @@ export class BoardComponent implements OnInit {
         issue.status = status;
 
         // Update backend
-        this.issueService.updateIssue(issue.id, { status: status }).subscribe({
-            next: () => {
-                this.snackbarService.success(
-                    `Issue ${issue.issueKey} moved to ${STATUS_MAP[newStatus]}`
-                );
-            },
-            error: (error) => {
-                console.error('Error updating issue:', error);
-                this.snackbarService.error('Failed to update issue status');
+        this.issueService
+            .updateIssue({
+                issueId: issue.id,
+                projectid: this.projectId(),
+                issue: { status: status },
+            })
+            .subscribe({
+                next: () => {
+                    this.snackbarService.success(
+                        `Issue ${issue.issueKey} moved to ${STATUS_MAP[newStatus]}`
+                    );
+                },
+                error: (error) => {
+                    console.error('Error updating issue:', error);
+                    this.snackbarService.error('Failed to update issue status');
 
-                // Rollback on error
-                issue.status = previousStatus;
-                const targetArray = this.getIssueArrayByStatus(newStatus);
-                const sourceArray = this.getIssueArrayByStatus(previousStatus);
-                transferArrayItem(
-                    targetArray,
-                    sourceArray,
-                    event.currentIndex,
-                    event.previousIndex
-                );
-            },
-        });
+                    // Rollback on error
+                    issue.status = previousStatus;
+                    const targetArray = this.getIssueArrayByStatus(newStatus);
+                    const sourceArray = this.getIssueArrayByStatus(previousStatus);
+                    transferArrayItem(
+                        targetArray,
+                        sourceArray,
+                        event.currentIndex,
+                        event.previousIndex
+                    );
+                },
+            });
     }
 
     getIssueArrayByStatus(status: number): Issue[] {

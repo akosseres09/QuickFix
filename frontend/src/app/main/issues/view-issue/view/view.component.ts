@@ -12,7 +12,7 @@ import {
 } from '../../../../shared/model/Issue';
 import { CommonModule } from '@angular/common';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { RelativeTimePipe } from '../../../../shared/pipes/relative-time/relative-time.pipe';
 import { GMTPipe } from '../../../../shared/pipes/gmt/gmt.pipe';
 import { QuillModule } from 'ngx-quill';
@@ -56,6 +56,8 @@ export class ViewComponent {
     private readonly snackbarService = inject(SnackbarService);
     private readonly issueCommentService = inject(IssueCommentService);
     private readonly fb = inject(FormBuilder);
+    private readonly router = inject(Router);
+    private readonly activeRoute = inject(ActivatedRoute);
 
     // inputs
     issueId = input.required<string>();
@@ -126,9 +128,13 @@ export class ViewComponent {
 
     updateIssueStatus(status: IssueStatus): void {
         this.issueService
-            .updateIssue(this.issue().id, {
-                status: status,
-                closedAt: status === IssueStatus.CLOSED ? Math.floor(Date.now() / 1000) : null,
+            .updateIssue({
+                issueId: this.issue().id,
+                projectid: this.projectId(),
+                issue: {
+                    status: status,
+                    closedAt: status === IssueStatus.CLOSED ? Math.floor(Date.now() / 1000) : null,
+                },
             })
             .subscribe({
                 next: (updatedIssue) => {
@@ -248,6 +254,7 @@ export class ViewComponent {
 
     onCommentEdit(comment: IssueComment | null) {
         this.editingComment.set(comment);
+        this.router.navigate(['.'], { fragment: 'text-editor', relativeTo: this.activeRoute });
     }
 
     onCommentEditCancel() {

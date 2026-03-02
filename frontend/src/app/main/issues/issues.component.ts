@@ -90,10 +90,6 @@ export class IssuesComponent {
     archiveConfirmTemplate = viewChild<any>('archiveConfirmTemplate');
     unarchiveConfirmTemplate = viewChild<any>('unarchiveConfirmTemplate');
 
-    constructor() {
-        this.issueService.setProjectId(this.projectId());
-    }
-
     private getProjectId(): string {
         return this.activeRoute.parent?.parent?.snapshot.paramMap.get('projectId') || '';
     }
@@ -107,7 +103,7 @@ export class IssuesComponent {
         this.listState.isLoading.set(true);
 
         this.issueService
-            .getIssues(this.listState.buildQueryParams())
+            .getIssues(this.projectId(), this.listState.buildQueryParams())
             .pipe(finalize(() => this.listState.isLoading.set(false)))
             .subscribe({
                 next: (response) => {
@@ -209,8 +205,12 @@ export class IssuesComponent {
         }
 
         this.issueService
-            .updateIssue(issue.id, {
-                isArchived: true,
+            .updateIssue({
+                issueId: issue.id,
+                projectid: this.projectId(),
+                issue: {
+                    isArchived: true,
+                },
             })
             .pipe(
                 finalize(() => {
@@ -237,8 +237,12 @@ export class IssuesComponent {
         }
 
         this.issueService
-            .updateIssue(issue.id, {
-                isArchived: false,
+            .updateIssue({
+                issueId: issue.id,
+                projectid: this.projectId(),
+                issue: {
+                    isArchived: false,
+                },
             })
             .pipe(
                 finalize(() => {

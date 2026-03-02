@@ -32,9 +32,12 @@ export class ViewIssueComponent implements OnInit {
             this.loading.set(false);
             return;
         }
-        this.issueService.setProjectId(projectId);
+
         this.issueService
-            .getIssueById(id)
+            .getIssueById({
+                issueId: id,
+                projectId: projectId,
+            })
             .pipe(finalize(() => this.loading.set(false)))
             .subscribe({
                 next: (issue) => {

@@ -27,19 +27,21 @@ export class EditIssueComponent {
     isSubmitting = signal<boolean>(false);
 
     constructor() {
-        console.log(this.projectId());
-
-        this.issueService.setProjectId(this.projectId());
-        this.issueService.getIssueById(this.issueId()).subscribe({
-            next: (issue) => {
-                this.issue.set(issue);
-            },
-            error: (err) => {
-                console.error('Failed to fetch issue:', err);
-                this.snackbarService.error('Failed to load issue. Please try again.');
-                this.router.navigate(['/project', this.projectId(), 'issues']);
-            },
-        });
+        this.issueService
+            .getIssueById({
+                projectId: this.projectId(),
+                issueId: this.issueId(),
+            })
+            .subscribe({
+                next: (issue) => {
+                    this.issue.set(issue);
+                },
+                error: (err) => {
+                    console.error('Failed to fetch issue:', err);
+                    this.snackbarService.error('Failed to load issue. Please try again.');
+                    this.router.navigate(['/project', this.projectId(), 'issues']);
+                },
+            });
     }
 
     /**
@@ -48,7 +50,11 @@ export class EditIssueComponent {
      */
     onIssueUpdated(updatedIssue: Partial<Issue>): void {
         this.issueService
-            .updateIssue(this.issueId(), updatedIssue)
+            .updateIssue({
+                issueId: this.issueId(),
+                projectid: this.projectId(),
+                issue: updatedIssue,
+            })
             .pipe(
                 finalize(() => {
                     this.isSubmitting.set(false);

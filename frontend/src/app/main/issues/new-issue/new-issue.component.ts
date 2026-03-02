@@ -44,17 +44,13 @@ export class NewIssueComponent {
 
     projectId = signal<string>(this.activeRoute.snapshot.parent?.parent?.params['projectId'] || '');
 
-    constructor() {
-        this.issueService.setProjectId(this.projectId());
-    }
-
     /**
      * Handles issue creation when the form is submitted.
      * @param issue the data emitted from the issue form, containing the new issue details.
      */
     onIssueCreated(issue: Partial<Issue>): void {
         this.issueService
-            .createIssue(issue)
+            .createIssue(this.projectId(), issue)
             .pipe(
                 finalize(() => {
                     this.isSubmitting.set(false);
