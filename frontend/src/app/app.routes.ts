@@ -101,10 +101,26 @@ export const routes: Routes = [
                 title: 'QuickFix - Organization',
                 canActivate: [authenticatedGuard],
             },
+            {
+                path: 'new',
+                loadComponent: () =>
+                    import('./main/organizations/create/create.component').then(
+                        (c) => c.CreateComponent
+                    ),
+                title: 'QuickFix - New Organization',
+                canActivate: [authenticatedGuard],
+            },
+            {
+                path: ':organizationId/edit',
+                loadComponent: () =>
+                    import('./main/organizations/edit/edit.component').then((c) => c.EditComponent),
+                title: 'QuickFix - Edit Organization',
+                canActivate: [authenticatedGuard],
+            },
         ],
     },
     {
-        path: 'project/:projectId',
+        path: ':organizationId/project/:projectId',
         loadComponent: () =>
             import('./layouts/main-layout/main-layout.component').then(
                 (c) => c.MainLayoutComponent

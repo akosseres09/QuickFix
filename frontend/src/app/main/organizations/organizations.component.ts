@@ -64,7 +64,7 @@ export class OrganizationsComponent {
                     this.snackbarService.error('Please select a valid project to edit!');
                     return null;
                 }
-                return ['/organization', org.slug, 'edit'];
+                return ['/organizations', org.slug, 'edit'];
             },
             onDelete: () =>
                 this.openConfirmationDialog({
@@ -96,6 +96,7 @@ export class OrganizationsComponent {
             .subscribe({
                 next: (response) => {
                     this.filteredOrganizations.set(response.items);
+                    this.listState.totalCount.set(response._meta.totalCount);
                 },
                 error: (error) => {
                     console.error(error);
