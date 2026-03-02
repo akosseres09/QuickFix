@@ -15,18 +15,14 @@ class m260125_165015_create_project_table extends Migration
     {
         $this->createTable('{{%project}}', [
             'id' => $this->string(36)->notNull(),
+            'organization_id' => $this->string(36)->notNull(),
             'name' => $this->string(255)->notNull(),
             'key' => $this->string(10)->notNull()->unique(),
             'description' => $this->text()->null(),
             'status' => $this->string(20)->notNull()->defaultValue(Project::STATUS_ACTIVE),
-            'start_date' => $this->date()->null(),
-            'end_date' => $this->date()->null(),
             'owner_id' => $this->string(36)->notNull(),
             'visibility' => $this->string(20)->notNull()->defaultValue(Project::VISIBILITY_PUBLIC),
             'priority' => $this->integer()->notNull()->defaultValue(Project::PRIORITY_MEDIUM),
-            'color' => $this->string(7)->null(),
-            'progress' => $this->float(2)->notNull()->defaultValue(0),
-            'budget' => $this->decimal(10, 2)->null(),
             'created_at' => $this->integer()->notNull(),
             'updated_at' => $this->integer()->notNull(),
         ]);
@@ -39,6 +35,15 @@ class m260125_165015_create_project_table extends Migration
             '{{%project}}',
             'owner_id',
             '{{%user}}',
+            'id',
+            'CASCADE'
+        );
+
+        $this->addForeignKey(
+            'fk-project-organization_id',
+            '{{%project}}',
+            'organization_id',
+            '{{%organization}}',
             'id',
             'CASCADE'
         );
@@ -81,6 +86,7 @@ class m260125_165015_create_project_table extends Migration
     public function safeDown()
     {
         $this->dropForeignKey('fk-project-owner_id', '{{%project}}');
+        $this->dropForeignKey('fk-project-organization_id', '{{%project}}');
         $this->dropPrimaryKey('pk-project-id', '{{%project}}');
         $this->dropTable('{{%project}}');
     }
