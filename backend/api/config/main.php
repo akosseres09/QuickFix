@@ -62,7 +62,19 @@ return [
                 ],
                 [
                     'class' => UrlRule::class,
-                    'controller' => ['issue', 'member', 'label'],
+                    'controller' => ['issue'],
+                    'pluralize' => false,
+                    'prefix' => '<project_id:[A-Za-z0-9_\-]+>/',
+                    'tokens' => [
+                        '{id}' => '<id:[A-Za-z0-9_\-]+>',
+                    ],
+                    'extraPatterns' => [
+                        'GET stats' => 'stats'
+                    ]
+                ],
+                [
+                    'class' => UrlRule::class,
+                    'controller' => ['member', 'label'],
                     'pluralize' => false,
                     'prefix' => '<project_id:[A-Za-z0-9_\-]+>/',
                     'tokens' => [

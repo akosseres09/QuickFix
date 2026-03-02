@@ -162,6 +162,7 @@ class Issue extends ActiveRecord
             ['priority', 'in', 'range' => self::PRIORITIES],
             [['project_id', 'created_by', 'assigned_to'], 'string', 'max' => 36],
             [['is_archived', 'is_draft'], 'boolean', 'trueValue' => true, 'falseValue' => false],
+            [['is_archived', 'is_draft'], 'default', 'value' => false],
             [['project_id', 'created_by', 'assigned_to'], 'string', 'max' => 36],
             [['project_id', 'issue_key'], 'unique', 'targetAttribute' => ['project_id', 'issue_key'], 'message' => 'The combination of Project ID and Issue Key has already been taken.'],
             [['project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['project_id' => 'id']],
