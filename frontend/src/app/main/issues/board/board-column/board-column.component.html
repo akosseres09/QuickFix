@@ -14,13 +14,15 @@
         [id]="dropListId"
         [cdkDropListData]="issues()"
         [cdkDropListConnectedTo]="dropListId"
+        (cdkDropListEntered)="onDropListEntered($event)"
         (cdkDropListDropped)="onDrop($event)"
+        (cdkDropListExited)="onDropListExited($event)"
     >
         @for (issue of issues(); track issue.id) {
             <app-issue-card [issue]="issue" (cardClick)="onIssueClick($event)"></app-issue-card>
         }
 
-        @if (issues().length === 0) {
+        @if (showEmptyText()) {
             <div class="text-center text-gray-400 py-8 text-sm">No issues</div>
         }
     </div>

@@ -1,6 +1,6 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, linkedSignal, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CdkDropList, CdkDragDrop } from '@angular/cdk/drag-drop';
+import { CdkDropList, CdkDragDrop, CdkDragEnter, CdkDragExit } from '@angular/cdk/drag-drop';
 import { Issue } from '../../../../shared/model/Issue';
 import { IssueCardComponent } from '../issue-card/issue-card.component';
 
@@ -16,9 +16,10 @@ export class BoardColumnComponent {
     status = input.required<number>();
     issueClick = output<Issue>();
     dropEvent = output<CdkDragDrop<Issue[]>>();
+    showEmptyText = linkedSignal<boolean>(() => this.issues().length <= 0);
 
     get dropListId(): string {
-        return `status-${this.status}`;
+        return `status-${this.status()}`;
     }
 
     onIssueClick(issue: Issue) {
@@ -27,5 +28,16 @@ export class BoardColumnComponent {
 
     onDrop(event: CdkDragDrop<Issue[]>) {
         this.dropEvent.emit(event);
+    }
+
+    onDropListEntered(event: CdkDragEnter) {
+        this.showEmptyText.set(false);
+    }
+
+    onDropListExited(event: CdkDragExit) {
+        const isOwnItem = this.issues().some((i) => i.id === event.item.data?.id);
+
+        if (!isOwnItem || this.issues().length > 1) return;
+        this.showEmptyText.set(true);
     }
 }
