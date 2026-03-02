@@ -85,7 +85,7 @@ export const routes: Routes = [
         ],
     },
     {
-        path: 'project/:projectId/edit',
+        path: 'organizations',
         loadComponent: () =>
             import('./layouts/base-layout/base-layout.component').then(
                 (c) => c.BaseLayoutComponent
@@ -93,11 +93,12 @@ export const routes: Routes = [
         children: [
             {
                 path: '',
+                pathMatch: 'full',
                 loadComponent: () =>
-                    import('./main/projects/edit-project/edit-project.component').then(
-                        (c) => c.EditProjectComponent
+                    import('./main/organizations/organizations.component').then(
+                        (c) => c.OrganizationsComponent
                     ),
-                title: 'QuickFix - Edit Project',
+                title: 'QuickFix - Organization',
                 canActivate: [authenticatedGuard],
             },
         ],
@@ -113,6 +114,15 @@ export const routes: Routes = [
                 path: '',
                 pathMatch: 'full',
                 redirectTo: 'issues',
+            },
+            {
+                path: 'edit',
+                loadComponent: () =>
+                    import('./main/projects/edit-project/edit-project.component').then(
+                        (c) => c.EditProjectComponent
+                    ),
+                title: 'QuickFix - Edit Project',
+                canActivate: [authenticatedGuard],
             },
             {
                 path: 'issues',
@@ -234,21 +244,21 @@ export const routes: Routes = [
         ],
     },
     {
-        path: '',
+        path: ':organizationId/projects',
         loadComponent: () =>
-            import('./layouts/base-layout/base-layout.component').then(
-                (c) => c.BaseLayoutComponent
+            import('./layouts/main-layout/main-layout.component').then(
+                (c) => c.MainLayoutComponent
             ),
         children: [
             {
-                path: 'projects',
+                path: '',
                 loadComponent: () =>
                     import('./main/projects/projects.component').then((c) => c.ProjectsComponent),
                 canActivate: [authenticatedGuard],
                 title: 'QuickFix - Projects',
             },
             {
-                path: 'projects/new',
+                path: 'new',
                 loadComponent: () =>
                     import('./main/projects/new-project/new-project.component').then(
                         (c) => c.NewProjectComponent
@@ -256,6 +266,15 @@ export const routes: Routes = [
                 canActivate: [authenticatedGuard],
                 title: 'QuickFix - New Project',
             },
+        ],
+    },
+    {
+        path: '',
+        loadComponent: () =>
+            import('./layouts/base-layout/base-layout.component').then(
+                (c) => c.BaseLayoutComponent
+            ),
+        children: [
             {
                 path: 'worktime',
                 loadComponent: () =>

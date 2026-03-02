@@ -78,7 +78,7 @@ export class LoginComponent {
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
                 next: (result) => {
-                    this.router.navigate(['/projects']);
+                    this.router.navigate(['/organizations']);
                 },
                 error: (error) => {
                     console.error('Login error:', error.error?.message);

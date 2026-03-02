@@ -89,4 +89,13 @@ export class FilterService {
             },
         ];
     }
+
+    getOrganizationFilters(): Filter[] {
+        return [
+            {
+                name: 'slug',
+                type: 'input',
+            },
+        ];
+    }
 }

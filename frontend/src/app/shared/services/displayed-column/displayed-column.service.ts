@@ -18,6 +18,7 @@ import {
 } from '../../model/Project';
 import { DisplayedColumn } from '../../constants/table/DisplayedColumn';
 import { Label } from '../../model/Label';
+import { Organization } from '../../model/Organization';
 
 @Injectable({
     providedIn: 'root',
@@ -144,6 +145,39 @@ export class DisplayedColumnService {
                 label: 'Description',
                 sortable: false,
                 value: (e: Label) => e.description,
+            },
+        ];
+    }
+
+    getOrganizationColumns(): DisplayedColumn<Organization>[] {
+        return [
+            {
+                id: 'slug',
+                label: 'Slug',
+                sortable: true,
+                value: (e: Organization) => e.slug,
+                routerLink: (e: Organization) => ['/organization', e.slug],
+            },
+            {
+                id: 'name',
+                label: 'Name',
+                sortable: false,
+                value: (e: Organization) => e.name,
+            },
+            {
+                id: 'owner',
+                label: 'Owner',
+                sortable: false,
+                value: (e: Organization) => e.owner?.username ?? '',
+            },
+            {
+                id: 'created_at',
+                label: 'Crated At',
+                sortable: true,
+                value: (e: Organization) => {
+                    const date = this.dateService.parseTimestamp(e.createdAt);
+                    return this.dateService.toLocaleISOString(date).split('T')[0];
+                },
             },
         ];
     }

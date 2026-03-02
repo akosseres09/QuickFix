@@ -86,6 +86,7 @@ export class ProjectsComponent {
                         this.updateProject({
                             isArchived: true,
                         }),
+                    template: this.archiveConfirmTemplate(),
                 }),
             onUnarchive: () =>
                 this.openConfirmationDialog({
@@ -95,12 +96,14 @@ export class ProjectsComponent {
                         this.updateProject({
                             isArchived: false,
                         }),
+                    template: this.archiveConfirmTemplate(),
                 }),
             onDelete: () =>
                 this.openConfirmationDialog({
                     header: 'Delete Project',
                     confirmLabel: 'Delete',
                     confirmAction: () => this.deleteProject(),
+                    template: this.deleteConfirmTemplate(),
                 }),
         });
     });
@@ -185,8 +188,9 @@ export class ProjectsComponent {
         header: string;
         confirmLabel: string;
         confirmAction: () => void;
+        template?: TemplateRef<any>;
     }) {
-        const template = this.archiveConfirmTemplate();
+        const template = config.template;
         if (!template) {
             this.snackbarService.error('Error opening confirmation dialog');
             return;
