@@ -29,6 +29,8 @@ use yii\db\ActiveRecord;
  * @property float $budget
  * @property integer $created_at
  * @property integer $updated_at
+ * @property integer $archived_at
+ * @property bool $is_archived
  * 
  * @property UserResource $owner
  * @property ProjectMember[] $projectMembers
@@ -40,7 +42,6 @@ class Project extends ActiveRecord
 {
     // Status constants
     const STATUS_ACTIVE = 'active';
-    const STATUS_ARCHIVED = 'archived';
     const STATUS_ON_HOLD = 'on_hold';
     const STATUS_COMPLETED = 'completed';
 
@@ -70,7 +71,6 @@ class Project extends ActiveRecord
 
     const STATUS_LIST = [
         self::STATUS_ACTIVE,
-        self::STATUS_ARCHIVED,
         self::STATUS_ON_HOLD,
         self::STATUS_COMPLETED
     ];
@@ -144,6 +144,10 @@ class Project extends ActiveRecord
     {
         if (!parent::beforeSave($insert)) {
             return false;
+        }
+
+        if ($this->is_archived && !$this->getOldAttribute('is_archived')) {
+            $this->archived_at = time();
         }
 
         if (!$insert) {
@@ -222,7 +226,8 @@ class Project extends ActiveRecord
                 },
                 'message' => 'End Date must be greater than or equal to Start Date.'
             ],
-            [['created_at', 'updated_at'], 'integer'],
+            [['created_at', 'updated_at', 'archived_at'], 'integer'],
+            ['is_archived', 'boolean'],
             [['budget'], 'number'],
             [['name'], 'string', 'max' => 255],
             [['key'], 'string', 'max' => 10],
@@ -288,6 +293,8 @@ class Project extends ActiveRecord
             'budget',
             'createdAt' => 'created_at',
             'updatedAt' => 'updated_at',
+            'isArchived' => 'is_archived',
+            'aechivedAt' => 'archived_at'
         ];
     }
 
@@ -422,7 +429,6 @@ class Project extends ActiveRecord
     {
         return [
             self::STATUS_ACTIVE => 'Active',
-            self::STATUS_ARCHIVED => 'Archived',
             self::STATUS_ON_HOLD => 'On Hold',
             self::STATUS_COMPLETED => 'Completed',
         ];
@@ -462,14 +468,5 @@ class Project extends ActiveRecord
     public function isActive(): bool
     {
         return $this->status === self::STATUS_ACTIVE;
-    }
-
-    /**
-     * Check if project is archived
-     * @return bool
-     */
-    public function isArchived(): bool
-    {
-        return $this->status === self::STATUS_ARCHIVED;
     }
 }

@@ -102,6 +102,7 @@ export interface Issue extends BaseModel {
     closedAt: number | null;
     dueDate: number | null;
     isArchived: boolean;
+    isDraft: boolean | null;
     creator?: User;
     assignee?: User | null;
     project?: Project;

@@ -28,6 +28,7 @@ use yii\db\ActiveRecord;
  * @property int|null $closed_at
  * @property int|null $due_date
  * @property bool $is_archived
+ * @property bool $is_draft
  * 
  * @property Project $project
  * @property UserResource $creator
@@ -160,7 +161,7 @@ class Issue extends ActiveRecord
             ['status', 'in', 'range' => self::STATUSES],
             ['priority', 'in', 'range' => self::PRIORITIES],
             [['project_id', 'created_by', 'assigned_to'], 'string', 'max' => 36],
-            [['is_archived'], 'boolean', 'trueValue' => true, 'falseValue' => false],
+            [['is_archived', 'is_draft'], 'boolean', 'trueValue' => true, 'falseValue' => false],
             [['project_id', 'created_by', 'assigned_to'], 'string', 'max' => 36],
             [['project_id', 'issue_key'], 'unique', 'targetAttribute' => ['project_id', 'issue_key'], 'message' => 'The combination of Project ID and Issue Key has already been taken.'],
             [['project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['project_id' => 'id']],
@@ -189,7 +190,8 @@ class Issue extends ActiveRecord
             'updatedAt' => 'updated_at',
             'closedAt' => 'closed_at',
             'dueDate' => 'due_date',
-            'isArchived' => 'is_archived'
+            'isArchived' => 'is_archived',
+            'isDraft' => 'is_draft'
         ];
     }
 

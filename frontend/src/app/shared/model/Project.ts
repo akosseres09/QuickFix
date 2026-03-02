@@ -4,28 +4,20 @@ import { User } from './User';
 
 export enum ProjectStatus {
     ACTIVE = 'active',
-    ARCHIVED = 'archived',
     ON_HOLD = 'on_hold',
     COMPLETED = 'completed',
 }
 
-export const STATUS_LIST = [
-    ProjectStatus.ACTIVE,
-    ProjectStatus.ARCHIVED,
-    ProjectStatus.ON_HOLD,
-    ProjectStatus.COMPLETED,
-];
+export const STATUS_LIST = [ProjectStatus.ACTIVE, ProjectStatus.ON_HOLD, ProjectStatus.COMPLETED];
 
 export const STATUS_MAP: { [key: string]: string } = {
     [ProjectStatus.ACTIVE]: 'Active',
-    [ProjectStatus.ARCHIVED]: 'Archived',
     [ProjectStatus.ON_HOLD]: 'On Hold',
     [ProjectStatus.COMPLETED]: 'Completed',
 };
 
 export const STATUS_COLOR_MAP: { [key: string]: string } = {
     [ProjectStatus.ACTIVE]: 'text-emerald-700 bg-emerald-100',
-    [ProjectStatus.ARCHIVED]: 'text-slate-600 bg-slate-100',
     [ProjectStatus.ON_HOLD]: 'text-amber-700 bg-amber-100',
     [ProjectStatus.COMPLETED]: 'text-blue-700 bg-blue-100',
 };
@@ -92,6 +84,8 @@ export interface Project extends BaseModel {
     budget: number;
     createdAt: number;
     updatedAt: number;
+    archivedat: number;
+    isArchived: boolean;
     owner?: User;
     projectMembers?: Array<User>;
     members?: Array<User>;
