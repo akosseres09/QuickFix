@@ -10,7 +10,7 @@ class m260125_164515_create_organization_member_table extends Migration
             'id' => $this->string(36)->notNull(),
             'organization_id' => $this->string(36)->notNull(),
             'user_id' => $this->string(36)->notNull(),
-            'role' => $this->string(50)->notNull(),
+            'role' => $this->integer()->notNull(),
             'created_at' => $this->integer()->notNull(),
         ]);
 

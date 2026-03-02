@@ -54,8 +54,25 @@ return [
                 ],
                 [
                     'class' => UrlRule::class,
-                    'controller' => ['user', 'project'],
+                    'controller' => ['organization'],
                     'pluralize' => false,
+                    'tokens' => [
+                        '{id}' => '<id:[A-Za-z0-9_\-]+>',
+                    ]
+                ],
+                [
+                    'class' => UrlRule::class,
+                    'controller' => ['user'],
+                    'pluralize' => false,
+                    'tokens' => [
+                        '{id}' => '<id:[A-Za-z0-9_\-]+>',
+                    ]
+                ],
+                [
+                    'class' => UrlRule::class,
+                    'controller' => ['project', 'organization-member'],
+                    'pluralize' => false,
+                    'prefix' => '<organization_id:[A-Za-z0-9_\-]+>',
                     'tokens' => [
                         '{id}' => '<id:[A-Za-z0-9_\-]+>',
                     ]
@@ -64,7 +81,7 @@ return [
                     'class' => UrlRule::class,
                     'controller' => ['issue'],
                     'pluralize' => false,
-                    'prefix' => '<project_id:[A-Za-z0-9_\-]+>/',
+                    'prefix' => '<organization_id:[A-Za-z0-9_\-]+>/<project_id:[A-Za-z0-9_\-]+>/',
                     'tokens' => [
                         '{id}' => '<id:[A-Za-z0-9_\-]+>',
                     ],
@@ -76,7 +93,7 @@ return [
                     'class' => UrlRule::class,
                     'controller' => ['member', 'label'],
                     'pluralize' => false,
-                    'prefix' => '<project_id:[A-Za-z0-9_\-]+>/',
+                    'prefix' => '<organization_id:[A-Za-z0-9_\-]+>/<project_id:[A-Za-z0-9_\-]+>/',
                     'tokens' => [
                         '{id}' => '<id:[A-Za-z0-9_\-]+>',
                     ]
@@ -85,7 +102,7 @@ return [
                     'class' => UrlRule::class,
                     'controller' => ['comment'],
                     'pluralize' => false,
-                    'prefix' => '<project_id:[A-Za-z0-9_\-]+>/<issue_id:[A-Za-z0-9_\-]+>/',
+                    'prefix' => '<organization_id:[A-Za-z0-9_\-]+>/<project_id:[A-Za-z0-9_\-]+>/<issue_id:[A-Za-z0-9_\-]+>/',
                     'tokens' => [
                         '{id}' => '<id:[A-Za-z0-9_\-]+>'
                     ]

@@ -13,6 +13,8 @@ class m260125_165015_create_project_table extends Migration
      */
     public function safeUp()
     {
+        $this->execute('CREATE EXTENSION IF NOT EXISTS pg_trgm;');
+
         $this->createTable('{{%project}}', [
             'id' => $this->string(36)->notNull(),
             'organization_id' => $this->string(36)->notNull(),

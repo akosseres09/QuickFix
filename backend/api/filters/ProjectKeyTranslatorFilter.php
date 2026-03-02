@@ -6,6 +6,7 @@ use common\models\Project;
 use Symfony\Component\Uid\Uuid;
 use Yii;
 use yii\base\ActionFilter;
+use yii\web\NotFoundHttpException;
 
 /**
  * Translates a project key from the request into a project ID and updates the request parameters accordingly.
@@ -42,17 +43,15 @@ class ProjectKeyTranslatorFilter extends ActionFilter
 
         // if the project_id from the request is not a valid UUID, treat it as a project key and translate it to project ID
         if (!Uuid::isValid($projectKey)) {
-            $projectId = Yii::$app->cache->getOrSet('project_key_to_id_' . $projectKey, function () use ($projectKey) {
+            $projectId = Yii::$app->cache->getOrSet(Project::getKeyToIdCacheKey($projectKey), function () use ($projectKey) {
                 return Project::find()->select('id')->byKey($projectKey)->scalar();
             });
 
             if (!$projectId) {
-                throw new \yii\web\NotFoundHttpException('Project not found for key: ' . $projectKey);
+                throw new NotFoundHttpException('Project not found for key: ' . $projectKey);
             }
 
             $request->setQueryParams(array_merge($request->getQueryParams(), [$this->identifierParamName => $projectId]));
-        } else {
-            throw new \yii\web\NotFoundHttpException('Invalid project identifier: ' . $projectKey);
         }
 
         return parent::beforeAction($action);
