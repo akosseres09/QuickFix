@@ -1,4 +1,4 @@
-import { Component, inject, signal, Signal, TemplateRef, viewChild } from '@angular/core';
+import { Component, inject, input, signal, Signal, TemplateRef, viewChild } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { DialogService } from '../../../shared/services/dialog/dialog.service';
@@ -21,6 +21,7 @@ export class NewProjectComponent {
     private readonly router = inject(Router);
     private readonly snackbarService = inject(SnackbarService);
 
+    organizationId = input.required<string>();
     infoDialogRef: Signal<TemplateRef<any> | undefined> = viewChild('infoDialog');
     isSubmitting = signal<boolean>(false);
 
@@ -33,12 +34,19 @@ export class NewProjectComponent {
     }
 
     onProjectCreated(project: Partial<Project>) {
+        const orgId = this.organizationId();
+        if (!orgId) {
+            this.snackbarService.error('Organization ID is missing');
+            return;
+        }
+
+        this.isSubmitting.set(true);
         this.projectService
-            .createProject(project)
+            .createProject(orgId, project)
             .pipe(finalize(() => this.isSubmitting.set(false)))
             .subscribe({
                 next: (project) => {
-                    this.router.navigate(['/project', project.key]);
+                    this.router.navigate(['/', orgId, 'project', project.key]);
                 },
                 error: (error) => {
                     console.error('Error creating project:', error);

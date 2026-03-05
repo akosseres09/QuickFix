@@ -28,6 +28,11 @@ class ProjectQuery extends ActiveQuery
         return $this->andWhere(['id' => $id]);
     }
 
+    public function byOrganizationId(string $organizationId): ProjectQuery
+    {
+        return $this->andWhere(['organization_id' => $organizationId]);
+    }
+
     /**
      * Filter by active projects
      * @return ProjectQuery

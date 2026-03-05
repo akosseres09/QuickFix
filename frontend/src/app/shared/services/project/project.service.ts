@@ -43,28 +43,32 @@ export class ProjectService {
         );
     }
 
-    getProject(identifier: string): Observable<Project> {
-        return this.http.get<Project>(`${this.url}/project/${identifier}`);
+    getProject(organizationId: string, identifier: string): Observable<Project> {
+        return this.http.get<Project>(`${this.url}/${organizationId}/project/${identifier}`);
     }
 
     /**
      * Creates a new project
      */
-    createProject(project: Partial<Project>): Observable<Project> {
-        return this.http.post<Project>(`${this.url}/project`, project);
+    createProject(organizationId: string, project: Partial<Project>): Observable<Project> {
+        return this.http.post<Project>(`${this.url}/${organizationId}/project`, project);
     }
 
     /**
      * Updates an existing project
      */
-    updateProject(id: string, project: Partial<Project>): Observable<Project> {
-        return this.http.put<Project>(`${this.url}/project/${id}`, project);
+    updateProject(
+        organizationId: string,
+        id: string,
+        project: Partial<Project>
+    ): Observable<Project> {
+        return this.http.put<Project>(`${this.url}/${organizationId}/project/${id}`, project);
     }
 
     /**
      * Deletes a project
      */
-    deleteProject(id: string): Observable<void> {
-        return this.http.delete<void>(`${this.url}/project/${id}`);
+    deleteProject(organizationId: string, id: string): Observable<void> {
+        return this.http.delete<void>(`${this.url}/${organizationId}/project/${id}`);
     }
 }

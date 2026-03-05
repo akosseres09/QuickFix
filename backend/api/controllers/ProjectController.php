@@ -2,6 +2,7 @@
 
 namespace api\controllers;
 
+use api\filters\OrganizationSlugTranslatorFilter;
 use api\filters\ProjectKeyTranslatorFilter;
 use common\models\Project;
 use common\models\search\ProjectSearch;
@@ -20,6 +21,10 @@ class ProjectController extends BaseRestController
             'class' => ProjectKeyTranslatorFilter::class,
             'identifierParamName' => 'id',
             'actions' => ['view', 'update', 'delete'],
+        ];
+
+        $behaviors['organizationTranslator'] = [
+            'class' => OrganizationSlugTranslatorFilter::class
         ];
 
         return $behaviors;
@@ -82,13 +87,16 @@ class ProjectController extends BaseRestController
     public function findModel($id): Project
     {
         $project_id = Yii::$app->request->get('id');
-
         if (!$project_id) {
             throw new NotFoundHttpException('Project ID is required!');
         }
 
-        $project = Project::find()->byId($project_id)->one();
+        $organizationId = Yii::$app->request->get('organization_id');
+        if (!$organizationId) {
+            throw new NotFoundHttpException('Organization ID is required!');
+        }
 
+        $project = Project::find()->byOrganizationId($organizationId)->byId($project_id)->one();
         if (!$project) {
             throw new NotFoundHttpException('Project not found!');
         }

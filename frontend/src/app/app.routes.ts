@@ -142,10 +142,16 @@ export const routes: Routes = [
             { path: '', pathMatch: 'full', redirectTo: 'projects' },
             {
                 path: 'projects',
-                loadComponent: () =>
-                    import('./main/projects/projects.component').then((c) => c.ProjectsComponent),
-                title: 'QuickFix - Projects',
                 children: [
+                    {
+                        path: '',
+                        pathMatch: 'full',
+                        loadComponent: () =>
+                            import('./main/projects/projects.component').then(
+                                (c) => c.ProjectsComponent
+                            ),
+                        title: 'QuickFix - Projects',
+                    },
                     {
                         path: 'new',
                         loadComponent: () =>

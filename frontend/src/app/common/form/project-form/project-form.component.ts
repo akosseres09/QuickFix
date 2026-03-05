@@ -85,17 +85,12 @@ export class ProjectFormComponent implements OnInit {
                 ],
             ],
             description: [this.project()?.description || ''],
-            startDate: [this.project()?.startDate || (null as string | null)],
-            endDate: [this.project()?.endDate || (null as string | null)],
             visibility: [
                 this.project()?.visibility ?? ProjectVisibility.PRIVATE,
                 Validators.required,
             ],
             status: [this.project()?.status ?? ProjectStatus.ACTIVE, Validators.required],
             priority: [this.project()?.priority ?? ProjectPriority.MEDIUM, Validators.required],
-            color: [this.project()?.color || '#3b82f6', [Validators.pattern(/^#[0-9A-Fa-f]{6}$/)]],
-            progress: [this.project()?.progress || 0, [Validators.min(0), Validators.max(100)]],
-            budget: [this.project()?.budget || 0, [Validators.min(0)]],
         });
 
         if (this.project()) return;
@@ -161,15 +156,6 @@ export class ProjectFormComponent implements OnInit {
             status: this.projectForm.value.status,
             visibility: this.projectForm.value.visibility,
             priority: this.projectForm.value.priority,
-            color: this.projectForm.value.color,
-            progress: this.projectForm.value.progress,
-            budget: this.projectForm.value.budget,
-            startDate: this.projectForm.value.startDate
-                ? formatDate(this.projectForm.value.startDate, 'yyyy-MM-dd', 'en-US')
-                : null,
-            endDate: this.projectForm.value.endDate
-                ? formatDate(this.projectForm.value.endDate, 'yyyy-MM-dd', 'en-US')
-                : null,
             ownerId: this.userId,
         };
 

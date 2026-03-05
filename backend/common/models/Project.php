@@ -134,6 +134,26 @@ class Project extends ActiveRecord
         ];
     }
 
+    public function beforeValidate()
+    {
+        if (!parent::beforeValidate()) {
+            return false;
+        }
+
+        if (!$this->isNewRecord) {
+            return true;
+        }
+
+        $organizationId = Yii::$app->request->get('organization_id');
+        if (!$organizationId) {
+            $this->addError('organization_id', 'Organization ID is required.');
+            return false;
+        }
+
+        $this->organization_id = $organizationId;
+        return true;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -200,33 +220,9 @@ class Project extends ActiveRecord
         return [
             [['name', 'key', 'owner_id'], 'required'],
             [['description'], 'string'],
-            [['start_date', 'end_date'], 'date', 'format' => 'php:Y-m-d'],
-            [
-                'start_date',
-                'compare',
-                'compareAttribute' => 'end_date',
-                'operator' => '<=',
-                'type' => 'date',
-                'when' => function ($model) {
-                    return !empty($model->end_date);
-                },
-                'message' => 'Start Date must be less than or equal to End Date.'
-            ],
-            [
-                'end_date',
-                'compare',
-                'compareAttribute' => 'start_date',
-                'operator' => '>=',
-                'type' => 'date',
-                'when' => function ($model) {
-                    return !empty($model->start_date);
-                },
-                'message' => 'End Date must be greater than or equal to Start Date.'
-            ],
             [['created_at', 'updated_at', 'archived_at'], 'integer'],
             ['is_archived', 'boolean'],
             ['is_archived', 'default', 'value' => false],
-            [['budget'], 'number'],
             [['name'], 'string', 'max' => 255],
             [['key'], 'string', 'max' => 10],
             [['key'], 'unique'],
@@ -240,10 +236,6 @@ class Project extends ActiveRecord
             [['priority'], 'integer'],
             [['priority'], 'default', 'value' => self::PRIORITY_MEDIUM],
             [['priority'], 'in', 'range' => self::PRIORITY_LIST],
-            [['color'], 'string', 'max' => 7],
-            [['color'], 'match', 'pattern' => '/^#[0-9A-Fa-f]{6}$/', 'message' => 'Color must be a valid hex color code'],
-            [['progress'], 'default', 'value' => 0],
-            [['progress'], 'double', 'min' => 0, 'max' => 100],
             [['owner_id'], 'string', 'max' => 36],
             [['owner_id'], 'exist', 'skipOnError' => true, 'targetClass' => UserResource::class, 'targetAttribute' => ['owner_id' => 'id']],
         ];
@@ -260,14 +252,9 @@ class Project extends ActiveRecord
             'key' => 'Key',
             'description' => 'Description',
             'status' => 'Status',
-            'start_date' => 'Start Date',
-            'end_date' => 'End Date',
             'owner_id' => 'Owner ID',
             'visibility' => 'Visibility',
             'priority' => 'Priority',
-            'color' => 'Color',
-            'progress' => 'Progress',
-            'budget' => 'Budget',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
@@ -281,14 +268,9 @@ class Project extends ActiveRecord
             'key',
             'description',
             'status',
-            'startDate' => 'start_date',
-            'endDate' => 'end_date',
             'ownerId' => 'owner_id',
             'visibility',
             'priority',
-            'color',
-            'progress',
-            'budget',
             'createdAt' => 'created_at',
             'updatedAt' => 'updated_at',
             'isArchived' => 'is_archived',

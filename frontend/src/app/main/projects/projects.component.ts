@@ -221,7 +221,13 @@ export class ProjectsComponent {
             return;
         }
 
-        this.projectService.deleteProject(project.key).subscribe({
+        const orgId = this.organizationId();
+        if (!orgId) {
+            this.snackbarService.error('Organization ID is missing');
+            return;
+        }
+
+        this.projectService.deleteProject(orgId, project.key).subscribe({
             next: () => {
                 this.snackbarService.success(
                     `Project "${this.selectedProjectName()}" deleted successfully!`
@@ -244,7 +250,13 @@ export class ProjectsComponent {
             return;
         }
 
-        this.projectService.updateProject(project.key, data).subscribe({
+        const orgId = this.organizationId();
+        if (!orgId) {
+            this.snackbarService.error('Organization ID is missing');
+            return;
+        }
+
+        this.projectService.updateProject(orgId, project.key, data).subscribe({
             next: () => {
                 this.selectedRow.set(null);
                 this.speedDial()?.close();

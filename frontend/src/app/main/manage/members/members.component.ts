@@ -25,6 +25,8 @@ export class MembersComponent implements OnInit {
     private readonly projectService = inject(ProjectService);
 
     projectId = input.required<string>();
+    organizationId = input.required<string>();
+
     members = signal<ProjectMember[]>([]);
     currentUser = signal<Claims | null>(this.authService.currentUserClaims());
     project = signal<Project | null>(null);
@@ -54,7 +56,21 @@ export class MembersComponent implements OnInit {
     }
 
     private getProject() {
-        this.projectService.getProject(this.projectId()).subscribe({
+        const projectId = this.projectId();
+        if (!projectId) {
+            console.error('Project ID is required to fetch project details');
+            this.snackbarService.open('Project ID is missing', ['snackbar-error']);
+            return;
+        }
+
+        const organizationId = this.organizationId();
+        if (!organizationId) {
+            console.error('Organization ID is required to fetch project details');
+            this.snackbarService.open('Organization ID is missing', ['snackbar-error']);
+            return;
+        }
+
+        this.projectService.getProject(organizationId, projectId).subscribe({
             next: (data) => {
                 this.project.set(data);
             },

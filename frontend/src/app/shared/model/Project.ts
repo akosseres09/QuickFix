@@ -1,5 +1,6 @@
 import { BaseModel } from './BaseModel';
 import { Label } from './Label';
+import { Organization } from './Organization';
 import { User } from './User';
 
 export enum ProjectStatus {
@@ -70,22 +71,19 @@ export const PRIORITY_COLOR_MAP: { [key: number]: string } = {
 
 export interface Project extends BaseModel {
     id: string;
+    organizationId: string;
     name: string;
     key: string;
     description: string;
     status: ProjectStatus;
-    startDate: string | null;
-    endDate: string | null;
     ownerId: string;
     visibility: ProjectVisibility;
     priority: ProjectPriority;
-    color: string;
-    progress: number;
-    budget: number;
     createdAt: number;
     updatedAt: number;
     archivedat: number;
     isArchived: boolean;
+    organization?: Organization;
     owner?: User;
     projectMembers?: Array<User>;
     members?: Array<User>;

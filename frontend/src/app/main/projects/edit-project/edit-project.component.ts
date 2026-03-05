@@ -1,4 +1,13 @@
-import { Component, inject, Signal, signal, TemplateRef, viewChild } from '@angular/core';
+import {
+    Component,
+    inject,
+    input,
+    OnInit,
+    Signal,
+    signal,
+    TemplateRef,
+    viewChild,
+} from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProjectFormComponent } from '../../../common/form/project-form/project-form.component';
@@ -15,28 +24,39 @@ import { finalize } from 'rxjs';
     templateUrl: './edit-project.component.html',
     styleUrl: './edit-project.component.css',
 })
-export class EditProjectComponent {
+export class EditProjectComponent implements OnInit {
     private readonly activeRoute = inject(ActivatedRoute);
     private readonly projectService = inject(ProjectService);
     private readonly router = inject(Router);
     private readonly snackbar = inject(SnackbarService);
     private readonly dialogService = inject(DialogService);
 
-    projectId = signal<string>('');
+    projectId = input.required<string>();
+    organizationId = input.required<string>();
     project = signal<Project | null>(null);
 
     isSubmitting = signal<boolean>(false);
 
     infoDialogRef: Signal<TemplateRef<any> | undefined> = viewChild('infoDialog');
 
-    constructor() {
-        this.projectId.set(this.activeRoute.snapshot.parent?.paramMap.get('projectId') || '');
-
-        if (!this.projectId()) {
+    ngOnInit() {
+        const projectId = this.projectId();
+        if (!projectId) {
             console.error('Project ID is missing in route parameters');
+            this.snackbar.error('Project ID is missing');
+            this.router.navigate(['/projects']);
+            return;
         }
 
-        this.projectService.getProject(this.projectId()).subscribe({
+        const organizationId = this.organizationId();
+        if (!organizationId) {
+            console.error('Organization ID is missing in route parameters');
+            this.snackbar.error('Organization ID is missing');
+            this.router.navigate(['/projects']);
+            return;
+        }
+
+        this.projectService.getProject(organizationId, projectId).subscribe({
             next: (project) => {
                 this.project.set(project);
             },
@@ -58,11 +78,13 @@ export class EditProjectComponent {
 
     onProjectEdited(project: Partial<Project>) {
         const projectId = this.projectId();
-
         if (!projectId) return;
 
+        const organizationId = this.organizationId();
+        if (!organizationId) return;
+
         this.projectService
-            .updateProject(projectId, project)
+            .updateProject(organizationId, projectId, project)
             .pipe(finalize(() => this.isSubmitting.set(false)))
             .subscribe({
                 next: (project) => {
