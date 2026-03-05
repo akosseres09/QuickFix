@@ -27,7 +27,7 @@ use yii\db\ActiveRecord;
  * @property int|null $updated_at
  * @property int|null $closed_at
  * @property int|null $due_date
- * @property bool $is_archived
+ * @property bool|null $is_archived
  * @property bool $is_draft
  * 
  * @property Project $project

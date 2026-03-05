@@ -17,6 +17,7 @@ export class OverviewComponent implements OnInit {
     private readonly issueService = inject(IssueService);
 
     projectId = input.required<string>();
+    organizationId = input.required<string>();
 
     stats = signal<IssueStats | null>(null);
     loading = signal(true);
@@ -56,8 +57,20 @@ export class OverviewComponent implements OnInit {
         this.loading.set(true);
         this.error.set(null);
 
+        const projectId = this.projectId();
+        const organizationId = this.organizationId();
+
+        if (!projectId || !organizationId) {
+            this.error.set('Project ID or Organization ID is missing.');
+            this.loading.set(false);
+            return;
+        }
+
         this.issueService
-            .getStats(this.projectId())
+            .getStats({
+                projectId,
+                organizationId,
+            })
             .pipe(finalize(() => this.loading.set(false)))
             .subscribe({
                 next: (data) => {

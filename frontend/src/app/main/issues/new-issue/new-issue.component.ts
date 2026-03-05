@@ -1,5 +1,5 @@
-import { Component, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, inject, input, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -35,22 +35,42 @@ import { finalize } from 'rxjs';
     styleUrl: './new-issue.component.css',
 })
 export class NewIssueComponent {
-    private readonly activeRoute = inject(ActivatedRoute);
     private readonly issueService = inject(IssueService);
     private readonly router = inject(Router);
     private readonly snackbarService = inject(SnackbarService);
 
     isSubmitting = signal<boolean>(false);
 
-    projectId = signal<string>(this.activeRoute.snapshot.parent?.parent?.params['projectId'] || '');
+    projectId = input.required<string>();
+    organizationId = input.required<string>();
 
     /**
      * Handles issue creation when the form is submitted.
      * @param issue the data emitted from the issue form, containing the new issue details.
      */
     onIssueCreated(issue: Partial<Issue>): void {
+        const projectId = this.projectId();
+        if (!projectId) {
+            console.error('Project ID is missing');
+            return;
+        }
+
+        const organizationId = this.organizationId();
+        if (!organizationId) {
+            console.error('Organization ID is missing');
+            return;
+        }
+
+        this.isSubmitting.set(true);
+
         this.issueService
-            .createIssue(this.projectId(), issue)
+            .createIssue(
+                {
+                    projectId: projectId,
+                    organizationId: organizationId,
+                },
+                issue
+            )
             .pipe(
                 finalize(() => {
                     this.isSubmitting.set(false);
@@ -58,13 +78,18 @@ export class NewIssueComponent {
             )
             .subscribe({
                 next: (issue) => {
-                    this.snackbarService.open(`Issue "${issue.title}" created successfully!`);
-                    this.router.navigate(['/project', this.projectId(), 'issues']);
+                    this.snackbarService.success(`Issue "${issue.title}" created successfully!`);
+                    this.router.navigate([
+                        '/',
+                        organizationId,
+                        'project',
+                        this.projectId(),
+                        'issues',
+                    ]);
                 },
                 error: (error) => {
-                    this.snackbarService.open(
-                        error?.error?.message || 'Failed to create issue. Please try again.',
-                        ['snackbar-error']
+                    this.snackbarService.error(
+                        error?.error?.message || 'Failed to create issue. Please try again.'
                     );
                 },
             });

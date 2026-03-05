@@ -62,6 +62,8 @@ export class ViewComponent {
     // inputs
     issueId = input.required<string>();
     projectId = input.required<string>();
+    organizationId = input.required<string>();
+
     issue = model.required<Issue>();
     editingComment = signal<IssueComment | null>(null);
 
@@ -130,7 +132,8 @@ export class ViewComponent {
         this.issueService
             .updateIssue({
                 issueId: this.issue().id,
-                projectid: this.projectId(),
+                projectId: this.projectId(),
+                organizationId: this.organizationId(),
                 issue: {
                     status: status,
                     closedAt: status === IssueStatus.CLOSED ? Math.floor(Date.now() / 1000) : null,

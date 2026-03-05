@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, input, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CdkDropListGroup, CdkDragDrop, transferArrayItem } from '@angular/cdk/drag-drop';
@@ -20,7 +20,9 @@ export class BoardComponent implements OnInit {
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
 
-    projectId = signal<string>('');
+    projectId = input.required<string>();
+    organizationId = input.required<string>();
+
     isLoading = signal<boolean>(true);
 
     // Status constants for template
@@ -35,22 +37,27 @@ export class BoardComponent implements OnInit {
     closedIssues = signal<Issue[]>([]);
 
     ngOnInit() {
-        const id = this.route.parent?.parent?.snapshot.paramMap.get('projectId');
-
-        if (!id) {
-            this.snackbarService.error('Project ID is missing');
-            return;
-        }
-
-        this.projectId.set(id);
         this.loadIssues();
     }
 
     loadIssues() {
+        const projectId = this.projectId();
+        if (!projectId) {
+            console.error('Project ID is missing');
+            return;
+        }
+
+        const organizationId = this.organizationId();
+        if (!organizationId) {
+            console.error('Organization ID is missing');
+            return;
+        }
+
         this.isLoading.set(true);
         this.issueService
             .getIssuesSimple({
-                projectId: this.projectId(),
+                projectId,
+                organizationId,
                 queryParams: {
                     expand: 'assignee',
                 },
@@ -106,7 +113,8 @@ export class BoardComponent implements OnInit {
         this.issueService
             .updateIssue({
                 issueId: issue.id,
-                projectid: this.projectId(),
+                projectId: this.projectId(),
+                organizationId: this.organizationId(),
                 issue: { status: status },
             })
             .subscribe({

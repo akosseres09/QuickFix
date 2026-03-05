@@ -3,6 +3,7 @@
 namespace common\models\search;
 
 use common\models\Issue;
+use common\models\Project;
 use yii\data\ActiveDataProvider;
 use yii\web\BadRequestHttpException;
 
@@ -44,6 +45,16 @@ class IssueSearch extends Issue implements SearchInterface
         $projectId = $params['project_id'] ?? null;
         if (!$projectId) {
             throw new BadRequestHttpException('Project ID is required for issue search.');
+        }
+
+        $organizationId = $params['organization_id'] ?? null;
+        if (!$organizationId) {
+            throw new BadRequestHttpException('Organization ID is required for issue search.');
+        }
+
+        $exists = Project::find()->byOrganizationId($organizationId)->byId($projectId)->exists();
+        if (!$exists) {
+            throw new BadRequestHttpException('Project not found for the given project_id and organization_id.');
         }
 
         $query = Issue::find()->byProjectId($projectId);
@@ -90,7 +101,6 @@ class IssueSearch extends Issue implements SearchInterface
             'priority' => $this->priority,
             'is_archived' => $this->is_archived
         ]);
-
         $query->andFilterWhere(['like', 'title', $this->title]);
 
         return $dataProvider;

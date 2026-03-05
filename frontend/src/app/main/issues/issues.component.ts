@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, inject, input, signal, viewChild } from '@angular/core';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { Issue } from '../../shared/model/Issue';
@@ -51,11 +51,12 @@ export class IssuesComponent {
         expand: 'creator,assignee',
     });
 
-    projectId = signal<string>(this.getProjectId());
+    projectId = input.required<string>();
+    organizationId = input.required<string>();
+
     selectedRow = signal<Issue | null>(null);
 
-    issues = signal<Issue[]>([]);
-    filteredIssues = signal<Issue[]>(this.issues());
+    filteredIssues = signal<Issue[]>([]);
     shownIssues = computed(() => new MatTableDataSource<Issue>(this.filteredIssues()));
     displayedColumns: Array<DisplayedColumn<Issue>> =
         this.displayedColumService.getIssueDisplayColumns();
@@ -64,6 +65,7 @@ export class IssuesComponent {
     speedDialButtons = computed<SpeedDialButton[]>(() => {
         const selected = this.selectedRow();
         const currentProjectId = this.projectId();
+        const currentOrganizationId = this.organizationId();
 
         return this.buttonFactory.createArchivableButtons({
             entityName: 'Issue',
@@ -76,7 +78,15 @@ export class IssuesComponent {
                     this.snackbarService.error('Please select a valid issue to edit!');
                     return null;
                 }
-                return ['/project', currentProjectId, 'issue', issueId, 'edit'];
+                return [
+                    '/',
+                    currentOrganizationId,
+                    'project',
+                    currentProjectId,
+                    'issue',
+                    issueId,
+                    'edit',
+                ];
             },
             onArchive: () => this.openArchiveConfirmation(),
             onUnarchive: () => this.openUnarchiveConfirmation(),
@@ -90,24 +100,26 @@ export class IssuesComponent {
     archiveConfirmTemplate = viewChild<any>('archiveConfirmTemplate');
     unarchiveConfirmTemplate = viewChild<any>('unarchiveConfirmTemplate');
 
-    private getProjectId(): string {
-        return this.activeRoute.parent?.parent?.snapshot.paramMap.get('projectId') || '';
-    }
-
     getIssues() {
-        if (!this.projectId()) {
+        const projectId = this.projectId();
+        const organizationId = this.organizationId();
+        if (!projectId) {
             this.snackbarService.error('Project ID is missing');
+            return;
+        }
+
+        if (!organizationId) {
+            this.snackbarService.error('Organization ID is missing');
             return;
         }
 
         this.listState.isLoading.set(true);
 
         this.issueService
-            .getIssues(this.projectId(), this.listState.buildQueryParams())
+            .getIssues({ projectId, organizationId }, this.listState.buildQueryParams())
             .pipe(finalize(() => this.listState.isLoading.set(false)))
             .subscribe({
                 next: (response) => {
-                    this.issues.set(response.items);
                     this.filteredIssues.set(response.items);
                     this.listState.totalCount.set(response._meta.totalCount);
                 },
@@ -204,10 +216,23 @@ export class IssuesComponent {
             return;
         }
 
+        const projectId = this.projectId();
+        if (!projectId) {
+            this.snackbarService.error('Project ID is missing');
+            return;
+        }
+
+        const organizationId = this.organizationId();
+        if (!organizationId) {
+            this.snackbarService.error('Organization ID is missing');
+            return;
+        }
+
         this.issueService
             .updateIssue({
                 issueId: issue.id,
-                projectid: this.projectId(),
+                projectId: projectId,
+                organizationId: organizationId,
                 issue: {
                     isArchived: true,
                 },
@@ -236,10 +261,23 @@ export class IssuesComponent {
             return;
         }
 
+        const projectId = this.projectId();
+        if (!projectId) {
+            this.snackbarService.error('Project ID is missing');
+            return;
+        }
+
+        const organizationId = this.organizationId();
+        if (!organizationId) {
+            this.snackbarService.error('Organization ID is missing');
+            return;
+        }
+
         this.issueService
             .updateIssue({
                 issueId: issue.id,
-                projectid: this.projectId(),
+                projectId: projectId,
+                organizationId: organizationId,
                 issue: {
                     isArchived: false,
                 },

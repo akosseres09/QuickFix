@@ -20,6 +20,7 @@ export class ViewIssueComponent implements OnInit {
     // angular automatically binds the URL parameters to these signals
     issueId = input.required<string>();
     projectId = input.required<string>();
+    organizationId = input.required<string>();
 
     issue = signal<Issue | null>(null);
     loading = signal<boolean>(true);
@@ -27,8 +28,9 @@ export class ViewIssueComponent implements OnInit {
     ngOnInit() {
         const id = this.issueId();
         const projectId = this.projectId();
+        const organizationId = this.organizationId();
 
-        if (!id || !projectId) {
+        if (!id || !projectId || !organizationId) {
             this.loading.set(false);
             return;
         }
@@ -37,6 +39,7 @@ export class ViewIssueComponent implements OnInit {
             .getIssueById({
                 issueId: id,
                 projectId: projectId,
+                organizationId: organizationId,
             })
             .pipe(finalize(() => this.loading.set(false)))
             .subscribe({

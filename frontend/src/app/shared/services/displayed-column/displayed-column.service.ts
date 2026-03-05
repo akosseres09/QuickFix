@@ -26,7 +26,7 @@ import { Organization } from '../../model/Organization';
 export class DisplayedColumnService {
     private readonly dateService = inject(DateService);
 
-    getIssueDisplayColumns() {
+    getIssueDisplayColumns(): DisplayedColumn<Issue>[] {
         return [
             {
                 id: 'title',

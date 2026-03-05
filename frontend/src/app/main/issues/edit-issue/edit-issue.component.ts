@@ -1,7 +1,7 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, input, OnInit, signal } from '@angular/core';
 import { IssueFormComponent } from '../../../common/form/issue-form/issue-form.component';
 import { Issue } from '../../../shared/model/Issue';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { IssueService } from '../../../shared/services/issue/issue.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
@@ -13,23 +13,35 @@ import { finalize } from 'rxjs';
     templateUrl: './edit-issue.component.html',
     styleUrl: './edit-issue.component.css',
 })
-export class EditIssueComponent {
-    private readonly activateRoute = inject(ActivatedRoute);
+export class EditIssueComponent implements OnInit {
     private readonly issueService = inject(IssueService);
     private readonly router = inject(Router);
     private readonly snackbarService = inject(SnackbarService);
 
-    projectId = signal<string>(
-        this.activateRoute.snapshot.parent?.parent?.paramMap.get('projectId') || ''
-    );
-    issueId = signal<string>(this.activateRoute.snapshot.paramMap.get('issueId') || '');
+    projectId = input.required<string>();
+    organizationId = input.required<string>();
+    issueId = input.required<string>();
+
     issue = signal<Issue | null>(null);
     isSubmitting = signal<boolean>(false);
 
-    constructor() {
+    ngOnInit() {
+        const projectId = this.projectId();
+        if (!projectId) {
+            console.error('Project ID is missing');
+            return;
+        }
+
+        const organizationId = this.organizationId();
+        if (!organizationId) {
+            console.error('Organization ID is missing');
+            return;
+        }
+
         this.issueService
             .getIssueById({
-                projectId: this.projectId(),
+                projectId: projectId,
+                organizationId: organizationId,
                 issueId: this.issueId(),
             })
             .subscribe({
@@ -39,7 +51,7 @@ export class EditIssueComponent {
                 error: (err) => {
                     console.error('Failed to fetch issue:', err);
                     this.snackbarService.error('Failed to load issue. Please try again.');
-                    this.router.navigate(['/project', this.projectId(), 'issues']);
+                    this.router.navigate(['/', organizationId, 'project', projectId, 'issues']);
                 },
             });
     }
@@ -49,10 +61,29 @@ export class EditIssueComponent {
      * @param updatedIssue the partial issue data containing the fields that were updated in the form.
      */
     onIssueUpdated(updatedIssue: Partial<Issue>): void {
+        const projectId = this.projectId();
+        if (!projectId) {
+            console.error('Project ID is missing');
+            return;
+        }
+
+        const organizationId = this.organizationId();
+        if (!organizationId) {
+            console.error('Organization ID is missing');
+            return;
+        }
+
+        const issueId = this.issueId();
+        if (!issueId) {
+            console.error('Issue ID is missing');
+            return;
+        }
+
         this.issueService
             .updateIssue({
-                issueId: this.issueId(),
-                projectid: this.projectId(),
+                issueId: issueId,
+                projectId: projectId,
+                organizationId: organizationId,
                 issue: updatedIssue,
             })
             .pipe(
@@ -63,9 +94,7 @@ export class EditIssueComponent {
             .subscribe({
                 next: () => {
                     this.snackbarService.success('Issue updated successfully');
-                    this.router.navigate(['/project', this.projectId(), 'issues'], {
-                        relativeTo: this.activateRoute,
-                    });
+                    this.router.navigate(['/', organizationId, 'project', projectId, 'issues']);
                 },
                 error: (err) => {
                     console.error('Failed to update issue:', err);

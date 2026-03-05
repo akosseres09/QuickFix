@@ -2,6 +2,7 @@
 
 namespace api\controllers;
 
+use api\filters\OrganizationSlugTranslatorFilter;
 use api\filters\ProjectKeyTranslatorFilter;
 use common\models\Issue;
 use common\models\Project;
@@ -21,6 +22,11 @@ class IssueController extends BaseRestController
         $behaviors["projectTranslator"] = [
             'class' => ProjectKeyTranslatorFilter::class,
             'identifierParamName' => 'project_id',
+            'actions' => ['index', 'view', 'update', 'delete', 'create', 'stats']
+        ];
+
+        $behaviors['organizationTranslator'] = [
+            'class' => OrganizationSlugTranslatorFilter::class,
             'actions' => ['index', 'view', 'update', 'delete', 'create', 'stats']
         ];
 
@@ -52,7 +58,13 @@ class IssueController extends BaseRestController
             throw new BadRequestHttpException('Project ID is required.');
         }
 
-        $project = Project::find()->byId($projectId)->one();
+        $organizationId = Yii::$app->request->get('organization_id');
+        if (!$organizationId) {
+            throw new BadRequestHttpException('Organization ID is required.');
+        }
+
+        $project = Project::find()->byOrganizationId($organizationId)
+            ->byId($projectId)->one();
         if (!$project) {
             throw new NotFoundHttpException('Requested project not found!');
         }
@@ -146,6 +158,16 @@ class IssueController extends BaseRestController
         $projectId = Yii::$app->request->get('project_id');
         if (!$projectId) {
             throw new BadRequestHttpException('Project ID is required to access issues.');
+        }
+
+        $organizationId = Yii::$app->request->get('organization_id');
+        if (!$organizationId) {
+            throw new BadRequestHttpException('Organization ID is required to access issues.');
+        }
+
+        $exists = Project::find()->byOrganizationId($organizationId)->byId($projectId)->exists();
+        if (!$exists) {
+            throw new BadRequestHttpException('Project not found for the given project_id and organization_id.');
         }
 
         $issue = Issue::find()->byProjectId($projectId)->byId($id)->one();
