@@ -71,7 +71,6 @@ class Organization extends ActiveRecord
         return [
             [
                 "class" => TimestampBehavior::class,
-                "updatedAtAttribute" => false
             ],
             [
                 "class" => BlameableBehavior::class,
@@ -89,6 +88,7 @@ class Organization extends ActiveRecord
             [['name'], 'string', 'max' => 255],
             ['slug', 'string', 'max' => 16],
             ['owner_id', 'exist', 'skipOnError' => true, 'targetClass' => UserResource::class, 'targetAttribute' => ['owner_id' => 'id']],
+            ['description', 'string'],
         ];
     }
 
@@ -156,7 +156,7 @@ class Organization extends ActiveRecord
             'ownerId' => 'owner_id',
             'logoUrl' => 'logo_url',
             'createdAt' => 'created_at',
-            'updatedAt' => 'updateAt',
+            'updatedAt' => 'updated_at',
             'deletedAt' => 'deleted_at',
         ];
     }
@@ -211,6 +211,6 @@ class Organization extends ActiveRecord
 
     private function generateLogoUrl()
     {
-        return "https://ui-avatars.com/api/?name={$this->slug}&background=random&size=256";
+        return "https://ui-avatars.com/api/?name={$this->name}&background=random&size=256";
     }
 }
