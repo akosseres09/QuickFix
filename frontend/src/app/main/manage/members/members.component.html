@@ -18,7 +18,12 @@
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         @for (item of members(); track item.id) {
-            <app-user [member]="item" [currentUser]="currentUser()"></app-user>
+            <app-member-card
+                [member]="item"
+                [currentUser]="currentUser()"
+                [RoleLabels]="roleLabels"
+                [getRoleBadgeClass]="getRoleBadgeClass"
+            ></app-member-card>
         } @empty {
             <div
                 class="col-span-full flex flex-col items-center justify-center py-16 text-light-text/60 dark:text-dark-text/60"

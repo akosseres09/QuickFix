@@ -1,6 +1,6 @@
 import { Component, inject, input, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ProjectMember } from '../../../shared/model/ProjectMember';
+import { ProjectMember, ROLE_LABELS } from '../../../shared/model/ProjectMember';
 import { MemberService } from '../../../shared/services/member/member.service';
 import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
 import { ApiQueryParams } from '../../../shared/constants/api/ApiQueryParams';
@@ -10,11 +10,11 @@ import { ProjectService } from '../../../shared/services/project/project.service
 import { Project, ProjectVisibility } from '../../../shared/model/Project';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { UserComponent } from './user/user.component';
+import { MemberCardComponent } from '../../../common/member-card/member-card.component';
 
 @Component({
     selector: 'app-members',
-    imports: [CommonModule, MatButton, MatIcon, UserComponent],
+    imports: [CommonModule, MatButton, MatIcon, MemberCardComponent],
     templateUrl: './members.component.html',
     styleUrl: './members.component.css',
 })
@@ -30,6 +30,7 @@ export class MembersComponent implements OnInit {
     project = signal<Project | null>(null);
 
     ProjectVisibility = ProjectVisibility;
+    roleLabels = ROLE_LABELS;
 
     ngOnInit(): void {
         this.getProject();
@@ -62,5 +63,19 @@ export class MembersComponent implements OnInit {
                 this.snackbarService.open('Failed to fetch project details', ['snackbar-error']);
             },
         });
+    }
+
+    getRoleBadgeClass(role: number): string {
+        const baseClasses = 'shadow-sm';
+        switch (role) {
+            case 3: // Owner
+                return `${baseClasses} bg-light-accent dark:bg-dark-accent text-white`;
+            case 2: // Admin
+                return `${baseClasses} bg-light-primary dark:bg-dark-primary text-white dark:text-dark-background`;
+            case 1: // Member
+                return `${baseClasses} bg-light-secondary dark:bg-dark-secondary text-white`;
+            default: // Guest
+                return `${baseClasses} bg-gray-400 dark:bg-gray-600 text-white`;
+        }
     }
 }

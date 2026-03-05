@@ -14,13 +14,13 @@ import { RouterLink } from '@angular/router';
                     [src]="user().profilePictureUrl"
                     [alt]="user().username || 'User avatar'"
                     [class]="avatarClasses + ' ' + styleClass()"
-                    class=" object-cover"
+                    class="object-cover"
                 />
             </a>
         } @else {
             <div
                 [class]="avatarClasses + ' ' + styleClass()"
-                class="rounded-full bg-gray-300 flex items-center justify-center"
+                class="rounded-md bg-gray-300 flex items-center justify-center"
             >
                 <mat-icon [class]="iconSizeClass">person</mat-icon>
             </div>
