@@ -6,6 +6,7 @@ use common\models\query\OrganizationMemberQuery;
 use common\models\resource\UserResource;
 use Symfony\Component\Uid\Uuid;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
 /**
@@ -77,6 +78,35 @@ class OrganizationMember extends ActiveRecord
         $this->id = Uuid::v7()->toString();
 
         return true;
+    }
+
+    public function fields(): array
+    {
+        return [
+            'id',
+            'organizationId' => 'organization_id',
+            'userId' => 'user_id',
+            'role',
+            'createdAt' => 'created_at',
+        ];
+    }
+
+    public function extraFields(): array
+    {
+        return [
+            'organization',
+            'user',
+        ];
+    }
+
+    public function getUser(): ActiveQuery
+    {
+        return $this->hasOne(UserResource::class, ['id' => 'user_id']);
+    }
+
+    public function getOrganization(): ActiveQuery
+    {
+        return $this->hasOne(Organization::class, ['id' => 'organization_id']);
     }
 
     public static function find(): OrganizationMemberQuery
