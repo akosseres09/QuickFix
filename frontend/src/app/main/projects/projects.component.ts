@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal, TemplateRef, viewChild } from '@angular/core';
+import { Component, computed, inject, input, signal, TemplateRef, viewChild } from '@angular/core';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TableComponent } from '../../common/table/table.component';
@@ -48,6 +48,8 @@ export class ProjectsComponent {
     private readonly listStateService = inject(ListStateService);
     private readonly buttonFactory = inject(SpeedDialButtonFactory);
     private dialogService = inject(DialogService);
+
+    organizationId = input.required<string>();
 
     // List state (pagination, sorting, filtering)
     readonly listState: ListState = this.listStateService.create(this.activeRoute, {
@@ -128,10 +130,13 @@ export class ProjectsComponent {
      * Updates the projects signal and pagination metadata.
      */
     getProjects() {
+        const orgId = this.organizationId();
+        if (!this.organizationId) return;
+
         this.listState.isLoading.set(true);
 
         this.projectService
-            .getProjects(this.listState.buildQueryParams())
+            .getProjects(orgId, this.listState.buildQueryParams())
             .pipe(finalize(() => this.listState.isLoading.set(false)))
             .subscribe({
                 next: (response) => {

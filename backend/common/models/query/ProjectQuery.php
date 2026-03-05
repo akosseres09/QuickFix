@@ -38,15 +38,6 @@ class ProjectQuery extends ActiveQuery
     }
 
     /**
-     * Filter by archived projects
-     * @return ProjectQuery
-     */
-    public function archived(): ProjectQuery
-    {
-        return $this->andWhere(['status' => Project::STATUS_ARCHIVED]);
-    }
-
-    /**
      * Filter by completed projects
      * @return ProjectQuery
      */

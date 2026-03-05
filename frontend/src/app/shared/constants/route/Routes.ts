@@ -7,6 +7,7 @@ export type SidenavRoute =
           show?: boolean;
           children: Array<ChildRoute>;
           icon?: string;
+          url?: string;
           path?: string;
           exact?: boolean;
       }
@@ -16,6 +17,7 @@ export type SidenavRoute =
           path: string | any[] | UrlTree | null | undefined;
           show?: boolean;
           icon?: string;
+          url?: string;
           children?: never;
           exact?: boolean;
       };
@@ -33,4 +35,5 @@ type ActionChild = {
 export type ChildRoute = {
     name: string;
     icon: string;
+    url?: string;
 } & (LinkChild | ActionChild);

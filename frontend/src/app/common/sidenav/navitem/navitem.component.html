@@ -49,7 +49,9 @@
                 routerLinkActive="bg-light-text-hover dark:bg-dark-hover"
                 [routerLinkActiveOptions]="matchOption"
             >
-                @if (route.icon) {
+                @if (route.url) {
+                    <img class="rounded-md" [src]="route.url" width="24" height="24" />
+                } @else if (route.icon) {
                     <mat-icon>
                         {{ route.icon }}
                     </mat-icon>

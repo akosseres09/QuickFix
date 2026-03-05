@@ -15,24 +15,21 @@ use yii\db\ActiveRecord;
  * Project model
  *
  * @property string $id
+ * @property string $organization_id
  * @property string $name
  * @property string $key
  * @property string $description
  * @property string $status
- * @property string $start_date
- * @property string $end_date
  * @property string $owner_id
  * @property string $visibility
  * @property int $priority
- * @property string $color
- * @property integer $progress
- * @property float $budget
  * @property integer $created_at
  * @property integer $updated_at
  * @property integer | null $archived_at
  * @property bool | null $is_archived
  * 
  * @property UserResource $owner
+ * @property Organization $organization
  * @property ProjectMember[] $projectMembers
  * @property User[] $members
  * @property Issue[] $issues
@@ -191,8 +188,6 @@ class Project extends ActiveRecord
             $errors = json_encode($owner->getErrors());
             Yii::error("Failed to create project owner. Errors: " . $errors, __METHOD__);
 
-            // Throwing an exception here alerts the transaction manager that 
-            // something went critically wrong, forcing it to execute a ROLLBACK.
             throw new \yii\db\Exception("Transaction aborted: Could not save Project Member. " . $errors);
         }
     }
@@ -297,13 +292,13 @@ class Project extends ActiveRecord
             'createdAt' => 'created_at',
             'updatedAt' => 'updated_at',
             'isArchived' => 'is_archived',
-            'aechivedAt' => 'archived_at'
+            'archivedAt' => 'archived_at'
         ];
     }
 
     public function extraFields()
     {
-        return ['members', 'owner', 'projectMembers', 'issues', 'labels'];
+        return ['members', 'owner', 'projectMembers', 'issues', 'labels', 'organization'];
     }
 
     /**
@@ -347,9 +342,24 @@ class Project extends ActiveRecord
         return $this->hasMany(Issue::class, ['project_id' => 'id']);
     }
 
+    /**
+     * Gets query for [[Labels]].
+     * 
+     * @return Yii\db\ActiveQuery
+     */
     public function getLabels()
     {
         return $this->hasMany(Label::class, ['project_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[Organization]].
+     * 
+     * @return Yii\db\ActiveQuery
+     */
+    public function getOrganization()
+    {
+        return $this->hasOne(Organization::class, ['id' => 'organization_id']);
     }
 
     /**

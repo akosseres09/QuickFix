@@ -10,6 +10,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
+import { OrganizationService } from '../../shared/services/organization/organization.service';
+import { Organization } from '../../shared/model/Organization';
 
 @Component({
     selector: 'app-main-layout',
@@ -30,8 +32,11 @@ export class MainLayoutComponent implements OnInit {
     private readonly authService = inject(AuthService);
     private readonly router = inject(Router);
     private readonly snackbarService = inject(SnackbarService);
+    private readonly organizationService = inject(OrganizationService);
 
     projectId = input.required<string>();
+    organizationId = input.required<string>();
+    organization = signal<Organization | null>(null);
 
     isSidebarOpened = signal<boolean>(window.innerWidth > 767);
     sidenavRoutes = signal<SidenavRoute[]>([]);
@@ -48,83 +53,120 @@ export class MainLayoutComponent implements OnInit {
             });
     }
 
+    getOrganization() {
+        const id = this.organizationId();
+        if (!id) {
+            this.snackbarService.error('No organization selected!');
+            this.router.navigate(['/organizations']);
+            return;
+        }
+
+        this.organizationService.getOrganization(id).subscribe({
+            next: (org) => {
+                this.organization.set(org);
+                this.sidenavRoutes.set(this.getSidenavRoutes());
+            },
+            error: (error) => {
+                console.error(error);
+                this.snackbarService.error('Failed to load organization!');
+                this.router.navigate(['/organizations']);
+            },
+        });
+    }
+
     ngOnInit(): void {
-        this.sidenavRoutes.set(this.getSidenavRoutes());
+        this.getOrganization();
+        //this.sidenavRoutes.set(this.getSidenavRoutes());
         this.bottomSidenavRoutes.set(this.getBottomSidenavRoutes());
     }
 
     getSidenavRoutes(): SidenavRoute[] {
-        return [
+        const organizationId = this.organizationId();
+        const projectId = this.projectId();
+
+        const routes: SidenavRoute[] = [
             {
-                name: this.projectId(),
+                name: this.organization()?.name || 'Organization',
                 type: 'button',
-                path: `/project/${this.projectId()}`,
-                icon: 'bolt',
+                path: `/${this.organizationId()}`,
+                url: this.organization()?.logoUrl as string,
+                icon: 'apartment',
+                exact: false,
             },
-            {
-                name: 'Projects',
-                type: 'button',
-                path: '/projects',
-                icon: 'folder_open',
-            },
-            {
-                name: 'Issues',
-                type: 'menu',
-                icon: 'report_problem',
-                path: `/project/${this.projectId()}/issues`,
-                children: [
-                    {
-                        name: 'Overview',
-                        path: `/project/${this.projectId()}/issues/overview`,
-                        icon: 'travel_explore',
-                    },
-                    {
-                        name: 'Issues',
-                        path: `/project/${this.projectId()}/issues`,
-                        icon: 'assignment',
-                    },
-                    {
-                        name: 'Board',
-                        path: `/project/${this.projectId()}/issues/board`,
-                        icon: 'space_dashboard',
-                    },
-                    {
-                        name: 'New Issue',
-                        path: `/project/${this.projectId()}/issues/add`,
-                        icon: 'add_task',
-                    },
-                ],
-            },
+        ];
+
+        if (projectId) {
+            routes.push(
+                {
+                    name: this.projectId(),
+                    type: 'button',
+                    path: `/${organizationId}/project/${this.projectId()}`,
+                    icon: 'bolt',
+                },
+                {
+                    name: 'Projects',
+                    type: 'button',
+                    path: `/${organizationId}/projects`,
+                    icon: 'folder_open',
+                },
+                {
+                    name: 'Issues',
+                    type: 'menu',
+                    icon: 'report_problem',
+                    path: `/${organizationId}/project/${this.projectId()}/issues`,
+                    children: [
+                        {
+                            name: 'Overview',
+                            path: `/${organizationId}/project/${this.projectId()}/issues/overview`,
+                            icon: 'travel_explore',
+                        },
+                        {
+                            name: 'Issues',
+                            path: `/${organizationId}/project/${this.projectId()}/issues`,
+                            icon: 'assignment',
+                        },
+                        {
+                            name: 'Board',
+                            path: `/${organizationId}/project/${this.projectId()}/issues/board`,
+                            icon: 'space_dashboard',
+                        },
+                        {
+                            name: 'New Issue',
+                            path: `/${organizationId}/project/${this.projectId()}/issues/add`,
+                            icon: 'add_task',
+                        },
+                    ],
+                }
+            );
+        }
+        routes.push(
             {
                 name: 'Manage',
                 type: 'menu',
                 icon: 'manage_accounts',
-                path: `/project/${this.projectId()}/manage`,
+                path: `/${organizationId}/manage`,
                 children: [
                     {
                         name: 'Members',
-                        path: `/project/${this.projectId()}/members`,
+                        path: `/${organizationId}/members`,
                         icon: 'person',
                     },
                     {
                         name: 'Activity',
-                        path: `/project/${this.projectId()}/activity`,
+                        path: `/${organizationId}/activity`,
                         icon: 'local_activity',
-                    },
-                    {
-                        name: 'Labels',
-                        icon: 'label',
-                        path: `/project/${this.projectId()}/labels`,
                     },
                 ],
             },
             {
                 name: 'Worktime',
-                path: '/worktime',
+                path: `/${organizationId}/worktime`,
                 type: 'button',
                 icon: 'access_time',
-            },
-        ];
+            }
+        );
+
+        return routes;
     }
 
     getBottomSidenavRoutes(): SidenavRoute[] {
