@@ -19,17 +19,8 @@ class IssueController extends BaseRestController
     public function behaviors(): array
     {
         $behaviors = parent::behaviors();
-        $behaviors["projectTranslator"] = [
-            'class' => ProjectKeyTranslatorFilter::class,
-            'identifierParamName' => 'project_id',
-            'actions' => ['index', 'view', 'update', 'delete', 'create', 'stats']
-        ];
-
-        $behaviors['organizationTranslator'] = [
-            'class' => OrganizationSlugTranslatorFilter::class,
-            'actions' => ['index', 'view', 'update', 'delete', 'create', 'stats']
-        ];
-
+        $behaviors["projectTranslator"]["actions"] = ['index', 'view', 'update', 'delete', 'create', 'stats'];
+        $behaviors['organizationTranslator']["actions"] = ['index', 'view', 'update', 'delete', 'create', 'stats'];
         return $behaviors;
     }
 

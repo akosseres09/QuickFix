@@ -16,10 +16,7 @@ class OrganizationMemberController extends BaseRestController
     public function behaviors(): array
     {
         $behaviors = parent::behaviors();
-        $behaviors["organizationTranslator"] = [
-            'class' => OrganizationSlugTranslatorFilter::class,
-        ];
-
+        unset($behaviors["projectTranslator"]);
         return $behaviors;
     }
 
@@ -46,7 +43,8 @@ class OrganizationMemberController extends BaseRestController
             throw new BadRequestHttpException('Organization ID is required!');
         }
 
-        $orgMember = OrganizationMember::find()->byId($id)->byOrganization($orgId)->one();
+        $orgMember = OrganizationMember::find()->byOrganization($orgId)
+            ->byId($id)->one();
         if (!$orgMember) {
             throw new NotFoundHttpException('The requested organization is not found!');
         }

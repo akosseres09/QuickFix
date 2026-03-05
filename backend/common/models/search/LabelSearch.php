@@ -3,8 +3,10 @@
 namespace common\models\search;
 
 use common\models\Label;
+use common\models\Project;
 use yii\data\ActiveDataProvider;
 use yii\web\BadRequestHttpException;
+use yii\web\NotFoundHttpException;
 
 
 class LabelSearch extends Label implements SearchInterface
@@ -23,13 +25,23 @@ class LabelSearch extends Label implements SearchInterface
         $pageSize = isset($params['pageSize']) ? (int) $params['pageSize'] : 20;
         $pageSize = min($pageSize, 100);
 
+        $organizationId = $params['organization_id'] ?? null;
+        if (!$organizationId) {
+            throw new BadRequestHttpException('Organization ID is required for label search.');
+        }
+
         $projectId = $params['project_id'] ?? null;
         if (!$projectId) {
             throw new BadRequestHttpException('Project ID is required for label search.');
         }
 
-        $query = Label::find()->byProjectId($projectId);
+        $exists = Project::find()->byOrganizationId($organizationId)
+            ->byId($projectId)->exists();
+        if (!$exists) {
+            throw new NotFoundHttpException('Requested project not found!');
+        }
 
+        $query = Label::find()->byProjectId($projectId);
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'pagination' => [
@@ -47,7 +59,6 @@ class LabelSearch extends Label implements SearchInterface
         ]);
 
         $this->load($params, '');
-
         if (!$this->validate()) {
             return $dataProvider;
         }

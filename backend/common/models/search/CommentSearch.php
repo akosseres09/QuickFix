@@ -3,6 +3,7 @@
 namespace common\models\search;
 
 use common\models\Comment;
+use common\models\Project;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\web\BadRequestHttpException;
@@ -18,6 +19,11 @@ class CommentSearch extends Comment implements SearchInterface
         $cursor = $params['cursor'] ?? null;
         $projectId = $params['project_id'] ?? null;
         $issueId = $params['issue_id'] ?? null;
+        $organizationId = $params['organization_id'] ?? null;
+
+        if (!$organizationId) {
+            throw new BadRequestHttpException('Organization ID is required to search for comments!');
+        }
 
         if (!$projectId) {
             throw new BadRequestHttpException('Project ID is required to search for comments!');
@@ -25,6 +31,11 @@ class CommentSearch extends Comment implements SearchInterface
 
         if (!$issueId) {
             throw new BadRequestHttpException('Issue ID is required to search for comments!');
+        }
+
+        $exists = Project::find()->byOrganizationId($organizationId)->byId($projectId)->exists();
+        if (!$exists) {
+            throw new BadRequestHttpException('Project not found in the specified organization!');
         }
 
         $query = Comment::find()->byProjectId($projectId)->byIssueId($issueId);

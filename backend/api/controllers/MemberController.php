@@ -3,9 +3,12 @@
 namespace api\controllers;
 
 use api\filters\ProjectKeyTranslatorFilter;
+use common\models\Project;
 use common\models\ProjectMember;
 use common\models\search\ProjectMemberSearch;
 use Yii;
+use yii\web\BadRequestHttpException;
+use yii\web\NotFoundHttpException;
 
 class MemberController extends BaseRestController
 {
@@ -14,11 +17,6 @@ class MemberController extends BaseRestController
     public function behaviors(): array
     {
         $behaviors = parent::behaviors();
-        $behaviors["projectTranslator"] = [
-            'class' => ProjectKeyTranslatorFilter::class,
-            'identifierParamName' => 'project_id',
-        ];
-
         return $behaviors;
     }
 
@@ -34,16 +32,25 @@ class MemberController extends BaseRestController
 
     public function findModel($id)
     {
-        $projectId = Yii::$app->request->get('project_id');
-
-        if (!$projectId) {
-            throw new \yii\web\BadRequestHttpException('Project ID is required.');
+        $organizationId = Yii::$app->request->get('organization_id');
+        if (!$organizationId) {
+            throw new BadRequestHttpException('Organization ID is required.');
         }
 
-        $model = ProjectMember::find()->andWhere(['id' => $id])->byProjectId($projectId)->one();
+        $projectId = Yii::$app->request->get('project_id');
+        if (!$projectId) {
+            throw new BadRequestHttpException('Project ID is required.');
+        }
 
+        $exists = Project::find()->byOrganizationId($organizationId)
+            ->byId($projectId)->exists();
+        if (!$exists) {
+            throw new NotFoundHttpException('Project does not exist in the specified organization.');
+        }
+
+        $model = ProjectMember::find()->byProjectId($projectId)->byId($id)->one();
         if (!$model) {
-            throw new \yii\web\NotFoundHttpException('The requested member does not exist.');
+            throw new NotFoundHttpException('The requested member does not exist.');
         }
 
         return $model;

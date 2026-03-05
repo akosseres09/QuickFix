@@ -23,6 +23,11 @@ class ProjectMemberQuery extends ActiveQuery
         return parent::one($db);
     }
 
+    public function byId($id): self
+    {
+        return $this->andWhere(['id' => $id]);
+    }
+
 
     public function byProjectId(string $project_id): ProjectMemberQuery
     {

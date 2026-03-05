@@ -16,11 +16,10 @@ class OrganizationController extends BaseRestController
     public function behaviors(): array
     {
         $behaviors = parent::behaviors();
-        $behaviors["organizationTranslator"] = [
-            'class' => OrganizationSlugTranslatorFilter::class,
-            'identifierParamName' => 'id',
-            'actions' => ['view', 'update', 'delete']
-        ];
+        unset($behaviors["projectTranslator"]);
+
+        $behaviors["organizationTranslator"]['identifierParamName'] = 'id';
+        $behaviors["organizationTranslator"]['actions'] = ['view', 'update', 'delete'];
 
         return $behaviors;
 

@@ -4,6 +4,7 @@ namespace api\controllers;
 
 use api\filters\ProjectKeyTranslatorFilter;
 use common\models\Comment;
+use common\models\Project;
 use common\models\search\CommentSearch;
 use Yii;
 use yii\web\BadRequestHttpException;
@@ -18,12 +19,6 @@ class CommentController extends BaseRestController
     public function behaviors(): array
     {
         $behaviors = parent::behaviors();
-
-        $behaviors["projectTranslator"] = [
-            'class' => ProjectKeyTranslatorFilter::class,
-            'identifierParamName' => 'project_id',
-        ];
-
         return $behaviors;
     }
 
@@ -52,6 +47,11 @@ class CommentController extends BaseRestController
 
     public function findModel($id)
     {
+        $organizationId = Yii::$app->request->get('organization_id');
+        if (!$organizationId) {
+            throw new BadRequestHttpException('Organization ID is required to access comments.');
+        }
+
         $projectId = Yii::$app->request->get('project_id');
         if (!$projectId) {
             throw new BadRequestHttpException('Project ID is required to access comments.');
@@ -60,6 +60,11 @@ class CommentController extends BaseRestController
         $issueId = Yii::$app->request->get('issue_id');
         if (!$issueId) {
             throw new BadRequestHttpException('Issue ID is required to access comments.');
+        }
+
+        $exists = Project::find()->byOrganizationId($organizationId)->byId($projectId)->exists();
+        if (!$exists) {
+            throw new NotFoundHttpException('The requested project does not exist!');
         }
 
         $comment = Comment::find()->byIssueId($issueId)

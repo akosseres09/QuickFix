@@ -2,6 +2,8 @@
 
 namespace api\controllers;
 
+use api\filters\OrganizationSlugTranslatorFilter;
+use api\filters\ProjectKeyTranslatorFilter;
 use yii\filters\Cors;
 use yii\rest\ActiveController;
 use yii\web\Response;
@@ -37,6 +39,15 @@ abstract class BaseRestController extends ActiveController
         $behaviors['authenticator'] = $auth;
 
         $behaviors['contentNegotiator']['formats']['text/html'] = Response::FORMAT_JSON;
+
+        // you can unset or modify these translators in child controllers if not needed
+        $behaviors["projectTranslator"] = [
+            'class' => ProjectKeyTranslatorFilter::class,
+        ];
+
+        $behaviors['organizationTranslator'] = [
+            'class' => OrganizationSlugTranslatorFilter::class
+        ];
 
         return $behaviors;
     }

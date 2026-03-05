@@ -17,16 +17,8 @@ class ProjectController extends BaseRestController
     public function behaviors(): array
     {
         $behaviors = parent::behaviors();
-        $behaviors["projectTranslator"] = [
-            'class' => ProjectKeyTranslatorFilter::class,
-            'identifierParamName' => 'id',
-            'actions' => ['view', 'update', 'delete'],
-        ];
-
-        $behaviors['organizationTranslator'] = [
-            'class' => OrganizationSlugTranslatorFilter::class
-        ];
-
+        $behaviors["projectTranslator"]['identifierParamName'] = 'id';
+        $behaviors["projectTranslator"]['actions'] = ['view', 'update', 'delete'];
         return $behaviors;
     }
 
@@ -86,17 +78,18 @@ class ProjectController extends BaseRestController
      */
     public function findModel($id): Project
     {
-        $project_id = Yii::$app->request->get('id');
-        if (!$project_id) {
-            throw new NotFoundHttpException('Project ID is required!');
-        }
-
         $organizationId = Yii::$app->request->get('organization_id');
         if (!$organizationId) {
             throw new NotFoundHttpException('Organization ID is required!');
         }
 
-        $project = Project::find()->byOrganizationId($organizationId)->byId($project_id)->one();
+        $project_id = Yii::$app->request->get('id');
+        if (!$project_id) {
+            throw new NotFoundHttpException('Project ID is required!');
+        }
+
+        $project = Project::find()->byOrganizationId($organizationId)
+            ->byId($project_id)->one();
         if (!$project) {
             throw new NotFoundHttpException('Project not found!');
         }
