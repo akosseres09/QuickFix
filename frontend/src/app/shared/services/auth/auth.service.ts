@@ -2,7 +2,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { errorResponse, successResponse } from '../../model/Response';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
-import { environment } from '../../../../environments/environment.development';
+import { environment } from '../../../../environments/environment';
 import { Claims } from '../../constants/user/Claims';
 import { DecodedToken } from '../../constants/user/DecodedToken';
 import { SignupData } from '../../constants/user/SignupData';

@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { IssueComment } from '../../model/IssueComment';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { environment } from '../../../../environments/environment.development';
+import { environment } from '../../../../environments/environment';
 import { map, Observable, Subject, tap } from 'rxjs';
 import { PaginatedResponse } from '../../constants/api/PaginatedResponse';
 

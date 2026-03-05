@@ -3,7 +3,7 @@ import { Issue } from '../../model/Issue';
 import { PaginatedResponse } from '../../constants/api/PaginatedResponse';
 import { IssueStats } from '../../constants/api/IssueStats';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../environments/environment.development';
+import { environment } from '../../../../environments/environment';
 import { ApiQueryParams } from '../../constants/api/ApiQueryParams';
 import { map, Observable } from 'rxjs';
 import { ParamsHandler } from '../../utils/paramsHandler';

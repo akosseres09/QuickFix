@@ -156,7 +156,7 @@ export class DisplayedColumnService {
                 label: 'Slug',
                 sortable: true,
                 value: (e: Organization) => e.slug,
-                routerLink: (e: Organization) => ['/organization', e.slug],
+                routerLink: (e: Organization) => ['/', e.slug],
             },
             {
                 id: 'name',

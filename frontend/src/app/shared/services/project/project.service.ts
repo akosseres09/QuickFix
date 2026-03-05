@@ -1,10 +1,11 @@
 import { inject, Injectable } from '@angular/core';
 import { Project } from '../../model/Project';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { environment } from '../../../../environments/environment.development';
+import { environment } from '../../../../environments/environment';
 import { map, Observable } from 'rxjs';
 import { ApiQueryParams } from '../../constants/api/ApiQueryParams';
 import { PaginatedResponse } from '../../constants/api/PaginatedResponse';
+import { ParamsHandler } from '../../utils/paramsHandler';
 
 @Injectable({
     providedIn: 'root',
@@ -18,17 +19,13 @@ export class ProjectService {
      * Automatically filters out null/undefined/empty values
      * Returns paginated response with metadata
      */
-    getProjects(queryParams: ApiQueryParams = {}): Observable<PaginatedResponse<Project>> {
-        let params = new HttpParams();
+    getProjects(
+        organizationId: string,
+        queryParams: ApiQueryParams = {}
+    ): Observable<PaginatedResponse<Project>> {
+        const params = ParamsHandler.convertToHttpParams(queryParams);
 
-        Object.entries(queryParams).forEach(([key, value]) => {
-            // Only add non-null, non-undefined, non-empty values
-            if (value !== null && value !== undefined && value !== '') {
-                params = params.set(key, value.toString());
-            }
-        });
-
-        return this.http.get<PaginatedResponse<Project>>(`${this.url}/project`, {
+        return this.http.get<PaginatedResponse<Project>>(`${this.url}/${organizationId}/project`, {
             params: params,
         });
     }
@@ -37,8 +34,13 @@ export class ProjectService {
      * Fetches projects and returns only the items array (legacy support)
      * Use this if you don't need pagination metadata
      */
-    getProjectsSimple(queryParams: ApiQueryParams = {}): Observable<Project[]> {
-        return this.getProjects(queryParams).pipe(map((response) => response.items));
+    getProjectsSimple(
+        organizationId: string,
+        queryParams: ApiQueryParams = {}
+    ): Observable<Project[]> {
+        return this.getProjects(organizationId, queryParams).pipe(
+            map((response) => response.items)
+        );
     }
 
     getProject(identifier: string): Observable<Project> {
