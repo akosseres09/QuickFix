@@ -1,5 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, input, signal, TemplateRef, viewChild } from '@angular/core';
+import {
+    Component,
+    computed,
+    inject,
+    input,
+    linkedSignal,
+    signal,
+    TemplateRef,
+    viewChild,
+} from '@angular/core';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TableComponent } from '../../common/table/table.component';
@@ -61,8 +70,8 @@ export class ProjectsComponent {
     selectedRow = signal<Project | null>(null);
     filteredProjects = signal<Project[]>([]);
     shownProjects = computed(() => new MatTableDataSource<Project>(this.filteredProjects()));
-    displayedColumns = signal<DisplayedColumn<Project>[]>(
-        this.displayedColumnService.getProjectColumns()
+    displayedColumns = linkedSignal<DisplayedColumn<Project>[]>(() =>
+        this.displayedColumnService.getProjectColumns(this.organizationId())
     );
 
     speedDialButtons = computed<SpeedDialButton[]>(() => {

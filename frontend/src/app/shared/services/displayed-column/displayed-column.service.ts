@@ -89,14 +89,14 @@ export class DisplayedColumnService {
         ];
     }
 
-    getProjectColumns() {
+    getProjectColumns(organizationId: string): DisplayedColumn<Project>[] {
         return [
             {
                 id: 'name',
                 label: 'Name',
                 sortable: true,
                 value: (e: Project) => e.name,
-                routerLink: (e: Project) => ['/project', e.key],
+                routerLink: (e: Project) => ['/', organizationId, 'project', e.key],
             },
             {
                 id: 'owner',
