@@ -9,7 +9,7 @@ import {
     viewChild,
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ProjectFormComponent } from '../../../common/form/project-form/project-form.component';
 import { Project } from '../../../shared/model/Project';
 import { ProjectService } from '../../../shared/services/project/project.service';
@@ -25,7 +25,6 @@ import { finalize } from 'rxjs';
     styleUrl: './edit-project.component.css',
 })
 export class EditProjectComponent implements OnInit {
-    private readonly activeRoute = inject(ActivatedRoute);
     private readonly projectService = inject(ProjectService);
     private readonly router = inject(Router);
     private readonly snackbar = inject(SnackbarService);
@@ -63,7 +62,7 @@ export class EditProjectComponent implements OnInit {
             error: (err) => {
                 console.error('Failed to load project:', err);
                 this.snackbar.error('Failed to load project!');
-                this.router.navigate(['/projects']);
+                this.router.navigate(['/', organizationId, 'projects']);
             },
         });
     }
@@ -88,7 +87,7 @@ export class EditProjectComponent implements OnInit {
             .pipe(finalize(() => this.isSubmitting.set(false)))
             .subscribe({
                 next: (project) => {
-                    this.router.navigate(['/project', project.key]);
+                    this.router.navigate(['/', organizationId, 'project', project.key]);
                 },
                 error: (error) => {
                     console.error('Error updating project:', error);

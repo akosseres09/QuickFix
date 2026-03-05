@@ -77,7 +77,7 @@ export class ProjectsComponent {
                     this.snackbarService.error('Please select a valid project to edit!');
                     return null;
                 }
-                return ['/project', project.key, 'edit'];
+                return ['/', this.organizationId(), 'project', project.key, 'edit'];
             },
             isArchived: !!selected && selected.isArchived,
             onArchive: () =>
