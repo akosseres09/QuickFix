@@ -13,6 +13,8 @@ class m260207_124907_create_issues_table extends Migration
      */
     public function safeUp()
     {
+        $this->execute('CREATE EXTENSION IF NOT EXISTS pg_trgm;');
+
         $this->createTable('{{%issue}}', [
             'id' => $this->string(36)->notNull(),
             'project_id' => $this->string(36)->notNull(),
@@ -78,6 +80,12 @@ class m260207_124907_create_issues_table extends Migration
             ['project_id', 'issue_key'],
             true
         );
+
+        $this->execute('
+            CREATE INDEX "idx-issue-title-trgm"
+            ON {{%issue}}
+            USING GIN (title gin_trgm_ops);
+        ');
 
         $this->createIndex(
             'idx-issue-created_at',

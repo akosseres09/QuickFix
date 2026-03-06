@@ -9,6 +9,8 @@ class m260226_215831_create_label_table extends Migration
      */
     public function safeUp()
     {
+        $this->execute('CREATE EXTENSION IF NOT EXISTS pg_trgm;');
+
         $this->createTable('{{%label}}', [
             'id' => $this->string(36)->notNull(),
             'project_id' => $this->string(36)->notNull(),
@@ -35,6 +37,11 @@ class m260226_215831_create_label_table extends Migration
             true
         );
 
+        $this->execute('
+            CREATE INDEX "idx-label-name-trgm"
+            ON {{%label}}
+            USING GIN (name gin_trgm_ops);
+        ');
     }
 
     /**

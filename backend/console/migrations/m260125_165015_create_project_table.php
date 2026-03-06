@@ -51,6 +51,12 @@ class m260125_165015_create_project_table extends Migration
         );
 
         // Add indexes
+        $this->execute('
+            CREATE INDEX "idx-project-name_trgm"
+            ON {{%project}}
+            USING GIN (name gin_trgm_ops);
+        ');
+
         $this->createIndex(
             'idx-project-key',
             '{{%project}}',
@@ -67,12 +73,6 @@ class m260125_165015_create_project_table extends Migration
             'idx-project-owner_id',
             '{{%project}}',
             'owner_id'
-        );
-
-        $this->createIndex(
-            'idx-project-name',
-            '{{%project}}',
-            'name'
         );
 
         $this->createIndex(
