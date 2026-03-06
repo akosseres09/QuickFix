@@ -1,11 +1,11 @@
-import { Component, inject, input, OnInit, signal } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { Component, computed, inject, input, OnInit, signal } from '@angular/core';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { NavbarComponent } from '../../common/navbar/navbar.component';
 import { MatSidenavContainer, MatSidenav, MatSidenavContent } from '@angular/material/sidenav';
-import { SidenavRoute } from '../../shared/constants/route/Routes';
+import { ChildRoute, SidenavRoute } from '../../shared/constants/route/Routes';
 import { NavitemComponent } from '../../common/sidenav/navitem/navitem.component';
 import { ThemeService } from '../../shared/services/theme/theme.service';
-import { fromEvent } from 'rxjs';
+import { filter, fromEvent } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../shared/services/auth/auth.service';
@@ -34,12 +34,14 @@ export class MainLayoutComponent implements OnInit {
     private readonly snackbarService = inject(SnackbarService);
     private readonly organizationService = inject(OrganizationService);
 
-    projectId = input.required<string>();
+    projectId = signal<string | null>(null);
     organizationId = input.required<string>();
     organization = signal<Organization | null>(null);
 
     isSidebarOpened = signal<boolean>(window.innerWidth > 767);
-    sidenavRoutes = signal<SidenavRoute[]>([]);
+    sidenavRoutes = computed(() => {
+        return this.getSidenavRoutes();
+    });
     bottomSidenavRoutes = signal<SidenavRoute[]>([]);
     imageSource = signal<string>(this.themeService.logos[this.themeService.getTheme()]);
     sidebarMode = signal<'over' | 'push' | 'side'>(window.innerWidth < 768 ? 'over' : 'side');
@@ -50,6 +52,19 @@ export class MainLayoutComponent implements OnInit {
             .subscribe(() => {
                 this.sidebarMode.set(window.innerWidth < 768 ? 'over' : 'side');
                 this.isSidebarOpened.set(window.innerWidth > 767);
+            });
+
+        this.router.events
+            .pipe(
+                takeUntilDestroyed(),
+                filter((event) => event instanceof NavigationEnd)
+            )
+            .subscribe(() => {
+                let route = this.router.routerState.root;
+                while (route.firstChild) {
+                    route = route.firstChild;
+                }
+                this.projectId.set(route.snapshot.params['projectId'] || null);
             });
     }
 
@@ -64,7 +79,6 @@ export class MainLayoutComponent implements OnInit {
         this.organizationService.getOrganization(id).subscribe({
             next: (org) => {
                 this.organization.set(org);
-                this.sidenavRoutes.set(this.getSidenavRoutes());
             },
             error: (error) => {
                 console.error(error);
@@ -76,97 +90,108 @@ export class MainLayoutComponent implements OnInit {
 
     ngOnInit(): void {
         this.getOrganization();
-        //this.sidenavRoutes.set(this.getSidenavRoutes());
         this.bottomSidenavRoutes.set(this.getBottomSidenavRoutes());
     }
 
     getSidenavRoutes(): SidenavRoute[] {
-        const organizationId = this.organizationId();
-        const projectId = this.projectId();
+        const orgId = this.organizationId();
+        const org = this.organization();
+        const projId = this.projectId();
 
-        const routes: SidenavRoute[] = [
+        if (!orgId || !org) {
+            return [];
+        }
+
+        const basePath = `/${orgId}`;
+        const projPath = `${basePath}/project/${projId}`;
+
+        return [
             {
-                name: this.organization()?.name || 'Organization',
+                name: org.name,
                 type: 'button',
-                path: `/${this.organizationId()}`,
-                url: this.organization()?.logoUrl as string,
+                path: basePath,
+                url: org.logoUrl as string,
                 icon: 'apartment',
                 exact: false,
             },
-        ];
 
-        if (projectId) {
-            routes.push(
-                {
-                    name: this.projectId(),
-                    type: 'button',
-                    path: `/${organizationId}/project/${this.projectId()}`,
-                    icon: 'bolt',
-                },
-                {
-                    name: 'Projects',
-                    type: 'button',
-                    path: `/${organizationId}/projects`,
-                    icon: 'folder_open',
-                },
-                {
-                    name: 'Issues',
-                    type: 'menu',
-                    icon: 'report_problem',
-                    path: `/${organizationId}/project/${this.projectId()}/issues`,
-                    children: [
-                        {
-                            name: 'Overview',
-                            path: `/${organizationId}/project/${this.projectId()}/issues/overview`,
-                            icon: 'travel_explore',
-                        },
-                        {
-                            name: 'Issues',
-                            path: `/${organizationId}/project/${this.projectId()}/issues`,
-                            icon: 'assignment',
-                        },
-                        {
-                            name: 'Board',
-                            path: `/${organizationId}/project/${this.projectId()}/issues/board`,
-                            icon: 'space_dashboard',
-                        },
-                        {
-                            name: 'New Issue',
-                            path: `/${organizationId}/project/${this.projectId()}/issues/add`,
-                            icon: 'add_task',
-                        },
-                    ],
-                }
-            );
-        }
-        routes.push(
+            ...(projId
+                ? ([
+                      { name: projId, type: 'button', path: projPath, icon: 'bolt' },
+                      {
+                          name: 'Projects',
+                          type: 'button',
+                          path: `${basePath}/projects`,
+                          icon: 'folder_open',
+                      },
+                      {
+                          name: 'Issues',
+                          type: 'menu',
+                          icon: 'report_problem',
+                          path: `${projPath}/issues`,
+                          children: [
+                              {
+                                  name: 'Overview',
+                                  path: `${projPath}/issues/overview`,
+                                  icon: 'travel_explore',
+                              },
+                              { name: 'Issues', path: `${projPath}/issues`, icon: 'assignment' },
+                              {
+                                  name: 'Board',
+                                  path: `${projPath}/issues/board`,
+                                  icon: 'space_dashboard',
+                              },
+                              {
+                                  name: 'New Issue',
+                                  path: `${projPath}/issues/add`,
+                                  icon: 'add_task',
+                              },
+                          ],
+                      },
+                  ] as SidenavRoute[])
+                : []),
+
             {
                 name: 'Manage',
                 type: 'menu',
                 icon: 'manage_accounts',
-                path: `/${organizationId}/manage`,
+                path: `${basePath}/manage`,
                 children: [
-                    {
-                        name: 'Members',
-                        path: `/${organizationId}/members`,
-                        icon: 'person',
-                    },
-                    {
-                        name: 'Activity',
-                        path: `/${organizationId}/activity`,
-                        icon: 'local_activity',
-                    },
+                    // Conditionally add project members to the manage children
+                    ...(projId
+                        ? [
+                              {
+                                  name: 'Project members',
+                                  path: `${projPath}/members`,
+                                  icon: 'group',
+                              },
+                              {
+                                  name: 'Project activity',
+                                  path: `${projPath}/activity`,
+                                  icon: 'local_activity',
+                              },
+                          ]
+                        : [
+                              {
+                                  name: 'Activity',
+                                  path: `${basePath}/activity`,
+                                  icon: 'local_activity',
+                              },
+                              {
+                                  name: 'Organization members',
+                                  path: `${basePath}/members`,
+                                  icon: 'person',
+                              },
+                          ]),
                 ],
             },
             {
                 name: 'Worktime',
-                path: `/${organizationId}/worktime`,
                 type: 'button',
+                path: `${basePath}/worktime`,
                 icon: 'access_time',
-            }
-        );
-
-        return routes;
+            },
+        ];
     }
 
     getBottomSidenavRoutes(): SidenavRoute[] {

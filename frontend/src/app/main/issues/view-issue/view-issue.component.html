@@ -1,5 +1,10 @@
 @if (issue(); as issue) {
-    <app-view [issueId]="issueId()" [projectId]="projectId()" [issue]="issue"></app-view>
+    <app-view
+        [issueId]="issueId()"
+        [projectId]="projectId()"
+        [organizationId]="organizationId()"
+        [issue]="issue"
+    ></app-view>
 } @else if (loading()) {
     <div class="flex items-center justify-center py-20">
         <mat-icon class="animate-spin text-4xl text-gray-400">autorenew</mat-icon>
