@@ -27,6 +27,8 @@ class m260125_165015_create_project_table extends Migration
             'priority' => $this->integer()->notNull()->defaultValue(Project::PRIORITY_MEDIUM),
             'created_at' => $this->integer()->notNull(),
             'updated_at' => $this->integer()->notNull(),
+            'is_archived' => $this->boolean()->notNull()->defaultValue(false),
+            'archived_at' => $this->integer()->null(),
         ]);
 
         $this->addPrimaryKey('pk-project-id', '{{%project}}', 'id');
@@ -50,23 +52,10 @@ class m260125_165015_create_project_table extends Migration
             'CASCADE'
         );
 
-        // Add indexes
-        $this->execute('
-            CREATE INDEX "idx-project-name_trgm"
-            ON {{%project}}
-            USING GIN (name gin_trgm_ops);
-        ');
-
         $this->createIndex(
-            'idx-project-key',
+            'idx-project-organization_id',
             '{{%project}}',
-            'key'
-        );
-
-        $this->createIndex(
-            'idx-project-status',
-            '{{%project}}',
-            'status'
+            'organization_id'
         );
 
         $this->createIndex(
@@ -75,11 +64,35 @@ class m260125_165015_create_project_table extends Migration
             'owner_id'
         );
 
+        // Add indexes
+        $this->execute('
+            CREATE INDEX "idx-project-name-trgm"
+            ON {{%project}}
+            USING GIN (name gin_trgm_ops);
+        ');
+
+        // for sorting on name
         $this->createIndex(
-            'idx-project-priority',
+            'idx-project-name-sort',
             '{{%project}}',
-            'priority'
+            'name'
         );
+
+        // The "Active Project Dashboard" Index
+        // Handles filters on status/priority and sorts by created_at
+        $this->execute('
+            CREATE INDEX "idx-project-active-dashboard" 
+            ON {{%project}} (status, priority, created_at DESC) 
+            WHERE is_archived = false;
+        ');
+
+        // A fallback index for finding archived items
+        // Usually, people just want a list of archived items sorted by newest.
+        $this->execute('
+            CREATE INDEX "idx-project-archived-list" 
+            ON {{%project}} (created_at DESC) 
+            WHERE is_archived = true;
+        ');
     }
 
     /**

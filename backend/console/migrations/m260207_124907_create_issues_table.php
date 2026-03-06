@@ -31,11 +31,13 @@ class m260207_124907_create_issues_table extends Migration
             'closed_at' => $this->integer()->null(),
             'due_date' => $this->integer()->null(),
             'is_archived' => $this->boolean()->notNull()->defaultValue(false),
+            'is_draft' => $this->boolean()->notNull()->defaultValue(false),
         ]);
 
         $this->addColumn('{{%issue}}', 'description', 'jsonb');
 
         $this->addPrimaryKey('pk-issue-id', '{{%issue}}', 'id');
+
         $this->addForeignKey(
             'fk-issue-project_id',
             '{{%issue}}',
@@ -75,6 +77,24 @@ class m260207_124907_create_issues_table extends Migration
         );
 
         $this->createIndex(
+            'idx-issue-created_by',
+            '{{%issue}}',
+            'created_by'
+        );
+
+        $this->createIndex(
+            'idx-issue-updated_by',
+            '{{%issue}}',
+            'updated_by'
+        );
+
+        $this->createIndex(
+            'idx-issue-assigned_to',
+            '{{%issue}}',
+            'assigned_to'
+        );
+
+        $this->createIndex(
             'idx-issue-project_id_issue_key',
             '{{%issue}}',
             ['project_id', 'issue_key'],
@@ -88,46 +108,26 @@ class m260207_124907_create_issues_table extends Migration
         ');
 
         $this->createIndex(
-            'idx-issue-created_at',
-            '{{%issue}}',
-            'created_at'
-        );
-
-        $this->createIndex(
             'idx-issue-updated_at',
             '{{%issue}}',
             'updated_at'
         );
 
-        $this->createIndex(
-            'idx-issue-due_date',
-            '{{%issue}}',
-            'due_date'
-        );
+        // The "Active Issue Dashboard" Index
+        // Covers combinations of the equality filters and finishes with the sort column
+        $this->execute('
+            CREATE INDEX "idx-issue-active-dashboard" 
+            ON {{%issue}} (status, priority, type, created_at DESC) 
+            WHERE is_archived = false;
+        ');
 
-        $this->createIndex(
-            'idx-issue-is_archived',
-            '{{%issue}}',
-            'is_archived'
-        );
-
-        $this->createIndex(
-            'idx-issue-status',
-            '{{%issue}}',
-            'status'
-        );
-
-        $this->createIndex(
-            'idx-issue-priority',
-            '{{%issue}}',
-            'priority'
-        );
-
-        $this->createIndex(
-            'idx-issue-type',
-            '{{%issue}}',
-            'type'
-        );
+        // A fallback index for finding archived items (since the above ignore them)
+        // Usually, people just want a list of archived items sorted by newest.
+        $this->execute('
+            CREATE INDEX "idx-issue-archived-list" 
+            ON {{%issue}} (created_at DESC) 
+            WHERE is_archived = true;
+        ');
     }
 
     /**

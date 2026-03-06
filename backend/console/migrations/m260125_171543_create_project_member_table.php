@@ -43,25 +43,18 @@ class m260125_171543_create_project_member_table extends Migration
             'CASCADE'
         );
 
-        // Add unique index to prevent duplicate memberships
-        $this->createIndex(
-            'idx-project_member-unique',
-            '{{%project_member}}',
-            ['project_id', 'user_id'],
-            true
-        );
-
-        // Add indexes for queries
-        $this->createIndex(
-            'idx-project_member-project_id',
-            '{{%project_member}}',
-            'project_id'
-        );
-
         $this->createIndex(
             'idx-project_member-user_id',
             '{{%project_member}}',
             'user_id'
+        );
+
+        // Add unique index to prevent duplicate memberships
+        $this->createIndex(
+            'idx-project_member-project_id-user_id',
+            '{{%project_member}}',
+            ['project_id', 'user_id'],
+            true
         );
     }
 

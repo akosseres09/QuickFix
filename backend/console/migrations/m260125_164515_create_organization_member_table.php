@@ -15,33 +15,13 @@ class m260125_164515_create_organization_member_table extends Migration
         ]);
 
         $this->addPrimaryKey(
-            'pk-organization-id',
-            '{{%organization}}',
+            'pk-organization_member-id',
+            '{{%organization_member}}',
             'id'
         );
 
-        // Unique constraint (no duplicate memberships)
-        $this->createIndex(
-            'uq-organization-organization_id-user_id',
-            '{{%organization_member}}',
-            ['organization_id', 'user_id'],
-            true
-        );
-
-        $this->createIndex(
-            'idx-organization-member-organization_id',
-            '{{%organization_member}}',
-            'organization_id'
-        );
-
-        $this->createIndex(
-            'idx-organization-memberuser_id',
-            '{{%organization_member}}',
-            'user_id'
-        );
-
         $this->addForeignKey(
-            'fk-organization-member-organization_id',
+            'fk-organization_member-organization_id',
             '{{%organization_member}}',
             'organization_id',
             '{{%organization}}',
@@ -51,7 +31,7 @@ class m260125_164515_create_organization_member_table extends Migration
         );
 
         $this->addForeignKey(
-            'fk-organization-member-user_id',
+            'fk-organization_member-user_id',
             '{{%organization_member}}',
             'user_id',
             '{{%user}}',
@@ -59,16 +39,30 @@ class m260125_164515_create_organization_member_table extends Migration
             'CASCADE',
             'CASCADE'
         );
+
+        $this->createIndex(
+            'idx-organization_member-user_id',
+            '{{%organization_member}}',
+            'user_id'
+        );
+
+        // Unique constraint (no duplicate memberships)
+        $this->createIndex(
+            'uq-organization_member-organization_id-user_id',
+            '{{%organization_member}}',
+            ['organization_id', 'user_id'],
+            true
+        );
     }
 
     public function safeDown()
     {
         $this->dropForeignKey(
-            'fk-organization-member-organization_id',
+            'fk-organization_member-organization_id',
             '{{%organization_member}}'
         );
         $this->dropForeignKey(
-            'fk-organization-member-user_id',
+            'fk-organization_member-user_id',
             '{{%organization_member}}'
         );
         $this->dropTable('{{%organization_member}}');
