@@ -38,6 +38,8 @@ export class LabelsComponent {
     });
 
     projectId = input.required<string>();
+    organizationId = input.required<string>();
+
     labels = signal<Label[]>([]);
     filteredLabels = signal<Label[]>(this.labels());
     shownLabels = computed(() => new MatTableDataSource<Label>(this.filteredLabels()));
@@ -77,7 +79,11 @@ export class LabelsComponent {
         this.listState.isLoading.set(true);
 
         this.labelService
-            .getLabelsToProject(this.projectId(), this.listState.buildQueryParams())
+            .getLabelsToProject({
+                organizationId: this.organizationId(),
+                projectId: this.projectId(),
+                queryParams: this.listState.buildQueryParams(),
+            })
             .pipe(finalize(() => this.listState.isLoading.set(false)))
             .subscribe({
                 next: (response) => {

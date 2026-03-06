@@ -64,7 +64,7 @@ class LabelSearch extends Label implements SearchInterface
         }
 
         $query->andFilterWhere([
-            'like',
+            'ilike',
             'name',
             $this->name
         ]);

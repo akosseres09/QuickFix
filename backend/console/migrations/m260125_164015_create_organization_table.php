@@ -25,7 +25,7 @@ class m260125_164015_create_organization_table extends Migration
 
         // searching on name
         $this->execute('
-            CREATE INDEX idx_organization_name_trgm
+            CREATE INDEX "idx-organization-name-trgm"
             ON {{%organization}}
             USING GIN (name gin_trgm_ops);
         ');

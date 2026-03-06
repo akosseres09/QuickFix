@@ -1,9 +1,8 @@
 import { Component, inject, input, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProjectMember, ROLE_LABELS } from '../../../shared/model/ProjectMember';
-import { MemberService } from '../../../shared/services/member/member.service';
+import { ProjectMemberService } from '../../../shared/services/project-member/project-member.service';
 import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
-import { ApiQueryParams } from '../../../shared/constants/api/ApiQueryParams';
 import { AuthService } from '../../../shared/services/auth/auth.service';
 import { Claims } from '../../../shared/constants/user/Claims';
 import { ProjectService } from '../../../shared/services/project/project.service';
@@ -19,7 +18,7 @@ import { MemberCardComponent } from '../../../common/member-card/member-card.com
     styleUrl: './members.component.css',
 })
 export class MembersComponent implements OnInit {
-    private readonly memberService = inject(MemberService);
+    private readonly memberService = inject(ProjectMemberService);
     private readonly snackbarService = inject(SnackbarService);
     private readonly authService = inject(AuthService);
     private readonly projectService = inject(ProjectService);
@@ -40,19 +39,20 @@ export class MembersComponent implements OnInit {
     }
 
     private getMembers() {
-        const params: ApiQueryParams = {
-            expand: 'user',
-        };
-
-        this.memberService.getMembers(this.projectId(), params).subscribe({
-            next: (data) => {
-                this.members.set(data.items);
-            },
-            error: (err) => {
-                console.error('Failed to fetch members:', err);
-                this.snackbarService.error('Failed to fetch members');
-            },
-        });
+        this.memberService
+            .getProjectMembers({
+                organizationId: this.organizationId(),
+                projectId: this.projectId(),
+            })
+            .subscribe({
+                next: (data) => {
+                    this.members.set(data.items);
+                },
+                error: (err) => {
+                    console.error('Failed to fetch members:', err);
+                    this.snackbarService.error('Failed to fetch members');
+                },
+            });
     }
 
     private getProject() {

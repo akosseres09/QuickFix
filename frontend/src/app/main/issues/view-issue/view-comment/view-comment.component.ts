@@ -41,6 +41,7 @@ export class ViewCommentComponent implements OnInit {
 
     issueId = input.required<string>();
     projectId = input.required<string>();
+    organizationId = input.required<string>();
 
     editingComment = output<IssueComment>();
 
@@ -83,6 +84,7 @@ export class ViewCommentComponent implements OnInit {
         this.isLoading.set(true);
         this.issueCommentService
             .getCommentsToIssue({
+                organizationId: this.organizationId(),
                 projectId: this.projectId(),
                 issueId: this.issueId(),
                 expand: 'creator,updator',

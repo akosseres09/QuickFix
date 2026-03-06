@@ -24,7 +24,7 @@ class ProjectSearch extends Project implements SearchInterface
                     return $value;
                 }
             ],
-            [['name', 'description'], 'safe'],
+            [['name'], 'safe'],
         ];
     }
 
@@ -109,8 +109,7 @@ class ProjectSearch extends Project implements SearchInterface
             'p.is_archived' => $this->is_archived
         ]);
 
-        $query->andFilterWhere(['like', 'p.name', $this->name])
-            ->andFilterWhere(['like', 'p.description', $this->description]);
+        $query->andFilterWhere(['ilike', 'p.name', $this->name]);
 
         return $dataProvider;
     }

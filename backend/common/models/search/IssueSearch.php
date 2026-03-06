@@ -101,7 +101,7 @@ class IssueSearch extends Issue implements SearchInterface
             'priority' => $this->priority,
             'is_archived' => $this->is_archived
         ]);
-        $query->andFilterWhere(['like', 'title', $this->title]);
+        $query->andFilterWhere(['ilike', 'title', $this->title]);
 
         return $dataProvider;
     }

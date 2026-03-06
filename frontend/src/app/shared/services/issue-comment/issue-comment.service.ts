@@ -6,6 +6,7 @@ import { map, Observable, Subject, tap } from 'rxjs';
 import { PaginatedResponse } from '../../constants/api/PaginatedResponse';
 
 export type CommentRequestParams = {
+    organizationId: string;
     projectId: string;
     issueId: string;
     expand: string;
@@ -39,7 +40,7 @@ export class IssueCommentService {
 
         return this.http
             .get<PaginatedResponse<IssueComment>>(
-                `${this.url}/${data.projectId}/${data.issueId}/comment`,
+                `${this.url}/${data.organizationId}/${data.projectId}/${data.issueId}/comment`,
                 {
                     params,
                     observe: 'response',
@@ -59,7 +60,7 @@ export class IssueCommentService {
 
         return this.http
             .post<IssueComment>(
-                `${this.url}/${data.projectId}/${data.issueId}/comment`,
+                `${this.url}/${data.organizationId}/${data.projectId}/${data.issueId}/comment`,
                 data.data,
                 {
                     params: params,
@@ -77,7 +78,7 @@ export class IssueCommentService {
 
         return this.http
             .put<IssueComment>(
-                `${this.url}/${data.projectId}/${data.issueId}/comment/${data.commentId}`,
+                `${this.url}/${data.organizationId}/${data.projectId}/${data.issueId}/comment/${data.commentId}`,
                 data.data,
                 {
                     params: params,
