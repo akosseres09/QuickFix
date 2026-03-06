@@ -16,6 +16,7 @@
         </div>
 
         <app-project-form
+            [organizationId]="organizationId()"
             (formSubmitted)="onProjectCreated($event)"
             [isSubmitting]="isSubmitting()"
             (isSubmittingChange)="isSubmitting.set($event)"

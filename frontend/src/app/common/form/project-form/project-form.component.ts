@@ -68,6 +68,7 @@ export class ProjectFormComponent implements OnInit {
     buttonText = input<string>('Create Project');
     icon = input<string>('add');
     isSubmitting = model<boolean>(false);
+    organizationId = input.required<string>();
 
     formSubmitted = output<Partial<Project>>();
 

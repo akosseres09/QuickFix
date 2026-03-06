@@ -109,7 +109,7 @@ export class MainLayoutComponent implements OnInit {
             {
                 name: org.name,
                 type: 'button',
-                path: basePath,
+                path: `${basePath}/projects`,
                 url: org.logoUrl as string,
                 icon: 'apartment',
                 exact: false,

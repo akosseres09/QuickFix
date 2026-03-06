@@ -17,6 +17,7 @@
 
         @if (project()) {
             <app-project-form
+                [organizationId]="organizationId()"
                 buttonText="Edit Project"
                 icon="edit"
                 [project]="project()"
