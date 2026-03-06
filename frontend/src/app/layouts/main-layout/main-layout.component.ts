@@ -157,7 +157,6 @@ export class MainLayoutComponent implements OnInit {
                 icon: 'manage_accounts',
                 path: `${basePath}/manage`,
                 children: [
-                    // Conditionally add project members to the manage children
                     ...(projId
                         ? [
                               {
@@ -170,10 +169,15 @@ export class MainLayoutComponent implements OnInit {
                                   path: `${projPath}/activity`,
                                   icon: 'local_activity',
                               },
+                              {
+                                  name: 'Labels',
+                                  path: `${projPath}/labels`,
+                                  icon: 'label',
+                              },
                           ]
                         : [
                               {
-                                  name: 'Activity',
+                                  name: 'Organization Activity',
                                   path: `${basePath}/activity`,
                                   icon: 'local_activity',
                               },

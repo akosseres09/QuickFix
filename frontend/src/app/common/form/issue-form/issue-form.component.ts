@@ -25,7 +25,7 @@ import {
 } from '../../../shared/model/Issue';
 import { Claims } from '../../../shared/constants/user/Claims';
 import { ProjectMember } from '../../../shared/model/ProjectMember';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
 import { ProjectMemberService } from '../../../shared/services/project-member/project-member.service';
 import { AuthService } from '../../../shared/services/auth/auth.service';
@@ -47,6 +47,7 @@ import { finalize } from 'rxjs';
         MatNativeDateModule,
         MatProgressSpinnerModule,
         MatButtonModule,
+        RouterLink,
     ],
     templateUrl: './issue-form.component.html',
     styleUrl: './issue-form.component.css',
@@ -60,7 +61,8 @@ export class IssueFormComponent implements OnInit {
     private readonly authService = inject(AuthService);
     private readonly location = inject(Location);
 
-    projectId = input<string>('');
+    projectId = input.required<string>();
+    organizationId = input.required<string>();
     issue = input<Issue | null>(null);
     buttonText = input<string>('Create Issue');
     icon = input<string>('add');
@@ -104,14 +106,25 @@ export class IssueFormComponent implements OnInit {
 
         this.issueForm.get('assignedTo')?.disable();
 
-        if (!this.projectId()) {
+        const projectId = this.projectId();
+        if (!projectId) {
             this.snackbarService.error('Project ID is missing. Cannot create or edit issue.');
             this.router.navigate(['../'], { relativeTo: this.activeRoute });
             return;
         }
 
+        const organizationId = this.organizationId();
+        if (!organizationId) {
+            this.snackbarService.error('Organization ID is missing. Cannot create or edit issue.');
+            this.router.navigate(['../'], { relativeTo: this.activeRoute });
+            return;
+        }
+
         this.memberService
-            .getProjectMembers(this.projectId())
+            .getProjectMembers({
+                organizationId,
+                projectId,
+            })
             .pipe(
                 finalize(() => {
                     this.isUsersLoading.set(false);

@@ -7,6 +7,7 @@
 
         @if (issue()) {
             <app-issue-form
+                [organizationId]="organizationId()"
                 buttonText="Update Issue"
                 [projectId]="projectId()"
                 [issue]="issue()"

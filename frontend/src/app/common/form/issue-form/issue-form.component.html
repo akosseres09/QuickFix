@@ -26,9 +26,6 @@
 
             <!-- Description -->
             <app-text-editor formControlName="description"></app-text-editor>
-            <!-- <mat-form-field class="w-full" appearance="outline">
-                        <mat-label>Description</mat-label>
-                    </mat-form-field> -->
         </div>
 
         <!-- Right Sidebar - Metadata -->
@@ -224,14 +221,6 @@
                 </span>
             </ng-container>
         </button>
-        <button
-            mat-button
-            type="button"
-            (click)="onCancel()"
-            class="!px-6 !py-2"
-            [disabled]="isSubmitting()"
-        >
-            Cancel
-        </button>
+        <a mat-button class="!px-6 !py-2" [routerLink]="['../']"> Cancel </a>
     </div>
 </form>

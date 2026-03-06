@@ -6,6 +6,7 @@
         </div>
 
         <app-issue-form
+            [organizationId]="organizationId()"
             [projectId]="projectId()"
             (formSubmitted)="onIssueCreated($event)"
             (isSubmittingChange)="isSubmitting.set($event)"

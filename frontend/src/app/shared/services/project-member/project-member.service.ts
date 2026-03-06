@@ -11,9 +11,9 @@ export class ProjectMemberService {
     private readonly http = inject(HttpClient);
     private readonly apiUrl = environment.apiUrl;
 
-    getProjectMembers(projectId: string) {
+    getProjectMembers(ids: { organizationId: string; projectId: string }) {
         return this.http.get<PaginatedResponse<ProjectMember>>(
-            `${this.apiUrl}/${projectId}/member`,
+            `${this.apiUrl}/${ids.organizationId}/${ids.projectId}/member`,
             {
                 params: {
                     expand: 'user',
