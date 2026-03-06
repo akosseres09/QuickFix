@@ -81,36 +81,6 @@ export const routes: Routes = [
         canActivate: [authenticatedGuard],
         children: [
             {
-                path: 'organizations',
-                children: [
-                    {
-                        path: '',
-                        pathMatch: 'full',
-                        loadComponent: () =>
-                            import('./main/organizations/organizations.component').then(
-                                (c) => c.OrganizationsComponent
-                            ),
-                        title: 'QuickFix - Organizations',
-                    },
-                    {
-                        path: 'new',
-                        loadComponent: () =>
-                            import(
-                                './main/organizations/create-organization/create-organization.component'
-                            ).then((c) => c.CreateOrganizationComponent),
-                        title: 'QuickFix - New Organization',
-                    },
-                    {
-                        path: ':organizationId/edit',
-                        loadComponent: () =>
-                            import(
-                                './main/organizations/edit-organization/edit-organization.component'
-                            ).then((c) => c.EditOrganizationComponent),
-                        title: 'QuickFix - Edit Organization',
-                    },
-                ],
-            },
-            {
                 path: 'account',
                 loadComponent: () =>
                     import('./main/account/account.component').then((c) => c.AccountComponent),
@@ -122,11 +92,40 @@ export const routes: Routes = [
                     import('./main/settings/settings.component').then((c) => c.SettingsComponent),
                 title: 'QuickFix - Settings',
             },
+        ],
+    },
+    {
+        path: 'organizations',
+        loadComponent: () =>
+            import('./layouts/main-layout/main-layout.component').then(
+                (c) => c.MainLayoutComponent
+            ),
+        canActivate: [authenticatedGuard],
+        children: [
             {
-                path: 'worktime',
+                path: '',
+                pathMatch: 'full',
                 loadComponent: () =>
-                    import('./main/worktime/worktime.component').then((c) => c.WorktimeComponent),
-                title: 'QuickFix - Worktime',
+                    import('./main/organizations/organizations.component').then(
+                        (c) => c.OrganizationsComponent
+                    ),
+                title: 'QuickFix - Organizations',
+            },
+            {
+                path: 'new',
+                loadComponent: () =>
+                    import(
+                        './main/organizations/create-organization/create-organization.component'
+                    ).then((c) => c.CreateOrganizationComponent),
+                title: 'QuickFix - New Organization',
+            },
+            {
+                path: ':organizationId/edit',
+                loadComponent: () =>
+                    import(
+                        './main/organizations/edit-organization/edit-organization.component'
+                    ).then((c) => c.EditOrganizationComponent),
+                title: 'QuickFix - Edit Organization',
             },
         ],
     },

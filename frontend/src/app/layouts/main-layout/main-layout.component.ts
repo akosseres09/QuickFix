@@ -89,7 +89,10 @@ export class MainLayoutComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.getOrganization();
+        const orgId = this.organizationId();
+        if (orgId) {
+            this.getOrganization();
+        }
         this.bottomSidenavRoutes.set(this.getBottomSidenavRoutes());
     }
 
@@ -98,14 +101,23 @@ export class MainLayoutComponent implements OnInit {
         const org = this.organization();
         const projId = this.projectId();
 
+        const baseRoute: SidenavRoute[] = [
+            {
+                name: 'Organizations',
+                type: 'button',
+                path: '/organizations',
+                icon: 'apartment',
+            },
+        ];
         if (!orgId || !org) {
-            return [];
+            return baseRoute;
         }
 
         const basePath = `/${orgId}`;
         const projPath = `${basePath}/project/${projId}`;
 
         return [
+            ...baseRoute,
             {
                 name: org.name,
                 type: 'button',
