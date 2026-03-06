@@ -5,7 +5,7 @@
 
     <mat-divider></mat-divider>
 
-    <mat-dialog-content class="flex-1 overflow-y-auto px-1 !mt-4">
+    <mat-dialog-content class="flex-1 overflow-y-auto px-1">
         <ng-container *ngTemplateOutlet="data.content"></ng-container>
     </mat-dialog-content>
 
@@ -14,19 +14,17 @@
     <mat-dialog-actions class="mt-6 p-8">
         @if (data.showSaveButton) {
             <button
-                mat-raised-button
+                mat-flat-button
+                color="primary"
                 (click)="onSave()"
                 [disabled]="data.saveDisabled"
-                class="px-6 py-2 bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed rounded-md transition-colors duration-200 shadow-sm"
+                [class]="data.saveButtonClass"
             >
                 {{ data.saveLabel }}
             </button>
-        } @else if (data.showCancelButton) {
-            <button
-                mat-button
-                (click)="onCancel()"
-                class="px-6 py-2 text-gray-700 hover:bg-gray-100 rounded-md transition-colors duration-200"
-            >
+        }
+        @if (data.showCancelButton) {
+            <button mat-button (click)="onCancel()" [class]="data.cancelButtonClass">
                 {{ data.cancelLabel }}
             </button>
         }

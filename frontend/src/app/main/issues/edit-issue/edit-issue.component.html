@@ -1,0 +1,24 @@
+<div class="mx-auto p-4 sm:p-6">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="mb-6">
+            <h1 class="text-2xl font-semibold text-slate-900 dark:text-white">Edit Issue</h1>
+        </div>
+
+        @if (issue()) {
+            <app-issue-form
+                [organizationId]="organizationId()"
+                buttonText="Update Issue"
+                [projectId]="projectId()"
+                [issue]="issue()"
+                [isSubmitting]="isSubmitting()"
+                (isSubmittingChange)="isSubmitting.set($event)"
+                (formSubmitted)="onIssueUpdated($event)"
+            ></app-issue-form>
+        } @else {
+            <div class="flex items-center justify-center h-64">
+                <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+            </div>
+        }
+    </div>
+</div>

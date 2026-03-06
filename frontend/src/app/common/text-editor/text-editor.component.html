@@ -1,0 +1,25 @@
+<div
+    class="rich-text w-full rounded-lg transition-all duration-200 shadow-sm"
+    [ngClass]="{
+        'bg-light-background dark:bg-dark-background': !isDisabled(),
+        'opacity-50 pointer-events-none grayscale': isDisabled(),
+    }"
+>
+    <quill-editor
+        theme="snow"
+        [classes]="'!text-light-text dark:!text-dark-text'"
+        [modules]="modules"
+        [placeholder]="placeholder()"
+        [readOnly]="readonly()"
+        [style]="{
+            width: '100%',
+        }"
+        [styles]="{
+            minHeight: minHeight(),
+            maxHeight: maxHeight(),
+        }"
+        (onEditorCreated)="onEditorCreated($event)"
+        format="object"
+    >
+    </quill-editor>
+</div>

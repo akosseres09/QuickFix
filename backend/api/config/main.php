@@ -1,5 +1,7 @@
 <?php
 
+use yii\rest\UrlRule;
+
 $params = array_merge(
     require __DIR__ . '/../../common/config/params.php',
     require __DIR__ . '/../../common/config/params-local.php',
@@ -46,9 +48,64 @@ return [
             'showScriptName' => false,
             'rules' => [
                 [
-                    'class' => 'yii\rest\UrlRule',
-                    'controller' => ['user', 'auth'],
-                    'pluralize' => false
+                    'class' => UrlRule::class,
+                    'controller' => ['auth'],
+                    'pluralize' => false,
+                ],
+                [
+                    'class' => UrlRule::class,
+                    'controller' => ['organization'],
+                    'pluralize' => false,
+                    'tokens' => [
+                        '{id}' => '<id:[A-Za-z0-9_\-]+>',
+                    ]
+                ],
+                [
+                    'class' => UrlRule::class,
+                    'controller' => ['user'],
+                    'pluralize' => false,
+                    'tokens' => [
+                        '{id}' => '<id:[A-Za-z0-9_\-]+>',
+                    ]
+                ],
+                [
+                    'class' => UrlRule::class,
+                    'controller' => ['project', 'organization-member'],
+                    'pluralize' => false,
+                    'prefix' => '<organization_id:[A-Za-z0-9_\-]+>',
+                    'tokens' => [
+                        '{id}' => '<id:[A-Za-z0-9_\-]+>',
+                    ]
+                ],
+                [
+                    'class' => UrlRule::class,
+                    'controller' => ['issue'],
+                    'pluralize' => false,
+                    'prefix' => '<organization_id:[A-Za-z0-9_\-]+>/<project_id:[A-Za-z0-9_\-]+>/',
+                    'tokens' => [
+                        '{id}' => '<id:[A-Za-z0-9_\-]+>',
+                    ],
+                    'extraPatterns' => [
+                        'GET stats' => 'stats'
+                    ]
+                ],
+                [
+                    'class' => UrlRule::class,
+                    'controller' => ['member', 'label'],
+                    'pluralize' => false,
+                    'prefix' => '<organization_id:[A-Za-z0-9_\-]+>/<project_id:[A-Za-z0-9_\-]+>/',
+                    'tokens' => [
+                        '{id}' => '<id:[A-Za-z0-9_\-]+>',
+                    ]
+                ],
+                [
+                    'class' => UrlRule::class,
+                    'controller' => ['comment'],
+                    'pluralize' => false,
+                    'prefix' => '<organization_id:[A-Za-z0-9_\-]+>/<project_id:[A-Za-z0-9_\-]+>/<issue_id:[A-Za-z0-9_\-]+>/',
+                    'tokens' => [
+                        '{id}' => '<id:[A-Za-z0-9_\-]+>'
+                    ]
                 ],
                 'auth/login' => 'auth/login',
                 'auth/signup' => 'auth/signup',
@@ -56,8 +113,8 @@ return [
                 'auth/verify' => 'auth/verify',
                 'auth/resend-verification-email' => 'auth/resend-verification-email',
                 'auth/reset-password' => 'auth/reset-password',
-                'auth/refresh-token' => 'auth/refresh-token',
-
+                'auth/refresh' => 'auth/refresh',
+                'auth/me' => 'auth/me',
             ],
         ],
         'jwt' => function () {

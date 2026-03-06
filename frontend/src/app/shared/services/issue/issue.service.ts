@@ -1,247 +1,136 @@
-import { Injectable } from '@angular/core';
-import { CLOSED, IN_PROGRESS, Issue, OPEN, TO_DO } from '../../model/Issue';
-import { UserService } from '../user/user.service';
-import { User } from '../../model/User';
+import { inject, Injectable, signal } from '@angular/core';
+import { Issue } from '../../model/Issue';
+import { PaginatedResponse } from '../../constants/api/PaginatedResponse';
+import { IssueStats } from '../../constants/api/IssueStats';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
+import { ApiQueryParams } from '../../constants/api/ApiQueryParams';
+import { map, Observable } from 'rxjs';
+import { ParamsHandler } from '../../utils/paramsHandler';
 
 @Injectable({
     providedIn: 'root',
 })
 export class IssueService {
-    constructor(private userService: UserService) {}
+    private readonly http = inject(HttpClient);
+    private readonly url = environment.apiUrl;
 
-    getIssues(): Array<Issue> {
-        const user = this.userService.getUser();
-        return [
-            {
-                id: 1,
-                title: 'Issue 1',
-                description: 'Description for Issue 1',
-                status: OPEN,
-                author: user as User,
-                assignee: user as User,
-                createdAt: new Date(),
-                project: 'IBM IT',
-            },
-            {
-                id: 2,
-                title: 'Issue 2',
-                description: 'Description for Issue 2',
-                status: TO_DO,
-                author: user as User,
-                assignee: user as User,
-                createdAt: new Date(),
-                project: 'IBM IT',
-            },
-            {
-                id: 3,
-                title: 'Issue 3',
-                description: 'Description for Issue 3',
-                status: CLOSED,
-                author: user as User,
-                assignee: user as User,
-                createdAt: new Date(),
-                project: 'Google IT',
-            },
+    /**
+     * Creates a new issue
+     * @param ids Object containing projectId and organizationId
+     * @param issue Partial issue object containing required fields (e.g., title, projectId)
+     * @returns Observable of the created Issue
+     */
+    createIssue(
+        ids: { projectId: string; organizationId: string },
+        issue: Partial<Issue>
+    ): Observable<Issue> {
+        return this.http.post<Issue>(
+            `${this.url}/${ids.organizationId}/${ids.projectId}/issue`,
+            issue
+        );
+    }
 
-            {
-                id: 4,
-                title: 'Issue 4',
-                description: 'Description for Issue 4',
-                status: IN_PROGRESS,
-                author: user as User,
-                assignee: null,
-                createdAt: new Date(),
-                project: 'Google HR',
-            },
-            {
-                id: 5,
-                title: 'Issue 5',
-                description: 'Description for Issue 5',
-                status: CLOSED,
-                author: user as User,
-                assignee: user as User,
-                createdAt: new Date(),
-                project: 'Google IT',
-            },
+    /**
+     * Fetches issues with optional query parameters
+     * Automatically filters out null/undefined/empty values
+     * Returns paginated response with metadata
+     *
+     * @param ids Object containing projectId and organizationId
+     * @param queryParams Optional query parameters for filtering, sorting, and pagination
+     * @returns Observable of PaginatedResponse containing an array of Issues and metadata
+     */
+    getIssues(
+        ids: { projectId: string; organizationId: string },
+        queryParams: ApiQueryParams = {}
+    ): Observable<PaginatedResponse<Issue>> {
+        const params = ParamsHandler.convertToHttpParams(queryParams);
 
+        return this.http.get<PaginatedResponse<Issue>>(
+            `${this.url}/${ids.organizationId}/${ids.projectId}/issue`,
             {
-                id: 6,
-                title: 'Issue 6',
-                description: 'Description for Issue 6',
-                status: IN_PROGRESS,
-                author: user as User,
-                assignee: null,
-                createdAt: new Date(),
-                project: 'Google HR',
-            },
-            {
-                id: 7,
-                title: 'Issue 7',
-                description: 'Description for Issue 7',
-                status: CLOSED,
-                author: user as User,
-                assignee: user as User,
-                createdAt: new Date(),
-                project: 'Google IT',
-            },
+                params: params,
+            }
+        );
+    }
 
+    /**
+     * Fetches an issue by its ID
+     * @param data Object containing issueId, projectId, organizationId, and optional expand parameters
+     * @returns Observable of the requested Issue
+     */
+    getIssueById(data: {
+        issueId: string;
+        projectId: string;
+        organizationId: string;
+        expand?: string;
+    }): Observable<Issue> {
+        const expandParams = data.expand ?? 'creator,assignee,updator';
+        return this.http.get<Issue>(
+            `${this.url}/${data.organizationId}/${data.projectId}/issue/${data.issueId}`,
             {
-                id: 8,
-                title: 'Issue 8',
-                description: 'Description for Issue 8',
-                status: CLOSED,
-                author: user as User,
-                assignee: null,
-                createdAt: new Date(),
-                project: 'Google HR',
-            },
-            {
-                id: 9,
-                title: 'Issue 9',
-                description: 'Description for Issue 9',
-                status: OPEN,
-                author: user as User,
-                assignee: user as User,
-                createdAt: new Date(),
-                project: 'Google IT',
-            },
+                params: {
+                    expand: expandParams,
+                },
+            }
+        );
+    }
 
-            {
-                id: 10,
-                title: 'Issue 10',
-                description: 'Description for Issue 10',
-                status: IN_PROGRESS,
-                author: user as User,
-                assignee: null,
-                createdAt: new Date(),
-                project: 'Google HR',
-            },
-            {
-                id: 11,
-                title: 'Issue 11',
-                description: 'Description for Issue 11',
-                status: CLOSED,
-                author: user as User,
-                assignee: user as User,
-                createdAt: new Date(),
-                project: 'Google IT',
-            },
+    /**
+     * Fetches issues and returns only the items array (legacy support)
+     * Use this if you don't need pagination metadata
+     * @param data Object containing projectId, organizationId, and optional queryParams
+     * @returns Observable of an array of Issues
+     */
+    getIssuesSimple(data: {
+        projectId: string;
+        organizationId: string;
+        queryParams?: ApiQueryParams;
+    }): Observable<Issue[]> {
+        const qp = data.queryParams ?? {};
+        return this.getIssues(data, qp).pipe(map((response) => response.items));
+    }
 
-            {
-                id: 12,
-                title: 'Issue 12',
-                description: 'Description for Issue 12',
-                status: IN_PROGRESS,
-                author: user as User,
-                assignee: null,
-                createdAt: new Date(),
-                project: 'Google HR',
-            },
-            {
-                id: 13,
-                title: 'Issue 13',
-                description: 'Description for Issue 13',
-                status: CLOSED,
-                author: user as User,
-                assignee: user as User,
-                createdAt: new Date(),
-                project: 'Google IT',
-            },
+    /**
+     * Updates an existing issue
+     * @param data Object containing issueId, projectId, organizationId, and the partial issue data to update
+     * @returns Observable of the updated Issue
+     */
+    updateIssue(data: {
+        issueId: string;
+        projectId: string;
+        organizationId: string;
+        issue: Partial<Issue>;
+    }): Observable<Issue> {
+        return this.http.put<Issue>(
+            `${this.url}/${data.organizationId}/${data.projectId}/issue/${data.issueId}`,
+            data.issue
+        );
+    }
 
-            {
-                id: 14,
-                title: 'Issue 14',
-                description: 'Description for Issue 14',
-                status: CLOSED,
-                author: user as User,
-                assignee: null,
-                createdAt: new Date(),
-                project: 'Google HR',
-            },
-            {
-                id: 15,
-                title: 'Issue 15',
-                description: 'Description for Issue 15',
-                status: CLOSED,
-                author: user as User,
-                assignee: user as User,
-                createdAt: new Date(),
-                project: 'Google IT',
-            },
+    /**
+     * Deletes an issue by ID
+     * @param data Object containing issueId, projectId, and organizationId
+     * @returns Observable of void
+     */
+    deleteIssue(data: {
+        issueId: string;
+        projectId: string;
+        organizationId: string;
+    }): Observable<void> {
+        return this.http.delete<void>(
+            `${this.url}/${data.organizationId}/${data.projectId}/issue/${data.issueId}`
+        );
+    }
 
-            {
-                id: 16,
-                title: 'Issue 16',
-                description: 'Description for Issue 16',
-                status: IN_PROGRESS,
-                author: user as User,
-                assignee: null,
-                createdAt: new Date(),
-                project: 'Google HR',
-            },
-            {
-                id: 17,
-                title: 'Issue 17',
-                description: 'Description for Issue 17',
-                status: TO_DO,
-                author: user as User,
-                assignee: user as User,
-                createdAt: new Date(),
-                project: 'Google IT',
-            },
-
-            {
-                id: 18,
-                title: 'Issue 18',
-                description: 'Description for Issue 18',
-                status: TO_DO,
-                author: user as User,
-                assignee: null,
-                createdAt: new Date(),
-                project: 'Google HR',
-            },
-            {
-                id: 19,
-                title: 'Issue 19',
-                description: 'Description for Issue 19',
-                status: CLOSED,
-                author: user as User,
-                assignee: user as User,
-                createdAt: new Date(),
-                project: 'Google IT',
-            },
-
-            {
-                id: 20,
-                title: 'Issue 20',
-                description: 'Description for Issue 20',
-                status: CLOSED,
-                author: user as User,
-                assignee: null,
-                createdAt: new Date(),
-                project: 'Google HR',
-            },
-            {
-                id: 21,
-                title: 'Issue 21',
-                description: 'Description for Issue 21',
-                status: TO_DO,
-                author: user as User,
-                assignee: user as User,
-                createdAt: new Date(),
-                project: 'Google HR',
-            },
-
-            {
-                id: 22,
-                title: 'Issue 22',
-                description: 'Description for Issue 22',
-                status: IN_PROGRESS,
-                author: user as User,
-                assignee: null,
-                createdAt: new Date(),
-                project: 'Google Business',
-            },
-        ];
+    /**
+     * Fetches aggregated issue statistics for the current project
+     * @param ids the object containing projectId and organizationId
+     * @returns Observable of IssueStats containing totals, priorities, types, and activity
+     */
+    getStats(ids: { projectId: string; organizationId: string }): Observable<IssueStats> {
+        return this.http.get<IssueStats>(
+            `${this.url}/${ids.organizationId}/${ids.projectId}/issue/stats`
+        );
     }
 }

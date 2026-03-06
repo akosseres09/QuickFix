@@ -1,18 +1,26 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, inject, input, output, signal } from '@angular/core';
+import {
+    AfterViewInit,
+    Component,
+    DestroyRef,
+    inject,
+    input,
+    model,
+    output,
+    signal,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonToggleChange } from '@angular/material/button-toggle';
 import { MatIcon } from '@angular/material/icon';
 import { Event, NavigationStart, Router, RouterLink, RouterModule } from '@angular/router';
 import { ThemeService } from '../../shared/services/theme/theme.service';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
-import { AppRoute } from '../../shared/constants/Routes';
-import { RouteService } from '../../shared/services/route/route.service';
-import { User } from '../../shared/model/User';
-import { SidebarService } from '../../shared/services/sidebar/sidebar.service';
-import { UserService } from '../../shared/services/user/user.service';
-import { filter, fromEvent, take } from 'rxjs';
+import { SidenavRoute } from '../../shared/constants/route/Routes';
+import { filter, fromEvent } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Claims } from '../../shared/constants/user/Claims';
+import { AuthService } from '../../shared/services/auth/auth.service';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
     selector: 'app-navbar',
@@ -25,6 +33,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
         MatMenu,
         MatMenuTrigger,
         MatMenuItem,
+        MatButtonModule,
     ],
     templateUrl: './navbar.component.html',
     styleUrl: './navbar.component.css',
@@ -33,33 +42,40 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 export class NavbarComponent implements AfterViewInit {
     private themeService = inject(ThemeService);
     private router = inject(Router);
-    private routeService = inject(RouteService);
-    private sidebarService = inject(SidebarService);
-    private userService = inject(UserService);
+    private authService = inject(AuthService);
+    private destroyRef = inject(DestroyRef);
 
-    showSidebarToggle = input<boolean>(true);
-    sidebarClosed = output<boolean>();
-    isSidebarCollapsed = signal<boolean>(this.sidebarService.getState());
+    isSidebarOpened = model<boolean>(window.innerWidth > 767);
+    imageSource = model<string>('QuickFix_logo_dark.png');
+    logoutClicked = output<void>();
+    showMenuLogo = input<boolean>(true);
+
     isMenuOpen = signal<boolean>(false);
-    imageSource: string = 'QuickFix_logo_dark.png';
-    user = signal<User | null>(this.userService.getUser());
+    user = signal<Claims | null>(this.authService.currentUserClaims());
     htmlElement = signal<HTMLElement | null>(document.documentElement);
-    routes = signal<AppRoute[]>(
-        this.routeService.getAppRoutes(this.user()).filter((route) => route.show)
-    );
-    logo = this.themeService.logos;
+    routes = signal<SidenavRoute[]>(this.getAppRoutes().filter((route) => route.show));
     theme = signal<'light' | 'dark'>(this.themeService.getTheme() || 'light');
+    showSidebarToggleButton = model<boolean>(true);
+    sidebarToggleButton = signal<boolean>(window.innerWidth <= 767);
+    logo = this.themeService.logos;
 
     constructor() {
         this.setTheme(this.theme());
-        fromEvent(window, 'resize')
-            .pipe(takeUntilDestroyed())
-            .subscribe(() => {
-                if (window.innerWidth <= 767) {
-                    this.isMenuOpen.set(false);
-                    this.toggleSidebar(true);
-                }
-            });
+
+        if (this.showSidebarToggleButton()) {
+            fromEvent(window, 'resize')
+                .pipe(takeUntilDestroyed())
+                .subscribe(() => {
+                    if (window.innerWidth <= 767) {
+                        this.sidebarToggleButton.set(true);
+                        this.isMenuOpen.set(false);
+                        this.isSidebarOpened.set(false);
+                    } else {
+                        this.sidebarToggleButton.set(false);
+                        this.isSidebarOpened.set(true);
+                    }
+                });
+        }
 
         this.router.events
             .pipe(
@@ -70,6 +86,9 @@ export class NavbarComponent implements AfterViewInit {
             )
             .subscribe(() => {
                 this.isMenuOpen.set(false);
+                if (window.innerWidth <= 767) {
+                    this.isSidebarOpened.set(false);
+                }
             });
     }
 
@@ -81,11 +100,65 @@ export class NavbarComponent implements AfterViewInit {
         el.dataset['theme'] = this.theme();
     }
 
+    getAppRoutes(): Array<SidenavRoute> {
+        return [
+            {
+                path: '/auth/login',
+                name: 'Login',
+                type: 'button',
+                show: this.user() === null,
+            },
+            {
+                path: '/auth/signup',
+                name: 'Sign Up',
+                type: 'button',
+                show: this.user() === null,
+            },
+            {
+                path: '',
+                name: 'Home',
+                type: 'button',
+                show: this.user() === null,
+                exact: true,
+            },
+            {
+                path: '/organizations',
+                name: 'Organizations',
+                type: 'button',
+                show: this.user() !== null,
+            },
+            {
+                path: '/worktime',
+                name: 'Worktime',
+                type: 'button',
+                show: this.user() !== null,
+            },
+            {
+                type: 'menu',
+                show: this.user() !== null,
+                name: 'Account',
+                icon: 'account_circle',
+                children: [
+                    {
+                        name: 'Account',
+                        path: '/account',
+                        icon: 'person',
+                    },
+                    {
+                        name: 'Settings',
+                        path: '/settings',
+                        icon: 'settings',
+                    },
+                ],
+            },
+        ];
+    }
+
     setTheme(theme: 'light' | 'dark') {
         if (!this.htmlElement()) return;
         this.themeService.setTheme(theme);
         this.theme.set(theme);
-        this.imageSource = this.logo[this.theme()];
+        this.imageSource.set(this.logo[this.theme()]);
     }
 
     toggleMenu() {
@@ -102,13 +175,16 @@ export class NavbarComponent implements AfterViewInit {
         this.setTheme(event.value);
     }
 
-    toggleSidebar(value: boolean = !this.isSidebarCollapsed()): void {
-        this.isSidebarCollapsed.set(value);
+    toggleSidebar(value: boolean = !this.isSidebarOpened()): void {
+        this.isSidebarOpened.set(value);
+    }
 
-        const name = this.isSidebarCollapsed()
-            ? this.sidebarService.CLOSED
-            : this.sidebarService.OPEN;
-        this.sidebarService.setState(name);
-        this.sidebarClosed.emit(this.isSidebarCollapsed());
+    logout() {
+        this.authService
+            .logout()
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe((response) => {
+                this.router.navigate(['/auth/login']);
+            });
     }
 }

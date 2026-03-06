@@ -1,4 +1,4 @@
-import { Component, inject, input } from '@angular/core';
+import { Component, inject, output, signal } from '@angular/core';
 import {
     AbstractControlOptions,
     FormBuilder,
@@ -6,8 +6,7 @@ import {
     Validators,
 } from '@angular/forms';
 import { passwordMatchValidator } from '../../../shared/validators/passwordValidator/passwordValidator';
-import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatError, MatFormField, MatInput, MatLabel, MatPrefix } from '@angular/material/input';
 import { MatIcon } from '@angular/material/icon';
@@ -30,10 +29,12 @@ import { MatButton } from '@angular/material/button';
     styleUrl: './reset-form.component.css',
 })
 export class ResetFormComponent {
-    private fb = inject(FormBuilder);
-    private router = inject(Router);
-    private snackBar = inject(SnackbarService);
-    token = input<string>('');
+    private readonly fb = inject(FormBuilder);
+    private readonly activeRoute = inject(ActivatedRoute);
+
+    sendForm = output<{ token: string; password: string }>();
+
+    token = signal<string>(this.activeRoute.snapshot.queryParamMap.get('token') ?? '');
     form = this.fb.group(
         {
             token: [this.token(), [Validators.required]],
@@ -53,18 +54,8 @@ export class ResetFormComponent {
         if (this.form.invalid) return;
 
         const { token, password } = this.form.value;
-        this.snackBar.open('Password reset successfully!');
-        this.router.navigateByUrl('/auth/login');
-        /*this.passwordSub = this.authService.resetPassword(token, password).subscribe({
-            next: (response) => {
-                this.snackBar.open('Password reset successfully!');
-                this.router.navigateByUrl('/auth/login');
-            },
-            error: (error) => {
-                this.snackBar.open('Error resetting password. Please try again later.', [
-                    'snackbar-error',
-                ]);
-            },
-        });*/
+        if (!token || !password) return;
+
+        this.sendForm.emit({ token, password });
     }
 }

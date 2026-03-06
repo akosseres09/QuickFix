@@ -1,1 +1,46 @@
-<p>board works!</p>
+<div class="h-full flex flex-col px-4">
+    @if (isLoading()) {
+        <div class="flex justify-center items-center h-64">
+            <div class="text-gray-500">Loading issues...</div>
+        </div>
+    } @else {
+        <div class="flex-1 flex flex-col" cdkDropListGroup>
+            <div class="flex flex-1 gap-4 overflow-x-auto pb-4">
+                <app-board-column
+                    [columnTitle]="STATUS_MAP[StatusEnum.OPEN]"
+                    [issues]="openIssues()"
+                    [status]="StatusEnum.OPEN"
+                    (dropEvent)="onDrop($event, StatusEnum.OPEN)"
+                ></app-board-column>
+
+                <app-board-column
+                    [columnTitle]="STATUS_MAP[StatusEnum.IN_PROGRESS]"
+                    [issues]="inProgressIssues()"
+                    [status]="StatusEnum.IN_PROGRESS"
+                    (dropEvent)="onDrop($event, StatusEnum.IN_PROGRESS)"
+                ></app-board-column>
+
+                <app-board-column
+                    [columnTitle]="STATUS_MAP[StatusEnum.REVIEW]"
+                    [issues]="reviewIssues()"
+                    [status]="StatusEnum.REVIEW"
+                    (dropEvent)="onDrop($event, StatusEnum.REVIEW)"
+                ></app-board-column>
+
+                <app-board-column
+                    [columnTitle]="STATUS_MAP[StatusEnum.RESOLVED]"
+                    [issues]="resolvedIssues()"
+                    [status]="StatusEnum.RESOLVED"
+                    (dropEvent)="onDrop($event, StatusEnum.RESOLVED)"
+                ></app-board-column>
+
+                <app-board-column
+                    [columnTitle]="STATUS_MAP[StatusEnum.CLOSED]"
+                    [issues]="closedIssues()"
+                    [status]="StatusEnum.CLOSED"
+                    (dropEvent)="onDrop($event, StatusEnum.CLOSED)"
+                ></app-board-column>
+            </div>
+        </div>
+    }
+</div>

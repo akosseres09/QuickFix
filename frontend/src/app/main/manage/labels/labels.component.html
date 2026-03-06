@@ -1,0 +1,29 @@
+<div class="max-w-7xl">
+    <app-filter
+        [filterFields]="filteredFields"
+        (onFilterChange)="onFilterChange($event)"
+    ></app-filter>
+    <app-table
+        [dataSource]="shownLabels()"
+        [displayedColumns]="displayedColumns"
+        tableHeader="Labels"
+        [initialPageSize]="listState.pageSize()"
+        [initialPageIndex]="listState.pageIndex()"
+        [initialSortActive]="listState.sortActive()"
+        [initialSortDirection]="listState.sortDirection()"
+        [totalCount]="listState.totalCount()"
+        [isLoading]="listState.isLoading()"
+        (sortChange)="onSortChange($event)"
+        (pageChange)="onPageChange($event)"
+        [selectedRow]="selectedRow()"
+        (selectedRowChange)="onRowChange($event)"
+    ></app-table>
+    <div class="fixed right-6 bottom-6 z-50">
+        <app-speed-dial
+            #speedDial
+            [buttons]="speedDialButtons()"
+            [selectedRow]="selectedRow()"
+            (selectedRowChange)="selectedRow.set($event)"
+        ></app-speed-dial>
+    </div>
+</div>

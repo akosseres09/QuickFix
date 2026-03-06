@@ -1,5 +1,5 @@
 import { Component, computed, signal } from '@angular/core';
-import { LanguageSettings } from '../../../shared/constants/LanguageSettings';
+import { LanguageSettings } from '../../../shared/constants/settings/LanguageSettings';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDividerModule } from '@angular/material/divider';

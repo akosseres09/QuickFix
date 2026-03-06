@@ -1,13 +1,26 @@
 <?php
 
+use yii\redis\Cache;
+use yii\redis\Connection;
+
+
 return [
     'components' => [
         'db' => [
             'class' => \yii\db\Connection::class,
-            'dsn' => 'pgsql:host=db;dbname=quickfix_db',
+            'dsn' => 'pgsql:host=db;dbname=quickfix',
             'username' => '', // fill in with your username
             'password' => '', // fill in with your password
             'charset' => 'utf8',
+        ],
+        'cache' => [
+            'class' => Cache::class,
+            'redis' => [
+                'class' => Connection::class,
+                'hostname' => 'redis',
+                'port' => 6379,
+                'database' => 0,
+            ]
         ],
         'mailer' => [
             'class' => \yii\symfonymailer\Mailer::class,

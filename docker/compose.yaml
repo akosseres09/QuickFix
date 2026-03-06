@@ -12,6 +12,7 @@ services:
         target: /etc/apache2/sites-available/000-default.conf
     depends_on:
       - db
+      - redis
 
   db:
     container_name: db
@@ -36,9 +37,20 @@ services:
     depends_on:
       - db
       - web
+      - redis
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
 
 volumes:
   pgdata:
+    driver: local
+  redis-data:
     driver: local
 configs:
   apache_config:

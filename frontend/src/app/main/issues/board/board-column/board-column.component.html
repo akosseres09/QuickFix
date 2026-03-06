@@ -1,0 +1,29 @@
+<div
+    class="rounded-lg p-4 flex flex-col min-w-[350px] h-full dark:bg-dark-background-hover bg-white"
+>
+    <div class="column-header flex items-center justify-between mb-4">
+        <h3 class="text-base font-semibold">{{ columnTitle() }}</h3>
+        <span class="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-xs font-medium">
+            {{ issues().length }}
+        </span>
+    </div>
+
+    <div
+        class="column-content flex-1 overflow-y-auto pr-2"
+        cdkDropList
+        [id]="dropListId"
+        [cdkDropListData]="issues()"
+        [cdkDropListConnectedTo]="dropListId"
+        (cdkDropListEntered)="onDropListEntered($event)"
+        (cdkDropListDropped)="onDrop($event)"
+        (cdkDropListExited)="onDropListExited($event)"
+    >
+        @for (issue of issues(); track issue.id) {
+            <app-issue-card [issue]="issue" (cardClick)="onIssueClick($event)"></app-issue-card>
+        }
+
+        @if (showEmptyText()) {
+            <div class="text-center text-gray-400 py-8 text-sm">No issues</div>
+        }
+    </div>
+</div>

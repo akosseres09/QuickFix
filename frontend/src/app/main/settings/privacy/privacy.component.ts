@@ -8,7 +8,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatSliderModule } from '@angular/material/slider';
-import { PrivacySettings } from '../../../shared/constants/PrivacySettings';
+import { PrivacySettings } from '../../../shared/constants/settings/PrivacySettings';
 
 @Component({
     selector: 'app-privacy',

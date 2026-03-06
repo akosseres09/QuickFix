@@ -10,14 +10,14 @@ use yii\db\ActiveRecord;
 /**
  * This is the model class for table "{{%user_refresh_token}}".
  *
- * @property int $id
- * @property int $user_id
+ * @property string $id
+ * @property string $user_id
  * @property string $token
  * @property string|null $ip
  * @property string|null $user_agent
  * @property int $created_at
  * @property int $expires_at
- * @property int $revoked_at
+ * @property int|null $revoked_at
  * 
  * relations
  * @property User $user
@@ -33,7 +33,9 @@ class UserRefreshToken extends ActiveRecord
     {
         return [
             [['user_id', 'token', 'expires_at'], 'required'],
-            [['user_id', 'expires_at', 'created_at'], 'integer'],
+            [['user_id'], 'string', 'max' => 36],
+            [['token'], 'string'],
+            [['expires_at', 'created_at'], 'integer'],
             [['ip'], 'string', 'max' => 45],
             [['user_agent'], 'string'],
             [['token'], 'unique'],
@@ -63,6 +65,20 @@ class UserRefreshToken extends ActiveRecord
                 'updatedAtAttribute' => false,
             ],
         ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+            if ($insert && empty($this->id)) {
+                $this->id = Yii::$app->security->generateRandomString(36);
+            }
+            return true;
+        }
+        return false;
     }
 
     public static function find(): UserRefreshTokenQuery

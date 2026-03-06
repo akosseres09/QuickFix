@@ -3,8 +3,6 @@
 namespace api\components;
 
 use api\models\UserRefreshToken;
-use DateTimeImmutable;
-use Lcobucci\JWT\UnencryptedToken;
 use Yii;
 use yii\web\ServerErrorHttpException;
 use yii\web\UnauthorizedHttpException;
@@ -18,7 +16,7 @@ trait RefreshTokenHandlerTrait
             ->byToken($token);
     }
 
-    protected function getRefreshToken(string $token, bool $withUser = true): UserRefreshToken
+    protected function getRefreshToken(string $token, bool $withUser = true): UserRefreshToken|null
     {
         $ip = Yii::$app->request->getUserIP();
         $query = UserRefreshToken::find()
@@ -26,7 +24,7 @@ trait RefreshTokenHandlerTrait
             ->notRevoked()
             ->byIp($ip);
 
-        if ($withUser && false) {
+        if ($withUser) {
             $query->with('user');
         }
 
@@ -41,88 +39,37 @@ trait RefreshTokenHandlerTrait
         }
     }
 
-    protected function createToken(int $userId): UnencryptedToken
-    {
-        $now = new DateTimeImmutable();
-        $issuer = Yii::$app->params['backendUrl'] ?? 'http://api.ticketing.test';
-        $audience = Yii::$app->params['frontendUrl'] ?? 'http://localhost:4200';
-
-        return $this->jwtConfig->builder()
-            ->issuedBy($issuer)
-            ->permittedFor($audience)
-            ->identifiedBy(bin2hex(random_bytes(16)))
-            ->issuedAt($now)
-            ->canOnlyBeUsedAfter($now)
-            ->expiresAt($now->modify('+ 5 minutes'))
-            ->withClaim('uid', $userId)
-            ->getToken($this->jwtConfig->signer(), $this->jwtConfig->signingKey());
-    }
-
     /**
      * Creates or updates a refresh token for the user.
      * If $credential is an instance of UserRefreshToken, it updates the existing token.
-     * If $credential is an integer (user ID), it creates a new refresh token.
+     * If $credential is a string (user ID), it creates a new refresh token.
      * Both cases will add the token to the response cookies.
      */
-    protected function createRefreshToken(int|UserRefreshToken $credential, int $expiresInSeconds = 300): UserRefreshToken
+    protected function createRefreshToken(string|UserRefreshToken $credential, int $expiresInSeconds = 60 * 60 * 24 * 14): UserRefreshToken|null
     {
-        $token = Yii::$app->security->generateRandomString(64);
-        $ip = Yii::$app->request->getUserIP();
-        $agent = Yii::$app->request->getUserAgent();
+        $credentialOptions = [
+            'token' => Yii::$app->security->generateRandomString(64),
+            'expiresInSeconds' => $expiresInSeconds,
+            'ip' => Yii::$app->request->getUserIP(),
+            'agent' => Yii::$app->request->getUserAgent(),
+        ];
 
-        // updates existing & not revoked refresh token and adds it to cookie
         if ($credential instanceof UserRefreshToken) {
-            if ($credential->isRevoked()) {
-                throw new UnauthorizedHttpException('Refresh token is revoked.');
-            }
-
-            $credential->expires_at = time() + $expiresInSeconds;
-            $credential->token = $token;
-            $credential->ip = $ip;
-            $credential->user_agent = $agent;
-            if (!$credential->save()) {
-                throw new ServerErrorHttpException(
-                    'Failed to update existing refresh token: ' . implode(', ', $credential->getFirstErrors())
-                );
-            }
-
-            $this->addToCookie($credential->token);
-            return $credential;
+            return $this->updateExistingRefreshToken($credential, $credentialOptions);
         }
 
         $refreshToken = UserRefreshToken::find()
             ->byUserId($credential)
-            ->byIp($ip)
+            ->byIp($credentialOptions['ip'])
             ->one();
 
         if (!$refreshToken) {
-            $refreshToken = new UserRefreshToken([
-                'user_id' => $credential,
-                'token' => $token,
-                'ip' => $ip,
-                'user_agent' => $agent,
-                'expires_at' => time() + $expiresInSeconds,
-            ]);
-
-            if (!$refreshToken->save()) {
-                throw new ServerErrorHttpException(
-                    'Failed to create refresh token: ' . implode(', ', $refreshToken->getFirstErrors())
-                );
-            }
+            $refreshToken = $this->createNewRefreshToken($credential, $credentialOptions);
         }
 
         if (!$refreshToken->isValid()) {
-            $refreshToken->token = $token;
-            $refreshToken->expires_at = time() + $expiresInSeconds;
-
-            if (!$refreshToken->save()) {
-                throw new ServerErrorHttpException(
-                    'Failed to update refresh token: ' . implode(', ', $refreshToken->getFirstErrors())
-                );
-            }
+            $refreshToken = $this->updateRefreshTokenExpiry($refreshToken, $credentialOptions);
         }
-
-        $this->addToCookie($refreshToken->token);
 
         return $refreshToken;
     }
@@ -137,8 +84,84 @@ trait RefreshTokenHandlerTrait
             'name' => 'refresh-token',
             'value' => $token,
             'httpOnly' => true,
-            'sameSite' => 'none',
-            'path' => '/auth'
+            'sameSite' => \yii\web\Cookie::SAME_SITE_LAX,
+            'secure' => false,
+            'path' => '/',
+            'domain' => '',
         ]));
+    }
+
+    /**
+     * Creates a new refresh token based on an existing one.
+     * If the existing token is revoked, an exception is thrown.
+     * @param UserRefreshToken $credential
+     * @param array $credentialOptions  
+     *    ['token' => string, 'expiresInSeconds' => int, 'ip' => string, 'agent' => string ]
+     * @return UserRefreshToken
+     */
+    private function updateExistingRefreshToken(UserRefreshToken $credential, array $credentialOptions): UserRefreshToken
+    {
+        if ($credential->isRevoked()) {
+            throw new UnauthorizedHttpException('Refresh token is revoked.');
+        }
+
+        $credential->expires_at = time() + $credentialOptions['expiresInSeconds'];
+        $credential->token = $credentialOptions['token'];
+        $credential->ip = $credentialOptions['ip'];
+        $credential->user_agent = $credentialOptions['agent'];
+        if (!$credential->save()) {
+            throw new ServerErrorHttpException(
+                'Failed to update existing refresh token: ' . implode(', ', $credential->getFirstErrors())
+            );
+        }
+
+        return $credential;
+    }
+
+    /**
+     * Creates a new refresh token for the given user ID.
+     * @param int $credential
+     * @param array $credentialOptions  
+     *    ['token' => string, 'expiresInSeconds' => int, 'ip' => string, 'agent' => string ]
+     * @return UserRefreshToken
+     */
+    private function createNewRefreshToken(string $credential, array $credentialOptions): UserRefreshToken
+    {
+        $refreshToken = new UserRefreshToken([
+            'user_id' => $credential,
+            'token' => $credentialOptions['token'],
+            'ip' => $credentialOptions['ip'],
+            'user_agent' => $credentialOptions['agent'],
+            'expires_at' => time() + $credentialOptions['expiresInSeconds'],
+        ]);
+
+        if (!$refreshToken->save()) {
+            throw new ServerErrorHttpException(
+                'Failed to create refresh token: ' . implode(', ', $refreshToken->getFirstErrors())
+            );
+        }
+
+        return $refreshToken;
+    }
+
+    /**
+     * Updates an existing refresh token with new token value and expiry.
+     * @param UserRefreshToken $refreshToken
+     * @param array $tokenOptions  
+     *    ['token' => string, 'expiresInSeconds' => int ]
+     * @return UserRefreshToken
+     */
+    private function updateRefreshTokenExpiry(UserRefreshToken $refreshToken, array $tokenOptions)
+    {
+        $refreshToken->token = $tokenOptions['token'];
+        $refreshToken->expires_at = time() + $tokenOptions['expiresInSeconds'];
+
+        if (!$refreshToken->save()) {
+            throw new ServerErrorHttpException(
+                'Failed to update refresh token: ' . implode(', ', $refreshToken->getFirstErrors())
+            );
+        }
+
+        return $refreshToken;
     }
 }

@@ -1,31 +1,51 @@
-<div class="relative h-full">
-    <form [formGroup]="filterForm" class="flex gap-2 items-center">
-        <mat-form-field appearance="outline">
-            <mat-label>Project Name</mat-label>
-            <input
-                type="text"
-                placeholder="Select Project"
-                aria-label="Project Name"
-                matInput
-                formControlName="projectName"
-                [matAutocomplete]="auto"
-            />
-            <mat-autocomplete #auto="matAutocomplete">
-                @for (project of filteredProjects(); track project) {
-                    <mat-option [value]="project.name">{{ project.name }}</mat-option>
-                }
-            </mat-autocomplete>
-        </mat-form-field>
-        @if (showFilterReset()) {
-            <button mat-flat-button color="primary" (click)="resetFilters()">Reset filters</button>
-        }
-    </form>
+<div class="min-h-full">
+    <app-filter
+        [filterFields]="filterFields"
+        (onFilterChange)="onFilterChange($event)"
+    ></app-filter>
     <app-table
         [dataSource]="shownProjects()"
         [displayedColumns]="displayedColumns()"
         tableHeader="Projects"
+        [initialPageSize]="listState.pageSize()"
+        [initialPageIndex]="listState.pageIndex()"
+        [initialSortActive]="listState.sortActive()"
+        [initialSortDirection]="listState.sortDirection()"
+        [totalCount]="listState.totalCount()"
+        [isLoading]="listState.isLoading()"
+        (sortChange)="onSortChange($event)"
+        (pageChange)="onPageChange($event)"
+        [selectedRow]="selectedRow()"
+        (selectedRowChange)="onRowChange($event)"
     ></app-table>
-    <div class="absolute right-0 bottom-0">
-        <app-speed-dial></app-speed-dial>
+    <div class="fixed right-6 bottom-6 z-50">
+        <app-speed-dial
+            #speedDial
+            [buttons]="speedDialButtons()"
+            [selectedRow]="selectedRow()"
+            (selectedRowChange)="selectedRow.set($event)"
+        ></app-speed-dial>
     </div>
 </div>
+
+<!-- Delete Confirmation Dialog Template -->
+<ng-template #deleteConfirmTemplate>
+    <div class="py-4">
+        <p class="text-gray-700 dark:text-gray-300">
+            Are you sure you want to delete the project
+            <strong class="font-semibold">{{ selectedProjectName() }}</strong
+            >?
+        </p>
+        <p class="font-bold text-red-600 dark:text-red-400 mt-2">This action cannot be undone.</p>
+    </div>
+</ng-template>
+
+<ng-template #archiveConfirmTemplate>
+    <div class="py-4">
+        <p class="text-gray-700 dark:text-gray-300">
+            Are you sure you want to archive the project
+            <strong class="font-semibold">{{ selectedProjectName() }}</strong
+            >?
+        </p>
+    </div>
+</ng-template>

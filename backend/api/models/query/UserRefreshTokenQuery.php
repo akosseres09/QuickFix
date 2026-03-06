@@ -16,7 +16,7 @@ class UserRefreshTokenQuery extends ActiveQuery
         return $this->andWhere(['token' => $token]);
     }
 
-    public function byUserId(int $userId): UserRefreshTokenQuery
+    public function byUserId(string $userId): UserRefreshTokenQuery
     {
         return $this->andWhere(['user_id' => $userId]);
     }

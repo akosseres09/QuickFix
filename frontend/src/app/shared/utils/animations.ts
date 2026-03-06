@@ -102,3 +102,30 @@ export const speedDialStaggerAnimation = trigger('speedDialStagger', [
         ),
     ]),
 ]);
+
+export const filterBoxAnimation = trigger('filterBoxAnimation', [
+    state(
+        'open',
+        style({
+            height: '*',
+            opacity: 1,
+            overflow: 'visible',
+        })
+    ),
+    state(
+        'closed',
+        style({
+            height: '0',
+            opacity: 0,
+            overflow: 'hidden',
+        })
+    ),
+    transition('closed => open', [
+        style({ overflow: 'hidden' }),
+        animate('150ms ease-out', style({ height: '*', opacity: 1 })),
+    ]),
+    transition('open => closed', [
+        style({ overflow: 'hidden' }),
+        animate('150ms ease-in', style({ height: '0', opacity: 0 })),
+    ]),
+]);

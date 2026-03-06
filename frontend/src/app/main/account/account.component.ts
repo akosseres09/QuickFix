@@ -12,6 +12,15 @@ import { UserService } from '../../shared/services/user/user.service';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 import { User } from '../../shared/model/User';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { DateService } from '../../shared/services/date/date.service';
+import {
+    maxAgeValidator,
+    minAgeValidator,
+} from '../../shared/validators/dateValidator/dateValidator';
+import { phoneValidator } from '../../shared/validators/phoneValidator/phoneValidator';
+import { AuthService } from '../../shared/services/auth/auth.service';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { provideNativeDateAdapter } from '@angular/material/core';
 
 @Component({
     selector: 'app-account',
@@ -25,35 +34,32 @@ import { toSignal } from '@angular/core/rxjs-interop';
         MatIconModule,
         MatDividerModule,
         MatChipsModule,
+        MatDatepickerModule,
     ],
+    providers: [provideNativeDateAdapter()],
     templateUrl: './account.component.html',
     styleUrl: './account.component.css',
 })
 export class AccountComponent {
-    private userService = inject(UserService);
-    private snackbarService = inject(SnackbarService);
-    private fb = inject(FormBuilder);
+    private readonly userService = inject(UserService);
+    private readonly snackbarService = inject(SnackbarService);
+    private readonly dateService = inject(DateService);
+    private readonly authService = inject(AuthService);
+    private readonly fb = inject(FormBuilder);
 
-    user = signal<User | null>(this.userService.getUser());
+    user = signal<User | null>(null);
     profileForm = this.fb.group({
-        username: [this.user()?.username || '', [Validators.required, Validators.minLength(3)]],
-        email: [this.user()?.email || '', [Validators.required, Validators.email]],
-        bio: ['Passionate developer working on QuickFix project'],
-        location: ['Budapest, Hungary'],
-        company: ['QuickFix Inc.'],
-        website: ['https://quickfix.com'],
+        username: ['', [Validators.required, Validators.minLength(3)]],
+        email: ['', [Validators.required, Validators.email]],
+        phoneNumber: ['', [phoneValidator()]],
+        dateOfBirth: ['', [minAgeValidator(13), maxAgeValidator(75)]],
     });
     private formValues = toSignal(this.profileForm.valueChanges, {
         initialValue: this.profileForm.value,
     });
     private initialFormSnapshot = signal(this.profileForm.value);
 
-    profilePictureUrl = signal<string>(
-        this.user()?.username
-            ? `https://ui-avatars.com/api/?name=${this.user()?.username}&size=200&background=a494e6&color=0f0c18`
-            : `https://ui-avatars.com/api/?name=User&size=200&background=a494e6&color=0f0c18`
-    );
-
+    profilePictureUrl = signal<string>('');
     selectedFile = signal<File | null>(null);
     previewUrl = signal<string | null>(null);
     fileInput = viewChild<ElementRef>('fileInput');
@@ -61,8 +67,66 @@ export class AccountComponent {
     hasChanges = computed(() => {
         const current = JSON.stringify(this.formValues());
         const initial = JSON.stringify(this.initialFormSnapshot());
-        return current !== initial || this.selectedFile() !== null;
+        return this.canEdit() && (current !== initial || this.selectedFile() !== null);
     });
+
+    minDate = signal<Date>(this.getMinDate());
+
+    constructor() {
+        this.userService.getUser().subscribe({
+            next: (userData) => {
+                this.user.set(userData);
+
+                this.profilePictureUrl.set(this.getProfilePicture());
+                this.initialFormSnapshot.set({
+                    username: userData.username || '',
+                    email: userData.email || '',
+                    phoneNumber: userData.phoneNumber || '',
+                    dateOfBirth: userData.dateOfBirth,
+                });
+
+                this.setProfileFormValues();
+            },
+            error: (error) => {
+                this.snackbarService.error('Failed to load user data');
+            },
+        });
+    }
+
+    getMinDate(): Date {
+        const today = new Date();
+        const minYear = today.getFullYear() - 13;
+        return new Date(minYear, today.getMonth(), today.getDate());
+    }
+
+    getProfilePicture(): string {
+        const user = this.user();
+        if (!user) return '';
+
+        if (user.profilePictureUrl) {
+            return user.profilePictureUrl;
+        }
+
+        const initials = `${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}`;
+
+        if (initials) {
+            return `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=random&size=128`;
+        }
+
+        const usernameInitial = user.username.charAt(0);
+        return `https://ui-avatars.com/api/?name=${encodeURIComponent(usernameInitial)}&background=random&size=128`;
+    }
+
+    setProfileFormValues(): void {
+        if (!this.user()) return;
+
+        this.profileForm.patchValue({
+            username: this.user()?.username || '',
+            email: this.user()?.email || '',
+            phoneNumber: this.user()?.phoneNumber || '',
+            dateOfBirth: this.user()?.dateOfBirth,
+        });
+    }
 
     onFileSelected(event: Event): void {
         const input = this.fileInput()?.nativeElement as HTMLInputElement;
@@ -84,17 +148,13 @@ export class AccountComponent {
     removeProfilePicture(): void {
         this.selectedFile.set(null);
         this.previewUrl.set(null);
-        this.profilePictureUrl.set(
-            `https://ui-avatars.com/api/?name=${this.user()?.username || 'User'}&size=200&background=a494e6&color=0f0c18`
-        );
+        this.profilePictureUrl.set(this.user()?.profilePictureUrl as string);
         this.resetFileInput();
     }
 
     saveChanges(): void {
         if (this.profileForm.invalid) {
-            this.snackbarService.open('Please fill in all required fields correctly', [
-                'snackbar-error',
-            ]);
+            this.snackbarService.error('Please fill in all required fields correctly');
             return;
         }
 
@@ -102,10 +162,19 @@ export class AccountComponent {
             this.profilePictureUrl.set(this.previewUrl() || this.profilePictureUrl());
         }
 
+        this.userService.updateUser(this.profileForm.value as Partial<User>).subscribe({
+            next: (response) => {
+                this.user.set(response);
+                this.initialFormSnapshot.set(this.profileForm.value);
+                this.snackbarService.success('Profile updated successfully!');
+            },
+            error: (error) => {
+                this.snackbarService.error('Failed to update profile');
+            },
+        });
+
         this.selectedFile.set(null);
         this.previewUrl.set(null);
-
-        this.snackbarService.open('Profile updated successfully!');
     }
 
     cancelChanges(): void {
@@ -124,5 +193,20 @@ export class AccountComponent {
 
     getControl(name: string) {
         return this.profileForm.get(name);
+    }
+
+    createDate(timestamp: number) {
+        const date = this.dateService.parseTimestamp(timestamp);
+        return this.dateService.toLocaleISOString(date).split('T')[0];
+    }
+
+    canEdit(): boolean {
+        const uid = this.authService.currentUserClaims()?.uid;
+        if (!uid) return false;
+
+        const user = this.user();
+        if (!user) return false;
+
+        return uid === user.id;
     }
 }

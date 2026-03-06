@@ -14,8 +14,9 @@
             <mat-paginator
                 [disabled]="isLoading()"
                 [pageSizeOptions]="pageSizes"
-                [pageIndex]="pageIndex()"
-                [pageSize]="pageSize()"
+                [pageIndex]="initialPageIndex()"
+                [pageSize]="initialPageSize()"
+                [length]="totalCount()"
                 (page)="onPageEvent($event)"
                 showFirstLastButtons
                 aria-label="Select page of periodic elements"
@@ -63,7 +64,7 @@
                             <td
                                 mat-cell
                                 *matCellDef="let element"
-                                class="!text-center px-4 whitespace-nowrap"
+                                class="!text-center px-4 whitespace-nowrap truncate max-w-[240px]"
                             >
                                 @if (col.routerLink) {
                                     <a
@@ -72,27 +73,25 @@
                                     >
                                         {{ col.value(element) }}
                                     </a>
-                                } @else if (col.id === 'createdAt') {
-                                    <ng-container>
-                                        {{ col.value(element) | date }}
-                                    </ng-container>
-                                } @else if (col.id === 'status') {
+                                } @else if (typeof col.badge === 'function') {
                                     <div class="flex justify-center items-center">
-                                        <span
-                                            class="px-3 py-1 rounded-full font-semibold text-sm"
-                                            [ngClass]="{
-                                                'text-green-900 bg-green-200':
-                                                    element.status === 'open',
-                                                'text-blue-900 bg-blue-200':
-                                                    element.status === 'to_do',
-                                                'text-yellow-900 bg-yellow-200':
-                                                    element.status === 'in_progress',
-                                                'text-red-900 bg-red-200':
-                                                    element.status === 'closed',
-                                            }"
-                                        >
-                                            {{ col.value(element) }}
-                                        </span>
+                                        @if (col.badge!(element)?.includes('#')) {
+                                            <span
+                                                class="px-3 py-1 rounded-full font-semibold text-sm border-2"
+                                                [style.backgroundColor]="col.badge!(element) + '33'"
+                                                [style.borderColor]="col.badge!(element)"
+                                                [style.color]="col.badge!(element)"
+                                            >
+                                                {{ col.value(element) }}
+                                            </span>
+                                        } @else {
+                                            <span
+                                                class="px-3 py-1 rounded-full font-semibold text-sm border-2"
+                                                [ngClass]="col.badge!(element)"
+                                            >
+                                                {{ col.value(element) }}
+                                            </span>
+                                        }
                                     </div>
                                 } @else {
                                     {{ col.value(element) }}
@@ -101,43 +100,16 @@
                         </ng-container>
                     }
 
-                    @if (showActions() && canModify()) {
-                        <ng-container matColumnDef="actions">
-                            <th
-                                mat-header-cell
-                                *matHeaderCellDef
-                                class="!text-center text-base font-bold"
-                            >
-                                Actions
-                            </th>
-                            <td mat-cell *matCellDef="let element" class="!text-center">
-                                <div class="flex justify-center items-center gap-2">
-                                    @if (showEditAction()) {
-                                        <button
-                                            mat-icon-button
-                                            (click)="onEdit(element)"
-                                            aria-label="Edit"
-                                        >
-                                            <mat-icon>edit</mat-icon>
-                                        </button>
-                                    }
-                                    @if (showDeleteAction()) {
-                                        <button
-                                            mat-icon-button
-                                            (click)="onDelete(element)"
-                                            aria-label="Delete"
-                                        >
-                                            <mat-icon class="!text-red-600">delete</mat-icon>
-                                        </button>
-                                    }
-                                </div>
-                            </td>
-                        </ng-container>
-                    }
-
                     <tr mat-header-row *matHeaderRowDef="columnIds()"></tr>
                     <tr
-                        class="odd:!bg-light-text-hover/20 dark:odd:!bg-dark-hover/20 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                        (click)="toggleRow(row)"
+                        class="cursor-pointer transition-colors"
+                        [ngClass]="{
+                            '!bg-light-primary !text-white hover:!bg-light-primary/70 dark:!bg-dark-hover dark:hover:!bg-dark-hover/50':
+                                selectedRow()?.id === row.id,
+                            'odd:!bg-light-text-hover/20 hover:!bg-light-text-hover/40 dark:odd:!bg-dark-hover/20 dark:hover:!bg-dark-hover/50':
+                                selectedRow()?.id !== row.id,
+                        }"
                         mat-row
                         *matRowDef="let row; columns: columnIds()"
                     ></tr>

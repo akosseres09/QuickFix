@@ -16,4 +16,4 @@ RUN chmod +x /entrypoint.sh
 USER node
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["ng", "serve", "--poll=2000", "--host", "0.0.0.0"]
+CMD ["ng", "serve", "--proxy-config", "proxy.conf.json", "--host", "0.0.0.0"]

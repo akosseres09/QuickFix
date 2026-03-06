@@ -1,50 +1,74 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Project } from '../../model/Project';
-import { UserService } from '../user/user.service';
-import { User } from '../../model/User';
-
-export interface ProjectFilters {
-    projectName?: string | null;
-}
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
+import { map, Observable } from 'rxjs';
+import { ApiQueryParams } from '../../constants/api/ApiQueryParams';
+import { PaginatedResponse } from '../../constants/api/PaginatedResponse';
+import { ParamsHandler } from '../../utils/paramsHandler';
 
 @Injectable({
     providedIn: 'root',
 })
 export class ProjectService {
-    constructor(private userService: UserService) {}
+    private readonly http = inject(HttpClient);
+    private readonly url = environment.apiUrl;
 
-    getProjects(filters: Partial<ProjectFilters> = {}): Array<Project> {
-        let baseProjects = [
-            {
-                id: '1',
-                name: 'Google IT',
-                createdAt: new Date(),
-                admin: this.userService.getUser() as User,
-                users: [],
-                issues: [],
-            },
-            {
-                id: '1',
-                name: 'Google HR',
-                createdAt: new Date(),
-                admin: this.userService.getUser() as User,
-                users: [
-                    this.userService.getUser() as User,
-                    this.userService.getUser() as User,
-                    this.userService.getUser() as User,
-                    this.userService.getUser() as User,
-                ],
-                issues: [],
-            },
-        ];
+    /**
+     * Fetches projects with optional query parameters
+     * Automatically filters out null/undefined/empty values
+     * Returns paginated response with metadata
+     */
+    getProjects(
+        organizationId: string,
+        queryParams: ApiQueryParams = {}
+    ): Observable<PaginatedResponse<Project>> {
+        const params = ParamsHandler.convertToHttpParams(queryParams);
 
-        baseProjects = baseProjects.filter((project) => {
-            if (filters.projectName) {
-                return project.name.toLowerCase().includes(filters.projectName.toLowerCase());
-            }
-            return true;
+        return this.http.get<PaginatedResponse<Project>>(`${this.url}/${organizationId}/project`, {
+            params: params,
         });
+    }
 
-        return baseProjects;
+    /**
+     * Fetches projects and returns only the items array (legacy support)
+     * Use this if you don't need pagination metadata
+     */
+    getProjectsSimple(
+        organizationId: string,
+        queryParams: ApiQueryParams = {}
+    ): Observable<Project[]> {
+        return this.getProjects(organizationId, queryParams).pipe(
+            map((response) => response.items)
+        );
+    }
+
+    getProject(organizationId: string, identifier: string): Observable<Project> {
+        return this.http.get<Project>(`${this.url}/${organizationId}/project/${identifier}`);
+    }
+
+    /**
+     * Creates a new project
+     */
+    createProject(organizationId: string, project: Partial<Project>): Observable<Project> {
+        return this.http.post<Project>(`${this.url}/${organizationId}/project`, project);
+    }
+
+    /**
+     * Updates an existing project
+     */
+    updateProject(
+        organizationId: string,
+        id: string,
+        project: Partial<Project>
+    ): Observable<Project> {
+        return this.http.put<Project>(`${this.url}/${organizationId}/project/${id}`, project);
+    }
+
+    /**
+     * Deletes a project
+     */
+    deleteProject(organizationId: string, id: string): Observable<void> {
+        return this.http.delete<void>(`${this.url}/${organizationId}/project/${id}`);
     }
 }

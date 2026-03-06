@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, signal } from '@angular/core';
+import { Component, DestroyRef, inject, OnDestroy, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -8,6 +8,7 @@ import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'app-verify',
@@ -28,11 +29,13 @@ import { SnackbarService } from '../../shared/services/snackbar/snackbar.service
     standalone: true,
 })
 export class VerifyComponent implements OnDestroy {
-    private authService = inject(AuthService);
-    private router = inject(Router);
-    private fb = inject(FormBuilder);
-    private snackbar = inject(SnackbarService);
-    currentRoute = inject(ActivatedRoute);
+    private readonly authService = inject(AuthService);
+    private readonly router = inject(Router);
+    private readonly fb = inject(FormBuilder);
+    private readonly snackbar = inject(SnackbarService);
+    private readonly destroyRef = inject(DestroyRef);
+    private readonly currentRoute = inject(ActivatedRoute);
+
     token = signal(this.currentRoute.snapshot.queryParamMap.get('token') ?? '');
     verifyPage = signal(true);
     verifyForm = this.fb.group({
@@ -45,25 +48,28 @@ export class VerifyComponent implements OnDestroy {
     }
 
     onSubmit() {
-        if (!this.verifyForm.valid) return;
+        if (this.verifyForm.invalid) return;
 
         const token = this.getControl('token')?.value;
 
-        if (!token || token !== this.token()) return;
+        if (!token) return;
 
         this.snackbar.open('Account Verified!');
         this.router.navigateByUrl('/auth/login');
 
-        /*this.authService.verify(token as string).subscribe({
-            next: (response) => {
-                this.snackbar.open('Account Verified!');
-                this.router.navigateByUrl('/auth/login');
-            },
-            error: (error) => {
-                console.error(error);
-                this.snackbar.open('Failed to verify account!', ['snackbar-error']);
-            },
-        });*/
+        this.authService
+            .verify(token as string)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+                next: (response) => {
+                    this.snackbar.success('Account Verified!');
+                    this.router.navigateByUrl('/auth/login');
+                },
+                error: (error) => {
+                    console.error(error);
+                    this.snackbar.error('Failed to verify account!');
+                },
+            });
     }
 
     resendVerificationEmail() {}

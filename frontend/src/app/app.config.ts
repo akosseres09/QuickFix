@@ -1,15 +1,30 @@
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import {
+    provideRouter,
+    withComponentInputBinding,
+    withRouterConfig,
+    withInMemoryScrolling,
+} from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 
 import { routes } from './app.routes';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { authInterceptor } from './shared/interceptor/auth/auth.interceptor';
+import { caseInterceptor } from './shared/interceptor/case/case.interceptor';
 
 export const appConfig: ApplicationConfig = {
     providers: [
-        provideHttpClient(),
+        provideHttpClient(withInterceptors([authInterceptor, caseInterceptor])),
         provideZoneChangeDetection({ eventCoalescing: true }),
-        provideRouter(routes),
+        provideRouter(
+            routes,
+            withComponentInputBinding(),
+            withRouterConfig({ paramsInheritanceStrategy: 'always' }),
+            withInMemoryScrolling({
+                anchorScrolling: 'enabled',
+                scrollPositionRestoration: 'top',
+            })
+        ),
         provideAnimations(),
     ],
 };

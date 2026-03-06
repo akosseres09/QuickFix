@@ -5,9 +5,9 @@ namespace common\models;
 use api\models\UserRefreshToken;
 use common\models\query\UserQuery;
 use Lcobucci\JWT\UnencryptedToken;
+use Symfony\Component\Uid\Uuid;
 use Throwable;
 use Yii;
-use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
@@ -15,7 +15,7 @@ use yii\web\IdentityInterface;
 /**
  * User model
  *
- * @property integer $id
+ * @property string $id
  * @property string $username
  * @property string $password_hash
  * @property string $password_reset_token
@@ -23,6 +23,11 @@ use yii\web\IdentityInterface;
  * @property string $email
  * @property string $auth_key
  * @property integer $status
+ * @property string $first_name
+ * @property string $last_name
+ * @property string $phone_number
+ * @property string $date_of_birth
+ * @property string $profile_picture_url
  * @property integer $created_at
  * @property integer $updated_at
  * @property integer $deleted_at
@@ -32,7 +37,10 @@ use yii\web\IdentityInterface;
  * @property string $password write-only password
  * 
  * relations
- * @property RefreshToken[] $refreshTokens
+ * @property UserRefreshToken[] $refreshTokens
+ * @property Project[] $projects
+ * @property Issue[] $createdIssues
+ * @property Issue[] $assignedIssues
  */
 class User extends ActiveRecord implements IdentityInterface
 {
@@ -47,13 +55,26 @@ class User extends ActiveRecord implements IdentityInterface
 
     public function fields(): array
     {
-        $fields = parent::fields();
+        $fields = [
+            'id',
+            'username',
+            'email',
+            'status',
+            'isAdmin' => 'is_admin',
+            'createdAt' => 'created_at',
+            'updatedAt' => 'updated_at',
+            'passwordHash' => 'password_hash',
+            'firstName' => 'first_name',
+            'lastName' => 'last_name',
+            'phoneNumber' => 'phone_number',
+            'dateOfBirth' => 'date_of_birth',
+            'profilePictureUrl' => 'profile_picture_url',
+        ];
 
         if ($this->getScenario() === self::SCENARIO_DEFAULT) {
             unset($fields['password_hash']);
         }
 
-        unset($fields['password_reset_token'], $fields['auth_key'], $fields['verification_token']);
         return $fields;
     }
 
@@ -78,21 +99,47 @@ class User extends ActiveRecord implements IdentityInterface
     /**
      * {@inheritdoc}
      */
+    public function beforeSave($insert)
+    {
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+
+        if (!$insert) {
+            return true;
+        }
+
+        if (empty($this->id)) {
+            $this->id = Uuid::v7()->toString();
+        }
+
+        if (empty($this->profile_picture_url)) {
+            $this->profile_picture_url = $this->generateProfilePictureUrl();
+        }
+
+        return true;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function rules(): array
     {
         return [
             [['username', 'password_reset_token', 'auth_key', 'email'], 'unique'],
-            [['auth_key', 'username', 'password_hash', 'email'], 'required'],
+            [['auth_key', 'username', 'password_hash', 'email', 'first_name', 'last_name'], 'required'],
             [['auth_key'], 'string', 'max' => 32],
             [['email'], 'email'],
-            [['email', 'password_hash', 'username', 'password_reset_token', 'verification_token'], 'string', 'max' => 255],
+            [['email', 'password_hash', 'username', 'password_reset_token', 'verification_token', 'first_name', 'last_name', 'phone_number'], 'string', 'max' => 255],
             ['is_admin', 'default', 'value' => self::USER],
             ['is_admin', 'in', 'range' => [self::USER, self::ADMIN]],
             ['status', 'default', 'value' => self::STATUS_INACTIVE],
             ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_INACTIVE]],
-            [['created_at', 'updated_at', 'deleted_at', 'email_verification_token_expires_at'], 'integer']
+            [['created_at', 'updated_at', 'deleted_at', 'email_verification_token_expires_at'], 'integer'],
+            [['date_of_birth'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
+
 
     public static function find(): UserQuery
     {
@@ -127,7 +174,7 @@ class User extends ActiveRecord implements IdentityInterface
             $userId = $parsedToken->claims()->get('uid');
 
             return static::findIdentity($userId);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             Yii::error('Error parsing access token: ' . $e->getMessage(), __METHOD__);
             return null;
         }
@@ -184,9 +231,45 @@ class User extends ActiveRecord implements IdentityInterface
         return time() < $this->password_reset_token_expires_at;
     }
 
+    /**
+     * Gets query for [[UserRefreshToken]]
+     * 
+     * @return \yii\db\ActiveQuery
+     */
     public function getRefreshTokens()
     {
         return $this->hasMany(UserRefreshToken::class, ['user_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[Project]]
+     * 
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProjects()
+    {
+        return $this->hasMany(Project::class, ['id' => 'project_id'])
+            ->viaTable('project_member', ['user_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[Issue]] created by the user
+     * 
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCreatedIssues()
+    {
+        return $this->hasMany(Issue::class, ['created_by' => 'id']);
+    }
+
+    /**
+     * Gets query for [[Issue]] assigned to the user
+     * 
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAssignedIssues()
+    {
+        return $this->hasMany(Issue::class, ['assigned_to' => 'id']);
     }
 
     /**
@@ -294,5 +377,20 @@ class User extends ActiveRecord implements IdentityInterface
     {
         $this->password_reset_token = null;
         $this->password_reset_token_expires_at = null;
+    }
+
+    public function setProfilePictureUrl(): void
+    {
+        $url = $this->generateProfilePictureUrl();
+        $this->profile_picture_url = $url;
+    }
+
+    public function generateProfilePictureUrl(): string
+    {
+        if ($this->first_name && $this->last_name) {
+            return 'https://ui-avatars.com/api/?name=' . urlencode($this->first_name . ' ' . $this->last_name) . '&background=random&size=256';
+        }
+
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->username) . '&background=random&size=256';
     }
 }

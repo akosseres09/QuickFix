@@ -78,6 +78,8 @@ export class DialogService {
             saveDisabled?: boolean;
             showSaveButton?: boolean;
             showCancelButton?: boolean;
+            saveButtonClass?: string;
+            cancelButtonClass?: string;
         }
     ): MatDialogRef<DialogComponent> {
         return this.dialog.open(DialogComponent, {
@@ -93,6 +95,8 @@ export class DialogService {
                 saveDisabled: options?.saveDisabled || false,
                 showSaveButton: options?.showSaveButton !== false,
                 showCancelButton: options?.showCancelButton !== false,
+                saveButtonClass: options?.saveButtonClass,
+                cancelButtonClass: options?.cancelButtonClass,
             } as DialogData,
         });
     }
@@ -110,6 +114,8 @@ export class DialogService {
             confirmLabel?: string;
             cancelLabel?: string;
             width?: string;
+            cancelButtonClass?: string;
+            saveButtonClass?: string;
         }
     ): MatDialogRef<DialogComponent> {
         return this.dialog.open(DialogComponent, {
@@ -122,6 +128,8 @@ export class DialogService {
                 cancelLabel: options?.cancelLabel || 'Cancel',
                 showSaveButton: true,
                 showCancelButton: true,
+                saveButtonClass: options?.saveButtonClass,
+                cancelButtonClass: options?.cancelButtonClass,
             } as DialogData,
         });
     }

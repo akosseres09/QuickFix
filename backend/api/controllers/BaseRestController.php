@@ -2,16 +2,28 @@
 
 namespace api\controllers;
 
+use api\filters\OrganizationSlugTranslatorFilter;
+use api\filters\ProjectKeyTranslatorFilter;
 use yii\filters\Cors;
 use yii\rest\ActiveController;
 use yii\web\Response;
 
-class BaseRestController extends ActiveController
+abstract class BaseRestController extends ActiveController
 {
+    public $serializer = [
+        'class' => 'yii\rest\Serializer',
+        'collectionEnvelope' => 'items',
+        'metaEnvelope' => '_meta',
+        'linksEnvelope' => '_links',
+    ];
+
     public function behaviors(): array
     {
         $behaviors = parent::behaviors();
-        $behaviors['contentNegotiator']['formats']['text/html'] = Response::FORMAT_JSON;
+
+        $auth = $behaviors['authenticator'];
+        unset($behaviors['authenticator']);
+
         $behaviors['corsFilter'] = [
             'class' => Cors::class,
             'cors' => [
@@ -21,11 +33,24 @@ class BaseRestController extends ActiveController
                 'Access-Control-Allow-Credentials' => true,
             ],
         ];
-        $behaviors['authenticator'] = [
-            'class' => \yii\filters\auth\HttpBearerAuth::class,
-            'except' => ['options'], // Allow OPTIONS requests without authentication
+
+        $auth['class'] = \yii\filters\auth\HttpBearerAuth::class;
+        $auth['except'] = ['options'];
+        $behaviors['authenticator'] = $auth;
+
+        $behaviors['contentNegotiator']['formats']['text/html'] = Response::FORMAT_JSON;
+
+        // you can unset or modify these translators in child controllers if not needed
+        $behaviors["projectTranslator"] = [
+            'class' => ProjectKeyTranslatorFilter::class,
+        ];
+
+        $behaviors['organizationTranslator'] = [
+            'class' => OrganizationSlugTranslatorFilter::class
         ];
 
         return $behaviors;
     }
+
+    abstract public function findModel($id);
 }

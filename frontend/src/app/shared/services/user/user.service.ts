@@ -1,29 +1,33 @@
-import { Injectable } from '@angular/core';
-import { ACTIVE, ADMIN, User } from '../../model/User';
-import { Router } from '@angular/router';
+import { inject, Injectable } from '@angular/core';
+import { User } from '../../model/User';
+import { HttpClient } from '@angular/common/http';
+import { AuthService } from '../auth/auth.service';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
     providedIn: 'root',
 })
 export class UserService {
-    user: User | null = null;
+    private readonly http = inject(HttpClient);
+    private readonly authService = inject(AuthService);
+    private readonly apiUrl = environment.apiUrl;
 
-    constructor(private router: Router) {}
+    getUser() {
+        const id = this.authService.currentUserClaims()?.uid;
 
-    getUser(): User | null {
-        if (!this.router.url.includes('/auth')) {
-            this.user = {
-                id: '1',
-                username: 'Admin',
-                email: 'admin@example.com',
-                created_at: new Date(),
-                status: ACTIVE,
-                role: ADMIN,
-            };
-        } else {
-            this.user = null;
-        }
+        return this.http.get<User>(`${this.apiUrl}/user/${id}`);
+    }
 
-        return this.user;
+    updateUser(userData: Partial<User>) {
+        const id = this.authService.currentUserClaims()?.uid;
+
+        const data = {
+            ...userData,
+            updated_at: Date.now(),
+            date_of_birth: userData.dateOfBirth,
+            phone_number: userData.phoneNumber,
+        };
+
+        return this.http.put<User>(`${this.apiUrl}/user/${id}`, data);
     }
 }

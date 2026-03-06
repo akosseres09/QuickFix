@@ -28,7 +28,7 @@ export class BaseLayoutComponent implements OnInit {
     }
 
     checkPage(url: string) {
-        if (url.match('/(projects|worktime|account|settings)')) {
+        if (url.match('/(organizations|worktime|account|settings)')) {
             this.innerPage.set(true);
         } else {
             this.innerPage.set(false);

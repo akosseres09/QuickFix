@@ -1,9 +1,43 @@
 <div class="max-w-7xl mx-auto">
+    <app-filter
+        [filterFields]="filteredFields"
+        (onFilterChange)="onFilterChange($event)"
+    ></app-filter>
     <app-table
-        (delete)="onDelete($event)"
-        (edit)="onEdit($event)"
         [dataSource]="shownIssues()"
         [displayedColumns]="displayedColumns"
         tableHeader="Issues"
+        [initialPageSize]="listState.pageSize()"
+        [initialPageIndex]="listState.pageIndex()"
+        [initialSortActive]="listState.sortActive()"
+        [initialSortDirection]="listState.sortDirection()"
+        [totalCount]="listState.totalCount()"
+        [isLoading]="listState.isLoading()"
+        (sortChange)="onSortChange($event)"
+        (pageChange)="onPageChange($event)"
+        [selectedRow]="selectedRow()"
+        (selectedRowChange)="onRowChange($event)"
     ></app-table>
+    <div class="fixed right-6 bottom-6 z-50">
+        <app-speed-dial
+            #speedDial
+            [buttons]="speedDialButtons()"
+            [selectedRow]="selectedRow()"
+            (selectedRowChange)="selectedRow.set($event)"
+        ></app-speed-dial>
+    </div>
 </div>
+
+<ng-template #archiveConfirmTemplate>
+    <div class="py-4">
+        <p class="text-gray-700 dark:text-gray-300">Are you sure you want to archive this issue?</p>
+    </div>
+</ng-template>
+
+<ng-template #unarchiveConfirmTemplate>
+    <div class="py-4">
+        <p class="text-gray-700 dark:text-gray-300">
+            Are you sure you want to unarchive this issue?
+        </p>
+    </div>
+</ng-template>

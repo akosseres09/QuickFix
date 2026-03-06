@@ -1,0 +1,62 @@
+<form class="flex flex-col space-y-4" [formGroup]="organizationForm" (submit)="onSubmit()">
+    <div class="flex gap-4 flex-col sm:flex-row">
+        <mat-form-field class="w-full" appearance="fill">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name" required />
+            @if (name.invalid && (name.dirty || name.touched)) {
+                <mat-error>
+                    @if (name.errors?.['required']) {
+                        <span>Name is required</span>
+                    }
+                    @if (name.errors?.['maxlength']) {
+                        <span>Name must be at most 255 characters long</span>
+                    }
+                </mat-error>
+            }
+        </mat-form-field>
+
+        <mat-form-field class="w-full" appearance="fill">
+            <mat-label>Slug</mat-label>
+            <input matInput formControlName="slug" required />
+            @if (slug.invalid && (slug.dirty || slug.touched)) {
+                <mat-error>
+                    @if (slug.errors?.['required']) {
+                        <span>Slug is required</span>
+                    }
+                    @if (slug.errors?.['maxlength']) {
+                        <span>Slug must be at most 16 characters long</span>
+                    }
+                </mat-error>
+            }
+        </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="fill">
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="description"></textarea>
+    </mat-form-field>
+
+    <div class="flex flex-col md:flex-row md:gap-8 gap-4">
+        <mat-form-field class="w-full">
+            <mat-label>Logo URL</mat-label>
+            <input matInput formControlName="logUrl" />
+        </mat-form-field>
+
+        @if (logoUrl.value) {
+            <img class="w-20 h-20 object-fill" [src]="logoUrl.value" />
+        }
+    </div>
+
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-4">
+        <button
+            mat-flat-button
+            color="primary"
+            [disabled]="isSubmitting() || organizationForm.invalid"
+            type="submit"
+        >
+            <mat-icon>{{ icon() }}</mat-icon>
+            {{ buttonText() }}
+        </button>
+        <a mat-button routerLink="/organizations" class="!px-6 !py-2"> Cancel </a>
+    </div>
+</form>

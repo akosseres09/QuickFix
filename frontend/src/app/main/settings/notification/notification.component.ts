@@ -1,5 +1,5 @@
 import { Component, computed, signal } from '@angular/core';
-import { NotificationSettings } from '../../../shared/constants/NotificationSettings';
+import { NotificationSettings } from '../../../shared/constants/settings/NotificationSettings';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';

@@ -1,7 +1,7 @@
 import { BaseModel } from './BaseModel';
 
 export interface WorktimeEntry extends BaseModel {
-    id: number;
+    id: string;
     issue: string;
     issueId: number;
     date: string;

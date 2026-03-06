@@ -1,0 +1,46 @@
+:host {
+    display: block;
+    width: 100%;
+}
+
+/* Smooth focus ring on the outer wrapper */
+:host .rich-text {
+    transition:
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+:host .rich-text:focus-within {
+    box-shadow:
+        0 0 0 2px rgba(57, 13, 231, 0.15),
+        0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+:host-context([data-theme='dark']) .rich-text:focus-within {
+    box-shadow:
+        0 0 0 2px rgba(67, 24, 242, 0.25),
+        0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Ensure the editor area has a nice scrollbar */
+:host ::ng-deep .ql-editor {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(128, 128, 128, 0.3) transparent;
+}
+
+:host ::ng-deep .ql-editor::-webkit-scrollbar {
+    width: 6px;
+}
+
+:host ::ng-deep .ql-editor::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+:host ::ng-deep .ql-editor::-webkit-scrollbar-thumb {
+    background: rgba(128, 128, 128, 0.3);
+    border-radius: 3px;
+}
+
+:host ::ng-deep .ql-editor::-webkit-scrollbar-thumb:hover {
+    background: rgba(128, 128, 128, 0.5);
+}

@@ -1,25 +1,37 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
-import { MatPaginatorModule } from '@angular/material/paginator';
+import {
+    Component,
+    computed,
+    inject,
+    input,
+    linkedSignal,
+    signal,
+    TemplateRef,
+    viewChild,
+} from '@angular/core';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { TableComponent } from '../../common/table/table.component';
 import { Project } from '../../shared/model/Project';
-import { DisplayedColumn } from '../../shared/constants/DisplayedColumn';
-import { ProjectFilters, ProjectService } from '../../shared/services/project/project.service';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { DisplayedColumn } from '../../shared/constants/table/DisplayedColumn';
+import { ProjectService } from '../../shared/services/project/project.service';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import {
-    MAT_FORM_FIELD_DEFAULT_OPTIONS,
-    MatFormField,
-    MatLabel,
-} from '@angular/material/form-field';
 import { MatOptionModule } from '@angular/material/core';
-import { MatInput } from '@angular/material/input';
-import { debounce } from 'rxjs';
-import { UrlService } from '../../shared/services/url/url.service';
 import { ActivatedRoute } from '@angular/router';
-import { MatButton } from '@angular/material/button';
 import { SpeedDialComponent } from '../../common/speed-dial/speed-dial.component';
+import { Sort } from '@angular/material/sort';
+import { ApiQueryParams } from '../../shared/constants/api/ApiQueryParams';
+import { SpeedDialButton } from '../../shared/constants/speed-dial/SpeedDialButton';
+import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
+import { Filter } from '../../shared/constants/Filter';
+import { FilterComponent } from '../../common/filter/filter.component';
+import { FilterService } from '../../shared/services/filter/filter.service';
+import { DisplayedColumnService } from '../../shared/services/displayed-column/displayed-column.service';
+import { SpeedDialButtonFactory } from '../../shared/services/speed-dial/speed-dial-button.factory';
+import { ListStateService } from '../../shared/services/list-state/list-state.service';
+import { ListState } from '../../shared/constants/table/ListState';
+import { DialogService } from '../../shared/services/dialog/dialog.service';
+import { finalize } from 'rxjs';
 
 @Component({
     selector: 'app-projects',
@@ -28,84 +40,243 @@ import { SpeedDialComponent } from '../../common/speed-dial/speed-dial.component
         MatPaginatorModule,
         CommonModule,
         TableComponent,
-        ReactiveFormsModule,
         MatAutocompleteModule,
         MatOptionModule,
-        MatFormField,
-        MatInput,
-        MatLabel,
-        MatButton,
         SpeedDialComponent,
-    ],
-    providers: [
-        { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { subscriptSizing: 'dynamic' } },
+        FilterComponent,
     ],
     templateUrl: './projects.component.html',
     styleUrl: './projects.component.css',
 })
 export class ProjectsComponent {
-    private readonly urlService = inject(UrlService);
-    private readonly fb = inject(FormBuilder);
     private readonly projectService = inject(ProjectService);
     private readonly activeRoute = inject(ActivatedRoute);
-    projects = signal<Project[]>(this.projectService.getProjects());
+    private readonly snackbarService = inject(SnackbarService);
+    private readonly filterService = inject(FilterService);
+    private readonly displayedColumnService = inject(DisplayedColumnService);
+    private readonly listStateService = inject(ListStateService);
+    private readonly buttonFactory = inject(SpeedDialButtonFactory);
+    private dialogService = inject(DialogService);
 
-    filterForm = this.fb.group({
-        projectName: [this.activeRoute.snapshot.queryParamMap.get('projectName') || ''],
+    organizationId = input.required<string>();
+
+    // List state (pagination, sorting, filtering)
+    readonly listState: ListState = this.listStateService.create(this.activeRoute, {
+        defaultPageSize: 10,
+        expand: 'owner,members',
     });
-    showFilterReset = signal<boolean>(this.activeRoute.snapshot.queryParamMap.has('projectName'));
-    filteredProjects = signal<Project[]>(this.projectService.getProjects(this.filterForm.value));
+
+    projects = signal<Project[]>([]);
+    selectedRow = signal<Project | null>(null);
+    filteredProjects = signal<Project[]>([]);
     shownProjects = computed(() => new MatTableDataSource<Project>(this.filteredProjects()));
-    displayedColumns = signal<DisplayedColumn<Project>[]>([
-        {
-            id: 'name',
-            label: 'Name',
-            sortable: true,
-            value: (e: Project) => e.name,
-            routerLink: (e: Project) => ['/projects', e.id],
-        },
-        {
-            id: 'admin',
-            label: 'Admin',
-            sortable: false,
-            value: (e: Project) => e.admin.username,
-            routerLink: (e: Project) => ['/users', e.admin.id],
-        },
-        {
-            id: 'users',
-            label: '# of users',
-            sortable: true,
-            value: (e: Project) => e.users.length,
-        },
-        {
-            id: 'createdAt',
-            label: 'Created At',
-            sortable: true,
-            value: (e: Project) => e.createdAt,
-        },
-    ]);
+    displayedColumns = linkedSignal<DisplayedColumn<Project>[]>(() =>
+        this.displayedColumnService.getProjectColumns(this.organizationId())
+    );
 
-    constructor() {
-        this.filterForm.valueChanges
-            .pipe(debounce(() => new Promise((resolve) => setTimeout(resolve, 300))))
-            .subscribe((filters) => {
-                const filterArray = Object.entries(filters);
-                filterArray.forEach(([key, value]) => {
-                    if (!value) {
-                        filters[key as keyof ProjectFilters] = null;
-                    }
-                });
-
-                if (filterArray.some(([_, value]) => value)) {
-                    this.showFilterReset.set(true);
+    speedDialButtons = computed<SpeedDialButton[]>(() => {
+        const selected = this.selectedRow();
+        return this.buttonFactory.createArchivableButtons({
+            entityName: 'Project',
+            hasSelection: selected !== null,
+            createRoute: ['new'],
+            editRouteBuilder: () => {
+                const project = this.selectedRow();
+                if (!project) {
+                    this.snackbarService.error('Please select a valid project to edit!');
+                    return null;
                 }
-                this.urlService.addQueryParams(filters);
-                this.filteredProjects.set(this.projectService.getProjects(filters));
+                return ['/', this.organizationId(), 'project', project.key, 'edit'];
+            },
+            isArchived: !!selected && selected.isArchived,
+            onArchive: () =>
+                this.openConfirmationDialog({
+                    header: 'Archive Project',
+                    confirmLabel: 'Archive',
+                    confirmAction: () =>
+                        this.updateProject({
+                            isArchived: true,
+                        }),
+                    template: this.archiveConfirmTemplate(),
+                }),
+            onUnarchive: () =>
+                this.openConfirmationDialog({
+                    header: 'Unarchive Project',
+                    confirmLabel: 'Unarchive',
+                    confirmAction: () =>
+                        this.updateProject({
+                            isArchived: false,
+                        }),
+                    template: this.archiveConfirmTemplate(),
+                }),
+            onDelete: () =>
+                this.openConfirmationDialog({
+                    header: 'Delete Project',
+                    confirmLabel: 'Delete',
+                    confirmAction: () => this.deleteProject(),
+                    template: this.deleteConfirmTemplate(),
+                }),
+        });
+    });
+
+    selectedProjectName = computed(() => {
+        const selectedRow = this.selectedRow();
+        if (!selectedRow) return '';
+        const project = this.projects().find((p) => p.key === selectedRow.key);
+        return project?.name || '';
+    });
+
+    filterFields: Filter[] = this.filterService.getProjectFilters();
+
+    // template reference variables
+    speedDial = viewChild<SpeedDialComponent>('speedDial');
+    deleteConfirmTemplate = viewChild<TemplateRef<any>>('deleteConfirmTemplate');
+    archiveConfirmTemplate = viewChild<TemplateRef<any>>('archiveConfirmTemplate');
+    speedDialNoButtonsLink = ['/projects/new'];
+
+    /**
+     * Fetches projects from the server using current query params.
+     * Updates the projects signal and pagination metadata.
+     */
+    getProjects() {
+        const orgId = this.organizationId();
+        if (!this.organizationId) return;
+
+        this.listState.isLoading.set(true);
+
+        this.projectService
+            .getProjects(orgId, this.listState.buildQueryParams())
+            .pipe(finalize(() => this.listState.isLoading.set(false)))
+            .subscribe({
+                next: (response) => {
+                    this.projects.set(response.items);
+                    this.filteredProjects.set(response.items);
+                    this.listState.totalCount.set(response._meta.totalCount);
+                },
+                error: (error) => {
+                    console.error('Error fetching projects', error);
+                    this.snackbarService.error('Error fetching projects');
+                },
             });
     }
 
-    resetFilters() {
-        this.filterForm.reset();
-        this.showFilterReset.set(false);
+    /**
+     * Handles sort change events from the table, updates the URL and fetches new data.
+     */
+    onSortChange(event: Sort) {
+        this.listState.onSortChange(event, () => this.getProjects());
+    }
+
+    /**
+     * Handles page change events from the paginator, updates the URL and fetches new data.
+     */
+    onPageChange(event: PageEvent) {
+        this.listState.onPageChange(event, () => this.getProjects());
+    }
+
+    /**
+     * Handles row selection changes from the custom table.
+     * @param project The currently selected project. If null, it means the selection was cleared.
+     */
+    onRowChange(project: Project | null) {
+        if (!project) {
+            this.selectedRow.set(null);
+            this.speedDial()?.close();
+            return;
+        }
+
+        this.selectedRow.set(project);
+        if (project.key && this.speedDial()?.isOpen()) return;
+
+        this.speedDial()?.onTogglerClick();
+    }
+
+    /**
+     * Handles filter changes emitted from the ProjectFilterComponent.
+     */
+    onFilterChange(filterParams: ApiQueryParams) {
+        this.listState.onFilterChange(filterParams, () => this.getProjects());
+    }
+
+    openConfirmationDialog(config: {
+        header: string;
+        confirmLabel: string;
+        confirmAction: () => void;
+        template?: TemplateRef<any>;
+    }) {
+        const template = config.template;
+        if (!template) {
+            this.snackbarService.error('Error opening confirmation dialog');
+            return;
+        }
+
+        const dialogRef = this.dialogService.openConfirmDialog(config.header, template, {
+            confirmLabel: config.confirmLabel,
+            cancelLabel: 'Cancel',
+            width: '450px',
+        });
+
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result && result.action === 'save') {
+                config.confirmAction();
+            }
+        });
+    }
+
+    deleteProject() {
+        const project = this.selectedRow();
+        if (!project) {
+            this.snackbarService.error('No project selected');
+            return;
+        }
+
+        const orgId = this.organizationId();
+        if (!orgId) {
+            this.snackbarService.error('Organization ID is missing');
+            return;
+        }
+
+        this.projectService.deleteProject(orgId, project.key).subscribe({
+            next: () => {
+                this.snackbarService.success(
+                    `Project "${this.selectedProjectName()}" deleted successfully!`
+                );
+                this.selectedRow.set(null);
+                this.speedDial()?.close();
+                this.getProjects();
+            },
+            error: (error) => {
+                console.error('Error deleting project', error);
+                this.snackbarService.error('Error deleting project');
+            },
+        });
+    }
+
+    updateProject(data: Partial<Project>) {
+        const project = this.selectedRow();
+        if (!project) {
+            this.snackbarService.error('No project selected');
+            return;
+        }
+
+        const orgId = this.organizationId();
+        if (!orgId) {
+            this.snackbarService.error('Organization ID is missing');
+            return;
+        }
+
+        this.projectService.updateProject(orgId, project.key, data).subscribe({
+            next: () => {
+                this.selectedRow.set(null);
+                this.speedDial()?.close();
+                this.getProjects();
+                this.snackbarService.success(
+                    `Project "${this.selectedProjectName()}" archived successfully!`
+                );
+            },
+            error: (error) => {
+                console.error(error);
+            },
+        });
     }
 }

@@ -1,4 +1,4 @@
 export const environment = {
-    apiUrl: 'http://api.quickfix.test',
+    apiUrl: '/api',
     production: false,
 };

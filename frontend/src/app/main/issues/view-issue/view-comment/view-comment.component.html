@@ -1,0 +1,72 @@
+<div class="relative">
+    @if (isLoading()) {
+        <div class="absolute inset-0 z-30 bg-white dark:bg-gray-800 opacity-50"></div>
+        <div class="absolute z-50 top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">
+            <mat-spinner diameter="45"></mat-spinner>
+        </div>
+    }
+    <div class="space-y-8">
+        @for (comment of comments(); track comment.id) {
+            <div
+                [ngClass]="{
+                    'before:content-[\'\'] before:bg-gray-700 before:absolute before:block before:h-8 before:w-[1px] before:top-[-2rem] before:left-20':
+                        !$first,
+                }"
+                class="relative flex gap-4 comment"
+            >
+                <app-avatar class="hidden sm:block" [user]="comment.creator!"></app-avatar>
+                <div class="w-full border border-gray-700 rounded-md">
+                    <div class="flex justify-between w-full px-4 py-2 border-b border-gray-700">
+                        <div>
+                            <a
+                                class="hover:underline hover:underline-offset-2"
+                                [routerLink]="['/users', '@' + comment.creator?.username]"
+                                >{{ comment.creator?.username }}</a
+                            >
+                            <span
+                                class="text-gray-400"
+                                matTooltipShowDelay="500"
+                                [matTooltip]="comment.createdAt * 1000 | gmt"
+                            >
+                                {{ comment.createdAt * 1000 | relativeTime }}
+                            </span>
+                        </div>
+                        <div>
+                            <mat-icon class="cursor-pointer" (click)="editComment(comment)"
+                                >edit</mat-icon
+                            >
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <quill-view
+                            class="!w-full border-red-500"
+                            format="json"
+                            [content]="comment.content"
+                        ></quill-view>
+                    </div>
+                </div>
+            </div>
+        } @empty {
+            <span class="text-gray-500 dark:text-gray-400"
+                >No comments have been made yet. Start the conversation!</span
+            >
+        }
+    </div>
+
+    @if (hasMore()) {
+        <div class="flex justify-center mt-4">
+            <button
+                mat-flat-button
+                (click)="loadMore()"
+                [disabled]="isLoading()"
+                class="!bg-transparent !rounded-md"
+            >
+                @if (isLoading()) {
+                    Loading...
+                } @else {
+                    Load More
+                }
+            </button>
+        </div>
+    }
+</div>
