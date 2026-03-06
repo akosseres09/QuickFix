@@ -211,6 +211,7 @@ export class ViewComponent {
 
         this.issueCommentService
             .editComment({
+                organizationId: this.organizationId(),
                 projectId: this.projectId(),
                 issueId: this.issueId(),
                 data: editContent,
@@ -235,6 +236,7 @@ export class ViewComponent {
 
         this.issueCommentService
             .createComment({
+                organizationId: this.organizationId(),
                 projectId: this.projectId(),
                 issueId: this.issueId(),
                 data: newComment,
