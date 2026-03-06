@@ -13,15 +13,25 @@ export class LabelService {
     private readonly http = inject(HttpClient);
     private readonly url = environment.apiUrl;
 
-    createLabel(projectId: string, label: Omit<Label, 'id'>) {
-        return this.http.post<Label>(`${this.url}/${projectId}/label`, label);
+    createLabel(data: { organizationId: string; projectId: string; label: Omit<Label, 'id'> }) {
+        return this.http.post<Label>(
+            `${this.url}/${data.organizationId}/${data.projectId}/label`,
+            data.label
+        );
     }
 
-    getLabelsToProject(projectId: string, queryParams: ApiQueryParams = {}) {
-        const params = ParamsHandler.convertToHttpParams(queryParams);
+    getLabelsToProject(data: {
+        organizationId: string;
+        projectId: string;
+        queryParams?: ApiQueryParams;
+    }) {
+        const params = data.queryParams ? ParamsHandler.convertToHttpParams(data.queryParams) : {};
 
-        return this.http.get<PaginatedResponse<Label>>(`${this.url}/${projectId}/label`, {
-            params: params,
-        });
+        return this.http.get<PaginatedResponse<Label>>(
+            `${this.url}/${data.organizationId}/${data.projectId}/label`,
+            {
+                params: params,
+            }
+        );
     }
 }

@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { PaginatedResponse } from '../../constants/api/PaginatedResponse';
 import { ProjectMember } from '../../model/ProjectMember';
 import { environment } from '../../../../environments/environment';
+import { ApiQueryParams } from '../../constants/api/ApiQueryParams';
 
 @Injectable({
     providedIn: 'root',
