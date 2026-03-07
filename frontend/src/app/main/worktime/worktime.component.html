@@ -17,8 +17,8 @@
     </div>
 </div>
 
-<div [formGroup]="form" class="mb-6">
-    <mat-form-field appearance="outline" class="w-full md:w-72">
+<div [formGroup]="form" class="mb-6 flex flex-col md:flex-row gap-4">
+    <mat-form-field appearance="outline" class="w-full sm:w-72">
         <mat-label>Project Name</mat-label>
         <input formControlName="projectName" matInput [matAutocomplete]="auto" />
 
@@ -34,18 +34,19 @@
             }
         </mat-autocomplete>
     </mat-form-field>
-</div>
 
-<div class="h-fit">
-    @if (endDate() && startDate()) {
-        <app-date-range
-            [startDate]="startDate()"
-            [endDate]="endDate()"
-            [minDate]="minDate()"
-            [maxDate]="maxDate()"
-            (dateRangeChange)="onDateRangeChange($event)"
-        ></app-date-range>
-    }
+    <div class="h-fit">
+        @if (endDate() && startDate()) {
+            <app-date-range
+                class="w-full"
+                [startDate]="startDate()"
+                [endDate]="endDate()"
+                [minDate]="minDate()"
+                [maxDate]="maxDate()"
+                (dateRangeChange)="onDateRangeChange($event)"
+            ></app-date-range>
+        }
+    </div>
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6 text-white">
@@ -87,4 +88,5 @@
 <app-worktime-dialog
     [projectId]="selectedProjectId()"
     [organizationId]="organizationId()"
+    (worktimeSaved)="onWorktimeSaved($event)"
 ></app-worktime-dialog>

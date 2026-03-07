@@ -6,11 +6,10 @@ import {
     input,
     OnInit,
     signal,
-    TemplateRef,
     viewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
@@ -29,7 +28,6 @@ import { TableComponent } from '../../common/table/table.component';
 import { WorktimeDialogComponent } from './worktime-dialog/worktime-dialog.component';
 import { Stat } from '../../shared/constants/Stat';
 import { DisplayedColumn } from '../../shared/constants/table/DisplayedColumn';
-import { DialogService } from '../../shared/services/dialog/dialog.service';
 import { DateService } from '../../shared/services/date/date.service';
 import { WorktimeService } from '../../shared/services/worktime/worktime.service';
 import { ProjectService } from '../../shared/services/project/project.service';
@@ -43,7 +41,6 @@ import { ApiQueryParams } from '../../shared/constants/api/ApiQueryParams';
     selector: 'app-worktime',
     imports: [
         CommonModule,
-        FormsModule,
         ReactiveFormsModule,
         MatSelectModule,
         MatProgressSpinnerModule,
@@ -57,13 +54,11 @@ import { ApiQueryParams } from '../../shared/constants/api/ApiQueryParams';
         MatInput,
         MatAutocomplete,
         MatAutocompleteTrigger,
-        ReactiveFormsModule,
     ],
     templateUrl: './worktime.component.html',
     styleUrl: './worktime.component.css',
 })
 export class WorktimeComponent implements OnInit {
-    private readonly dialogService = inject(DialogService);
     private readonly dateService = inject(DateService);
     private readonly worktimeService = inject(WorktimeService);
     private readonly projectService = inject(ProjectService);
@@ -348,64 +343,19 @@ export class WorktimeComponent implements OnInit {
     }
 
     openWorktimeDialog(): void {
-        const dialog = this.worktimeDialog();
-        if (!dialog?.worktimeFormTemplate) return;
-
-        const orgId = this.organizationId();
-        const projectId = this.selectedProjectId();
-        if (!projectId) {
+        if (!this.selectedProjectId()) {
             this.snackbarService.error('Please select a project first.');
             return;
         }
+        this.worktimeDialog()?.open();
+    }
 
-        const dialogRef = this.dialogService.openFormDialog(
-            'Add Worktime',
-            dialog.worktimeFormTemplate() as TemplateRef<any>,
-            {
-                saveLabel: 'Save',
-                cancelLabel: 'Cancel',
-                saveDisabled: dialog.worktimeForm.invalid,
-                width: '600px',
-            }
-        );
+    onWorktimeSaved(worktime: Worktime): void {
+        const start = this.dateService.toLocaleISOString(this.startDate(), true);
+        const end = this.dateService.toLocaleISOString(this.endDate(), true);
+        if (worktime.loggedAt <= start || worktime.loggedAt >= end) return;
 
-        const statusSub = dialog.worktimeForm.statusChanges.subscribe(() => {
-            if (dialogRef.componentInstance) {
-                dialogRef.componentInstance.data.saveDisabled = dialog.worktimeForm.invalid;
-            }
-        });
-
-        dialogRef
-            .afterClosed()
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe((result) => {
-                statusSub.unsubscribe();
-                if (result?.action === 'save' && dialog.worktimeForm.valid) {
-                    const formValue = dialog.worktimeForm.value;
-                    const loggedAt = this.dateService.toLocaleISOString(
-                        new Date(formValue.loggedAt),
-                        true
-                    );
-                    const minutesSpent = Math.round(parseFloat(formValue.hours) * 60);
-
-                    this.worktimeService
-                        .createWorktime(orgId, {
-                            issue_id: formValue.issueId,
-                            minutes_spent: minutesSpent,
-                            logged_at: loggedAt,
-                            description: formValue.description ?? '',
-                        })
-                        .subscribe({
-                            next: (created) => {
-                                this.filteredEntries.update((entries) => [created, ...entries]);
-                                this.snackbarService.success('Worktime entry saved.');
-                            },
-                            error: () =>
-                                this.snackbarService.error('Failed to save worktime entry.'),
-                        });
-                }
-                dialog.worktimeForm.reset({ loggedAt: new Date() });
-            });
+        this.filteredEntries.update((entries) => [worktime, ...entries]);
     }
 
     getStatValue(valueName: string): string | number {

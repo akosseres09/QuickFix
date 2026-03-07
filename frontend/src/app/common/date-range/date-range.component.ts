@@ -8,6 +8,7 @@ import {
     ValidationErrors,
 } from '@angular/forms';
 import {
+    MAT_DATE_RANGE_SELECTION_STRATEGY,
     MatDatepickerModule,
     MatDateRangeInput,
     MatDateRangePicker,
@@ -16,6 +17,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatNativeDateModule, provideNativeDateAdapter } from '@angular/material/core';
 import { fromEvent } from 'rxjs';
 import { debounceTime, map, startWith } from 'rxjs/operators';
+import { WeekSelectionStrategy } from './week-selection-strategy/week-selection-strategy';
 
 @Component({
     selector: 'app-date-range',
@@ -28,7 +30,13 @@ import { debounceTime, map, startWith } from 'rxjs/operators';
         MatNativeDateModule,
         ReactiveFormsModule,
     ],
-    providers: [provideNativeDateAdapter()],
+    providers: [
+        {
+            provide: MAT_DATE_RANGE_SELECTION_STRATEGY,
+            useClass: WeekSelectionStrategy,
+        },
+        provideNativeDateAdapter(),
+    ],
     templateUrl: './date-range.component.html',
     styleUrl: './date-range.component.css',
 })

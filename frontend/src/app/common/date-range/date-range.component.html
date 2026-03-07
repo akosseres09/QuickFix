@@ -1,4 +1,4 @@
-<mat-form-field appearance="outline">
+<mat-form-field appearance="outline" class="w-full sm:w-72">
     <mat-label>Enter a date range</mat-label>
 
     <mat-date-range-input
@@ -30,10 +30,10 @@
         <mat-error>Start date cannot be after end date</mat-error>
     }
     @if (range.hasError('minDateViolation')) {
-        <mat-error>Date is too early</mat-error>
+        <mat-error>Start date is too early</mat-error>
     }
     @if (range.hasError('maxDateViolation')) {
-        <mat-error>Date is too late</mat-error>
+        <mat-error>End Date can not be after today</mat-error>
     }
 
     @if (range.controls.startDate.hasError('matStartDateInvalid')) {

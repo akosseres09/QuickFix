@@ -2,15 +2,27 @@
     <form [formGroup]="worktimeForm" class="flex flex-col gap-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Issue</mat-label>
-                <mat-select formControlName="issueId">
+                <mat-label>Issue Name</mat-label>
+                <input
+                    matInput
+                    formControlName="issue"
+                    placeholder="Search issues..."
+                    [matAutocomplete]="auto"
+                />
+                <mat-autocomplete
+                    #auto="matAutocomplete"
+                    [displayWith]="displayFn"
+                    (optionSelected)="onIssueChange($event.option.value.id)"
+                >
                     @for (issue of issues(); track issue.id) {
-                        <mat-option [value]="issue.id"
+                        <mat-option [value]="issue"
                             >#{{ issue.issueKey }} — {{ issue.title }}</mat-option
                         >
+                    } @empty {
+                        <mat-option disabled>No issues found</mat-option>
                     }
-                </mat-select>
-                @if (worktimeForm.get('issueId')?.hasError('required')) {
+                </mat-autocomplete>
+                @if (worktimeForm.get('issue')?.hasError('required')) {
                     <mat-error>Issue is required</mat-error>
                 }
             </mat-form-field>
