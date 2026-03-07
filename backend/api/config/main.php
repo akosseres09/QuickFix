@@ -70,7 +70,7 @@ return [
                 ],
                 [
                     'class' => UrlRule::class,
-                    'controller' => ['project', 'organization-member'],
+                    'controller' => ['project', 'organization-member', 'worktime'],
                     'pluralize' => false,
                     'prefix' => '<organization_id:[A-Za-z0-9_\-]+>',
                     'tokens' => [
