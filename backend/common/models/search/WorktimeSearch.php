@@ -33,9 +33,7 @@ class WorktimeSearch extends Worktime implements SearchInterface
 
     public function rules(): array
     {
-        $parentRules = parent::rules();
-
-        $rules = [
+        return [
             ['start_date', 'date', 'format' => 'php:Y-m-d'],
             ['end_date', 'date', 'format' => 'php:Y-m-d'],
             [
@@ -57,8 +55,6 @@ class WorktimeSearch extends Worktime implements SearchInterface
                 'message' => 'End Date must be greater than or equal to Start Date.'
             ],
         ];
-
-        return [...$parentRules, ...$rules];
     }
 
 
