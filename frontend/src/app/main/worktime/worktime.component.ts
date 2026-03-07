@@ -1,22 +1,27 @@
 import {
     Component,
     computed,
+    DestroyRef,
     inject,
-    OnDestroy,
+    input,
+    OnInit,
     signal,
     TemplateRef,
     viewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
-import { Subscription } from 'rxjs';
+import { MatSelectModule } from '@angular/material/select';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ActivatedRoute, Router } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { Subject } from 'rxjs';
 
-import { WorktimeEntry } from '../../shared/model/Worktime';
+import { Worktime } from '../../shared/model/Worktime';
+import { Project } from '../../shared/model/Project';
 import { DateRangeComponent } from '../../common/date-range/date-range.component';
 import { BarChartComponent } from '../../common/bar-chart/bar-chart.component';
 import { LineChartComponent } from '../../common/line-chart/line-chart.component';
@@ -26,81 +31,13 @@ import { Stat } from '../../shared/constants/Stat';
 import { DisplayedColumn } from '../../shared/constants/table/DisplayedColumn';
 import { DialogService } from '../../shared/services/dialog/dialog.service';
 import { DateService } from '../../shared/services/date/date.service';
-
-const MOCK_DATA: WorktimeEntry[] = [
-    {
-        id: '1',
-        issue: 'Fix login bug',
-        issueId: 1234,
-        date: '2025-12-28',
-        hours: 4,
-        description: 'Fixed authentication issue',
-        user: 'John Doe',
-    },
-    {
-        id: '2',
-        issue: 'Update dashboard UI',
-        issueId: 1235,
-        date: '2025-12-28',
-        hours: 6,
-        description: 'Redesigned dashboard layout',
-        user: 'John Doe',
-    },
-    {
-        id: '3',
-        issue: 'API integration',
-        issueId: 1236,
-        date: '2025-12-27',
-        hours: 8,
-        description: 'Integrated payment gateway',
-        user: 'John Doe',
-    },
-    {
-        id: '4',
-        issue: 'Database optimization',
-        issueId: 1237,
-        date: '2025-12-27',
-        hours: 5,
-        description: 'Optimized slow queries',
-        user: 'Jane Smith',
-    },
-    {
-        id: '5',
-        issue: 'Mobile responsive fixes',
-        issueId: 1238,
-        date: '2025-12-26',
-        hours: 3,
-        description: 'Fixed mobile layout issues',
-        user: 'John Doe',
-    },
-    {
-        id: '6',
-        issue: 'Security audit',
-        issueId: 1239,
-        date: '2025-12-26',
-        hours: 7,
-        description: 'Performed security review',
-        user: 'Jane Smith',
-    },
-    {
-        id: '7',
-        issue: 'Documentation update',
-        issueId: 1240,
-        date: '2025-12-25',
-        hours: 2,
-        description: 'Updated API documentation',
-        user: 'John Doe',
-    },
-    {
-        id: '8',
-        issue: 'Code review',
-        issueId: 1241,
-        date: '2025-12-24',
-        hours: 4,
-        description: 'Reviewed pull requests',
-        user: 'Jane Smith',
-    },
-];
+import { WorktimeService } from '../../shared/services/worktime/worktime.service';
+import { ProjectService } from '../../shared/services/project/project.service';
+import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
+import { MatInput } from '@angular/material/input';
+import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autocomplete';
+import { debounceTime, filter, switchMap, EMPTY } from 'rxjs';
+import { ApiQueryParams } from '../../shared/constants/api/ApiQueryParams';
 
 @Component({
     selector: 'app-worktime',
@@ -108,6 +45,8 @@ const MOCK_DATA: WorktimeEntry[] = [
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
+        MatSelectModule,
+        MatProgressSpinnerModule,
         DateRangeComponent,
         BarChartComponent,
         LineChartComponent,
@@ -115,64 +54,59 @@ const MOCK_DATA: WorktimeEntry[] = [
         MatButton,
         TableComponent,
         WorktimeDialogComponent,
+        MatInput,
+        MatAutocomplete,
+        MatAutocompleteTrigger,
+        ReactiveFormsModule,
     ],
     templateUrl: './worktime.component.html',
     styleUrl: './worktime.component.css',
 })
-export class WorktimeComponent implements OnDestroy {
+export class WorktimeComponent implements OnInit {
     private readonly dialogService = inject(DialogService);
     private readonly dateService = inject(DateService);
+    private readonly worktimeService = inject(WorktimeService);
+    private readonly projectService = inject(ProjectService);
+    private readonly snackbarService = inject(SnackbarService);
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
+    private readonly destroyRef = inject(DestroyRef);
+    private readonly fb = inject(FormBuilder);
 
     private readonly queryParams = toSignal(this.route.queryParams);
+    readonly organizationId = input.required<string>();
 
-    minDate = signal<Date>(new Date('2025-01-01'));
+    minDate = signal<Date>(new Date('2026-01-01'));
     maxDate = signal<Date>(new Date(new Date().setHours(23, 59, 59, 999)));
+    startDate = signal<Date>(this.getStartDate());
+    endDate = signal<Date>(this.getEndDate());
 
-    startDate = computed(() => this.getStartDate());
-    endDate = computed(() => this.getEndDate());
+    projects = signal<Project[]>([]);
+    selectedProjectId = signal<string | null>(null);
 
-    worktimeEntries = signal<WorktimeEntry[]>(MOCK_DATA);
     isLoading = signal<boolean>(false);
 
-    filteredEntries = computed(() => {
-        const startStr = this.startDate();
-        const endStr = this.endDate();
-        const entries = this.worktimeEntries();
+    private readonly loadTrigger$ = new Subject<void>();
 
-        if (!startStr || !endStr) {
-            return entries;
-        }
-
-        const start = new Date(startStr);
-        const end = new Date(endStr);
-
-        return entries.filter((entry) => {
-            const entryDate = this.dateService.toLocaleISODate(new Date(entry.date), true);
-            return entryDate >= start && entryDate <= end;
-        });
-    });
+    filteredEntries = signal<Worktime[]>([]);
 
     shownWorktimes = computed(() => new MatTableDataSource(this.filteredEntries()));
 
     days = computed(() => {
         const dayHours = new Map<string, number>();
-        const startStr = this.startDate();
-        const endStr = this.endDate();
+        const start = this.startDate();
+        const end = this.endDate();
         const entries = this.filteredEntries();
 
-        if (startStr && endStr) {
-            const start = new Date(startStr);
-            const end = new Date(endStr);
+        if (start && end) {
             for (const dt = new Date(start); dt <= end; dt.setDate(dt.getDate() + 1)) {
-                const dateStr = this.dateService.toLocaleISOString(dt, true);
-                dayHours.set(dateStr, 0);
+                dayHours.set(this.dateService.toLocaleISOString(dt, true), 0);
             }
         }
 
         entries.forEach((entry) => {
-            dayHours.set(entry.date, (dayHours.get(entry.date) || 0) + entry.hours);
+            const hours = entry.minutesSpent / 60;
+            dayHours.set(entry.loggedAt, (dayHours.get(entry.loggedAt) ?? 0) + hours);
         });
 
         return dayHours;
@@ -180,14 +114,17 @@ export class WorktimeComponent implements OnDestroy {
 
     stats = computed(() => {
         const entries = this.filteredEntries();
-        const totalHours = entries.reduce((sum, entry) => sum + entry.hours, 0);
+        const totalHours = entries.reduce((sum, e) => sum + e.minutesSpent / 60, 0);
         const totalEntries = entries.length;
 
-        const daysWorked = new Set(entries.map((e) => e.date)).size;
+        const daysWorked = new Set(entries.map((e) => e.loggedAt)).size;
         const avgHours = daysWorked > 0 ? totalHours / daysWorked : 0;
 
         const dayMap = new Map<string, number>();
-        entries.forEach((e) => dayMap.set(e.date, (dayMap.get(e.date) || 0) + e.hours));
+        entries.forEach((e) => {
+            const h = e.minutesSpent / 60;
+            dayMap.set(e.loggedAt, (dayMap.get(e.loggedAt) ?? 0) + h);
+        });
         let maxHours = 0;
         let maxDay = '';
         dayMap.forEach((val, key) => {
@@ -229,7 +166,7 @@ export class WorktimeComponent implements OnDestroy {
                 'mostProductiveDay',
                 {
                     label: 'Most Productive Day',
-                    value: maxDay ? new Date(maxDay).toLocaleDateString() : 'N/A',
+                    value: maxDay ? new Date(maxDay + 'T00:00:00').toLocaleDateString() : 'N/A',
                     icon: 'star',
                     bgColor: 'bg-yellow-500',
                 },
@@ -237,94 +174,189 @@ export class WorktimeComponent implements OnDestroy {
         ]);
     });
 
-    issueIds = computed(() => {
-        const ids = new Set(this.worktimeEntries().map((e) => e.issueId));
-        return Array.from(ids).sort((a, b) => a - b);
-    });
-
-    displayedColumns: DisplayedColumn<WorktimeEntry>[] = [
+    displayedColumns: DisplayedColumn<Worktime>[] = [
         {
-            id: 'issueId',
-            label: '#',
-            sortable: false,
-            value: (e: WorktimeEntry) => `#${e.issueId}`,
-            routerLink: (e: WorktimeEntry) => ['/issues', e.issueId],
-        },
-        {
-            id: 'issue',
-            label: 'Issue',
-            sortable: false,
-            value: (e: WorktimeEntry) => e.issue,
-        },
-        {
-            id: 'date',
+            id: 'loggedAt',
             label: 'Date',
             sortable: true,
-            value: (e: WorktimeEntry) => this.dateService.toLocaleISOString(new Date(e.date), true),
+            value: (e: Worktime) => new Date(e.loggedAt + 'T00:00:00').toLocaleDateString(),
         },
-        { id: 'hours', label: 'Hours', sortable: true, value: (e: WorktimeEntry) => e.hours },
+        {
+            id: 'minutesSpent',
+            label: 'Hours',
+            sortable: true,
+            value: (e: Worktime) => (e.minutesSpent / 60).toFixed(2),
+        },
+        {
+            id: 'description',
+            label: 'Description',
+            sortable: false,
+            value: (e: Worktime) => e.description,
+        },
     ];
 
     worktimeDialog = viewChild(WorktimeDialogComponent);
-    private dialogRefSub: Subscription | null = null;
+    form = this.fb.group({
+        projectName: [''],
+    });
 
-    ngOnDestroy(): void {
-        this.dialogRefSub?.unsubscribe();
+    ngOnInit() {
+        this.loadTrigger$
+            .pipe(
+                debounceTime(50),
+                switchMap(() => {
+                    const orgId = this.organizationId();
+                    if (!orgId) return EMPTY;
+
+                    const start = this.dateService.toLocaleISOString(this.startDate(), true);
+                    const end = this.dateService.toLocaleISOString(this.endDate(), true);
+
+                    const projectId = this.selectedProjectId();
+                    const queryParams: Record<string, string | number | undefined> = {
+                        start_date: start,
+                        end_date: end,
+                        pageSize: 200,
+                    };
+                    if (projectId) {
+                        queryParams['project_id'] = projectId;
+                    }
+
+                    this.isLoading.set(true);
+                    return this.worktimeService.getWorktime(orgId, queryParams);
+                }),
+                takeUntilDestroyed(this.destroyRef)
+            )
+            .subscribe({
+                next: (response) => {
+                    this.filteredEntries.set(response.items);
+                    this.isLoading.set(false);
+                },
+                error: () => {
+                    this.snackbarService.error('Failed to load worktime entries.');
+                    this.isLoading.set(false);
+                },
+            });
+
+        this.form
+            .get('projectName')
+            ?.valueChanges.pipe(
+                takeUntilDestroyed(this.destroyRef),
+                filter((value) => typeof value === 'string'),
+                debounceTime(300)
+            )
+            .subscribe((value) => {
+                this.loadProjects({ name: value });
+                if (this.selectedProjectId()) {
+                    this.selectedProjectId.set(null);
+                    this.filteredEntries.set([]);
+                    this.loadWorktime();
+                }
+            });
+
+        this.loadWorktime();
+    }
+
+    // used by autocomplete to show project name instead of id
+    displayFn(project: Project | string | null): string {
+        if (!project) return '';
+        if (typeof project === 'object' && 'name' in project) {
+            return project.name;
+        }
+        return project as string;
+    }
+
+    private loadProjects(qp: ApiQueryParams): void {
+        const orgId = this.organizationId();
+        if (!orgId) return;
+
+        this.projectService.getProjectsSimple(orgId, qp).subscribe({
+            next: (projects) => {
+                this.projects.set(projects);
+            },
+            error: () => {
+                this.snackbarService.error('Failed to load projects.');
+            },
+        });
+    }
+
+    onProjectChange(projectId: string): void {
+        this.selectedProjectId.set(projectId);
+        this.filteredEntries.set([]);
+        this.loadWorktime();
+    }
+
+    loadWorktime(): void {
+        this.loadTrigger$.next();
     }
 
     getStartDate(): Date {
         const startQuery = this.queryParams()?.['startDate'];
         if (startQuery) {
             const sd = new Date(startQuery);
-            if (sd >= this.minDate()) {
-                return sd;
-            }
+            if (!isNaN(sd.getTime()) && sd >= this.minDate()) return sd;
         }
-
         return this.getLastWeek();
     }
 
     getEndDate(): Date {
         const endQuery = this.queryParams()?.['endDate'];
         const max = this.maxDate();
-
         if (endQuery) {
             const ed = new Date(endQuery);
-            if (ed <= max) {
-                return ed;
-            }
+            if (!isNaN(ed.getTime()) && ed <= max) return ed;
         }
-
         const now = new Date();
         return now > max ? max : now;
     }
 
     getLastWeek(): Date {
         const date = new Date();
-        if (date) {
-            date.setDate(date.getDate() - 7);
-        }
+        date.setDate(date.getDate() - 7);
         return date;
     }
 
     onDateRangeChange($event: { startDate: string; endDate: string }) {
-        const start = this.dateService.toLocaleISOString(new Date($event.startDate), true);
-        const end = this.dateService.toLocaleISOString(new Date($event.endDate), true);
+        const start = new Date($event.startDate);
+        const end = new Date($event.endDate);
+
+        this.startDate.set(start);
+        this.endDate.set(end);
 
         this.router.navigate([], {
             relativeTo: this.route,
-            queryParams: { startDate: start, endDate: end },
+            queryParams: {
+                startDate: this.dateService.toLocaleISOString(start, true),
+                endDate: this.dateService.toLocaleISOString(end, true),
+            },
             queryParamsHandling: 'merge',
+        });
+
+        this.loadWorktime();
+    }
+
+    deleteEntry(id: string): void {
+        const orgId = this.organizationId();
+        if (!orgId) return;
+
+        this.worktimeService.deleteWorktime(orgId, id).subscribe({
+            next: () => {
+                this.filteredEntries.update((entries) => entries.filter((e) => e.id !== id));
+                this.snackbarService.success('Worktime entry deleted.');
+            },
+            error: () => this.snackbarService.error('Failed to delete entry.'),
         });
     }
 
-    deleteEntry(id: string) {
-        this.worktimeEntries.update((entries) => entries.filter((e) => e.id !== id));
-    }
-
-    openWorktimeDialog() {
+    openWorktimeDialog(): void {
         const dialog = this.worktimeDialog();
         if (!dialog?.worktimeFormTemplate) return;
+
+        const orgId = this.organizationId();
+        const projectId = this.selectedProjectId();
+        if (!projectId) {
+            this.snackbarService.error('Please select a project first.');
+            return;
+        }
 
         const dialogRef = this.dialogService.openFormDialog(
             'Add Worktime',
@@ -343,31 +375,44 @@ export class WorktimeComponent implements OnDestroy {
             }
         });
 
-        this.dialogRefSub = dialogRef.afterClosed().subscribe((result) => {
-            statusSub.unsubscribe();
-            if (result && result.action === 'save') {
-                const formValue = dialog.worktimeForm.value;
-                const newEntry: WorktimeEntry = {
-                    id: Math.max(...this.worktimeEntries().map((e) => parseInt(e.id)), 0) + 1 + '',
-                    issueId: parseInt(formValue.issueId as string),
-                    issue: formValue.issue as string,
-                    date: new Date(formValue.date).toISOString(),
-                    hours: parseFloat(formValue.hours),
-                    description: formValue.description || '',
-                    user: 'Current User',
-                };
+        dialogRef
+            .afterClosed()
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe((result) => {
+                statusSub.unsubscribe();
+                if (result?.action === 'save' && dialog.worktimeForm.valid) {
+                    const formValue = dialog.worktimeForm.value;
+                    const loggedAt = this.dateService.toLocaleISOString(
+                        new Date(formValue.loggedAt),
+                        true
+                    );
+                    const minutesSpent = Math.round(parseFloat(formValue.hours) * 60);
 
-                this.worktimeEntries.update((entries) => [newEntry, ...entries]);
-            }
-            dialog.worktimeForm.reset({ date: new Date() });
-        });
+                    this.worktimeService
+                        .createWorktime(orgId, {
+                            issue_id: formValue.issueId,
+                            minutes_spent: minutesSpent,
+                            logged_at: loggedAt,
+                            description: formValue.description ?? '',
+                        })
+                        .subscribe({
+                            next: (created) => {
+                                this.filteredEntries.update((entries) => [created, ...entries]);
+                                this.snackbarService.success('Worktime entry saved.');
+                            },
+                            error: () =>
+                                this.snackbarService.error('Failed to save worktime entry.'),
+                        });
+                }
+                dialog.worktimeForm.reset({ loggedAt: new Date() });
+            });
     }
 
-    getStatValue(valueName: string) {
+    getStatValue(valueName: string): string | number {
         const value = this.stats().get(valueName)?.value;
         if (typeof value === 'number' && value % 1 !== 0) {
             return value.toFixed(2);
         }
-        return value;
+        return value ?? '';
     }
 }

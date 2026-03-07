@@ -42,7 +42,7 @@ export class DisplayedColumnService {
                 value: (e: Issue) => e.creator?.username || '',
                 routerLink: (e: Issue) => {
                     if (!e.creator?.username) return null;
-                    return ['/users/', '@' + e.creator.username];
+                    return ['/member/', '@' + e.creator.username];
                 },
             },
 
@@ -53,7 +53,7 @@ export class DisplayedColumnService {
                 value: (e: Issue) => e.assignee?.username || 'None',
                 routerLink: (e: Issue) => {
                     if (!e.assignee?.username) return null;
-                    return ['/users/', '@' + e.assignee.username];
+                    return ['/member/', '@' + e.assignee.username];
                 },
             },
             {
@@ -103,7 +103,8 @@ export class DisplayedColumnService {
                 label: 'Owner',
                 sortable: false,
                 value: (e: Project) => e.owner?.username || 'N/A',
-                routerLink: (e: Project) => (e.owner?.id ? ['/user', '@' + e.owner.username] : []),
+                routerLink: (e: Project) =>
+                    e.owner?.id ? ['/member', '@' + e.owner.username] : [],
             },
             {
                 id: 'status',
@@ -168,15 +169,17 @@ export class DisplayedColumnService {
                 id: 'owner',
                 label: 'Owner',
                 sortable: false,
+                routerLink: (e: Organization) =>
+                    e.owner?.id ? ['/member', '@' + e.owner.username] : [],
                 value: (e: Organization) => e.owner?.username ?? '',
             },
             {
                 id: 'created_at',
-                label: 'Crated At',
+                label: 'Created At',
                 sortable: true,
                 value: (e: Organization) => {
                     const date = this.dateService.parseTimestamp(e.createdAt);
-                    return this.dateService.toLocaleISOString(date).split('T')[0];
+                    return this.dateService.toGMTtime(date);
                 },
             },
         ];

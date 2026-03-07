@@ -6,14 +6,34 @@
     <div>
         <button
             class="flex md:gap-2 justify-center !text-white"
-            mat-raised-button
+            mat-flat-button
             color="primary"
+            [disabled]="!selectedProjectId()"
             (click)="openWorktimeDialog()"
         >
             <mat-icon class="!mr-0">add</mat-icon>
             <span class="hidden md:block">Add Worktime</span>
         </button>
     </div>
+</div>
+
+<div [formGroup]="form" class="mb-6">
+    <mat-form-field appearance="outline" class="w-full md:w-72">
+        <mat-label>Project Name</mat-label>
+        <input formControlName="projectName" matInput [matAutocomplete]="auto" />
+
+        <mat-autocomplete
+            #auto="matAutocomplete"
+            [displayWith]="displayFn"
+            (optionSelected)="onProjectChange($event.option.value.id)"
+        >
+            @for (project of projects(); track project.id) {
+                <mat-option [value]="project">{{ project.name }}</mat-option>
+            } @empty {
+                <mat-option disabled>No projects found</mat-option>
+            }
+        </mat-autocomplete>
+    </mat-form-field>
 </div>
 
 <div class="h-fit">
@@ -41,18 +61,30 @@
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-    <app-bar-chart [data]="filteredEntries()" [daysMap]="days()"></app-bar-chart>
-
-    <app-line-chart [data]="filteredEntries()" [daysMap]="days()"></app-line-chart>
+    <app-bar-chart
+        [isLoading]="isLoading()"
+        [data]="filteredEntries()"
+        [daysMap]="days()"
+    ></app-bar-chart>
+    <app-line-chart
+        [isLoading]="isLoading()"
+        [data]="filteredEntries()"
+        [daysMap]="days()"
+    ></app-line-chart>
 </div>
 
 <div class="rounded-xl shadow-lg overflow-hidden">
     <div class="overflow-x-auto">
         <app-table
+            [isLoading]="isLoading()"
             [dataSource]="shownWorktimes()"
             [displayedColumns]="displayedColumns"
             [tableHeader]="'Recent Entries'"
         ></app-table>
     </div>
 </div>
-<app-worktime-dialog [issueIds]="issueIds()"></app-worktime-dialog>
+
+<app-worktime-dialog
+    [projectId]="selectedProjectId()"
+    [organizationId]="organizationId()"
+></app-worktime-dialog>
