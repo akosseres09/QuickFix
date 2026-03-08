@@ -97,6 +97,10 @@ class WorktimeSearch extends Worktime implements SearchInterface
                         'asc' => ['logged_at' => SORT_ASC],
                         'desc' => ['logged_at' => SORT_DESC],
                     ],
+                    'minutesSpent' => [
+                        'asc' => ['minutes_spent' => SORT_ASC],
+                        'desc' => ['minutes_spent' => SORT_DESC],
+                    ]
                 ],
             ],
         ]);
