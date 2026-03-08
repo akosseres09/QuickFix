@@ -18,24 +18,25 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { Subject } from 'rxjs';
-
 import { Worktime } from '../../shared/model/Worktime';
 import { Project } from '../../shared/model/Project';
 import { DateRangeComponent } from '../../common/date-range/date-range.component';
-import { BarChartComponent } from '../../common/bar-chart/bar-chart.component';
-import { LineChartComponent } from '../../common/line-chart/line-chart.component';
 import { TableComponent } from '../../common/table/table.component';
 import { WorktimeDialogComponent } from './worktime-dialog/worktime-dialog.component';
-import { Stat } from '../../shared/constants/Stat';
+import { WorktimeStatsComponent } from './worktime-stats/worktime-stats.component';
 import { DisplayedColumn } from '../../shared/constants/table/DisplayedColumn';
 import { DateService } from '../../shared/services/date/date.service';
-import { WorktimeService } from '../../shared/services/worktime/worktime.service';
+import { WorktimeService, WorktimeStats } from '../../shared/services/worktime/worktime.service';
 import { ProjectService } from '../../shared/services/project/project.service';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 import { MatInput } from '@angular/material/input';
 import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import { debounceTime, filter, switchMap, EMPTY } from 'rxjs';
 import { ApiQueryParams } from '../../shared/constants/api/ApiQueryParams';
+import { ListStateService } from '../../shared/services/list-state/list-state.service';
+import { ListState } from '../../shared/constants/table/ListState';
+import { PageEvent } from '@angular/material/paginator';
+import { Sort } from '@angular/material/sort';
 
 @Component({
     selector: 'app-worktime',
@@ -45,12 +46,11 @@ import { ApiQueryParams } from '../../shared/constants/api/ApiQueryParams';
         MatSelectModule,
         MatProgressSpinnerModule,
         DateRangeComponent,
-        BarChartComponent,
-        LineChartComponent,
         MatIcon,
         MatButton,
         TableComponent,
         WorktimeDialogComponent,
+        WorktimeStatsComponent,
         MatInput,
         MatAutocomplete,
         MatAutocompleteTrigger,
@@ -64,11 +64,14 @@ export class WorktimeComponent implements OnInit {
     private readonly projectService = inject(ProjectService);
     private readonly snackbarService = inject(SnackbarService);
     private readonly router = inject(Router);
-    private readonly route = inject(ActivatedRoute);
+    private readonly activeRoute = inject(ActivatedRoute);
     private readonly destroyRef = inject(DestroyRef);
     private readonly fb = inject(FormBuilder);
+    private readonly listStateService = inject(ListStateService);
 
-    private readonly queryParams = toSignal(this.route.queryParams);
+    private readonly loadListTrigger$ = new Subject<void>();
+    private readonly loadStatsTrigger$ = new Subject<void>();
+    private readonly queryParams = toSignal(this.activeRoute.queryParams);
     readonly organizationId = input.required<string>();
 
     minDate = signal<Date>(new Date('2026-01-01'));
@@ -78,97 +81,11 @@ export class WorktimeComponent implements OnInit {
 
     projects = signal<Project[]>([]);
     selectedProjectId = signal<string | null>(null);
-
+    filteredEntries = signal<Worktime[]>([]);
+    worktimeStats = signal<WorktimeStats | null>(null);
     isLoading = signal<boolean>(false);
 
-    private readonly loadTrigger$ = new Subject<void>();
-
-    filteredEntries = signal<Worktime[]>([]);
-
     shownWorktimes = computed(() => new MatTableDataSource(this.filteredEntries()));
-
-    days = computed(() => {
-        const dayHours = new Map<string, number>();
-        const start = this.startDate();
-        const end = this.endDate();
-        const entries = this.filteredEntries();
-
-        if (start && end) {
-            for (const dt = new Date(start); dt <= end; dt.setDate(dt.getDate() + 1)) {
-                dayHours.set(this.dateService.toLocaleISOString(dt, true), 0);
-            }
-        }
-
-        entries.forEach((entry) => {
-            const hours = entry.minutesSpent / 60;
-            dayHours.set(entry.loggedAt, (dayHours.get(entry.loggedAt) ?? 0) + hours);
-        });
-
-        return dayHours;
-    });
-
-    stats = computed(() => {
-        const entries = this.filteredEntries();
-        const totalHours = entries.reduce((sum, e) => sum + e.minutesSpent / 60, 0);
-        const totalEntries = entries.length;
-
-        const daysWorked = new Set(entries.map((e) => e.loggedAt)).size;
-        const avgHours = daysWorked > 0 ? totalHours / daysWorked : 0;
-
-        const dayMap = new Map<string, number>();
-        entries.forEach((e) => {
-            const h = e.minutesSpent / 60;
-            dayMap.set(e.loggedAt, (dayMap.get(e.loggedAt) ?? 0) + h);
-        });
-        let maxHours = 0;
-        let maxDay = '';
-        dayMap.forEach((val, key) => {
-            if (val > maxHours) {
-                maxHours = val;
-                maxDay = key;
-            }
-        });
-
-        return new Map<string, Stat>([
-            [
-                'totalHours',
-                {
-                    label: 'Total Hours',
-                    value: totalHours,
-                    icon: 'schedule',
-                    bgColor: 'bg-blue-500',
-                },
-            ],
-            [
-                'totalEntries',
-                {
-                    label: 'Total Entries',
-                    value: totalEntries,
-                    icon: 'assignment',
-                    bgColor: 'bg-purple-500',
-                },
-            ],
-            [
-                'averageHoursPerDay',
-                {
-                    label: 'Avg Hours/Day',
-                    value: avgHours,
-                    icon: 'bar_chart',
-                    bgColor: 'bg-green-500',
-                },
-            ],
-            [
-                'mostProductiveDay',
-                {
-                    label: 'Most Productive Day',
-                    value: maxDay ? new Date(maxDay + 'T00:00:00').toLocaleDateString() : 'N/A',
-                    icon: 'star',
-                    bgColor: 'bg-yellow-500',
-                },
-            ],
-        ]);
-    });
-
     displayedColumns: DisplayedColumn<Worktime>[] = [
         {
             id: 'loggedAt',
@@ -195,8 +112,12 @@ export class WorktimeComponent implements OnInit {
         projectName: [''],
     });
 
+    listState: ListState = this.listStateService.create(this.activeRoute, {
+        defaultPageSize: 20,
+    });
+
     ngOnInit() {
-        this.loadTrigger$
+        this.loadListTrigger$
             .pipe(
                 debounceTime(50),
                 switchMap(() => {
@@ -207,29 +128,58 @@ export class WorktimeComponent implements OnInit {
                     const end = this.dateService.toLocaleISOString(this.endDate(), true);
 
                     const projectId = this.selectedProjectId();
-                    const queryParams: Record<string, string | number | undefined> = {
+                    const queryParams: Record<string, string | number | undefined | null> = {
                         start_date: start,
                         end_date: end,
-                        pageSize: 200,
+                        ...this.listState.buildQueryParams(),
                     };
                     if (projectId) {
                         queryParams['project_id'] = projectId;
                     }
 
-                    this.isLoading.set(true);
+                    this.listState.isLoading.set(true);
                     return this.worktimeService.getWorktime(orgId, queryParams);
                 }),
                 takeUntilDestroyed(this.destroyRef)
             )
             .subscribe({
-                next: (response) => {
-                    this.filteredEntries.set(response.items);
-                    this.isLoading.set(false);
+                next: (worktime) => {
+                    this.filteredEntries.set(worktime.items);
+                    this.listState.totalCount.set(worktime._meta.totalCount);
+                    this.listState.isLoading.set(false);
                 },
                 error: () => {
                     this.snackbarService.error('Failed to load worktime entries.');
-                    this.isLoading.set(false);
+                    this.listState.isLoading.set(false);
                 },
+            });
+
+        this.loadStatsTrigger$
+            .pipe(
+                debounceTime(50),
+                switchMap(() => {
+                    const orgId = this.organizationId();
+                    if (!orgId) return EMPTY;
+
+                    const start = this.dateService.toLocaleISOString(this.startDate(), true);
+                    const end = this.dateService.toLocaleISOString(this.endDate(), true);
+
+                    const projectId = this.selectedProjectId();
+                    const queryParams: Record<string, string | undefined> = {
+                        start_date: start,
+                        end_date: end,
+                    };
+                    if (projectId) {
+                        queryParams['project_id'] = projectId;
+                    }
+
+                    return this.worktimeService.getStats(orgId, queryParams);
+                }),
+                takeUntilDestroyed(this.destroyRef)
+            )
+            .subscribe({
+                next: (stats) => this.worktimeStats.set(stats),
+                error: () => this.snackbarService.error('Failed to load worktime stats.'),
             });
 
         this.form
@@ -245,10 +195,12 @@ export class WorktimeComponent implements OnInit {
                     this.selectedProjectId.set(null);
                     this.filteredEntries.set([]);
                     this.loadWorktime();
+                    this.loadStats();
                 }
             });
 
         this.loadWorktime();
+        this.loadStats();
     }
 
     // used by autocomplete to show project name instead of id
@@ -260,28 +212,27 @@ export class WorktimeComponent implements OnInit {
         return project as string;
     }
 
-    private loadProjects(qp: ApiQueryParams): void {
-        const orgId = this.organizationId();
-        if (!orgId) return;
+    onSortChange(event: Sort): void {
+        this.listState.onSortChange(event, () => this.loadWorktime());
+    }
 
-        this.projectService.getProjectsSimple(orgId, qp).subscribe({
-            next: (projects) => {
-                this.projects.set(projects);
-            },
-            error: () => {
-                this.snackbarService.error('Failed to load projects.');
-            },
-        });
+    onPageChange(event: PageEvent): void {
+        this.listState.onPageChange(event, () => this.loadWorktime());
     }
 
     onProjectChange(projectId: string): void {
         this.selectedProjectId.set(projectId);
         this.filteredEntries.set([]);
         this.loadWorktime();
+        this.loadStats();
     }
 
     loadWorktime(): void {
-        this.loadTrigger$.next();
+        this.loadListTrigger$.next();
+    }
+
+    loadStats(): void {
+        this.loadStatsTrigger$.next();
     }
 
     getStartDate(): Date {
@@ -318,7 +269,7 @@ export class WorktimeComponent implements OnInit {
         this.endDate.set(end);
 
         this.router.navigate([], {
-            relativeTo: this.route,
+            relativeTo: this.activeRoute,
             queryParams: {
                 startDate: this.dateService.toLocaleISOString(start, true),
                 endDate: this.dateService.toLocaleISOString(end, true),
@@ -327,6 +278,7 @@ export class WorktimeComponent implements OnInit {
         });
 
         this.loadWorktime();
+        this.loadStatsTrigger$.next();
     }
 
     deleteEntry(id: string): void {
@@ -335,8 +287,9 @@ export class WorktimeComponent implements OnInit {
 
         this.worktimeService.deleteWorktime(orgId, id).subscribe({
             next: () => {
-                this.filteredEntries.update((entries) => entries.filter((e) => e.id !== id));
                 this.snackbarService.success('Worktime entry deleted.');
+                this.loadWorktime();
+                this.loadStats();
             },
             error: () => this.snackbarService.error('Failed to delete entry.'),
         });
@@ -351,18 +304,29 @@ export class WorktimeComponent implements OnInit {
     }
 
     onWorktimeSaved(worktime: Worktime): void {
-        const start = this.dateService.toLocaleISOString(this.startDate(), true);
-        const end = this.dateService.toLocaleISOString(this.endDate(), true);
-        if (worktime.loggedAt <= start || worktime.loggedAt >= end) return;
+        if (!this.isBetweenDates(worktime.loggedAt)) return;
 
-        this.filteredEntries.update((entries) => [worktime, ...entries]);
+        this.loadWorktime();
+        this.loadStats();
     }
 
-    getStatValue(valueName: string): string | number {
-        const value = this.stats().get(valueName)?.value;
-        if (typeof value === 'number' && value % 1 !== 0) {
-            return value.toFixed(2);
-        }
-        return value ?? '';
+    private loadProjects(qp: ApiQueryParams): void {
+        const orgId = this.organizationId();
+        if (!orgId) return;
+
+        this.projectService.getProjectsSimple(orgId, qp).subscribe({
+            next: (projects) => {
+                this.projects.set(projects);
+            },
+            error: () => {
+                this.snackbarService.error('Failed to load projects.');
+            },
+        });
+    }
+
+    private isBetweenDates(date: string): boolean {
+        const start = this.dateService.toLocaleISOString(this.startDate(), true);
+        const end = this.dateService.toLocaleISOString(this.endDate(), true);
+        return date >= start && date <= end;
     }
 }

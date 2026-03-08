@@ -90,6 +90,7 @@ export class WorktimeDialogComponent {
                 cancelLabel: 'Cancel',
                 saveDisabled: this.worktimeForm.invalid,
                 width: '600px',
+                saveButtonClass: '',
             }
         );
 

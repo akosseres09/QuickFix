@@ -49,38 +49,28 @@
     </div>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6 text-white">
-    @for (stat of stats(); track stat[0]) {
-        <div [class]="'rounded-xl shadow-lg flex flex-col px-6 py-3 ' + stat[1].bgColor">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-semibold opacity-90">{{ stat[1].label }}</span>
-                <mat-icon>{{ stat[1].icon }}</mat-icon>
-            </div>
-            <p class="text-3xl font-bold">{{ getStatValue(stat[0]) }}</p>
-        </div>
-    }
-</div>
-
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-    <app-bar-chart
-        [isLoading]="isLoading()"
-        [data]="filteredEntries()"
-        [daysMap]="days()"
-    ></app-bar-chart>
-    <app-line-chart
-        [isLoading]="isLoading()"
-        [data]="filteredEntries()"
-        [daysMap]="days()"
-    ></app-line-chart>
-</div>
+<app-worktime-stats
+    [startDate]="startDate()"
+    [endDate]="endDate()"
+    [filteredEntries]="filteredEntries()"
+    [stats]="worktimeStats()"
+    [isLoading]="isLoading()"
+></app-worktime-stats>
 
 <div class="rounded-xl shadow-lg overflow-hidden">
     <div class="overflow-x-auto">
         <app-table
-            [isLoading]="isLoading()"
+            [isLoading]="listState.isLoading()"
             [dataSource]="shownWorktimes()"
             [displayedColumns]="displayedColumns"
             [tableHeader]="'Recent Entries'"
+            [totalCount]="listState.totalCount()"
+            [initialPageSize]="listState.pageSize()"
+            [initialPageIndex]="listState.pageIndex()"
+            [initialSortActive]="listState.sortActive()"
+            [initialSortDirection]="listState.sortDirection()"
+            (sortChange)="onSortChange($event)"
+            (pageChange)="onPageChange($event)"
         ></app-table>
     </div>
 </div>

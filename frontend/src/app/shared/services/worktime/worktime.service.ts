@@ -7,6 +7,28 @@ import { PaginatedResponse } from '../../constants/api/PaginatedResponse';
 import { Worktime } from '../../model/Worktime';
 import { Observable } from 'rxjs';
 
+export type WorktimeStats = {
+    totalHours: number;
+    totalEntries: number;
+    avgHoursPerDay: number;
+    mostProductiveDay: {
+        date: string;
+        hours: number;
+    } | null;
+    hoursPerDay:
+        | {
+              date: string;
+              hours: number;
+          }[]
+        | null;
+    hoursPerUser:
+        | {
+              userId: string;
+              hours: number;
+          }[]
+        | null;
+};
+
 export type WorktimeRequestIds = {
     organizationId: string;
     projectId: string;
@@ -29,6 +51,11 @@ export class WorktimeService {
     ): Observable<PaginatedResponse<Worktime>> {
         const params = queryParams ? ParamsHandler.convertToHttpParams(queryParams) : {};
         return this.http.get<PaginatedResponse<Worktime>>(this.baseUrl(organizationId), { params });
+    }
+
+    getStats(organizationId: string, queryParams?: ApiQueryParams): Observable<WorktimeStats> {
+        const params = queryParams ? ParamsHandler.convertToHttpParams(queryParams) : {};
+        return this.http.get<WorktimeStats>(`${this.baseUrl(organizationId)}/stats`, { params });
     }
 
     createWorktime(
