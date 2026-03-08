@@ -164,8 +164,44 @@ export const routes: Routes = [
             {
                 path: 'worktime',
                 loadComponent: () =>
-                    import('./main/worktime/worktime.component').then((c) => c.WorktimeComponent),
-                title: 'QuickFix - Worktime',
+                    import('./layouts/tabs-layout/tabs-layout.component').then(
+                        (c) => c.TabsLayoutComponent
+                    ),
+                data: {
+                    tabs: [
+                        {
+                            label: 'Worktime',
+                            route: 'view',
+                        },
+                        {
+                            label: 'Stats',
+                            route: 'stats',
+                        },
+                    ],
+                },
+                children: [
+                    {
+                        path: '',
+                        pathMatch: 'full',
+                        redirectTo: 'view',
+                    },
+                    {
+                        path: 'view',
+                        loadComponent: () =>
+                            import('./main/worktime/worktime.component').then(
+                                (c) => c.WorktimeComponent
+                            ),
+                        title: 'QuickFix - Worktime',
+                    },
+                    {
+                        path: 'stats',
+                        loadComponent: () =>
+                            import('./main/worktime/worktime-stats/worktime-stats.component').then(
+                                (c) => c.WorktimeStatsComponent
+                            ),
+                        title: 'QuickFix - Worktime Statistics',
+                    },
+                ],
             },
             {
                 path: 'members',

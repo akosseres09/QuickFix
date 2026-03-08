@@ -1,7 +1,6 @@
 import { Component, effect, input, OnInit, ViewChild } from '@angular/core';
 import { Chart, registerables, ChartConfiguration, ChartType } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
-import { Worktime } from '../../shared/model/Worktime';
 import { CommonModule } from '@angular/common';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
@@ -12,7 +11,6 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
     styleUrl: './line-chart.component.css',
 })
 export class LineChartComponent implements OnInit {
-    data = input<Worktime[]>([]);
     daysMap = input<Map<string, number>>(new Map());
     isLoading = input<boolean>(false);
     @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
