@@ -58,12 +58,24 @@
             [initialSortDirection]="listState.sortDirection()"
             (sortChange)="onSortChange($event)"
             (pageChange)="onPageChange($event)"
+            [selectedRow]="selectedWorktime()"
+            (selectedRowChange)="onRowChange($event)"
         ></app-table>
+    </div>
+    <div class="fixed right-6 bottom-6 z-50">
+        <app-speed-dial
+            #speedDial
+            [buttons]="speedDialButtons()"
+            [selectedRow]="selectedWorktime()"
+            (selectedRowChange)="onRowChange($event)"
+        ></app-speed-dial>
     </div>
 </div>
 
 <app-worktime-dialog
+    [worktime]="selectedWorktime()"
     [projectId]="selectedProjectId()"
     [organizationId]="organizationId()"
     (worktimeSaved)="onWorktimeSaved($event)"
+    (worktimeEdited)="onWorktimeEdited($event)"
 ></app-worktime-dialog>

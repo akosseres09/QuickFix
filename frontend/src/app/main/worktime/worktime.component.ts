@@ -37,6 +37,8 @@ import { ListState } from '../../shared/constants/table/ListState';
 import { PageEvent } from '@angular/material/paginator';
 import { Sort } from '@angular/material/sort';
 import { DateRangeService } from '../../shared/services/date-range/date-range.service';
+import { SpeedDialComponent } from '../../common/speed-dial/speed-dial.component';
+import { SpeedDialButton } from '../../shared/constants/speed-dial/SpeedDialButton';
 
 @Component({
     selector: 'app-worktime',
@@ -53,6 +55,7 @@ import { DateRangeService } from '../../shared/services/date-range/date-range.se
         MatInput,
         MatAutocomplete,
         MatAutocompleteTrigger,
+        SpeedDialComponent,
     ],
     templateUrl: './worktime.component.html',
     styleUrl: './worktime.component.css',
@@ -79,7 +82,9 @@ export class WorktimeComponent implements OnInit {
     projects = signal<Project[]>([]);
     selectedProjectId = signal<string | null>(null);
     filteredEntries = signal<Worktime[]>([]);
-    worktimeStats = signal<WorktimeStats | null>(null);
+
+    selectedWorktime = signal<Worktime | null>(null);
+
     isLoading = signal<boolean>(false);
 
     shownWorktimes = computed(() => new MatTableDataSource(this.filteredEntries()));
@@ -105,12 +110,32 @@ export class WorktimeComponent implements OnInit {
     ];
 
     worktimeDialog = viewChild(WorktimeDialogComponent);
+    speedDial = viewChild<SpeedDialComponent>('speedDial');
+    speedDialButtons = computed<SpeedDialButton[]>(() => {
+        const selected = this.selectedWorktime();
+
+        return [
+            {
+                iconName: 'edit',
+                label: 'Edit Worktime',
+                shown: !!selected,
+                onClick: () => this.openWorktimeDialog(),
+            },
+            {
+                iconName: 'delete',
+                label: 'Delete Worktime',
+                shown: !!selected,
+                onClick: () => {},
+            },
+        ];
+    });
     form = this.fb.group({
         projectName: [''],
     });
 
     listState: ListState = this.listStateService.create(this.activeRoute, {
         defaultPageSize: 20,
+        expand: 'issue',
     });
 
     ngOnInit() {
@@ -184,6 +209,20 @@ export class WorktimeComponent implements OnInit {
         return project as string;
     }
 
+    onRowChange(worktime: Worktime | null) {
+        if (!worktime) {
+            this.selectedWorktime.set(null);
+            this.speedDial()?.close();
+            return;
+        }
+
+        this.selectedWorktime.set(worktime);
+
+        if (worktime && this.speedDial()?.isOpen()) return;
+
+        this.speedDial()?.onTogglerClick();
+    }
+
     onSortChange(event: Sort): void {
         this.listState.onSortChange(event, () => this.loadWorktime());
     }
@@ -222,7 +261,7 @@ export class WorktimeComponent implements OnInit {
     }
 
     openWorktimeDialog(): void {
-        if (!this.selectedProjectId()) {
+        if (!this.selectedProjectId() && !this.selectedWorktime()) {
             this.snackbarService.error('Please select a project first.');
             return;
         }
@@ -238,6 +277,14 @@ export class WorktimeComponent implements OnInit {
         if (!this.dateService.isBetweenDates(obj)) return;
 
         this.loadWorktime();
+    }
+
+    onWorktimeEdited(worktime: Worktime) {
+        this.filteredEntries.update((entries) =>
+            entries.map((entry) => (entry.id === worktime.id ? worktime : entry))
+        );
+
+        this.onRowChange(null);
     }
 
     private loadProjects(qp: ApiQueryParams): void {

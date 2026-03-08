@@ -1,31 +1,33 @@
 <ng-template #worktimeFormTemplate>
     <form [formGroup]="worktimeForm" class="flex flex-col gap-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Issue Name</mat-label>
-                <input
-                    matInput
-                    formControlName="issue"
-                    placeholder="Search issues..."
-                    [matAutocomplete]="auto"
-                />
-                <mat-autocomplete
-                    #auto="matAutocomplete"
-                    [displayWith]="displayFn"
-                    (optionSelected)="onIssueChange($event.option.value.id)"
-                >
-                    @for (issue of issues(); track issue.id) {
-                        <mat-option [value]="issue"
-                            >#{{ issue.issueKey }} — {{ issue.title }}</mat-option
-                        >
-                    } @empty {
-                        <mat-option disabled>No issues found</mat-option>
+        <div class="flex flex-col md:flex-row gap-4">
+            @if (!this.worktime()) {
+                <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Issue Name</mat-label>
+                    <input
+                        matInput
+                        formControlName="issue"
+                        placeholder="Search issues..."
+                        [matAutocomplete]="auto"
+                    />
+                    <mat-autocomplete
+                        #auto="matAutocomplete"
+                        [displayWith]="displayFn"
+                        (optionSelected)="onIssueChange($event.option.value.id)"
+                    >
+                        @for (issue of issues(); track issue.id) {
+                            <mat-option [value]="issue"
+                                >#{{ issue.issueKey }} — {{ issue.title }}</mat-option
+                            >
+                        } @empty {
+                            <mat-option disabled>No issues found</mat-option>
+                        }
+                    </mat-autocomplete>
+                    @if (worktimeForm.get('issue')?.hasError('required')) {
+                        <mat-error>Issue is required</mat-error>
                     }
-                </mat-autocomplete>
-                @if (worktimeForm.get('issue')?.hasError('required')) {
-                    <mat-error>Issue is required</mat-error>
-                }
-            </mat-form-field>
+                </mat-form-field>
+            }
 
             <mat-form-field appearance="outline" class="w-full">
                 <mat-label>Hours</mat-label>
