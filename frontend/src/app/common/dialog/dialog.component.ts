@@ -33,9 +33,8 @@ export class DialogComponent {
         this.data.showSaveButton = this.data.showSaveButton !== false;
         this.data.showCancelButton = this.data.showCancelButton !== false;
         this.data.saveDisabled = this.data.saveDisabled || false;
-        this.data.saveButtonClass =
-            this.data.saveButtonClass || '!px-6 !py-2 !bg-red-300 !text-red-700 !font-bold';
-        this.data.cancelButtonClass = this.data.cancelButtonClass || '!px-6 !py-2';
+        this.data.saveButtonClass = this.data.saveButtonClass ?? '!bg-red-300 !text-red-700';
+        this.data.cancelButtonClass = this.data.cancelButtonClass;
     }
 
     onCancel(): void {
