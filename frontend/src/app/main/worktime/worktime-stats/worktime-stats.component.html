@@ -1,3 +1,19 @@
+<div class="mb-8 flex justify-between">
+    <div>
+        <h1 class="text-4xl font-black text-gray-900 dark:text-white mb-2">Worktime Tracking</h1>
+        <p class="text-gray-600 dark:text-gray-400">Track and analyze your time spent on issues</p>
+    </div>
+</div>
+
+<app-date-range
+    class="w-full sm:w-72 shrink"
+    [startDate]="startDate()"
+    [endDate]="endDate()"
+    [minDate]="minDate()"
+    [maxDate]="maxDate()"
+    (dateRangeChange)="onDateRangeChange($event)"
+></app-date-range>
+
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6 text-white">
     @if (isLoading()) {
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
@@ -21,14 +37,6 @@
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-    <app-bar-chart
-        [isLoading]="isLoading()"
-        [data]="filteredEntries()"
-        [daysMap]="days()"
-    ></app-bar-chart>
-    <app-line-chart
-        [isLoading]="isLoading()"
-        [data]="filteredEntries()"
-        [daysMap]="days()"
-    ></app-line-chart>
+    <app-bar-chart [isLoading]="isLoading()" [daysMap]="days()"></app-bar-chart>
+    <app-line-chart [isLoading]="isLoading()" [daysMap]="days()"></app-line-chart>
 </div>

@@ -15,15 +15,14 @@ import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { ActivatedRoute, Router } from '@angular/router';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subject } from 'rxjs';
 import { Worktime } from '../../shared/model/Worktime';
 import { Project } from '../../shared/model/Project';
 import { DateRangeComponent } from '../../common/date-range/date-range.component';
 import { TableComponent } from '../../common/table/table.component';
 import { WorktimeDialogComponent } from './worktime-dialog/worktime-dialog.component';
-import { WorktimeStatsComponent } from './worktime-stats/worktime-stats.component';
 import { DisplayedColumn } from '../../shared/constants/table/DisplayedColumn';
 import { DateService } from '../../shared/services/date/date.service';
 import { WorktimeService, WorktimeStats } from '../../shared/services/worktime/worktime.service';
@@ -37,6 +36,7 @@ import { ListStateService } from '../../shared/services/list-state/list-state.se
 import { ListState } from '../../shared/constants/table/ListState';
 import { PageEvent } from '@angular/material/paginator';
 import { Sort } from '@angular/material/sort';
+import { DateRangeService } from '../../shared/services/date-range/date-range.service';
 
 @Component({
     selector: 'app-worktime',
@@ -50,7 +50,6 @@ import { Sort } from '@angular/material/sort';
         MatButton,
         TableComponent,
         WorktimeDialogComponent,
-        WorktimeStatsComponent,
         MatInput,
         MatAutocomplete,
         MatAutocompleteTrigger,
@@ -63,21 +62,19 @@ export class WorktimeComponent implements OnInit {
     private readonly worktimeService = inject(WorktimeService);
     private readonly projectService = inject(ProjectService);
     private readonly snackbarService = inject(SnackbarService);
-    private readonly router = inject(Router);
     private readonly activeRoute = inject(ActivatedRoute);
     private readonly destroyRef = inject(DestroyRef);
     private readonly fb = inject(FormBuilder);
     private readonly listStateService = inject(ListStateService);
+    private readonly dateRangeService = inject(DateRangeService);
 
     private readonly loadListTrigger$ = new Subject<void>();
-    private readonly loadStatsTrigger$ = new Subject<void>();
-    private readonly queryParams = toSignal(this.activeRoute.queryParams);
     readonly organizationId = input.required<string>();
 
     minDate = signal<Date>(new Date('2026-01-01'));
     maxDate = signal<Date>(new Date(new Date().setHours(23, 59, 59, 999)));
-    startDate = signal<Date>(this.getStartDate());
-    endDate = signal<Date>(this.getEndDate());
+    startDate = this.dateRangeService.startDate;
+    endDate = this.dateRangeService.endDate;
 
     projects = signal<Project[]>([]);
     selectedProjectId = signal<string | null>(null);
@@ -117,6 +114,11 @@ export class WorktimeComponent implements OnInit {
     });
 
     ngOnInit() {
+        this.dateRangeService.init(this.activeRoute, {
+            minDate: this.minDate(),
+            maxDate: this.maxDate(),
+        });
+
         this.loadListTrigger$
             .pipe(
                 debounceTime(50),
@@ -154,34 +156,6 @@ export class WorktimeComponent implements OnInit {
                 },
             });
 
-        this.loadStatsTrigger$
-            .pipe(
-                debounceTime(50),
-                switchMap(() => {
-                    const orgId = this.organizationId();
-                    if (!orgId) return EMPTY;
-
-                    const start = this.dateService.toLocaleISOString(this.startDate(), true);
-                    const end = this.dateService.toLocaleISOString(this.endDate(), true);
-
-                    const projectId = this.selectedProjectId();
-                    const queryParams: Record<string, string | undefined> = {
-                        start_date: start,
-                        end_date: end,
-                    };
-                    if (projectId) {
-                        queryParams['project_id'] = projectId;
-                    }
-
-                    return this.worktimeService.getStats(orgId, queryParams);
-                }),
-                takeUntilDestroyed(this.destroyRef)
-            )
-            .subscribe({
-                next: (stats) => this.worktimeStats.set(stats),
-                error: () => this.snackbarService.error('Failed to load worktime stats.'),
-            });
-
         this.form
             .get('projectName')
             ?.valueChanges.pipe(
@@ -195,12 +169,10 @@ export class WorktimeComponent implements OnInit {
                     this.selectedProjectId.set(null);
                     this.filteredEntries.set([]);
                     this.loadWorktime();
-                    this.loadStats();
                 }
             });
 
         this.loadWorktime();
-        this.loadStats();
     }
 
     // used by autocomplete to show project name instead of id
@@ -224,61 +196,16 @@ export class WorktimeComponent implements OnInit {
         this.selectedProjectId.set(projectId);
         this.filteredEntries.set([]);
         this.loadWorktime();
-        this.loadStats();
     }
 
     loadWorktime(): void {
         this.loadListTrigger$.next();
     }
 
-    loadStats(): void {
-        this.loadStatsTrigger$.next();
-    }
-
-    getStartDate(): Date {
-        const startQuery = this.queryParams()?.['startDate'];
-        if (startQuery) {
-            const sd = new Date(startQuery);
-            if (!isNaN(sd.getTime()) && sd >= this.minDate()) return sd;
-        }
-        return this.getLastWeek();
-    }
-
-    getEndDate(): Date {
-        const endQuery = this.queryParams()?.['endDate'];
-        const max = this.maxDate();
-        if (endQuery) {
-            const ed = new Date(endQuery);
-            if (!isNaN(ed.getTime()) && ed <= max) return ed;
-        }
-        const now = new Date();
-        return now > max ? max : now;
-    }
-
-    getLastWeek(): Date {
-        const date = new Date();
-        date.setDate(date.getDate() - 7);
-        return date;
-    }
-
     onDateRangeChange($event: { startDate: string; endDate: string }) {
-        const start = new Date($event.startDate);
-        const end = new Date($event.endDate);
-
-        this.startDate.set(start);
-        this.endDate.set(end);
-
-        this.router.navigate([], {
-            relativeTo: this.activeRoute,
-            queryParams: {
-                startDate: this.dateService.toLocaleISOString(start, true),
-                endDate: this.dateService.toLocaleISOString(end, true),
-            },
-            queryParamsHandling: 'merge',
-        });
-
-        this.loadWorktime();
-        this.loadStatsTrigger$.next();
+        this.dateRangeService.onDateRangeChange($event, this.activeRoute, () =>
+            this.loadWorktime()
+        );
     }
 
     deleteEntry(id: string): void {
@@ -289,7 +216,6 @@ export class WorktimeComponent implements OnInit {
             next: () => {
                 this.snackbarService.success('Worktime entry deleted.');
                 this.loadWorktime();
-                this.loadStats();
             },
             error: () => this.snackbarService.error('Failed to delete entry.'),
         });
@@ -304,10 +230,14 @@ export class WorktimeComponent implements OnInit {
     }
 
     onWorktimeSaved(worktime: Worktime): void {
-        if (!this.isBetweenDates(worktime.loggedAt)) return;
+        const obj = {
+            dateToCheck: worktime.loggedAt,
+            startDate: this.startDate(),
+            endDate: this.endDate(),
+        };
+        if (!this.dateService.isBetweenDates(obj)) return;
 
         this.loadWorktime();
-        this.loadStats();
     }
 
     private loadProjects(qp: ApiQueryParams): void {
@@ -322,11 +252,5 @@ export class WorktimeComponent implements OnInit {
                 this.snackbarService.error('Failed to load projects.');
             },
         });
-    }
-
-    private isBetweenDates(date: string): boolean {
-        const start = this.dateService.toLocaleISOString(this.startDate(), true);
-        const end = this.dateService.toLocaleISOString(this.endDate(), true);
-        return date >= start && date <= end;
     }
 }

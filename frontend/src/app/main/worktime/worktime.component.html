@@ -1,44 +1,28 @@
-<div class="mb-8 flex justify-between">
-    <div>
-        <h1 class="text-4xl font-black text-gray-900 dark:text-white mb-2">Worktime Tracking</h1>
-        <p class="text-gray-600 dark:text-gray-400">Track and analyze your time spent on issues</p>
-    </div>
-    <div>
-        <button
-            class="flex md:gap-2 justify-center !text-white"
-            mat-flat-button
-            color="primary"
-            [disabled]="!selectedProjectId()"
-            (click)="openWorktimeDialog()"
-        >
-            <mat-icon class="!mr-0">add</mat-icon>
-            <span class="hidden md:block">Add Worktime</span>
-        </button>
-    </div>
-</div>
+<div
+    [formGroup]="form"
+    class="pt-2 mb-6 flex items-start flex-col md:flex-row sm:justify-between gap-4"
+>
+    <div class="flex flex-col flex-wrap md:flex-row gap-4 w-full">
+        <mat-form-field appearance="outline" class="w-full sm:w-72 shrink">
+            <mat-label>Project Name</mat-label>
+            <input formControlName="projectName" matInput [matAutocomplete]="auto" />
 
-<div [formGroup]="form" class="mb-6 flex flex-col md:flex-row gap-4">
-    <mat-form-field appearance="outline" class="w-full sm:w-72">
-        <mat-label>Project Name</mat-label>
-        <input formControlName="projectName" matInput [matAutocomplete]="auto" />
+            <mat-autocomplete
+                #auto="matAutocomplete"
+                [displayWith]="displayFn"
+                (optionSelected)="onProjectChange($event.option.value.id)"
+            >
+                @for (project of projects(); track project.id) {
+                    <mat-option [value]="project">{{ project.name }}</mat-option>
+                } @empty {
+                    <mat-option disabled>No projects found</mat-option>
+                }
+            </mat-autocomplete>
+        </mat-form-field>
 
-        <mat-autocomplete
-            #auto="matAutocomplete"
-            [displayWith]="displayFn"
-            (optionSelected)="onProjectChange($event.option.value.id)"
-        >
-            @for (project of projects(); track project.id) {
-                <mat-option [value]="project">{{ project.name }}</mat-option>
-            } @empty {
-                <mat-option disabled>No projects found</mat-option>
-            }
-        </mat-autocomplete>
-    </mat-form-field>
-
-    <div class="h-fit">
         @if (endDate() && startDate()) {
             <app-date-range
-                class="w-full"
+                class="w-full sm:w-72 shrink"
                 [startDate]="startDate()"
                 [endDate]="endDate()"
                 [minDate]="minDate()"
@@ -47,15 +31,18 @@
             ></app-date-range>
         }
     </div>
-</div>
 
-<app-worktime-stats
-    [startDate]="startDate()"
-    [endDate]="endDate()"
-    [filteredEntries]="filteredEntries()"
-    [stats]="worktimeStats()"
-    [isLoading]="isLoading()"
-></app-worktime-stats>
+    <button
+        class="flex max-w-50 w-full md:gap-2 justify-center !text-white"
+        mat-flat-button
+        color="primary"
+        [disabled]="!selectedProjectId()"
+        (click)="openWorktimeDialog()"
+    >
+        <mat-icon class="!mr-0">add</mat-icon>
+        <span class="hidden md:block">Add Worktime</span>
+    </button>
+</div>
 
 <div class="rounded-xl shadow-lg overflow-hidden">
     <div class="overflow-x-auto">
