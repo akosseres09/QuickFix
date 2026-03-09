@@ -109,6 +109,7 @@ export class MainLayoutComponent implements OnInit {
                 icon: 'apartment',
             },
         ];
+
         if (!orgId || !org) {
             return baseRoute;
         }
@@ -129,7 +130,12 @@ export class MainLayoutComponent implements OnInit {
 
             ...(projId
                 ? ([
-                      { name: projId, type: 'button', path: projPath, icon: 'bolt' },
+                      {
+                          name: projId,
+                          type: 'button',
+                          path: `${projPath}`,
+                          icon: 'bolt',
+                      },
                       {
                           name: 'Projects',
                           type: 'button',
@@ -147,14 +153,18 @@ export class MainLayoutComponent implements OnInit {
                                   path: `${projPath}/issues/overview`,
                                   icon: 'travel_explore',
                               },
-                              { name: 'Issues', path: `${projPath}/issues`, icon: 'assignment' },
+                              {
+                                  name: 'All Issues',
+                                  path: `${projPath}/issues`,
+                                  icon: 'assignment',
+                              },
                               {
                                   name: 'Board',
                                   path: `${projPath}/issues/board`,
                                   icon: 'space_dashboard',
                               },
                               {
-                                  name: 'New Issue',
+                                  name: 'Create Issue',
                                   path: `${projPath}/issues/add`,
                                   icon: 'add_task',
                               },
@@ -167,17 +177,16 @@ export class MainLayoutComponent implements OnInit {
                 name: 'Manage',
                 type: 'menu',
                 icon: 'manage_accounts',
-                path: `${basePath}/manage`,
                 children: [
                     ...(projId
                         ? [
                               {
-                                  name: 'Project members',
+                                  name: 'Members',
                                   path: `${projPath}/members`,
                                   icon: 'group',
                               },
                               {
-                                  name: 'Project activity',
+                                  name: 'Activity',
                                   path: `${projPath}/activity`,
                                   icon: 'local_activity',
                               },
@@ -189,12 +198,12 @@ export class MainLayoutComponent implements OnInit {
                           ]
                         : [
                               {
-                                  name: 'Organization Activity',
+                                  name: 'Activity',
                                   path: `${basePath}/activity`,
                                   icon: 'local_activity',
                               },
                               {
-                                  name: 'Organization members',
+                                  name: 'Members',
                                   path: `${basePath}/members`,
                                   icon: 'person',
                               },
@@ -202,7 +211,7 @@ export class MainLayoutComponent implements OnInit {
                 ],
             },
             {
-                name: 'Worktime',
+                name: 'Time Tracking',
                 type: 'button',
                 path: `${basePath}/worktime`,
                 icon: 'access_time',
@@ -214,10 +223,14 @@ export class MainLayoutComponent implements OnInit {
         return [
             {
                 name: 'Account',
-                path: '/account',
                 type: 'menu',
                 icon: 'account_box',
                 children: [
+                    {
+                        name: 'Profile',
+                        path: '/account',
+                        icon: 'account_box',
+                    },
                     {
                         name: 'Settings',
                         path: '/settings',

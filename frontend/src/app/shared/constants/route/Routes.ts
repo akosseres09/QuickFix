@@ -8,7 +8,7 @@ export type SidenavRoute =
           children: Array<ChildRoute>;
           icon?: string;
           url?: string;
-          path?: string;
+          path?: never;
           exact?: boolean;
       }
     | {
