@@ -266,39 +266,6 @@ export class ViewComponent {
         this.editingComment.set(null);
     }
 
-    get creatorName(): string {
-        const issue = this.issue();
-        if (!issue) return 'Unknown';
-
-        const creator = issue.creator;
-
-        if (!creator) return 'Unknown';
-
-        const { firstName, lastName } = creator;
-
-        if (firstName && lastName) {
-            return `${firstName} ${lastName}`;
-        }
-
-        return creator.username;
-    }
-
-    get updatorName(): string {
-        const issue = this.issue();
-        if (!issue) return 'Unknown';
-
-        const updator = issue.updator;
-        if (!updator) return 'Unknown';
-
-        const { firstName, lastName } = updator;
-
-        if (firstName && lastName) {
-            return `${firstName} ${lastName}`;
-        }
-
-        return updator.username;
-    }
-
     get comment() {
         return this.commentForm.get('content')!;
     }

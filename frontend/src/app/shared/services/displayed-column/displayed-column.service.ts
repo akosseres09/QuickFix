@@ -42,7 +42,7 @@ export class DisplayedColumnService {
                 value: (e: Issue) => e.creator?.fullName ?? 'Unknown',
                 routerLink: (e: Issue) => {
                     if (!e.creator?.username) return null;
-                    return ['../../../member/', '@' + e.creator.username];
+                    return ['../members/', e.creator.username];
                 },
                 photoOnly: (e: Issue) => !!e.creator,
                 photoUrl: (e: Issue) => e.creator?.profilePictureUrl ?? null,
@@ -54,7 +54,7 @@ export class DisplayedColumnService {
                 value: (e: Issue) => e.assignee?.fullName ?? 'Unassigned',
                 routerLink: (e: Issue) => {
                     if (!e.assignee?.username) return null;
-                    return ['../../../member/', '@' + e.assignee.username];
+                    return ['../members/', e.assignee.username];
                 },
                 photoOnly: (e: Issue) => !!e.assignee,
                 photoUrl: (e: Issue) => e.assignee?.profilePictureUrl || null,
@@ -106,8 +106,7 @@ export class DisplayedColumnService {
                 label: 'Owner',
                 sortable: false,
                 value: (e: Project) => e.owner?.fullName ?? 'Unknown',
-                routerLink: (e: Project) =>
-                    e.owner?.id ? ['../member', '@' + e.owner.username] : [],
+                routerLink: (e: Project) => (e.owner?.id ? ['../members', e.owner.username] : []),
                 photoOnly: (e: Project) => !!e.owner,
                 photoUrl: (e: Project) => e.owner?.profilePictureUrl ?? '',
             },
@@ -184,7 +183,7 @@ export class DisplayedColumnService {
                 label: 'Owner',
                 sortable: false,
                 routerLink: (e: Organization) =>
-                    e.owner?.id ? ['member', '@' + e.owner.username] : [],
+                    e.owner?.id ? ['../org', e.slug, 'members', e.owner.username] : [],
                 photoUrl: (element: Organization) =>
                     element.owner ? element.owner.profilePictureUrl : null,
                 photoOnly: (e: Organization) => !!e.owner,
