@@ -61,6 +61,7 @@ export class WorktimeDialogComponent implements OnInit {
     organizationId = input.required<string>();
     worktimeSaved = output<Worktime>();
     worktimeEdited = output<Worktime>();
+    onCancel = output<void>();
 
     issues = signal<Issue[]>([]);
     worktimeFormTemplate = viewChild<TemplateRef<unknown>>('worktimeFormTemplate');
@@ -138,6 +139,8 @@ export class WorktimeDialogComponent implements OnInit {
                 } else {
                     this.saveIssue();
                 }
+            } else {
+                this.onCancel.emit();
             }
             this.worktimeForm.reset({ loggedAt: new Date() });
         });

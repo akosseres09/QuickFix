@@ -25,7 +25,7 @@ import { TableComponent } from '../../common/table/table.component';
 import { WorktimeDialogComponent } from './worktime-dialog/worktime-dialog.component';
 import { DisplayedColumn } from '../../shared/constants/table/DisplayedColumn';
 import { DateService } from '../../shared/services/date/date.service';
-import { WorktimeService, WorktimeStats } from '../../shared/services/worktime/worktime.service';
+import { WorktimeService } from '../../shared/services/worktime/worktime.service';
 import { ProjectService } from '../../shared/services/project/project.service';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 import { MatInput } from '@angular/material/input';
@@ -39,6 +39,7 @@ import { Sort } from '@angular/material/sort';
 import { DateRangeService } from '../../shared/services/date-range/date-range.service';
 import { SpeedDialComponent } from '../../common/speed-dial/speed-dial.component';
 import { SpeedDialButton } from '../../shared/constants/speed-dial/SpeedDialButton';
+import { DisplayedColumnService } from '../../shared/services/displayed-column/displayed-column.service';
 
 @Component({
     selector: 'app-worktime',
@@ -70,6 +71,7 @@ export class WorktimeComponent implements OnInit {
     private readonly fb = inject(FormBuilder);
     private readonly listStateService = inject(ListStateService);
     private readonly dateRangeService = inject(DateRangeService);
+    private readonly displayedColumnService = inject(DisplayedColumnService);
 
     private readonly loadListTrigger$ = new Subject<void>();
     readonly organizationId = input.required<string>();
@@ -88,26 +90,8 @@ export class WorktimeComponent implements OnInit {
     isLoading = signal<boolean>(false);
 
     shownWorktimes = computed(() => new MatTableDataSource(this.filteredEntries()));
-    displayedColumns: DisplayedColumn<Worktime>[] = [
-        {
-            id: 'loggedAt',
-            label: 'Date',
-            sortable: true,
-            value: (e: Worktime) => new Date(e.loggedAt + 'T00:00:00').toLocaleDateString(),
-        },
-        {
-            id: 'minutesSpent',
-            label: 'Hours',
-            sortable: true,
-            value: (e: Worktime) => (e.minutesSpent / 60).toFixed(2),
-        },
-        {
-            id: 'description',
-            label: 'Description',
-            sortable: false,
-            value: (e: Worktime) => e.description,
-        },
-    ];
+    displayedColumns: DisplayedColumn<Worktime>[] =
+        this.displayedColumnService.getWorktimeColumns();
 
     worktimeDialog = viewChild(WorktimeDialogComponent);
     speedDial = viewChild<SpeedDialComponent>('speedDial');
@@ -115,6 +99,12 @@ export class WorktimeComponent implements OnInit {
         const selected = this.selectedWorktime();
 
         return [
+            {
+                iconName: 'add',
+                label: 'Add Worktime',
+                shown: !!this.selectedProjectId() && !selected,
+                onClick: () => this.openWorktimeDialog(),
+            },
             {
                 iconName: 'edit',
                 label: 'Edit Worktime',
@@ -129,6 +119,7 @@ export class WorktimeComponent implements OnInit {
             },
         ];
     });
+
     form = this.fb.group({
         projectName: [''],
     });
@@ -155,7 +146,7 @@ export class WorktimeComponent implements OnInit {
                     const end = this.dateService.toLocaleISOString(this.endDate(), true);
 
                     const projectId = this.selectedProjectId();
-                    const queryParams: Record<string, string | number | undefined | null> = {
+                    const queryParams: ApiQueryParams = {
                         start_date: start,
                         end_date: end,
                         ...this.listState.buildQueryParams(),

@@ -19,6 +19,7 @@ import {
 import { DisplayedColumn } from '../../constants/table/DisplayedColumn';
 import { Label } from '../../model/Label';
 import { Organization } from '../../model/Organization';
+import { Worktime } from '../../model/Worktime';
 
 @Injectable({
     providedIn: 'root',
@@ -197,6 +198,29 @@ export class DisplayedColumnService {
                     const date = this.dateService.parseTimestamp(e.createdAt);
                     return this.dateService.toGMTtime(date);
                 },
+            },
+        ];
+    }
+
+    getWorktimeColumns(): DisplayedColumn<Worktime>[] {
+        return [
+            {
+                id: 'loggedAt',
+                label: 'Date',
+                sortable: true,
+                value: (e: Worktime) => new Date(e.loggedAt + 'T00:00:00').toLocaleDateString(),
+            },
+            {
+                id: 'minutesSpent',
+                label: 'Hours',
+                sortable: true,
+                value: (e: Worktime) => (e.minutesSpent / 60).toFixed(2),
+            },
+            {
+                id: 'description',
+                label: 'Description',
+                sortable: false,
+                value: (e: Worktime) => e.description,
             },
         ];
     }
