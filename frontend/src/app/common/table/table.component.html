@@ -78,22 +78,24 @@
                                     @if (link === null) {
                                         <span>{{ value }}</span>
                                     } @else {
-                                        <a
-                                            [routerLink]="link"
-                                            class="flex justify-center items-center gap-2 text-blue-600 dark:text-blue-400 cursor-pointer hover:underline underline-offset-3"
-                                        >
-                                            @if (url) {
-                                                <img
-                                                    [matTooltip]="value"
-                                                    [src]="url"
-                                                    [alt]="value"
-                                                    class="w-8 h-8 rounded-md"
-                                                />
-                                            }
-                                            @if (!photoOnly) {
-                                                {{ value }}
-                                            }
-                                        </a>
+                                        <span class="flex justify-center items-center gap-2">
+                                            <a
+                                                [routerLink]="link"
+                                                class="text-blue-600 dark:text-blue-400 cursor-pointer hover:underline underline-offset-3 w-fit"
+                                            >
+                                                @if (url) {
+                                                    <img
+                                                        [matTooltip]="value"
+                                                        [src]="url"
+                                                        [alt]="value"
+                                                        class="w-8 h-8 rounded-md"
+                                                    />
+                                                }
+                                                @if (!photoOnly) {
+                                                    {{ value }}
+                                                }
+                                            </a>
+                                        </span>
                                     }
                                 } @else if (col.badge) {
                                     <div class="flex justify-center items-center">
