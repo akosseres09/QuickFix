@@ -132,18 +132,21 @@ export class WorktimeDialogComponent implements OnInit {
             }
         });
 
-        dialogRef.afterClosed().subscribe((result) => {
-            if (result?.action === 'save' && this.worktimeForm && this.worktimeForm.valid) {
-                if (worktime) {
-                    this.editIssue();
+        dialogRef
+            .afterClosed()
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe((result) => {
+                if (result?.action === 'save' && this.worktimeForm && this.worktimeForm.valid) {
+                    if (worktime) {
+                        this.editIssue();
+                    } else {
+                        this.saveIssue();
+                    }
                 } else {
-                    this.saveIssue();
+                    this.onCancel.emit();
                 }
-            } else {
-                this.onCancel.emit();
-            }
-            this.worktimeForm.reset({ loggedAt: new Date() });
-        });
+                this.worktimeForm.reset({ loggedAt: new Date() });
+            });
     }
 
     saveIssue() {

@@ -40,6 +40,7 @@ import { DateRangeService } from '../../shared/services/date-range/date-range.se
 import { SpeedDialComponent } from '../../common/speed-dial/speed-dial.component';
 import { SpeedDialButton } from '../../shared/constants/speed-dial/SpeedDialButton';
 import { DisplayedColumnService } from '../../shared/services/displayed-column/displayed-column.service';
+import { DeleteWorktimeDialogComponent } from './delete-worktime-dialog/delete-worktime-dialog.component';
 
 @Component({
     selector: 'app-worktime',
@@ -57,6 +58,7 @@ import { DisplayedColumnService } from '../../shared/services/displayed-column/d
         MatAutocomplete,
         MatAutocompleteTrigger,
         SpeedDialComponent,
+        DeleteWorktimeDialogComponent,
     ],
     templateUrl: './worktime.component.html',
     styleUrl: './worktime.component.css',
@@ -94,15 +96,17 @@ export class WorktimeComponent implements OnInit {
         this.displayedColumnService.getWorktimeColumns();
 
     worktimeDialog = viewChild(WorktimeDialogComponent);
+    deleteDialog = viewChild(DeleteWorktimeDialogComponent);
     speedDial = viewChild<SpeedDialComponent>('speedDial');
     speedDialButtons = computed<SpeedDialButton[]>(() => {
         const selected = this.selectedWorktime();
+        const selectedProjectId = this.selectedProjectId();
 
         return [
             {
                 iconName: 'add',
                 label: 'Add Worktime',
-                shown: !!this.selectedProjectId() && !selected,
+                shown: !!selectedProjectId && !selected,
                 onClick: () => this.openWorktimeDialog(),
             },
             {
@@ -115,7 +119,7 @@ export class WorktimeComponent implements OnInit {
                 iconName: 'delete',
                 label: 'Delete Worktime',
                 shown: !!selected,
-                onClick: () => {},
+                onClick: () => this.openDeleteDialog(),
             },
         ];
     });
@@ -228,35 +232,10 @@ export class WorktimeComponent implements OnInit {
         this.loadWorktime();
     }
 
-    loadWorktime(): void {
-        this.loadListTrigger$.next();
-    }
-
     onDateRangeChange($event: { startDate: string; endDate: string }) {
         this.dateRangeService.onDateRangeChange($event, this.activeRoute, () =>
             this.loadWorktime()
         );
-    }
-
-    deleteEntry(id: string): void {
-        const orgId = this.organizationId();
-        if (!orgId) return;
-
-        this.worktimeService.deleteWorktime(orgId, id).subscribe({
-            next: () => {
-                this.snackbarService.success('Worktime entry deleted.');
-                this.loadWorktime();
-            },
-            error: () => this.snackbarService.error('Failed to delete entry.'),
-        });
-    }
-
-    openWorktimeDialog(): void {
-        if (!this.selectedProjectId() && !this.selectedWorktime()) {
-            this.snackbarService.error('Please select a project first.');
-            return;
-        }
-        this.worktimeDialog()?.open();
     }
 
     onWorktimeSaved(worktime: Worktime): void {
@@ -270,12 +249,34 @@ export class WorktimeComponent implements OnInit {
         this.loadWorktime();
     }
 
+    loadWorktime(): void {
+        this.loadListTrigger$.next();
+    }
+
+    onDelete(worktimeId: string) {
+        this.filteredEntries.update((current) => {
+            return current.filter((wt) => wt.id !== worktimeId);
+        });
+    }
+
     onWorktimeEdited(worktime: Worktime) {
         this.filteredEntries.update((entries) =>
             entries.map((entry) => (entry.id === worktime.id ? worktime : entry))
         );
 
         this.onRowChange(null);
+    }
+
+    openWorktimeDialog(): void {
+        if (!this.selectedProjectId() && !this.selectedWorktime()) {
+            this.snackbarService.error('Please select a project first.');
+            return;
+        }
+        this.worktimeDialog()?.open();
+    }
+
+    openDeleteDialog(): void {
+        this.deleteDialog()?.open();
     }
 
     private loadProjects(qp: ApiQueryParams): void {

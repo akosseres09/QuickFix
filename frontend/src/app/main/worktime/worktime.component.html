@@ -80,3 +80,9 @@
     (worktimeEdited)="onWorktimeEdited($event)"
     (onCancel)="onRowChange(null)"
 ></app-worktime-dialog>
+
+<app-delete-worktime-dialog
+    [organizationId]="organizationId()"
+    [worktime]="selectedWorktime()"
+    (worktimeDeleted)="onDelete($event)"
+></app-delete-worktime-dialog>
