@@ -113,7 +113,7 @@ export class MainLayoutComponent implements OnInit {
             return baseRoute;
         }
 
-        const basePath = `/${orgId}`;
+        const basePath = `/org/${orgId}`;
         const projPath = `${basePath}/project/${projId}`;
 
         return [

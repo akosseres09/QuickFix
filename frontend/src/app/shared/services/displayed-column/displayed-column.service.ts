@@ -39,10 +39,10 @@ export class DisplayedColumnService {
                 id: 'author',
                 label: 'Author',
                 sortable: false,
-                value: (e: Issue) => e.creator?.username || '',
+                value: (e: Issue) => e.creator?.fullName ?? 'Unknown',
                 routerLink: (e: Issue) => {
                     if (!e.creator?.username) return null;
-                    return ['/member/', '@' + e.creator.username];
+                    return ['../../../member/', '@' + e.creator.username];
                 },
                 photoOnly: (e: Issue) => !!e.creator,
                 photoUrl: (e: Issue) => e.creator?.profilePictureUrl ?? null,
@@ -51,10 +51,10 @@ export class DisplayedColumnService {
                 id: 'assignee',
                 label: 'Assignee',
                 sortable: false,
-                value: (e: Issue) => e.assignee?.username || 'Not Assigned',
+                value: (e: Issue) => e.assignee?.fullName ?? 'Unassigned',
                 routerLink: (e: Issue) => {
                     if (!e.assignee?.username) return null;
-                    return ['/member/', '@' + e.assignee.username];
+                    return ['../../../member/', '@' + e.assignee.username];
                 },
                 photoOnly: (e: Issue) => !!e.assignee,
                 photoUrl: (e: Issue) => e.assignee?.profilePictureUrl || null,
@@ -92,22 +92,22 @@ export class DisplayedColumnService {
         ];
     }
 
-    getProjectColumns(organizationId: string): DisplayedColumn<Project>[] {
+    getProjectColumns(): DisplayedColumn<Project>[] {
         return [
             {
                 id: 'name',
                 label: 'Name',
                 sortable: true,
                 value: (e: Project) => e.name,
-                routerLink: (e: Project) => ['/', organizationId, 'project', e.key],
+                routerLink: (e: Project) => ['../', 'project', e.key],
             },
             {
                 id: 'owner',
                 label: 'Owner',
                 sortable: false,
-                value: (e: Project) => e.owner?.username || 'N/A',
+                value: (e: Project) => e.owner?.fullName ?? 'Unknown',
                 routerLink: (e: Project) =>
-                    e.owner?.id ? ['/member', '@' + e.owner.username] : [],
+                    e.owner?.id ? ['../member', '@' + e.owner.username] : [],
                 photoOnly: (e: Project) => !!e.owner,
                 photoUrl: (e: Project) => e.owner?.profilePictureUrl ?? '',
             },
@@ -160,18 +160,18 @@ export class DisplayedColumnService {
             {
                 id: 'orgPhoto',
                 label: '',
-                value: (e: Organization) => '',
+                value: (e: Organization) => e.name,
                 sortable: false,
                 photoOnly: () => true,
                 photoUrl: (e: Organization) => e.logoUrl,
-                routerLink: (e: Organization) => ['/', e.slug],
+                routerLink: (e: Organization) => ['/org', e.slug],
             },
             {
                 id: 'slug',
                 label: 'Slug',
                 sortable: true,
                 value: (e: Organization) => e.slug,
-                routerLink: (e: Organization) => ['/', e.slug],
+                routerLink: (e: Organization) => ['/org', e.slug],
             },
             {
                 id: 'name',
@@ -184,11 +184,11 @@ export class DisplayedColumnService {
                 label: 'Owner',
                 sortable: false,
                 routerLink: (e: Organization) =>
-                    e.owner?.id ? ['/member', '@' + e.owner.username] : [],
+                    e.owner?.id ? ['member', '@' + e.owner.username] : [],
                 photoUrl: (element: Organization) =>
                     element.owner ? element.owner.profilePictureUrl : null,
                 photoOnly: (e: Organization) => !!e.owner,
-                value: (e: Organization) => e.owner?.username ?? '',
+                value: (e: Organization) => e.owner?.fullName ?? 'Unknown',
             },
             {
                 id: 'created_at',

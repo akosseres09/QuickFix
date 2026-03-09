@@ -54,7 +54,6 @@ export const routes: Routes = [
             },
         ],
     },
-
     {
         path: '',
         loadComponent: () =>
@@ -71,15 +70,44 @@ export const routes: Routes = [
             },
         ],
     },
-
     {
         path: '',
         loadComponent: () =>
-            import('./layouts/base-layout/base-layout.component').then(
-                (c) => c.BaseLayoutComponent
+            import('./layouts/main-layout/main-layout.component').then(
+                (c) => c.MainLayoutComponent
             ),
         canActivate: [authenticatedGuard],
         children: [
+            {
+                path: 'organizations',
+                children: [
+                    {
+                        path: '',
+                        pathMatch: 'full',
+                        loadComponent: () =>
+                            import('./main/organizations/organizations.component').then(
+                                (c) => c.OrganizationsComponent
+                            ),
+                        title: 'QuickFix - Organizations',
+                    },
+                    {
+                        path: 'new',
+                        loadComponent: () =>
+                            import(
+                                './main/organizations/create-organization/create-organization.component'
+                            ).then((c) => c.CreateOrganizationComponent),
+                        title: 'QuickFix - New Organization',
+                    },
+                    {
+                        path: ':organizationId/edit',
+                        loadComponent: () =>
+                            import(
+                                './main/organizations/edit-organization/edit-organization.component'
+                            ).then((c) => c.EditOrganizationComponent),
+                        title: 'QuickFix - Edit Organization',
+                    },
+                ],
+            },
             {
                 path: 'account',
                 loadComponent: () =>
@@ -94,44 +122,9 @@ export const routes: Routes = [
             },
         ],
     },
-    {
-        path: 'organizations',
-        loadComponent: () =>
-            import('./layouts/main-layout/main-layout.component').then(
-                (c) => c.MainLayoutComponent
-            ),
-        canActivate: [authenticatedGuard],
-        children: [
-            {
-                path: '',
-                pathMatch: 'full',
-                loadComponent: () =>
-                    import('./main/organizations/organizations.component').then(
-                        (c) => c.OrganizationsComponent
-                    ),
-                title: 'QuickFix - Organizations',
-            },
-            {
-                path: 'new',
-                loadComponent: () =>
-                    import(
-                        './main/organizations/create-organization/create-organization.component'
-                    ).then((c) => c.CreateOrganizationComponent),
-                title: 'QuickFix - New Organization',
-            },
-            {
-                path: ':organizationId/edit',
-                loadComponent: () =>
-                    import(
-                        './main/organizations/edit-organization/edit-organization.component'
-                    ).then((c) => c.EditOrganizationComponent),
-                title: 'QuickFix - Edit Organization',
-            },
-        ],
-    },
 
     {
-        path: ':organizationId',
+        path: 'org/:organizationId',
         loadComponent: () =>
             import('./layouts/main-layout/main-layout.component').then(
                 (c) => c.MainLayoutComponent

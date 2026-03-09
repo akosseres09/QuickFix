@@ -71,7 +71,7 @@ export class ProjectsComponent {
     filteredProjects = signal<Project[]>([]);
     shownProjects = computed(() => new MatTableDataSource<Project>(this.filteredProjects()));
     displayedColumns = linkedSignal<DisplayedColumn<Project>[]>(() =>
-        this.displayedColumnService.getProjectColumns(this.organizationId())
+        this.displayedColumnService.getProjectColumns()
     );
 
     speedDialButtons = computed<SpeedDialButton[]>(() => {

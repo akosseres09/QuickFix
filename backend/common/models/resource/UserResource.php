@@ -19,6 +19,7 @@ class UserResource extends User
             'profilePictureUrl' => 'profile_picture_url',
             'createdAt' => 'created_at',
             'updatedAt' => 'updated_at',
+            'fullName'
         ];
     }
 }
