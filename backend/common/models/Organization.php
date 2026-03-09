@@ -2,11 +2,11 @@
 
 namespace common\models;
 
+use common\components\behaviors\InvalidateCacheBehavior;
 use common\models\query\OrganizationQuery;
 use common\models\resource\UserResource;
 use Symfony\Component\Uid\Uuid;
 use Yii;
-use yii\base\Event;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -35,29 +35,6 @@ class Organization extends ActiveRecord
         return "{{%organization}}";
     }
 
-    public function init()
-    {
-        parent::init();
-
-        $this->on(self::EVENT_BEFORE_UPDATE, [self::class, 'clearCache']);
-        $this->on(self::EVENT_BEFORE_DELETE, [self::class, 'clearCache']);
-        $this->on(self::EVENT_AFTER_INSERT, [self::class, 'clearCache']);
-    }
-
-    public static function clearCache(Event $event)
-    {
-        /**
-         * @var Organization
-         */
-        $org = $event->sender;
-        self::deleteCache(self::getSlugToIdCache($org->slug));
-    }
-
-    public static function deleteCache(mixed $key)
-    {
-        Yii::$app->cache->delete($key);
-    }
-
     public static function getSlugToIdCache($slug)
     {
         return 'organization_slug_to_id_' . $slug;
@@ -77,6 +54,10 @@ class Organization extends ActiveRecord
                 "createdByAttribute" => "owner_id",
                 "updatedByAttribute" => false
             ],
+            [
+                "class" => InvalidateCacheBehavior::class,
+                'cacheKeys' => [$this->getSlugToIdCache($this->id)],
+            ]
         ];
     }
 
