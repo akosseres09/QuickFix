@@ -1,0 +1,42 @@
+<div class="mb-8 flex justify-between">
+    <div>
+        <h1 class="text-4xl font-black text-gray-900 dark:text-white mb-2">Worktime Tracking</h1>
+        <p class="text-gray-600 dark:text-gray-400">Track and analyze your time spent on issues</p>
+    </div>
+</div>
+
+<app-date-range
+    class="w-full sm:w-72 shrink"
+    [startDate]="startDate()"
+    [endDate]="endDate()"
+    [minDate]="minDate()"
+    [maxDate]="maxDate()"
+    (dateRangeChange)="onDateRangeChange($event)"
+></app-date-range>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6 text-white">
+    @if (isLoading()) {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            @for (_ of [1, 2, 3, 4]; track $index) {
+                <div
+                    class="rounded-xl shadow-lg bg-gray-200 dark:bg-gray-700 animate-pulse h-24"
+                ></div>
+            }
+        </div>
+    } @else {
+        @for (stat of statCards(); track stat[0]) {
+            <div [class]="'rounded-xl shadow-lg flex flex-col px-6 py-3 ' + stat[1].bgColor">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-semibold opacity-90">{{ stat[1].label }}</span>
+                    <mat-icon>{{ stat[1].icon }}</mat-icon>
+                </div>
+                <p class="text-3xl font-bold">{{ getStatValue(stat[0]) }}</p>
+            </div>
+        }
+    }
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <app-bar-chart [isLoading]="isLoading()" [daysMap]="days()"></app-bar-chart>
+    <app-line-chart [isLoading]="isLoading()" [daysMap]="days()"></app-line-chart>
+</div>

@@ -1,11 +1,18 @@
 import { BaseModel } from './BaseModel';
+import { Issue } from './Issue';
+import { User } from './User';
 
-export interface WorktimeEntry extends BaseModel {
+export interface Worktime extends BaseModel {
     id: string;
-    issue: string;
-    issueId: number;
-    date: string;
-    hours: number;
+    issueId: string;
+    createdBy: string;
+    updatedBy: string | null;
+    minutesSpent: number;
     description: string;
-    user: string;
+    loggedAt: string; // 'YYYY-MM-DD' date string
+    createdAt: number;
+    updatedAt: number | null;
+    issue?: Issue;
+    creator?: User;
+    updator?: User;
 }

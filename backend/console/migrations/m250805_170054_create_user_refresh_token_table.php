@@ -26,7 +26,7 @@ class m250805_170054_create_user_refresh_token_table extends Migration
         $this->addPrimaryKey('pk-user_refresh_token-id', '{{%user_refresh_token}}', 'id');
 
         $this->addForeignKey(
-            'fk-refresh-token-user',
+            'fk-user_refresh_token-user_id',
             '{{%user_refresh_token}}',
             'user_id',
             '{{%user}}',
@@ -35,15 +35,17 @@ class m250805_170054_create_user_refresh_token_table extends Migration
         );
 
         $this->createIndex(
-            'idx-user_refresh_token-token',
+            'idx-user_refresh_token-user_id',
             '{{%user_refresh_token}}',
-            'token'
+            'user_id'
         );
+
         $this->createIndex(
             'idx-user_refresh_token-expires_at',
             '{{%user_refresh_token}}',
             'expires_at'
         );
+
         $this->createIndex(
             'idx-user_refresh_token-revoked_at',
             '{{%user_refresh_token}}',
@@ -57,21 +59,10 @@ class m250805_170054_create_user_refresh_token_table extends Migration
     public function safeDown()
     {
         $this->dropForeignKey(
-            'fk-refresh-token-user',
+            'fk-user_refresh_token-user_id',
             '{{%user_refresh_token}}'
         );
-        $this->dropIndex(
-            'idx-user_refresh_token-token',
-            '{{%user_refresh_token}}'
-        );
-        $this->dropIndex(
-            'idx-user_refresh_token-expires_at',
-            '{{%user_refresh_token}}'
-        );
-        $this->dropIndex(
-            'idx-user_refresh_token-revoked_at',
-            '{{%user_refresh_token}}'
-        );
+
         $this->dropTable('{{%user_refresh_token}}');
     }
 }

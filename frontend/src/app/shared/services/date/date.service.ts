@@ -74,4 +74,20 @@ export class DateService {
     parseTimestamp(timestamp: number): Date {
         return new Date(timestamp * 1000);
     }
+
+    isBetweenDates(dates: {
+        dateToCheck: string | Date;
+        startDate: string | Date;
+        endDate: string | Date;
+    }) {
+        const start = this.toLocaleISOString(new Date(dates.startDate), true);
+        const end = this.toLocaleISOString(new Date(dates.endDate), true);
+
+        const date =
+            dates.dateToCheck instanceof Date
+                ? this.toLocaleISOString(dates.dateToCheck, true)
+                : dates.dateToCheck;
+
+        return date >= start && date <= end;
+    }
 }

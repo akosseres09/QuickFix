@@ -122,18 +122,6 @@ export class NavbarComponent implements AfterViewInit {
                 exact: true,
             },
             {
-                path: '/organizations',
-                name: 'Organizations',
-                type: 'button',
-                show: this.user() !== null,
-            },
-            {
-                path: '/worktime',
-                name: 'Worktime',
-                type: 'button',
-                show: this.user() !== null,
-            },
-            {
                 type: 'menu',
                 show: this.user() !== null,
                 name: 'Account',

@@ -44,7 +44,6 @@ export class OrganizationFormComponent implements OnInit {
                 [Validators.required, Validators.maxLength(16)],
             ],
             description: [this.organization()?.description ?? ''],
-            logUrl: [this.organization()?.logoUrl ?? ''],
         });
 
         this.name.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
@@ -72,10 +71,6 @@ export class OrganizationFormComponent implements OnInit {
 
     get description() {
         return this.organizationForm.get('description')!;
-    }
-
-    get logoUrl() {
-        return this.organizationForm.get('logUrl')!;
     }
 
     onSubmit() {

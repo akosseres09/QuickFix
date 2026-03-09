@@ -23,6 +23,9 @@ class m260125_164015_create_organization_table extends Migration
             'deleted_at' => $this->integer()->null(),
         ]);
 
+        $this->addPrimaryKey('pk-organization-id', '{{%organization}}', 'id');
+        $this->createIndex('idx-organization-owner_id', '{{%organization}}', 'owner_id');
+
         // searching on name
         $this->execute('
             CREATE INDEX "idx-organization-name-trgm"
@@ -31,9 +34,9 @@ class m260125_164015_create_organization_table extends Migration
         ');
 
         $this->createIndex(
-            'uq-organization-name-slug',
+            'uq-organization-slug-slug',
             '{{%organization}}',
-            ['name', 'slug'],
+            ['slug', 'name'],
             true
         );
 
@@ -50,7 +53,6 @@ class m260125_164015_create_organization_table extends Migration
 
     public function safeDown()
     {
-        $this->execute('DROP INDEX IF EXISTS idx_organization_name_trgm;');
         $this->dropForeignKey('fk-organization-owner_id', '{{%organization}}');
         $this->dropTable('{{%organization}}');
     }

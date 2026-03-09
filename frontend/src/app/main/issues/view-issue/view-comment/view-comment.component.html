@@ -20,8 +20,8 @@
                         <div>
                             <a
                                 class="hover:underline hover:underline-offset-2"
-                                [routerLink]="['/users', '@' + comment.creator?.username]"
-                                >{{ comment.creator?.username }}</a
+                                [routerLink]="['../../../members', comment.creator?.username]"
+                                >{{ comment.creator?.fullName }}</a
                             >
                             <span
                                 class="text-gray-400"

@@ -4,7 +4,6 @@ import {
     model,
     input,
     output,
-    signal,
     effect,
     computed,
     viewChild,
@@ -15,14 +14,11 @@ import { DisplayedColumn } from '../../shared/constants/table/DisplayedColumn';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatSort, MatSortHeader, Sort, SortDirection } from '@angular/material/sort';
 import { CommonModule } from '@angular/common';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
 import { BaseModel } from '../../shared/model/BaseModel';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { RouterLink } from '@angular/router';
-import { Claims } from '../../shared/constants/user/Claims';
-import { AuthService } from '../../shared/services/auth/auth.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
     selector: 'app-table',
@@ -32,10 +28,9 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
         MatPaginatorModule,
         MatSort,
         MatSortHeader,
-        MatIconModule,
-        MatButtonModule,
         MatProgressSpinner,
         RouterLink,
+        MatTooltipModule,
     ],
     templateUrl: './table.component.html',
     styleUrl: './table.component.css',
@@ -59,15 +54,11 @@ export class TableComponent<T extends BaseModel> {
     sortChange = output<Sort>();
     pageChange = output<PageEvent>();
 
-    private readonly authService = inject(AuthService);
     private readonly destroyRef = inject(DestroyRef);
 
     selectedRow = model<T | null>(null);
-    user = signal<Claims | null>(this.authService.currentUserClaims());
 
-    columnIds = computed<Array<String>>(() => {
-        return this.displayedColumnIds();
-    });
+    columnIds = computed<string[]>(() => this.displayedColumns().map((col) => col.id));
 
     paginator = viewChild(MatPaginator);
     sort = viewChild(MatSort);
@@ -95,16 +86,8 @@ export class TableComponent<T extends BaseModel> {
         this.sortChange.emit(event);
     }
 
-    displayedColumnIds(): Array<String> {
-        return this.displayedColumns().map((col) => col.id);
-    }
-
     onPageEvent(event: PageEvent) {
         this.pageChange.emit(event);
-    }
-
-    onNameClick(element: T): void {
-        this.name.emit(element);
     }
 
     toggleRow(row: T): void {

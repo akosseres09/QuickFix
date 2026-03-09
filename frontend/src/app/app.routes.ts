@@ -54,7 +54,6 @@ export const routes: Routes = [
             },
         ],
     },
-
     {
         path: '',
         loadComponent: () =>
@@ -71,12 +70,11 @@ export const routes: Routes = [
             },
         ],
     },
-
     {
         path: '',
         loadComponent: () =>
-            import('./layouts/base-layout/base-layout.component').then(
-                (c) => c.BaseLayoutComponent
+            import('./layouts/main-layout/main-layout.component').then(
+                (c) => c.MainLayoutComponent
             ),
         canActivate: [authenticatedGuard],
         children: [
@@ -122,17 +120,11 @@ export const routes: Routes = [
                     import('./main/settings/settings.component').then((c) => c.SettingsComponent),
                 title: 'QuickFix - Settings',
             },
-            {
-                path: 'worktime',
-                loadComponent: () =>
-                    import('./main/worktime/worktime.component').then((c) => c.WorktimeComponent),
-                title: 'QuickFix - Worktime',
-            },
         ],
     },
 
     {
-        path: ':organizationId',
+        path: 'org/:organizationId',
         loadComponent: () =>
             import('./layouts/main-layout/main-layout.component').then(
                 (c) => c.MainLayoutComponent
@@ -165,8 +157,44 @@ export const routes: Routes = [
             {
                 path: 'worktime',
                 loadComponent: () =>
-                    import('./main/worktime/worktime.component').then((c) => c.WorktimeComponent),
-                title: 'QuickFix - Worktime',
+                    import('./layouts/tabs-layout/tabs-layout.component').then(
+                        (c) => c.TabsLayoutComponent
+                    ),
+                data: {
+                    tabs: [
+                        {
+                            label: 'Worktime',
+                            route: 'view',
+                        },
+                        {
+                            label: 'Stats',
+                            route: 'stats',
+                        },
+                    ],
+                },
+                children: [
+                    {
+                        path: '',
+                        pathMatch: 'full',
+                        redirectTo: 'view',
+                    },
+                    {
+                        path: 'view',
+                        loadComponent: () =>
+                            import('./main/worktime/worktime.component').then(
+                                (c) => c.WorktimeComponent
+                            ),
+                        title: 'QuickFix - Worktime',
+                    },
+                    {
+                        path: 'stats',
+                        loadComponent: () =>
+                            import('./main/worktime/worktime-stats/worktime-stats.component').then(
+                                (c) => c.WorktimeStatsComponent
+                            ),
+                        title: 'QuickFix - Worktime Statistics',
+                    },
+                ],
             },
             {
                 path: 'members',

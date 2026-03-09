@@ -36,17 +36,6 @@
         <textarea matInput formControlName="description"></textarea>
     </mat-form-field>
 
-    <div class="flex flex-col md:flex-row md:gap-8 gap-4">
-        <mat-form-field class="w-full">
-            <mat-label>Logo URL</mat-label>
-            <input matInput formControlName="logUrl" />
-        </mat-form-field>
-
-        @if (logoUrl.value) {
-            <img class="w-20 h-20 object-fill" [src]="logoUrl.value" />
-        }
-    </div>
-
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-4">
         <button
             mat-flat-button

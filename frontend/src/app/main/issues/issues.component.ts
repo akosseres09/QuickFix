@@ -64,8 +64,6 @@ export class IssuesComponent {
     // Transform the signal into a computed signal
     speedDialButtons = computed<SpeedDialButton[]>(() => {
         const selected = this.selectedRow();
-        const currentProjectId = this.projectId();
-        const currentOrganizationId = this.organizationId();
 
         return this.buttonFactory.createArchivableButtons({
             entityName: 'Issue',
@@ -78,15 +76,7 @@ export class IssuesComponent {
                     this.snackbarService.error('Please select a valid issue to edit!');
                     return null;
                 }
-                return [
-                    '/',
-                    currentOrganizationId,
-                    'project',
-                    currentProjectId,
-                    'issue',
-                    issueId,
-                    'edit',
-                ];
+                return ['../issue', issueId, 'edit'];
             },
             onArchive: () => this.openArchiveConfirmation(),
             onUnarchive: () => this.openUnarchiveConfirmation(),

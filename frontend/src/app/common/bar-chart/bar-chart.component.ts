@@ -1,7 +1,6 @@
 import { Component, effect, input, OnInit, ViewChild } from '@angular/core';
 import { Chart, registerables, ChartConfiguration, ChartType } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
-import { WorktimeEntry } from '../../shared/model/Worktime';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 @Component({
@@ -11,7 +10,6 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
     styleUrl: './bar-chart.component.css',
 })
 export class BarChartComponent implements OnInit {
-    data = input<WorktimeEntry[]>([]);
     isLoading = input<boolean>(false);
     daysMap = input<Map<string, number>>(new Map());
     @ViewChild(BaseChartDirective) chart?: BaseChartDirective;

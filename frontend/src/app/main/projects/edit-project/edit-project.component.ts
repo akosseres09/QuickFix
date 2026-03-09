@@ -9,7 +9,7 @@ import {
     viewChild,
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, NavigationExtras, Router, RouterLink } from '@angular/router';
 import { ProjectFormComponent } from '../../../common/form/project-form/project-form.component';
 import { Project } from '../../../shared/model/Project';
 import { ProjectService } from '../../../shared/services/project/project.service';
@@ -29,6 +29,7 @@ export class EditProjectComponent implements OnInit {
     private readonly router = inject(Router);
     private readonly snackbar = inject(SnackbarService);
     private readonly dialogService = inject(DialogService);
+    private readonly activeRoute = inject(ActivatedRoute);
 
     projectId = input.required<string>();
     organizationId = input.required<string>();
@@ -37,21 +38,24 @@ export class EditProjectComponent implements OnInit {
     isSubmitting = signal<boolean>(false);
 
     infoDialogRef: Signal<TemplateRef<any> | undefined> = viewChild('infoDialog');
+    routerOptions: NavigationExtras = {
+        relativeTo: this.activeRoute,
+    };
 
     ngOnInit() {
-        const projectId = this.projectId();
-        if (!projectId) {
-            console.error('Project ID is missing in route parameters');
-            this.snackbar.error('Project ID is missing');
-            this.router.navigate(['/projects']);
-            return;
-        }
-
         const organizationId = this.organizationId();
         if (!organizationId) {
             console.error('Organization ID is missing in route parameters');
             this.snackbar.error('Organization ID is missing');
-            this.router.navigate(['/projects']);
+            this.router.navigate(['/organizations']);
+            return;
+        }
+
+        const projectId = this.projectId();
+        if (!projectId) {
+            console.error('Project ID is missing in route parameters');
+            this.snackbar.error('Project ID is missing');
+            this.router.navigate(['../../../projects'], this.routerOptions);
             return;
         }
 
@@ -61,8 +65,8 @@ export class EditProjectComponent implements OnInit {
             },
             error: (err) => {
                 console.error('Failed to load project:', err);
-                this.snackbar.error('Failed to load project!');
-                this.router.navigate(['/', organizationId, 'projects']);
+                this.snackbar.error(err.error.message);
+                this.router.navigate(['../../../projects'], this.routerOptions);
             },
         });
     }
@@ -87,7 +91,7 @@ export class EditProjectComponent implements OnInit {
             .pipe(finalize(() => this.isSubmitting.set(false)))
             .subscribe({
                 next: (project) => {
-                    this.router.navigate(['/', organizationId, 'project', project.key]);
+                    this.router.navigate(['..'], this.routerOptions);
                 },
                 error: (error) => {
                     console.error('Error updating project:', error);

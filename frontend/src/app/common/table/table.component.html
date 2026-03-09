@@ -38,8 +38,10 @@
                     class="w-full"
                 >
                     @for (col of displayedColumns(); track $index) {
+                        @let isSortable = col.sortable;
+
                         <ng-container [matColumnDef]="col.id">
-                            @if (col.sortable) {
+                            @if (isSortable) {
                                 <th
                                     mat-header-cell
                                     *matHeaderCellDef
@@ -66,41 +68,64 @@
                                 *matCellDef="let element"
                                 class="!text-center px-4 whitespace-nowrap truncate max-w-[240px]"
                             >
-                                @if (col.routerLink) {
-                                    <a
-                                        [routerLink]="col.routerLink(element)"
-                                        class="text-blue-600 dark:text-blue-400 cursor-pointer hover:underline underline-offset-3"
-                                    >
-                                        {{ col.value(element) }}
-                                    </a>
-                                } @else if (typeof col.badge === 'function') {
+                                @let link = col.routerLink?.(element);
+                                @let url = col.photoUrl?.(element);
+                                @let value = col.value(element);
+                                @let photoOnly = col.photoOnly?.(element);
+                                @let badge = col.badge?.(element);
+
+                                @if (link) {
+                                    @if (link === null) {
+                                        <span>{{ value }}</span>
+                                    } @else {
+                                        <span class="flex justify-center items-center gap-2">
+                                            <a
+                                                [routerLink]="link"
+                                                class="text-blue-600 dark:text-blue-400 cursor-pointer hover:underline underline-offset-3 w-fit"
+                                            >
+                                                @if (url) {
+                                                    <img
+                                                        [matTooltip]="value"
+                                                        [src]="url"
+                                                        [alt]="value"
+                                                        class="w-8 h-8 rounded-md"
+                                                    />
+                                                }
+                                                @if (!photoOnly) {
+                                                    {{ value }}
+                                                }
+                                            </a>
+                                        </span>
+                                    }
+                                } @else if (col.badge) {
                                     <div class="flex justify-center items-center">
-                                        @if (col.badge!(element)?.includes('#')) {
+                                        @if (badge?.includes('#')) {
                                             <span
                                                 class="px-3 py-1 rounded-full font-semibold text-sm border-2"
-                                                [style.backgroundColor]="col.badge!(element) + '33'"
-                                                [style.borderColor]="col.badge!(element)"
-                                                [style.color]="col.badge!(element)"
+                                                [style.backgroundColor]="badge + '33'"
+                                                [style.borderColor]="badge"
+                                                [style.color]="badge"
                                             >
-                                                {{ col.value(element) }}
+                                                {{ value }}
                                             </span>
                                         } @else {
                                             <span
                                                 class="px-3 py-1 rounded-full font-semibold text-sm border-2"
-                                                [ngClass]="col.badge!(element)"
+                                                [ngClass]="badge"
                                             >
-                                                {{ col.value(element) }}
+                                                {{ value }}
                                             </span>
                                         }
                                     </div>
                                 } @else {
-                                    {{ col.value(element) }}
+                                    {{ value }}
                                 }
                             </td>
                         </ng-container>
                     }
 
-                    <tr mat-header-row *matHeaderRowDef="columnIds()"></tr>
+                    @let columns = columnIds();
+                    <tr mat-header-row *matHeaderRowDef="columns"></tr>
                     <tr
                         (click)="toggleRow(row)"
                         class="cursor-pointer transition-colors"
@@ -111,7 +136,7 @@
                                 selectedRow()?.id !== row.id,
                         }"
                         mat-row
-                        *matRowDef="let row; columns: columnIds()"
+                        *matRowDef="let row; columns: columns"
                     ></tr>
                 </table>
             </div>

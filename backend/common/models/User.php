@@ -69,10 +69,13 @@ class User extends ActiveRecord implements IdentityInterface
             'phoneNumber' => 'phone_number',
             'dateOfBirth' => 'date_of_birth',
             'profilePictureUrl' => 'profile_picture_url',
+            'fullName' => function ($model) {
+                return $model->fullName;
+            },
         ];
 
         if ($this->getScenario() === self::SCENARIO_DEFAULT) {
-            unset($fields['password_hash']);
+            unset($fields['passwordHash']);
         }
 
         return $fields;
@@ -387,10 +390,16 @@ class User extends ActiveRecord implements IdentityInterface
 
     public function generateProfilePictureUrl(): string
     {
-        if ($this->first_name && $this->last_name) {
-            return 'https://ui-avatars.com/api/?name=' . urlencode($this->first_name . ' ' . $this->last_name) . '&background=random&size=256';
+        $fullName = $this->getFullName();
+        if ($fullName) {
+            return 'https://ui-avatars.com/api/?name=' . urlencode($fullName) . '&background=random&size=256';
         }
 
         return 'https://ui-avatars.com/api/?name=' . urlencode($this->username) . '&background=random&size=256';
+    }
+
+    public function getFullName(): string
+    {
+        return "{$this->last_name} {$this->first_name}";
     }
 }

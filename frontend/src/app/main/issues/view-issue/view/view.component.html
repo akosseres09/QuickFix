@@ -51,8 +51,8 @@
                 >by:
                 <a
                     class="text-black dark:text-white hover:underline hover:underline-offset-2"
-                    [routerLink]="'/users/@' + issue().creator?.username"
-                    >{{ creatorName }}</a
+                    [routerLink]="['../../../members', issue().creator?.username]"
+                    >{{ issue().creator?.fullName ?? 'Unknown' }}</a
                 ></span
             >
         </div>
@@ -118,8 +118,8 @@
                             >by:
                             <a
                                 class="text-black dark:text-white hover:underline hover:underline-offset-2"
-                                [routerLink]="'/users/@' + issue().updator?.username"
-                                >{{ updatorName }}</a
+                                [routerLink]="['../../../members', issue().updator?.username]"
+                                >{{ issue().updator?.fullName ?? 'Unknown' }}</a
                             ></span
                         >
                     </div>

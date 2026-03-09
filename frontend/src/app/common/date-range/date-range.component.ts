@@ -8,6 +8,7 @@ import {
     ValidationErrors,
 } from '@angular/forms';
 import {
+    MAT_DATE_RANGE_SELECTION_STRATEGY,
     MatDatepickerModule,
     MatDateRangeInput,
     MatDateRangePicker,
@@ -16,6 +17,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatNativeDateModule, provideNativeDateAdapter } from '@angular/material/core';
 import { fromEvent } from 'rxjs';
 import { debounceTime, map, startWith } from 'rxjs/operators';
+import { WeekSelectionStrategy } from './week-selection-strategy/week-selection-strategy';
 
 @Component({
     selector: 'app-date-range',
@@ -28,7 +30,13 @@ import { debounceTime, map, startWith } from 'rxjs/operators';
         MatNativeDateModule,
         ReactiveFormsModule,
     ],
-    providers: [provideNativeDateAdapter()],
+    providers: [
+        {
+            provide: MAT_DATE_RANGE_SELECTION_STRATEGY,
+            useClass: WeekSelectionStrategy,
+        },
+        provideNativeDateAdapter(),
+    ],
     templateUrl: './date-range.component.html',
     styleUrl: './date-range.component.css',
 })
@@ -89,10 +97,10 @@ export class DateRangeComponent {
             const currentStart = this.range.controls.startDate.value;
             const currentEnd = this.range.controls.endDate.value;
 
-            if (s && s.getTime() !== currentStart?.getTime()) {
+            if (s && !this.sameDay(s, currentStart)) {
                 this.range.controls.startDate.setValue(s, { emitEvent: false });
             }
-            if (e && e.getTime() !== currentEnd?.getTime()) {
+            if (e && !this.sameDay(e, currentEnd)) {
                 this.range.controls.endDate.setValue(e, { emitEvent: false });
             }
         });
@@ -120,6 +128,15 @@ export class DateRangeComponent {
                 takeUntilDestroyed()
             )
             .subscribe((isSmall) => this.touchUi.set(isSmall));
+    }
+
+    private sameDay(a: Date | null, b: Date | null): boolean {
+        if (!a || !b) return false;
+        return (
+            a.getFullYear() === b.getFullYear() &&
+            a.getMonth() === b.getMonth() &&
+            a.getDate() === b.getDate()
+        );
     }
 
     private validateDateRange(group: AbstractControl): ValidationErrors | null {

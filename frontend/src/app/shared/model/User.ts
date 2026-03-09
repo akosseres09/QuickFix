@@ -18,6 +18,7 @@ export interface User extends BaseModel {
     email: string;
     firstName: string;
     lastName: string;
+    fullName: string;
     phoneNumber: string | null;
     dateOfBirth: string | null;
     profilePictureUrl: string;
