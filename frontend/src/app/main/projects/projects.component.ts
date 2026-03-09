@@ -81,12 +81,11 @@ export class ProjectsComponent {
             hasSelection: selected !== null,
             createRoute: ['new'],
             editRouteBuilder: () => {
-                const project = this.selectedRow();
-                if (!project) {
+                if (!selected) {
                     this.snackbarService.error('Please select a valid project to edit!');
                     return null;
                 }
-                return ['/', this.organizationId(), 'project', project.key, 'edit'];
+                return ['../project', selected.key, 'edit'];
             },
             isArchived: !!selected && selected.isArchived,
             onArchive: () =>

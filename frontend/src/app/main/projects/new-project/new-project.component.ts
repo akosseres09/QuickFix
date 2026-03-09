@@ -3,7 +3,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { DialogService } from '../../../shared/services/dialog/dialog.service';
 import { ProjectFormComponent } from '../../../common/form/project-form/project-form.component';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, NavigationExtras, Router, RouterLink } from '@angular/router';
 import { ProjectService } from '../../../shared/services/project/project.service';
 import { Project } from '../../../shared/model/Project';
 import { finalize } from 'rxjs';
@@ -20,10 +20,15 @@ export class NewProjectComponent {
     private readonly projectService = inject(ProjectService);
     private readonly router = inject(Router);
     private readonly snackbarService = inject(SnackbarService);
+    private readonly activeRoute = inject(ActivatedRoute);
 
     organizationId = input.required<string>();
     infoDialogRef: Signal<TemplateRef<any> | undefined> = viewChild('infoDialog');
     isSubmitting = signal<boolean>(false);
+
+    readonly routerOptions: NavigationExtras = {
+        relativeTo: this.activeRoute,
+    };
 
     openInfo(): void {
         const dialogRef = this.infoDialogRef();
@@ -37,6 +42,7 @@ export class NewProjectComponent {
         const orgId = this.organizationId();
         if (!orgId) {
             this.snackbarService.error('Organization ID is missing');
+            this.router.navigate(['..'], this.routerOptions);
             return;
         }
 
@@ -46,7 +52,7 @@ export class NewProjectComponent {
             .pipe(finalize(() => this.isSubmitting.set(false)))
             .subscribe({
                 next: (project) => {
-                    this.router.navigate(['/', orgId, 'project', project.key]);
+                    this.router.navigate(['../../', 'project', project.key], this.routerOptions);
                 },
                 error: (error) => {
                     console.error('Error creating project:', error);

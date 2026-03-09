@@ -25,7 +25,7 @@ import {
 } from '../../../shared/model/Issue';
 import { Claims } from '../../../shared/constants/user/Claims';
 import { ProjectMember } from '../../../shared/model/ProjectMember';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
 import { ProjectMemberService } from '../../../shared/services/project-member/project-member.service';
 import { AuthService } from '../../../shared/services/auth/auth.service';
@@ -54,10 +54,8 @@ import { finalize } from 'rxjs';
 })
 export class IssueFormComponent implements OnInit {
     private readonly fb = inject(FormBuilder);
-    private readonly router = inject(Router);
     private readonly snackbarService = inject(SnackbarService);
     private readonly memberService = inject(ProjectMemberService);
-    private readonly activeRoute = inject(ActivatedRoute);
     private readonly authService = inject(AuthService);
     private readonly location = inject(Location);
 
@@ -107,18 +105,7 @@ export class IssueFormComponent implements OnInit {
         this.issueForm.get('assignedTo')?.disable();
 
         const projectId = this.projectId();
-        if (!projectId) {
-            this.snackbarService.error('Project ID is missing. Cannot create or edit issue.');
-            this.router.navigate(['../'], { relativeTo: this.activeRoute });
-            return;
-        }
-
         const organizationId = this.organizationId();
-        if (!organizationId) {
-            this.snackbarService.error('Organization ID is missing. Cannot create or edit issue.');
-            this.router.navigate(['../'], { relativeTo: this.activeRoute });
-            return;
-        }
 
         this.memberService
             .getProjectMembers({
@@ -135,7 +122,7 @@ export class IssueFormComponent implements OnInit {
                 next: (response) => {
                     this.pickableUsers.set(response.items);
                 },
-                error: (error) => {
+                error: (_) => {
                     this.snackbarService.error('Failed to load users');
                 },
             });

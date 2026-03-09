@@ -1,5 +1,5 @@
 import { Component, inject, input, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -38,6 +38,10 @@ export class NewIssueComponent {
     private readonly issueService = inject(IssueService);
     private readonly router = inject(Router);
     private readonly snackbarService = inject(SnackbarService);
+    private readonly activeRoute = inject(ActivatedRoute);
+    private readonly routerOptions: NavigationExtras = {
+        relativeTo: this.activeRoute,
+    };
 
     isSubmitting = signal<boolean>(false);
 
@@ -77,19 +81,13 @@ export class NewIssueComponent {
                 })
             )
             .subscribe({
-                next: (issue) => {
-                    this.snackbarService.success(`Issue "${issue.title}" created successfully!`);
-                    this.router.navigate([
-                        '/',
-                        organizationId,
-                        'project',
-                        this.projectId(),
-                        'issues',
-                    ]);
+                next: (_) => {
+                    this.snackbarService.success(`Issue created successfully!`);
+                    this.router.navigate(['..'], this.routerOptions);
                 },
                 error: (error) => {
                     this.snackbarService.error(
-                        error?.error?.message || 'Failed to create issue. Please try again.'
+                        error.error.message || 'Failed to create issue. Please try again.'
                     );
                 },
             });
