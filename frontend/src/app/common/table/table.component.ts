@@ -18,6 +18,7 @@ import { BaseModel } from '../../shared/model/BaseModel';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
     selector: 'app-table',
@@ -29,6 +30,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
         MatSortHeader,
         MatProgressSpinner,
         RouterLink,
+        MatTooltipModule,
     ],
     templateUrl: './table.component.html',
     styleUrl: './table.component.css',

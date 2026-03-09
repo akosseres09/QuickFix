@@ -164,7 +164,7 @@ export class DisplayedColumnService {
                 sortable: false,
                 photoOnly: () => true,
                 photoUrl: (e: Organization) => e.logoUrl,
-                routerLink: (e: Organization) => null,
+                routerLink: (e: Organization) => ['/', e.slug],
             },
             {
                 id: 'slug',

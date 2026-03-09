@@ -33,6 +33,7 @@ export type BadgeColumn<T extends BaseModel> = ColumnBase<T> & {
     badge: (element: T) => string | null;
     routerLink?: never;
     photoUrl?: never;
+    photoOnly?: never;
 };
 
 /** A plain text column with no special rendering. */
@@ -40,6 +41,7 @@ export type PlainColumn<T extends BaseModel> = ColumnBase<T> & {
     badge?: never;
     routerLink?: never;
     photoUrl?: never;
+    photoOnly?: never;
 };
 
 export type DisplayedColumn<T extends BaseModel> = LinkColumn<T> | BadgeColumn<T> | PlainColumn<T>;
