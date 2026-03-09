@@ -44,17 +44,20 @@ export class DisplayedColumnService {
                     if (!e.creator?.username) return null;
                     return ['/member/', '@' + e.creator.username];
                 },
+                photoOnly: (e: Issue) => !!e.creator,
+                photoUrl: (e: Issue) => e.creator?.profilePictureUrl ?? null,
             },
-
             {
                 id: 'assignee',
                 label: 'Assignee',
                 sortable: false,
-                value: (e: Issue) => e.assignee?.username || 'None',
+                value: (e: Issue) => e.assignee?.username || 'Not Assigned',
                 routerLink: (e: Issue) => {
                     if (!e.assignee?.username) return null;
                     return ['/member/', '@' + e.assignee.username];
                 },
+                photoOnly: (e: Issue) => !!e.assignee,
+                photoUrl: (e: Issue) => e.assignee?.profilePictureUrl || null,
             },
             {
                 id: 'status',
@@ -105,6 +108,8 @@ export class DisplayedColumnService {
                 value: (e: Project) => e.owner?.username || 'N/A',
                 routerLink: (e: Project) =>
                     e.owner?.id ? ['/member', '@' + e.owner.username] : [],
+                photoOnly: (e: Project) => !!e.owner,
+                photoUrl: (e: Project) => e.owner?.profilePictureUrl ?? '',
             },
             {
                 id: 'status',
@@ -153,6 +158,15 @@ export class DisplayedColumnService {
     getOrganizationColumns(): DisplayedColumn<Organization>[] {
         return [
             {
+                id: 'orgPhoto',
+                label: '',
+                value: (e: Organization) => '',
+                sortable: false,
+                photoOnly: () => true,
+                photoUrl: (e: Organization) => e.logoUrl,
+                routerLink: (e: Organization) => null,
+            },
+            {
                 id: 'slug',
                 label: 'Slug',
                 sortable: true,
@@ -171,6 +185,9 @@ export class DisplayedColumnService {
                 sortable: false,
                 routerLink: (e: Organization) =>
                     e.owner?.id ? ['/member', '@' + e.owner.username] : [],
+                photoUrl: (element: Organization) =>
+                    element.owner ? element.owner.profilePictureUrl : null,
+                photoOnly: (e: Organization) => !!e.owner,
                 value: (e: Organization) => e.owner?.username ?? '',
             },
             {

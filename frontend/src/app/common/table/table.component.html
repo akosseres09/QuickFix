@@ -67,27 +67,40 @@
                                 class="!text-center px-4 whitespace-nowrap truncate max-w-[240px]"
                             >
                                 @if (col.routerLink) {
-                                    <a
-                                        [routerLink]="col.routerLink(element)"
-                                        class="text-blue-600 dark:text-blue-400 cursor-pointer hover:underline underline-offset-3"
-                                    >
-                                        {{ col.value(element) }}
-                                    </a>
-                                } @else if (typeof col.badge === 'function') {
+                                    @if (col.routerLink(element) === null) {
+                                        <span>{{ col.value(element) }}</span>
+                                    } @else {
+                                        <a
+                                            [routerLink]="col.routerLink(element)"
+                                            class="flex justify-center items-center gap-2 text-blue-600 dark:text-blue-400 cursor-pointer hover:underline underline-offset-3"
+                                        >
+                                            @if (col.photoUrl && col.photoUrl(element)) {
+                                                <img
+                                                    [src]="col.photoUrl(element)"
+                                                    [alt]="col.value(element)"
+                                                    class="w-8 h-8 rounded-md"
+                                                />
+                                            }
+                                            @if (!col.photoOnly?.(element)) {
+                                                {{ col.value(element) }}
+                                            }
+                                        </a>
+                                    }
+                                } @else if (col.badge) {
                                     <div class="flex justify-center items-center">
-                                        @if (col.badge!(element)?.includes('#')) {
+                                        @if (col.badge(element)?.includes('#')) {
                                             <span
                                                 class="px-3 py-1 rounded-full font-semibold text-sm border-2"
-                                                [style.backgroundColor]="col.badge!(element) + '33'"
-                                                [style.borderColor]="col.badge!(element)"
-                                                [style.color]="col.badge!(element)"
+                                                [style.backgroundColor]="col.badge(element) + '33'"
+                                                [style.borderColor]="col.badge(element)"
+                                                [style.color]="col.badge(element)"
                                             >
                                                 {{ col.value(element) }}
                                             </span>
                                         } @else {
                                             <span
                                                 class="px-3 py-1 rounded-full font-semibold text-sm border-2"
-                                                [ngClass]="col.badge!(element)"
+                                                [ngClass]="col.badge(element)"
                                             >
                                                 {{ col.value(element) }}
                                             </span>
