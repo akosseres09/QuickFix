@@ -70,7 +70,19 @@ return [
                 ],
                 [
                     'class' => UrlRule::class,
-                    'controller' => ['project', 'member' => 'organization-member', 'worktime', 'invitation' => 'organization-invitation'],
+                    'controller' => ['project', 'member' => 'organization-member', 'invitation' => 'organization-invitation'],
+                    'pluralize' => false,
+                    'prefix' => '<organization_id:[A-Za-z0-9_\-]+>',
+                    'tokens' => [
+                        '{id}' => '<id:[A-Za-z0-9_\-]+>',
+                    ],
+                    'extraPatterns' => [
+                        'GET stats' => 'stats'
+                    ]
+                ],
+                [
+                    'class' => UrlRule::class,
+                    'controller' => ['worktime'],
                     'pluralize' => false,
                     'prefix' => '<organization_id:[A-Za-z0-9_\-]+>',
                     'tokens' => [

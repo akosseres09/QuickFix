@@ -5,6 +5,7 @@ namespace common\models;
 use common\models\query\OrganizationMemberQuery;
 use common\models\resource\UserResource;
 use Symfony\Component\Uid\Uuid;
+use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -58,12 +59,30 @@ class OrganizationMember extends ActiveRecord
     public function rules(): array
     {
         return [
+            ['user_id', 'required'],
             ['role', 'string', 'max' => 16],
             ['role', 'in', 'range' => self::ROLE_LIST],
+            ['role', 'default', 'value' => self::ROLE_MEMBER],
             [['organization_id', 'user_id'], 'unique', 'targetAttribute' => ['organization_id', 'user_id'], 'message' => 'This user is already a member of this organization.'],
             ['organization_id', 'exist', 'skipOnError' => true, 'targetClass' => Organization::class, 'targetAttribute' => ['organization_id' => 'id']],
             ['user_id', 'exist', 'skipOnError' => true, 'targetClass' => UserResource::class, 'targetAttribute' => ['user_id' => 'id']],
         ];
+    }
+
+    public function beforeValidate()
+    {
+        if (!parent::beforeValidate()) return false;
+
+        if (!$this->isNewRecord) return true;
+
+        $organizationId = Yii::$app->request->get('organization_id');
+        if (!$organizationId) {
+            $this->addError('organization_id', 'Organization ID is required!');
+            return false;
+        }
+
+        $this->organization_id = $organizationId;
+        return true;
     }
 
     public function beforeSave($insert)

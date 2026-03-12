@@ -2,10 +2,10 @@
 
 namespace api\controllers;
 
-use api\components\AccessTokenHandler;
-use api\components\RefreshTokenHandlerTrait;
 use Yii;
 use api\components\ResponseMaker;
+use api\components\traits\AccessTokenHandler;
+use api\components\traits\RefreshTokenHandlerTrait;
 use common\components\traits\EmailSenderTrait;
 use common\models\forms\SignupForm;
 use common\models\User;
