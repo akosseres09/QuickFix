@@ -2,7 +2,6 @@
 
 namespace api\controllers;
 
-use api\filters\ProjectKeyTranslatorFilter;
 use common\models\Project;
 use common\models\ProjectMember;
 use common\models\search\ProjectMemberSearch;
@@ -10,7 +9,7 @@ use Yii;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 
-class MemberController extends BaseRestController
+class ProjectMemberController extends BaseRestController
 {
     public $modelClass = ProjectMember::class;
 

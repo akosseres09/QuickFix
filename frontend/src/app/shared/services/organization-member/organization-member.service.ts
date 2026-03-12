@@ -17,14 +17,14 @@ export class OrganizationMemberService {
         const qp = ParamsHandler.convertToHttpParams(params);
 
         return this.http.get<PaginatedResponse<OrganizationMember>>(
-            `${this.url}/${organizationId}/organization-member`,
+            `${this.url}/${organizationId}/member`,
             { params: qp }
         );
     }
 
     getOrganizationMember(organizationId: number, memberId: number) {
         return this.http.get<OrganizationMember>(
-            `${this.url}/${organizationId}/organization-member/${memberId}`
+            `${this.url}/${organizationId}/member/${memberId}`
         );
     }
 }

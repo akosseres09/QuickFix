@@ -62,7 +62,7 @@ export class OrganizationMembersComponent implements OnInit {
             });
     }
 
-    getRoleBadgeClass(role: number): string {
+    getRoleBadgeClass(role: string): string {
         switch (role) {
             case OrganizationMemberRole.OWNER:
                 return 'bg-light-accent dark:bg-dark-accent text-white';

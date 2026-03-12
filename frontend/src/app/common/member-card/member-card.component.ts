@@ -15,6 +15,6 @@ export class MemberCardComponent {
     member = input.required<ProjectMember | OrganizationMember>();
     currentUser = input.required<Claims | null>();
 
-    RoleLabels = input.required<Record<number, string>>();
-    getRoleBadgeClass = input.required<(role: number) => string>();
+    RoleLabels = input.required<Record<string, string>>();
+    getRoleBadgeClass = input.required<(role: string) => string>();
 }

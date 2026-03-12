@@ -24,10 +24,10 @@ use yii\db\ActiveRecord;
 class OrganizationMember extends ActiveRecord
 {
 
-    const ROLE_VIEWER = 0;
-    const ROLE_MEMBER = 1;
-    const ROLE_ADMIN = 2;
-    const ROLE_OWNER = 3;
+    const ROLE_VIEWER = 'viewer';
+    const ROLE_MEMBER = 'member';
+    const ROLE_ADMIN = 'admin';
+    const ROLE_OWNER = 'owner';
 
     const ROLE_LIST = [
         self::ROLE_VIEWER,
@@ -58,6 +58,7 @@ class OrganizationMember extends ActiveRecord
     public function rules(): array
     {
         return [
+            ['role', 'string', 'max' => 16],
             ['role', 'in', 'range' => self::ROLE_LIST],
             [['organization_id', 'user_id'], 'unique', 'targetAttribute' => ['organization_id', 'user_id'], 'message' => 'This user is already a member of this organization.'],
             ['organization_id', 'exist', 'skipOnError' => true, 'targetClass' => Organization::class, 'targetAttribute' => ['organization_id' => 'id']],

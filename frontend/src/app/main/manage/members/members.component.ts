@@ -1,6 +1,10 @@
 import { Component, inject, input, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ProjectMember, ROLE_LABELS } from '../../../shared/model/ProjectMember';
+import {
+    ProjectMember,
+    ProjectMemberRoles,
+    ROLE_LABELS,
+} from '../../../shared/model/ProjectMember';
 import { ProjectMemberService } from '../../../shared/services/project-member/project-member.service';
 import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
 import { AuthService } from '../../../shared/services/auth/auth.service';
@@ -81,16 +85,16 @@ export class MembersComponent implements OnInit {
         });
     }
 
-    getRoleBadgeClass(role: number): string {
+    getRoleBadgeClass(role: string): string {
         const baseClasses = 'shadow-sm';
         switch (role) {
-            case 3: // Owner
+            case ProjectMemberRoles.OWNER:
                 return `${baseClasses} bg-light-accent dark:bg-dark-accent text-white`;
-            case 2: // Admin
+            case ProjectMemberRoles.ADMIN:
                 return `${baseClasses} bg-light-primary dark:bg-dark-primary text-white dark:text-dark-background`;
-            case 1: // Member
+            case ProjectMemberRoles.MEMBER:
                 return `${baseClasses} bg-light-secondary dark:bg-dark-secondary text-white`;
-            default: // Guest
+            default:
                 return `${baseClasses} bg-gray-400 dark:bg-gray-600 text-white`;
         }
     }
