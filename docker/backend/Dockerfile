@@ -15,3 +15,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 WORKDIR /var/www/html
 
 RUN a2enmod rewrite
+
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
