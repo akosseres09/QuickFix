@@ -6,7 +6,6 @@ use common\models\OrganizationInvitation;
 use common\models\search\OrganizationInvitationSearch;
 use Symfony\Component\Uid\Uuid;
 use Yii;
-use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 
 class OrganizationInvitationController extends BaseRestController
@@ -17,7 +16,7 @@ class OrganizationInvitationController extends BaseRestController
     {
         $behaviors = parent::behaviors();
 
-        unset($behaviors['organizationTranslator']);
+        $behaviors['organizationTranslator']['actions'] = ['create'];
         unset($behaviors['projectTranslator']);
 
         return $behaviors;

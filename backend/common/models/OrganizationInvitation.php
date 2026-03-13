@@ -65,8 +65,8 @@ class OrganizationInvitation extends ActiveRecord
     {
         return [
             [['organization_id', 'role', 'email'], 'required'],
-            ['organization_id', 'exist', 'skipOnError' => true, 'targetClass' => Organization::class, 'targetAttribute' => ['organization_id' => 'id']],
-            ['inviter_id', 'exist', 'skipOnError' => true, 'targetClass' => UserResource::class, 'targetAttribute' => ['inviter_id' => 'id']],
+            ['organization_id', 'exist', 'targetClass' => Organization::class, 'targetAttribute' => ['organization_id' => 'id']],
+            ['inviter_id', 'exist', 'targetClass' => UserResource::class, 'targetAttribute' => ['inviter_id' => 'id']],
             ['email', 'email'],
             ['status', 'string', 'max' => 64],
             ['status', 'in', 'range' => self::STATUSES],

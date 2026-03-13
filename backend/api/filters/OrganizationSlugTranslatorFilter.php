@@ -18,11 +18,14 @@ class OrganizationSlugTranslatorFilter extends ActionFilter
         if (!in_array($action->id, $this->actions)) {
             return parent::beforeAction($action);
         }
-
         $request = Yii::$app->getRequest();
-        $organizationSlug = $request->get($this->identifierParamName);
 
-        if (!Uuid::isValid($organizationSlug)) {
+        $queryParams = $request->getQueryParams();
+        $bodyParams = $request->getBodyParams();
+
+        $organizationSlug = $queryParams[$this->identifierParamName] ?? $bodyParams[$this->identifierParamName] ?? null;
+
+        if ($organizationSlug && !Uuid::isValid($organizationSlug)) {
             $organizationId = Yii::$app->cache->getOrSet(Organization::getSlugToIdCache($organizationSlug), function () use ($organizationSlug) {
                 return Organization::find()->select('id')->bySlug($organizationSlug)->scalar();
             });
@@ -31,12 +34,15 @@ class OrganizationSlugTranslatorFilter extends ActionFilter
                 throw new NotFoundHttpException('Organization not found for slug: ' . $organizationSlug);
             }
 
-            $request->setQueryParams(
-                array_merge(
-                    $request->getQueryParams(),
-                    [$this->identifierParamName => $organizationId]
-                )
-            );
+            if (isset($queryParams[$this->identifierParamName])) {
+                $queryParams[$this->identifierParamName] = $organizationId;
+                $request->setQueryParams($queryParams);
+            }
+
+            if (isset($bodyParams[$this->identifierParamName])) {
+                $bodyParams[$this->identifierParamName] = $organizationId;
+                $request->setBodyParams($bodyParams);
+            }
         }
 
         return parent::beforeAction($action);
