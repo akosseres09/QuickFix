@@ -76,6 +76,15 @@ class OrganizationInvitation extends ActiveRecord
             ['role', 'in', 'range' => OrganizationMember::ROLE_LIST],
             ['token', 'string', 'max' => 36],
             ['token', 'unique'],
+            [
+                ['email', 'organization_id'],
+                'unique',
+                'targetAttribute' => ['email', 'organization_id'],
+                'message' => 'An invitation for this email and organization already exists.',
+                'when' => function () {
+                    return $this->isNewRecord;
+                }
+            ]
         ];
     }
 
