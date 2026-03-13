@@ -78,6 +78,7 @@ class OrganizationInvitation extends ActiveRecord
                 ['email', 'organization_id'],
                 'unique',
                 'targetAttribute' => ['email', 'organization_id'],
+                'filter' => ['status' => self::STATUS_PENDING],
                 'message' => 'An invitation for this email and organization already exists.',
                 'when' => function () {
                     return $this->isNewRecord;
@@ -110,6 +111,13 @@ class OrganizationInvitation extends ActiveRecord
         ];
     }
 
+    public function transactions()
+    {
+        return [
+            self::SCENARIO_DEFAULT => self::OP_ALL,
+        ];
+    }
+
     public function beforeSave($insert): bool
     {
         if (!parent::beforeSave($insert))
@@ -132,6 +140,18 @@ class OrganizationInvitation extends ActiveRecord
             Yii::$app->queue->push(new SendInvitationEmailJob([
                 'invitationId' => $this->id,
             ]));
+        }
+
+        if ($changedAttributes['status'] === self::STATUS_PENDING && $this->status === self::STATUS_ACCEPTED) {
+            $member = new OrganizationMember();
+            $member->organization_id = $this->organization_id;
+            $member->user_id = UserResource::find()->select('id')->where(['email' => $this->email])->scalar();
+            $member->role = $this->role;
+            if (!$member->save()) {
+                $errors = json_encode($member->getErrors());
+                Yii::error("Failed to create project owner. Errors: " . $errors, __METHOD__);
+                throw new \yii\db\Exception("Transaction aborted: Could not save Project Member. " . $errors);
+            }
         }
     }
 

@@ -34,7 +34,7 @@ class SendInvitationEmailJob extends BaseObject implements JobInterface
         }
 
         $frontendUrl = Yii::$app->params['frontendUrl'] ?? 'http://localhost:4200';
-        $inviteLink = $frontendUrl . '/invitation?token=' . $invitation->token;
+        $inviteLink = $frontendUrl . '/invitation/' . $invitation->token;
 
         try {
             $sent = Yii::$app->mailer->compose([

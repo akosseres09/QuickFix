@@ -75,6 +75,10 @@ class OrganizationMember extends ActiveRecord
 
         if (!$this->isNewRecord) return true;
 
+        if (!empty($this->organization_id)) {
+            return true;
+        }
+
         $organizationId = Yii::$app->request->get('organization_id');
         if (!$organizationId) {
             $this->addError('organization_id', 'Organization ID is required!');
