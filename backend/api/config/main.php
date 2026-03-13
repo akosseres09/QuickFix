@@ -53,7 +53,7 @@ return [
                 ],
                 [
                     'class' => UrlRule::class,
-                    'controller' => ['organization'],
+                    'controller' => ['organization', 'invitation' => 'organization-invitation'],
                     'pluralize' => false,
                     'tokens' => [
                         '{id}' => '<id:[A-Za-z0-9_\-]+>',
@@ -69,7 +69,7 @@ return [
                 ],
                 [
                     'class' => UrlRule::class,
-                    'controller' => ['project', 'member' => 'organization-member', 'invitation' => 'organization-invitation'],
+                    'controller' => ['project', 'member' => 'organization-member'],
                     'pluralize' => false,
                     'prefix' => '<organization_id:[A-Za-z0-9_\-]+>',
                     'tokens' => [

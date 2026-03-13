@@ -97,6 +97,7 @@ class OrganizationInvitation extends ActiveRecord
             'email',
             'role',
             'status',
+            'token',
             'expiresAt' => 'expires_at',
             'createdAt' => 'created_at',
             'updatedAt' => 'updated_at',
@@ -121,13 +122,6 @@ class OrganizationInvitation extends ActiveRecord
             return true;
         }
 
-        $organizationId = Yii::$app->request->get('organization_id');
-        if ($organizationId === null) {
-            $this->addError('organization_id', 'Organization ID is required.');
-            return false;
-        }
-
-        $this->organization_id = $organizationId;
         $this->token = Yii::$app->security->generateRandomString(36);
         return true;
     }
