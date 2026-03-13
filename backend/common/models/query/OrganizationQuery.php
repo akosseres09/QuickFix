@@ -26,7 +26,7 @@ class OrganizationQuery extends ActiveQuery
      */
     public function byId(string $id): OrganizationQuery
     {
-        return $this->andWhere(["id" => $id]);
+        return $this->andWhere(["{{%organization}}.id" => $id]);
     }
 
     /**
@@ -36,6 +36,6 @@ class OrganizationQuery extends ActiveQuery
      */
     public function bySlug(string $slug): OrganizationQuery
     {
-        return $this->andWhere(["slug" => $slug]);
+        return $this->andWhere(["{{%organization}}.slug" => $slug]);
     }
 }

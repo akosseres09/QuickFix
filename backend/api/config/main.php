@@ -14,7 +14,6 @@ return [
     'basePath' => dirname(__DIR__),
     'controllerNamespace' => 'api\controllers', // Points directly to the api/controllers directory
     'bootstrap' => ['log'],
-    // The 'modules' section has been removed
     'components' => [
         'request' => [
             'parsers' => [
