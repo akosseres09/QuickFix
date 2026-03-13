@@ -13,14 +13,10 @@ import { SnackbarService } from '../../shared/services/snackbar/snackbar.service
 import { User } from '../../shared/model/User';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { DateService } from '../../shared/services/date/date.service';
-import {
-    maxAgeValidator,
-    minAgeValidator,
-} from '../../shared/validators/dateValidator/dateValidator';
-import { phoneValidator } from '../../shared/validators/phoneValidator/phoneValidator';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
+import { CustomValidators } from '../../shared/validators/CustomValidators';
 
 @Component({
     selector: 'app-account',
@@ -51,8 +47,11 @@ export class AccountComponent {
     profileForm = this.fb.group({
         username: ['', [Validators.required, Validators.minLength(3)]],
         email: ['', [Validators.required, Validators.email]],
-        phoneNumber: ['', [phoneValidator()]],
-        dateOfBirth: ['', [minAgeValidator(13), maxAgeValidator(75)]],
+        phoneNumber: ['', [CustomValidators.phoneValidator()]],
+        dateOfBirth: [
+            '',
+            [CustomValidators.minAgeValidator(13), CustomValidators.maxAgeValidator(75)],
+        ],
     });
     private formValues = toSignal(this.profileForm.valueChanges, {
         initialValue: this.profileForm.value,

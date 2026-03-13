@@ -5,12 +5,12 @@ import {
     ReactiveFormsModule,
     Validators,
 } from '@angular/forms';
-import { passwordMatchValidator } from '../../../shared/validators/passwordValidator/passwordValidator';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatError, MatFormField, MatInput, MatLabel, MatPrefix } from '@angular/material/input';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
+import { CustomValidators } from '../../../shared/validators/CustomValidators';
 
 @Component({
     selector: 'app-reset-form',
@@ -42,7 +42,7 @@ export class ResetFormComponent {
             rePassword: ['', [Validators.required, Validators.minLength(6)]],
         },
         {
-            validators: passwordMatchValidator('password', 'rePassword'),
+            validators: CustomValidators.passwordMatchValidator('password', 'rePassword'),
         } as AbstractControlOptions
     );
 

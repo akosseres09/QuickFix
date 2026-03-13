@@ -18,13 +18,11 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../shared/services/auth/auth.service';
-import { passwordMatchValidator } from '../../shared/validators/passwordValidator/passwordValidator';
-import { phoneValidator } from '../../shared/validators/phoneValidator/phoneValidator';
-import { minAgeValidator } from '../../shared/validators/dateValidator/dateValidator';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 import { errorResponse } from '../../shared/model/Response';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SignupData } from '../../shared/constants/user/SignupData';
+import { CustomValidators } from '../../shared/validators/CustomValidators';
 
 @Component({
     selector: 'app-signup',
@@ -63,11 +61,11 @@ export class SignupComponent {
             email: ['', [Validators.required, Validators.email]],
             password: ['', [Validators.required, Validators.minLength(6)]],
             confirmPassword: ['', [Validators.required, Validators.minLength(6)]],
-            dateOfBirth: [null as Date | null, [minAgeValidator(13)]],
-            phoneNumber: ['', [phoneValidator()]],
+            dateOfBirth: [null as Date | null, [CustomValidators.minAgeValidator(13)]],
+            phoneNumber: ['', [CustomValidators.phoneValidator()]],
         },
         {
-            validators: passwordMatchValidator('password', 'confirmPassword'),
+            validators: CustomValidators.passwordMatchValidator('password', 'confirmPassword'),
         } as AbstractControlOptions
     );
 
