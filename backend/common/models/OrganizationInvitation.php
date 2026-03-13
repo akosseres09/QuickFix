@@ -164,4 +164,9 @@ class OrganizationInvitation extends ActiveRecord
     {
         return new OrganizationInvitationQuery(get_called_class());
     }
+
+    public function isExpired(): bool
+    {
+        return time() > $this->expires_at;
+    }
 }

@@ -28,7 +28,29 @@ export class OrganizationInvitationService {
         });
     }
 
-    getInvitationByToken(token: string): Observable<OrganizationInvitation> {
-        return this.http.get<OrganizationInvitation>(`${this.url}/invitation/${token}`);
+    getInvitationByToken(
+        token: string,
+        payload: ApiQueryParams
+    ): Observable<OrganizationInvitation> {
+        const qp = ParamsHandler.convertToHttpParams(payload);
+
+        return this.http.get<OrganizationInvitation>(`${this.url}/invitation/${token}`, {
+            params: qp,
+        });
+    }
+
+    updateInvitation(
+        identifier: string,
+        invitation: Partial<OrganizationInvitation>
+    ): Observable<OrganizationInvitation> {
+        return this.http.put<OrganizationInvitation>(
+            `${this.url}/invitation/${identifier}`,
+            invitation,
+            {
+                params: {
+                    expand: 'organization, inviter',
+                },
+            }
+        );
     }
 }

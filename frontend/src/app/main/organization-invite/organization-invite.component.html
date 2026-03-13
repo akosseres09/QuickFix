@@ -1,0 +1,140 @@
+<div class="mx-auto w-full max-w-3xl">
+    <div class="flex items-center justify-center">
+        @if (isLoading()) {
+            <div class="space-y-4">
+                <div class="h-8 w-64 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"></div>
+                <div class="h-5 w-full animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"></div>
+                <div class="h-5 w-3/4 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"></div>
+                <div class="grid gap-3 sm:grid-cols-2">
+                    <div class="h-28 animate-pulse rounded-xl bg-gray-200 dark:bg-gray-700"></div>
+                    <div class="h-28 animate-pulse rounded-xl bg-gray-200 dark:bg-gray-700"></div>
+                </div>
+                <div class="h-12 w-44 animate-pulse rounded-xl bg-gray-200 dark:bg-gray-700"></div>
+            </div>
+        } @else if (invitation()) {
+            <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">
+                    Organization Invitation
+                </h1>
+
+                @if (invitation()?.status === invitationStatus.Pending) {
+                    <span
+                        class="rounded-md bg-amber-50 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-amber-700 dark:bg-amber-900/20 dark:text-amber-300"
+                    >
+                        Pending
+                    </span>
+                } @else if (invitation()?.status === invitationStatus.Accepted) {
+                    <span
+                        class="rounded-md bg-emerald-50 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300"
+                    >
+                        Accepted
+                    </span>
+                } @else if (invitation()?.status === invitationStatus.Rejected) {
+                    <span
+                        class="rounded-md bg-rose-50 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-rose-700 dark:bg-rose-900/20 dark:text-rose-300"
+                    >
+                        Declined
+                    </span>
+                } @else {
+                    <span
+                        class="rounded-md bg-gray-100 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-700 dark:bg-gray-700 dark:text-gray-200"
+                    >
+                        {{ invitation()?.status }}
+                    </span>
+                }
+            </div>
+
+            <p class="mb-6 text-base text-gray-600 dark:text-gray-300">
+                <span class="font-semibold text-gray-900 dark:text-gray-100">
+                    {{ invitation()?.inviter?.fullName }}
+                </span>
+                invited you to join
+                <span class="font-semibold text-gray-900 dark:text-gray-100">
+                    {{ invitation()?.organization?.name }}
+                </span>
+                as
+                <span class="font-semibold text-gray-900 dark:text-gray-100">
+                    {{ invitation()?.role | titlecase }}
+                </span>
+                .
+            </p>
+
+            <div class="mb-8 grid gap-3 sm:grid-cols-2">
+                <div
+                    class="rounded-md border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-dark-background"
+                >
+                    <p
+                        class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
+                    >
+                        Invited By
+                    </p>
+                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        {{ invitation()?.inviter?.fullName || 'Unknown user' }}
+                    </p>
+                    <p class="text-sm text-gray-600 dark:text-gray-300">
+                        {{ invitation()?.inviter?.email || 'No email available' }}
+                    </p>
+                </div>
+
+                <div
+                    class="rounded-md border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-dark-background"
+                >
+                    <p
+                        class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
+                    >
+                        Organization
+                    </p>
+                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        {{ invitation()?.organization?.name || 'Unknown organization' }}
+                    </p>
+                    <p class="text-sm text-gray-600 dark:text-gray-300">
+                        Invitation email: {{ invitation()?.email }}
+                    </p>
+                </div>
+            </div>
+
+            @if (invitation()?.status === invitationStatus.Pending) {
+                <div class="flex flex-col gap-3 sm:flex-row">
+                    <button
+                        mat-flat-button
+                        type="button"
+                        (click)="acceptInvitation()"
+                        [disabled]="isSubmitting()"
+                        color="primary"
+                    >
+                        {{ currentAction() === 'accept' ? 'Accepting...' : 'Accept Invitation' }}
+                    </button>
+
+                    <button
+                        mat-button
+                        type="button"
+                        (click)="declineInvitation()"
+                        [disabled]="isSubmitting()"
+                    >
+                        {{ currentAction() === 'decline' ? 'Declining...' : 'Decline Invitation' }}
+                    </button>
+                </div>
+            } @else if (invitation()?.status === invitationStatus.Accepted) {
+                <div
+                    class="rounded-md border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300"
+                >
+                    You have already accepted this invitation.
+                </div>
+            } @else if (invitation()?.status === invitationStatus.Rejected) {
+                <div
+                    class="rounded-md border border-rose-200 bg-rose-50 p-4 text-sm font-medium text-rose-700 dark:border-rose-800 dark:bg-rose-900/20 dark:text-rose-300"
+                >
+                    You have already declined this invitation.
+                </div>
+            } @else {
+                <div
+                    class="rounded-md border border-gray-200 bg-gray-100 p-4 text-sm font-medium text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                >
+                    This invitation is no longer available.
+                </div>
+            }
+        } @else {
+            <span class="text-center text-2xl">Invitation not found!</span>
+        }
+    </div>
+</div>

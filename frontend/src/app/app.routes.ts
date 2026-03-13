@@ -120,6 +120,14 @@ export const routes: Routes = [
                     import('./main/settings/settings.component').then((c) => c.SettingsComponent),
                 title: 'QuickFix - Settings',
             },
+            {
+                path: 'invitation/:token',
+                loadComponent: () =>
+                    import('./main/organization-invite/organization-invite.component').then(
+                        (c) => c.OrganizationInviteComponent
+                    ),
+                title: 'QuickFix - Invitation',
+            },
         ],
     },
 

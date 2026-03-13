@@ -16,7 +16,6 @@ class OrganizationInvitationController extends BaseRestController
     {
         $behaviors = parent::behaviors();
 
-        $behaviors['organizationTranslator']['actions'] = ['create'];
         unset($behaviors['projectTranslator']);
 
         return $behaviors;
@@ -47,9 +46,13 @@ class OrganizationInvitationController extends BaseRestController
             $query->byToken($id);
         }
 
-        $inv = $query->pending()->one();
+        $inv = $query->byEmail(Yii::$app->user->identity->email)->one();
         if (!$inv) {
             throw new NotFoundHttpException('Organization invitation not found.');
+        }
+
+        if ($inv->isExpired()) {
+            throw new NotFoundHttpException('Organization invitation has expired.');
         }
 
         return $inv;
