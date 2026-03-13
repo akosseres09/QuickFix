@@ -93,7 +93,8 @@ export class OrgInviteDialogComponent {
         }
 
         this.organizationInvitationService
-            .sendInvitation(orgId, {
+            .sendInvitation({
+                organizationId: orgId,
                 email,
                 role,
             })
