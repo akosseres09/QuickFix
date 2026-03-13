@@ -20,6 +20,12 @@ import { DisplayedColumn } from '../../constants/table/DisplayedColumn';
 import { Label } from '../../model/Label';
 import { Organization } from '../../model/Organization';
 import { Worktime } from '../../model/Worktime';
+import {
+    OrganizationInvitation,
+    ORGANIZATION_INVITATION_STATUS_COLOR_MAP,
+    ORGANIZATION_INVITATION_STATUS_MAP,
+} from '../../model/OrganizationInvitation';
+import { ORGANIZATION_MEMBER_ROLE_MAP } from '../../model/OrganizationMember';
 
 @Injectable({
     providedIn: 'root',
@@ -221,6 +227,54 @@ export class DisplayedColumnService {
                 label: 'Description',
                 sortable: false,
                 value: (e: Worktime) => e.description,
+            },
+        ];
+    }
+
+    getOrganizationInvitationColumns(): DisplayedColumn<OrganizationInvitation>[] {
+        return [
+            {
+                id: 'organization_id',
+                label: 'Organization',
+                sortable: false,
+                value: (e: OrganizationInvitation) => e.organization?.name ?? 'Unknown',
+            },
+            {
+                id: 'inviter',
+                label: 'Invited By',
+                sortable: false,
+                value: (e: OrganizationInvitation) => e.inviter?.fullName ?? 'Unknown',
+                routerLink: (e: OrganizationInvitation) => {
+                    if (!e.inviter?.username) return null;
+                    return ['../members/', e.inviter.username];
+                },
+                photoOnly: (e: OrganizationInvitation) => !!e.inviter,
+                photoUrl: (e: OrganizationInvitation) => e.inviter?.profilePictureUrl ?? null,
+            },
+            {
+                id: 'role',
+                label: 'Role',
+                sortable: false,
+                value: (e: OrganizationInvitation) =>
+                    ORGANIZATION_MEMBER_ROLE_MAP[e.role] ?? e.role,
+            },
+            {
+                id: 'status',
+                label: 'Status',
+                sortable: true,
+                badge: (e: OrganizationInvitation) =>
+                    ORGANIZATION_INVITATION_STATUS_COLOR_MAP[e.status],
+                value: (e: OrganizationInvitation) =>
+                    ORGANIZATION_INVITATION_STATUS_MAP[e.status] ?? e.status,
+            },
+            {
+                id: 'expires_at',
+                label: 'Expires At',
+                sortable: true,
+                value: (e: OrganizationInvitation) => {
+                    const date = this.dateService.parseTimestamp(e.expiresAt);
+                    return this.dateService.toGMTtime(date);
+                },
             },
         ];
     }

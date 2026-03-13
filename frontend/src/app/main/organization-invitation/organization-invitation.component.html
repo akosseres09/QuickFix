@@ -1,0 +1,22 @@
+<div class="min-h-full">
+    <app-filter
+        [filterFields]="filterFields"
+        (onFilterChange)="onFilterChange($event)"
+    ></app-filter>
+
+    <app-table
+        [dataSource]="shownInvitations()"
+        [displayedColumns]="displayedColumns()"
+        tableHeader="Invitations"
+        [initialPageSize]="listState.pageSize()"
+        [initialPageIndex]="listState.pageIndex()"
+        [initialSortActive]="listState.sortActive()"
+        [initialSortDirection]="listState.sortDirection()"
+        [totalCount]="listState.totalCount()"
+        [isLoading]="listState.isLoading()"
+        (sortChange)="onSortChange($event)"
+        (pageChange)="onPageChange($event)"
+        [selectedRow]="selectedRow()"
+        (selectedRowChange)="onRowChange($event)"
+    ></app-table>
+</div>

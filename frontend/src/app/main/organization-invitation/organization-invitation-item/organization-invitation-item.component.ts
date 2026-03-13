@@ -1,21 +1,21 @@
 import { Component, inject, input, OnInit, signal } from '@angular/core';
-import { OrganizationInvitationService } from '../../shared/services/organization-invitation/organization-invitation.service';
-import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
+import { CommonModule, TitleCasePipe } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
+import { OrganizationInvitationService } from '../../../shared/services/organization-invitation/organization-invitation.service';
+import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
+import { AuthService } from '../../../shared/services/auth/auth.service';
 import {
     OrganizationInvitation,
     OrganizationInvitationStatus,
-} from '../../shared/model/OrganizationInvitation';
-import { AuthService } from '../../shared/services/auth/auth.service';
-import { TitleCasePipe } from '@angular/common';
-import { MatButtonModule } from '@angular/material/button';
+} from '../../../shared/model/OrganizationInvitation';
 
 @Component({
     selector: 'app-organization-invite',
-    imports: [TitleCasePipe, MatButtonModule],
-    templateUrl: './organization-invite.component.html',
-    styleUrl: './organization-invite.component.css',
+    imports: [TitleCasePipe, MatButtonModule, CommonModule],
+    templateUrl: './organization-invitation-item.component.html',
+    styleUrl: './organization-invitation-item.component.css',
 })
-export class OrganizationInviteComponent implements OnInit {
+export class OrganizationInvitationItemComponent implements OnInit {
     private readonly organizationInvitationService = inject(OrganizationInvitationService);
     private readonly snacbarService = inject(SnackbarService);
     private readonly authService = inject(AuthService);

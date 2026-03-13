@@ -9,6 +9,8 @@ import {
     PRIORITY_MAP as PROJECT_PRIORITY_MAP,
     STATUS_MAP as PROJECT_STATUS_MAP,
 } from '../../model/Project';
+import { ORGANIZATION_INVITATION_STATUS_MAP } from '../../model/OrganizationInvitation';
+import { ORGANIZATION_MEMBER_ROLE_MAP } from '../../model/OrganizationMember';
 
 @Injectable({
     providedIn: 'root',
@@ -95,6 +97,29 @@ export class FilterService {
             {
                 name: 'slug',
                 type: 'input',
+            },
+        ];
+    }
+
+    getOrganizationInvitationFilters(): Filter[] {
+        return [
+            {
+                name: 'status',
+                type: 'select',
+                options: Object.entries(ORGANIZATION_INVITATION_STATUS_MAP).map(
+                    ([value, label]) => ({
+                        value,
+                        label,
+                    })
+                ),
+            },
+            {
+                name: 'role',
+                type: 'select',
+                options: Object.entries(ORGANIZATION_MEMBER_ROLE_MAP).map(([value, label]) => ({
+                    value,
+                    label,
+                })),
             },
         ];
     }

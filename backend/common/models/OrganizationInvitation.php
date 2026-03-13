@@ -74,8 +74,6 @@ class OrganizationInvitation extends ActiveRecord
             ['role', 'string', 'max' => 16],
             ['role', 'default', 'value' => OrganizationMember::ROLE_VIEWER],
             ['role', 'in', 'range' => OrganizationMember::ROLE_LIST],
-            ['token', 'string', 'max' => 36],
-            ['token', 'unique'],
             [
                 ['email', 'organization_id'],
                 'unique',
@@ -112,20 +110,6 @@ class OrganizationInvitation extends ActiveRecord
         ];
     }
 
-    public function beforeValidate(): bool
-    {
-        if (!parent::beforeValidate()) {
-            return false;
-        }
-
-        if (!$this->isNewRecord) {
-            return true;
-        }
-
-        $this->token = Yii::$app->security->generateRandomString(36);
-        return true;
-    }
-
     public function beforeSave($insert): bool
     {
         if (!parent::beforeSave($insert))
@@ -135,6 +119,7 @@ class OrganizationInvitation extends ActiveRecord
             return true;
 
         $this->id = Uuid::v7()->toString();
+        $this->token = Yii::$app->security->generateRandomString(36);
         $this->expires_at = time() + self::EXPIRATION_LENGTH;
         return true;
     }

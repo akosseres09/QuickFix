@@ -108,6 +108,12 @@ export class MainLayoutComponent implements OnInit {
                 path: '/organizations',
                 icon: 'apartment',
             },
+            {
+                name: 'Invitations',
+                type: 'button',
+                path: '/invitations',
+                icon: 'mail_outline',
+            },
         ];
 
         if (!orgId || !org) {

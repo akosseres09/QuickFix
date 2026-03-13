@@ -121,11 +121,25 @@ export const routes: Routes = [
                 title: 'QuickFix - Settings',
             },
             {
+                path: 'invitations',
+                children: [
+                    {
+                        path: '',
+                        pathMatch: 'full',
+                        loadComponent: () =>
+                            import(
+                                './main/organization-invitation/organization-invitation.component'
+                            ).then((c) => c.OrganizationInvitationComponent),
+                        title: 'QuickFix - Invitations',
+                    },
+                ],
+            },
+            {
                 path: 'invitation/:token',
                 loadComponent: () =>
-                    import('./main/organization-invite/organization-invite.component').then(
-                        (c) => c.OrganizationInviteComponent
-                    ),
+                    import(
+                        './main/organization-invitation/organization-invitation-item/organization-invitation-item.component'
+                    ).then((c) => c.OrganizationInvitationItemComponent),
                 title: 'QuickFix - Invitation',
             },
         ],
