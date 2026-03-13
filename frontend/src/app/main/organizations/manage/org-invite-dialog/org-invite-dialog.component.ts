@@ -11,6 +11,7 @@ import { MatOptionModule } from '@angular/material/core';
 import { TitleCasePipe } from '@angular/common';
 import { OrganizationInvitationService } from '../../../../shared/services/organization-invitation/organization-invitation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar/snackbar.service';
+import { AuthService } from '../../../../shared/services/auth/auth.service';
 
 @Component({
     selector: 'app-org-invite-dialog',
@@ -31,12 +32,21 @@ export class OrgInviteDialogComponent {
     private readonly destroyRef = inject(DestroyRef);
     private readonly organizationInvitationService = inject(OrganizationInvitationService);
     private readonly snackbarService = inject(SnackbarService);
+    private readonly authService = inject(AuthService);
 
     organizationId = input.required<string>();
     roles = Object.values(OrganizationMemberRole);
+    userClaims = this.authService.currentUserClaims();
 
     form = this.fb.group({
-        email: ['', [Validators.required, Validators.email]],
+        email: [
+            '',
+            [
+                Validators.required,
+                Validators.email,
+                CustomValidators.notOwnEmailValidator(this.userClaims?.email ?? ''),
+            ],
+        ],
         role: [
             OrganizationMemberRole.MEMBER,
             [Validators.required, CustomValidators.enum(OrganizationMemberRole)],

@@ -102,4 +102,16 @@ export class CustomValidators {
             return valid ? null : { invalidPhone: true };
         };
     }
+
+    static notOwnEmailValidator(userEmail: string): ValidatorFn {
+        return (control: AbstractControl): ValidationErrors | null => {
+            if (!control.value) {
+                return null; // Don't validate empty values to allow optional controls
+            }
+
+            const isOwnEmail =
+                control.value.trim().toLowerCase() === userEmail.trim().toLowerCase();
+            return isOwnEmail ? { ownEmail: true } : null;
+        };
+    }
 }

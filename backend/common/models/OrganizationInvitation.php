@@ -68,6 +68,16 @@ class OrganizationInvitation extends ActiveRecord
             ['organization_id', 'exist', 'targetClass' => Organization::class, 'targetAttribute' => ['organization_id' => 'id']],
             ['inviter_id', 'exist', 'targetClass' => UserResource::class, 'targetAttribute' => ['inviter_id' => 'id']],
             ['email', 'email'],
+            [
+                'email',
+                function ($attribute) {
+                    $currentUserEmail = Yii::$app->user->identity->email;
+
+                    if ($this->$attribute === $currentUserEmail) {
+                        $this->addError($attribute, 'You cannot invite yourself to an organization.');
+                    }
+                }
+            ],
             ['status', 'string', 'max' => 64],
             ['status', 'in', 'range' => self::STATUSES],
             ['status', 'default', 'value' => self::STATUS_PENDING],
@@ -78,7 +88,7 @@ class OrganizationInvitation extends ActiveRecord
                 ['email', 'organization_id'],
                 'unique',
                 'targetAttribute' => ['email', 'organization_id'],
-                'filter' => ['status' => self::STATUS_PENDING],
+                'filter' => ['status' => [self::STATUS_PENDING, self::STATUS_ACCEPTED]],
                 'message' => 'An invitation for this email and organization already exists.',
                 'when' => function () {
                     return $this->isNewRecord;

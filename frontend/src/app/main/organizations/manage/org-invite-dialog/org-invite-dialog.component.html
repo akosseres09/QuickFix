@@ -11,6 +11,9 @@
                     @if (email.hasError('email')) {
                         <span>Please enter a valid email address</span>
                     }
+                    @if (email.hasError('ownEmail')) {
+                        <span>You cannot invite yourself to an organization.</span>
+                    }
                 </mat-error>
             }
         </mat-form-field>
