@@ -1,0 +1,36 @@
+<ng-template #orgInviteFormTemplate>
+    <form [formGroup]="form" class="flex flex-col gap-4">
+        <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
+            <input matInput formControlName="email" type="email" />
+            @if (email.invalid && (email.dirty || email.touched)) {
+                <mat-error>
+                    @if (email.hasError('required')) {
+                        <span>Email is required</span>
+                    }
+                    @if (email.hasError('email')) {
+                        <span>Please enter a valid email address</span>
+                    }
+                </mat-error>
+            }
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+            <mat-label>Role</mat-label>
+            <mat-select matNativeControl formControlName="role">
+                @for (role of roles; track $index) {
+                    <mat-option [value]="role">{{ role | titlecase }}</mat-option>
+                }
+            </mat-select>
+            @if (role.invalid && (role.dirty || role.touched)) {
+                <mat-error>
+                    @if (role.hasError('required')) {
+                        <span>Role is required</span>
+                    }
+                    @if (role.hasError('invalidRole')) {
+                        <span>Invalid role selected</span>
+                    }
+                </mat-error>
+            }
+        </mat-form-field>
+    </form>
+</ng-template>

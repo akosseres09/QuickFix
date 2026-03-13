@@ -1,4 +1,4 @@
-import { Component, inject, input, OnInit, signal } from '@angular/core';
+import { Component, inject, input, OnInit, signal, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
@@ -14,6 +14,7 @@ import {
 import { SnackbarService } from '../../../../shared/services/snackbar/snackbar.service';
 import { MemberCardComponent } from '../../../../common/member-card/member-card.component';
 import { AuthService } from '../../../../shared/services/auth/auth.service';
+import { OrgInviteDialogComponent } from '../org-invite-dialog/org-invite-dialog.component';
 
 @Component({
     selector: 'app-organization-members',
@@ -24,6 +25,7 @@ import { AuthService } from '../../../../shared/services/auth/auth.service';
         MatPaginatorModule,
         MatProgressSpinner,
         MemberCardComponent,
+        OrgInviteDialogComponent,
     ],
     templateUrl: './organization-members.component.html',
     styleUrl: './organization-members.component.css',
@@ -40,6 +42,8 @@ export class OrganizationMembersComponent implements OnInit {
 
     readonly RoleMap = ORGANIZATION_MEMBER_ROLE_MAP;
     readonly OrganizationMemberRole = OrganizationMemberRole;
+
+    inviteDialog = viewChild(OrgInviteDialogComponent);
 
     ngOnInit(): void {
         this.getMembers();
@@ -72,6 +76,13 @@ export class OrganizationMembersComponent implements OnInit {
                 return 'bg-light-secondary dark:bg-dark-secondary text-white';
             default:
                 return 'bg-gray-400 dark:bg-gray-600 text-white';
+        }
+    }
+
+    openDialog(): void {
+        const dial = this.inviteDialog();
+        if (dial) {
+            dial.open();
         }
     }
 }

@@ -13,6 +13,7 @@
             </p>
         </div>
         <button
+            (click)="openDialog()"
             mat-flat-button
             color="primary"
             class="!text-white shrink-0 self-start sm:self-auto"
@@ -40,6 +41,10 @@
                     ></app-member-card>
                 }
             </div>
+            <app-org-invite-dialog
+                #dialog
+                [organizationId]="organizationId()"
+            ></app-org-invite-dialog>
         } @else {
             <!-- Empty State -->
             <div
