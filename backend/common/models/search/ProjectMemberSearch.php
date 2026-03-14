@@ -4,7 +4,6 @@ namespace common\models\search;
 
 use common\models\Project;
 use common\models\ProjectMember;
-use Symfony\Component\Uid\Uuid;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\web\BadRequestHttpException;
@@ -21,6 +20,9 @@ class ProjectMemberSearch extends ProjectMember implements SearchInterface
 
     public function search($params): ActiveDataProvider
     {
+        $pageSize = isset($params['pageSize']) ? (int) $params['pageSize'] : 20;
+        $pageSize = min($pageSize, 30);
+
         $organizationId = Yii::$app->request->get('organization_id');
         if (!$organizationId) {
             throw new BadRequestHttpException('Organization ID is required.');
@@ -38,9 +40,35 @@ class ProjectMemberSearch extends ProjectMember implements SearchInterface
             throw new BadRequestHttpException('Project does not exist in the specified organization.');
         }
 
+        $cursor = $params['cursor'] ?? null;
+
+        $userId = Yii::$app->user->id;
         $query = ProjectMember::find()->byProjectId($projectId);
-        return new ActiveDataProvider([
+        if ($cursor) {
+            $query->byCursor($cursor);
+        }
+
+        $query->orderBy(['{{%project_member}}.id' => SORT_ASC]);
+        $query->limit($pageSize);
+
+        $dataprovider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => false,
+            'pagination' => false,
         ]);
+
+        $models = $query->all();
+
+        if (!empty($models)) {
+            $lastModel = end($models);
+
+            $headers = Yii::$app->response->headers;
+            $headers->set('X-Cursor', $lastModel->id);
+
+            $hasMore = count($models) === $pageSize ? 'true' : 'false';
+            $headers->set('X-Has-More', $hasMore);
+        }
+
+        return $dataprovider;
     }
 }

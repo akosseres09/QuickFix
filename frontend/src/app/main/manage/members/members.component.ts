@@ -14,6 +14,7 @@ import { Project, ProjectVisibility } from '../../../shared/model/Project';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MemberCardComponent } from '../../../common/member-card/member-card.component';
+import { ApiQueryParams } from '../../../shared/constants/api/ApiQueryParams';
 
 @Component({
     selector: 'app-members',
@@ -31,6 +32,9 @@ export class MembersComponent implements OnInit {
     organizationId = input.required<string>();
 
     members = signal<ProjectMember[]>([]);
+    cursor = signal<string | null>(null);
+    hasMore = signal<boolean>(false);
+    isLoading = signal<boolean>(false);
     currentUser = signal<Claims | null>(this.authService.currentUserClaims());
     project = signal<Project | null>(null);
 
@@ -42,15 +46,38 @@ export class MembersComponent implements OnInit {
         this.getMembers();
     }
 
-    private getMembers() {
+    loadMore() {
+        const currentCursor = this.cursor();
+        console.log(currentCursor);
+        console.log(this.isLoading());
+
+        if (currentCursor && !this.isLoading()) {
+            this.getMembers(currentCursor);
+        } else {
+            console.warn('No more members to load');
+        }
+    }
+
+    private getMembers(cursor?: string) {
+        const params: ApiQueryParams = { expand: 'user', cursor: cursor ?? undefined };
+
         this.memberService
-            .getProjectMembers({
-                organizationId: this.organizationId(),
-                projectId: this.projectId(),
-            })
+            .getProjectMembers(
+                {
+                    organizationId: this.organizationId(),
+                    projectId: this.projectId(),
+                },
+                params
+            )
             .subscribe({
                 next: (data) => {
-                    this.members.set(data.items);
+                    if (cursor) {
+                        this.members.update((members) => [...members, ...data.items]);
+                    } else {
+                        this.members.set(data.items);
+                    }
+                    this.cursor.set(data.nextCursor);
+                    this.hasMore.set(data.hasMore);
                 },
                 error: (err) => {
                     console.error('Failed to fetch members:', err);

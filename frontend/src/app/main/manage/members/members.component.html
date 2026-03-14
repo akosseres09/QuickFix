@@ -45,5 +45,18 @@
                 <p class="text-sm">Add members to start collaborating</p>
             </div>
         }
+        @if (hasMore()) {
+            <div class="col-span-full flex justify-center">
+                <button
+                    mat-stroked-button
+                    color="primary"
+                    (click)="loadMore()"
+                    [disabled]="isLoading()"
+                >
+                    <mat-icon class="mr-2">refresh</mat-icon>
+                    Load More
+                </button>
+            </div>
+        }
     </div>
 </div>
