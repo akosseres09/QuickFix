@@ -221,8 +221,11 @@ class AuthController extends Controller
             $this->queueEmail(
                 $user->email,
                 'Email Verification',
-                'emailVerification',
-                ['user' => $user]
+                'emailVerify',
+                [
+                    'username' => $user->username,
+                    'verificationToken' => $user->verification_token
+                ]
             );
 
             return ResponseMaker::asSuccess([
@@ -255,7 +258,10 @@ class AuthController extends Controller
                     $user->email,
                     'Password Reset Request',
                     'passwordResetToken',
-                    ['user' => $user]
+                    [
+                        'username' => $user->username,
+                        'passwordResetToken' => $user->password_reset_token
+                    ]
                 );
 
                 return ResponseMaker::asSuccess([

@@ -1,12 +1,12 @@
 <?php
 
-/** @var yii\web\View $this */
-/** @var common\models\User $user */
+/** @var string $username */
+/** @var string $verificationToken */
 
-$verifyLink = Yii::$app->params['frontendUrl'] . '/auth/verify?token=' . $user->verification_token;
+$verifyLink = Yii::$app->params['frontendUrl'] . '/auth/verify?token=' . $verificationToken;
 ?>
-Hello <?= $user->username ?>,
+Hello <?= $username ?>,
 You have requested to verify your account.
-Your verification token is: <?= $user->verification_token ?>
+Your verification token is: <?= $verificationToken ?>
 Click the link below to verify your account:
 <?= $verifyLink ?>

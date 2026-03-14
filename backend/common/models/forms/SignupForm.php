@@ -96,11 +96,15 @@ class SignupForm extends Model
      */
     protected function sendVerificationEmail(User $user): bool
     {
+
         $this->queueEmail(
             $user->email,
             'Verify your email address',
             'emailVerify',
-            ['user' => $user]
+            [
+                'username' => $user->username,
+                'verificationToken' => $user->verification_token
+            ]
         );
         return true;
     }
