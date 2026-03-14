@@ -5,6 +5,7 @@ import { PaginatedResponse } from '../../constants/api/PaginatedResponse';
 import { OrganizationMember } from '../../model/OrganizationMember';
 import { ApiQueryParams } from '../../constants/api/ApiQueryParams';
 import { ParamsHandler } from '../../utils/paramsHandler';
+import { map } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
@@ -16,10 +17,17 @@ export class OrganizationMemberService {
     getOrganizationMembers(organizationId: string, params: ApiQueryParams = {}) {
         const qp = ParamsHandler.convertToHttpParams(params);
 
-        return this.http.get<PaginatedResponse<OrganizationMember>>(
-            `${this.url}/${organizationId}/member`,
-            { params: qp }
-        );
+        return this.http
+            .get<
+                PaginatedResponse<OrganizationMember>
+            >(`${this.url}/${organizationId}/member`, { params: qp, observe: 'response' })
+            .pipe(
+                map((response) => ({
+                    items: response.body?.items ?? [],
+                    nextCursor: response.headers.get('X-Cursor'),
+                    hasMore: response.headers.get('X-Has-More') === 'true',
+                }))
+            );
     }
 
     getOrganizationMember(organizationId: number, memberId: number) {

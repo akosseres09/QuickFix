@@ -45,7 +45,7 @@ class CommentSearch extends Comment implements SearchInterface
         }
 
         $query->orderBy(['comment.id' => SORT_ASC]);
-        $query->limit($pageSize);
+        $query->limit($pageSize + 1);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -54,17 +54,22 @@ class CommentSearch extends Comment implements SearchInterface
         ]);
 
         $models = $query->all();
+        $hasMore = 'false';
 
-        $dataProvider->setModels($models);
+        if (count($models) > $pageSize) {
+            $hasMore = 'true';
+            array_pop($models);
+        }
 
+        $headers = Yii::$app->response->headers;
         if (!empty($models)) {
+            $dataProvider->setModels($models);
             $lastModel = end($models);
 
-            $headers = Yii::$app->response->headers;
             $headers->set('X-Next-Cursor', $lastModel->id);
-
-            $hasMore = count($models) === $pageSize ? 'true' : 'false';
             $headers->set('X-Has-More', $hasMore);
+        } else {
+            $headers->set('X-Has-More', 'false');
         }
 
         return $dataProvider;

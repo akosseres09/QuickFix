@@ -49,7 +49,7 @@ class ProjectMemberSearch extends ProjectMember implements SearchInterface
         }
 
         $query->orderBy(['{{%project_member}}.id' => SORT_ASC]);
-        $query->limit($pageSize);
+        $query->limit($pageSize + 1);
 
         $dataprovider = new ActiveDataProvider([
             'query' => $query,
@@ -58,15 +58,23 @@ class ProjectMemberSearch extends ProjectMember implements SearchInterface
         ]);
 
         $models = $query->all();
+        $hasMore = 'false';
 
+        if (count($models) > $pageSize) {
+            $hasMore = 'true';
+            array_pop($models);
+        }
+
+        $headers = Yii::$app->response->headers;
         if (!empty($models)) {
+            $dataprovider->setModels($models);
+
             $lastModel = end($models);
 
-            $headers = Yii::$app->response->headers;
             $headers->set('X-Cursor', $lastModel->id);
-
-            $hasMore = count($models) === $pageSize ? 'true' : 'false';
             $headers->set('X-Has-More', $hasMore);
+        } else {
+            $headers->set('X-Has-More', 'false');
         }
 
         return $dataprovider;

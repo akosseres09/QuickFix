@@ -3,8 +3,7 @@ import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { OrganizationMemberService } from '../../../../shared/services/organization-member/organization-member.service';
 import {
     OrganizationMember,
@@ -23,7 +22,6 @@ import { OrgInviteDialogComponent } from '../org-invite-dialog/org-invite-dialog
         MatButtonModule,
         MatIconModule,
         MatPaginatorModule,
-        MatProgressSpinner,
         MemberCardComponent,
         OrgInviteDialogComponent,
     ],
@@ -37,6 +35,8 @@ export class OrganizationMembersComponent implements OnInit {
 
     organizationId = input.required<string>();
     members = signal<OrganizationMember[]>([]);
+    cursor = signal<string | null>(null);
+    hasMore = signal<boolean>(false);
     isLoading = signal<boolean>(false);
     currentUser = this.authService.currentUserClaims;
 
@@ -49,21 +49,11 @@ export class OrganizationMembersComponent implements OnInit {
         this.getMembers();
     }
 
-    getMembers(): void {
-        this.isLoading.set(true);
-
-        this.orgMemberService
-            .getOrganizationMembers(this.organizationId(), { expand: 'user' })
-            .pipe(finalize(() => this.isLoading.set(false)))
-            .subscribe({
-                next: (response) => {
-                    this.members.set(response.items);
-                },
-                error: (err) => {
-                    console.error('Failed to fetch members:', err);
-                    this.snackbarService.error('Failed to fetch members');
-                },
-            });
+    loadMore(): void {
+        const currentCursor = this.cursor();
+        if (currentCursor && !this.isLoading()) {
+            this.getMembers(currentCursor);
+        }
     }
 
     getRoleBadgeClass(role: string): string {
@@ -84,5 +74,28 @@ export class OrganizationMembersComponent implements OnInit {
         if (dial) {
             dial.open();
         }
+    }
+
+    private getMembers(cursor?: string): void {
+        this.isLoading.set(true);
+
+        this.orgMemberService
+            .getOrganizationMembers(this.organizationId(), { expand: 'user', cursor })
+            .pipe(finalize(() => this.isLoading.set(false)))
+            .subscribe({
+                next: (response) => {
+                    if (cursor) {
+                        this.members.update((current) => [...current, ...response.items]);
+                    } else {
+                        this.members.set(response.items);
+                    }
+                    this.cursor.set(response.nextCursor);
+                    this.hasMore.set(response.hasMore);
+                },
+                error: (err) => {
+                    console.error('Failed to fetch members:', err);
+                    this.snackbarService.error('Failed to fetch members');
+                },
+            });
     }
 }
