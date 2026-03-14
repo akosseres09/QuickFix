@@ -49,7 +49,7 @@ export class DisplayedColumnService {
                 value: (e: Issue) => e.creator?.fullName ?? 'Unknown',
                 routerLink: (e: Issue) => {
                     if (!e.creator) return null;
-                    return ['../member/', e.creator.username];
+                    return ['../../../member/', e.creator.username];
                 },
                 photoOnly: (e: Issue) => !!e.creator,
                 photoUrl: (e: Issue) => e.creator?.profilePictureUrl ?? null,
@@ -61,7 +61,7 @@ export class DisplayedColumnService {
                 value: (e: Issue) => e.assignee?.fullName ?? 'Unassigned',
                 routerLink: (e: Issue) => {
                     if (!e.assignee?.username) return null;
-                    return ['../member/', e.assignee.username];
+                    return ['../../../member/', e.assignee.username];
                 },
                 photoOnly: (e: Issue) => !!e.assignee,
                 photoUrl: (e: Issue) => e.assignee?.profilePictureUrl || null,
