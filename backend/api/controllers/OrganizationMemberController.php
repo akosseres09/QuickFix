@@ -2,9 +2,9 @@
 
 namespace api\controllers;
 
-use api\filters\OrganizationSlugTranslatorFilter;
 use common\models\OrganizationMember;
 use common\models\search\OrganizationMemberSearch;
+use Symfony\Component\Uid\Uuid;
 use Yii;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
@@ -43,9 +43,15 @@ class OrganizationMemberController extends BaseRestController
         if (!$orgId) {
             throw new BadRequestHttpException('Organization ID is required!');
         }
+        $query = OrganizationMember::find()->byOrganization($orgId);
 
-        $orgMember = OrganizationMember::find()->byOrganization($orgId)
-            ->byUserId($id)->one();
+        if (Uuid::isValid($id)) {
+            $query->byUserId($id);
+        } else {
+            $query->byUsername($id);
+        }
+
+        $orgMember = $query->one();
         if (!$orgMember) {
             throw new NotFoundHttpException('The requested organization member is not found!');
         }
