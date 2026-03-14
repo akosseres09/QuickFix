@@ -14,7 +14,7 @@ class OrganizationInvitationSearch extends OrganizationInvitation implements Sea
         return [
             ['role', 'in', 'range' => OrganizationMember::ROLE_LIST],
             ['status', 'in', 'range' => self::STATUSES],
-            [['organization_id', 'token'], 'string', 'max' => 36],
+            [['organization_id'], 'string', 'max' => 36],
         ];
     }
 
@@ -50,7 +50,6 @@ class OrganizationInvitationSearch extends OrganizationInvitation implements Sea
 
         $query->andFilterWhere([
             'organization_id' => $this->organization_id,
-            'token' => $this->token,
             'status' => $this->status,
             'role' => $this->role,
         ]);

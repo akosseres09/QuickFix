@@ -1,4 +1,4 @@
-export interface DecodedToken {
+export interface BaseTokenPayload {
     // issuer
     iss: string;
     // audience
@@ -11,10 +11,4 @@ export interface DecodedToken {
     nbf: number;
     // expiration
     exp: number;
-    // user id (custom claim)
-    uid: string;
-    // role (custom claim)
-    role: string;
-    // email (custom claim)
-    email: string;
 }

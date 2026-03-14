@@ -5,6 +5,8 @@ namespace common\models;
 use common\components\traits\EmailSenderTrait;
 use common\models\query\OrganizationInvitationQuery;
 use common\models\resource\UserResource;
+use DateTimeImmutable;
+use Lcobucci\JWT\Configuration;
 use Symfony\Component\Uid\Uuid;
 use Yii;
 use yii\behaviors\BlameableBehavior;
@@ -19,7 +21,6 @@ use yii\db\ActiveRecord;
  * @property string $email
  * @property int $role
  * @property int $status
- * @property string $token
  * @property int $expires_at
  * @property int $created_at
  * @property int $updated_at
@@ -30,6 +31,9 @@ use yii\db\ActiveRecord;
  */
 class OrganizationInvitation extends ActiveRecord
 {
+    public string $token = '';
+    private Configuration $jwtConfig;
+
     use EmailSenderTrait;
 
     const STATUS_PENDING = 'pending';
@@ -45,6 +49,12 @@ class OrganizationInvitation extends ActiveRecord
     ];
 
     const EXPIRATION_LENGTH = 7 * 24 * 60 * 60; // 7 days
+
+    public function init()
+    {
+        $this->jwtConfig = Yii::$app->get('jwt');
+        return parent::init();
+    }
 
     public static function tableName()
     {
@@ -73,6 +83,10 @@ class OrganizationInvitation extends ActiveRecord
             [
                 'email',
                 function ($attribute) {
+                    if (!$this->isNewRecord) {
+                        return;
+                    }
+
                     $currentUserEmail = Yii::$app->user->identity->email;
 
                     if ($this->$attribute === $currentUserEmail) {
@@ -139,7 +153,6 @@ class OrganizationInvitation extends ActiveRecord
             return true;
 
         $this->id = Uuid::v7()->toString();
-        $this->token = Yii::$app->security->generateRandomString(36);
         $this->expires_at = time() + self::EXPIRATION_LENGTH;
         return true;
     }
@@ -193,19 +206,21 @@ class OrganizationInvitation extends ActiveRecord
     private function sendInvitationEmail()
     {
         $invitation = OrganizationInvitation::find()
-            ->byId($this->invitationId)
+            ->byId($this->id)
             ->joinWith('organization')
             ->joinWith('inviter')
             ->one();
 
         // If the invite was somehow deleted before the queue processed it, just exit gracefully.
         if (!$invitation) {
-            Yii::warning("Invitation ID {$this->invitationId} not found. Skipping email.", 'queue');
+            Yii::warning("Invitation ID {$this->id} not found. Skipping email.", 'queue');
             return;
         }
 
+        $token = $this->generateInvitationToken();
+        $id = $invitation->id;
         $frontendUrl = Yii::$app->params['frontendUrl'] ?? 'http://localhost:4200';
-        $inviteLink = $frontendUrl . '/invitation/' . $invitation->token;
+        $inviteLink = "$frontendUrl/invitation/$id?invitationToken=$token";
 
         $this->queueEmail(
             $invitation->email,
@@ -213,8 +228,31 @@ class OrganizationInvitation extends ActiveRecord
             'invite',
             [
                 'inviteLink' => $inviteLink,
-                'invitation' => $invitation
+                'inviter' => $invitation->inviter->getFullName(),
+                'organization' => $invitation->organization->name,
             ]
         );
+    }
+
+    private function generateInvitationToken(): string
+    {
+        $time = new DateTimeImmutable();
+        $issuer = Yii::$app->params['backendUrl'] ?? 'http://api.ticketing.test';
+        $audience = Yii::$app->params['frontendUrl'] ?? 'http://localhost:4200';
+
+        $emailExists = User::find()->where(['email' => $this->email])->exists();
+
+        return $this->jwtConfig->builder()
+            ->issuedBy($issuer)
+            ->permittedFor($audience)
+            ->identifiedBy(bin2hex(random_bytes(16)))
+            ->issuedAt($time)
+            ->canOnlyBeUsedAfter($time)
+            ->expiresAt($time->modify('+' . self::EXPIRATION_LENGTH . ' seconds'))
+            ->withClaim('email', $this->email)
+            ->withClaim('emailExists', $emailExists)
+            ->withClaim('orgId', $this->organization_id)
+            ->getToken($this->jwtConfig->signer(), $this->jwtConfig->signingKey())
+            ->toString();
     }
 }

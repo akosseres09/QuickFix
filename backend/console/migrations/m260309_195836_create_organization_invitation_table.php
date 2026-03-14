@@ -21,7 +21,6 @@ class m260309_195836_create_organization_invitation_table extends Migration
             'email' => $this->string(255)->notNull(),
             'role' => $this->string(64)->notNull()->defaultValue(OrganizationMember::ROLE_VIEWER),
             'status' => $this->string(16)->notNull()->defaultValue(OrganizationInvitation::STATUS_PENDING),
-            'token' => $this->string(36)->notNull()->unique(),
             'expires_at' => $this->integer()->notNull(),
             'created_at' => $this->integer()->notNull(),
             'updated_at' => $this->integer()->notNull(),
@@ -50,12 +49,6 @@ class m260309_195836_create_organization_invitation_table extends Migration
             '{{%user}}',
             'id',
             'CASCADE'
-        );
-
-        $this->createIndex(
-            'idx-organization_invitation-token',
-            '{{%organization_invitation}}',
-            'token'
         );
     }
 

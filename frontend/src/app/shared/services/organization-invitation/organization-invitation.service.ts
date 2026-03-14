@@ -28,14 +28,11 @@ export class OrganizationInvitationService {
         });
     }
 
-    getInvitationByToken(
-        token: string,
-        payload: ApiQueryParams
-    ): Observable<OrganizationInvitation> {
-        const qp = ParamsHandler.convertToHttpParams(payload);
-
-        return this.http.get<OrganizationInvitation>(`${this.url}/invitation/${token}`, {
-            params: qp,
+    getInvitationById(identifier: string): Observable<OrganizationInvitation> {
+        return this.http.get<OrganizationInvitation>(`${this.url}/invitation/${identifier}`, {
+            params: {
+                expand: 'organization, inviter',
+            },
         });
     }
 

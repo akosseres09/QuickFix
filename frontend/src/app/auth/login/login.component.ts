@@ -1,5 +1,5 @@
 import { Component, DestroyRef, inject, signal } from '@angular/core';
-import { MatButton, MatAnchor } from '@angular/material/button';
+import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import {
     MatError,
@@ -30,7 +30,6 @@ import { SnackbarService } from '../../shared/services/snackbar/snackbar.service
         RouterLink,
         ReactiveFormsModule,
         CommonModule,
-        MatAnchor,
     ],
     templateUrl: './login.component.html',
     styleUrl: './login.component.css',

@@ -35,7 +35,6 @@ export interface OrganizationInvitation extends BaseModel {
     email: string;
     role: OrganizationMemberRole;
     status: OrganizationInvitationStatus;
-    token: string;
     createdAt: number;
     updatedAt: number;
     expiresAt: number;

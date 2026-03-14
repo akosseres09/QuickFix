@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authenticatedGuard } from './shared/guards/authenticated/authenticated.guard';
 import { unauthenticatedGuard } from './shared/guards/unauthenticated/unauthenticated.guard';
+import { invitationGuard } from './shared/guards/invitation/invitation.guard';
 
 export const routes: Routes = [
     {
@@ -76,66 +77,76 @@ export const routes: Routes = [
             import('./layouts/main-layout/main-layout.component').then(
                 (c) => c.MainLayoutComponent
             ),
-        canActivate: [authenticatedGuard],
         children: [
             {
-                path: 'organizations',
+                path: '',
+                canActivate: [authenticatedGuard],
                 children: [
                     {
-                        path: '',
-                        pathMatch: 'full',
+                        path: 'organizations',
+                        children: [
+                            {
+                                path: '',
+                                pathMatch: 'full',
+                                loadComponent: () =>
+                                    import('./main/organizations/organizations.component').then(
+                                        (c) => c.OrganizationsComponent
+                                    ),
+                                title: 'QuickFix - Organizations',
+                            },
+                            {
+                                path: 'new',
+                                loadComponent: () =>
+                                    import(
+                                        './main/organizations/create-organization/create-organization.component'
+                                    ).then((c) => c.CreateOrganizationComponent),
+                                title: 'QuickFix - New Organization',
+                            },
+                            {
+                                path: ':organizationId/edit',
+                                loadComponent: () =>
+                                    import(
+                                        './main/organizations/edit-organization/edit-organization.component'
+                                    ).then((c) => c.EditOrganizationComponent),
+                                title: 'QuickFix - Edit Organization',
+                            },
+                        ],
+                    },
+                    {
+                        path: 'account',
                         loadComponent: () =>
-                            import('./main/organizations/organizations.component').then(
-                                (c) => c.OrganizationsComponent
+                            import('./main/account/account.component').then(
+                                (c) => c.AccountComponent
                             ),
-                        title: 'QuickFix - Organizations',
+                        title: 'QuickFix - Account',
                     },
                     {
-                        path: 'new',
+                        path: 'settings',
                         loadComponent: () =>
-                            import(
-                                './main/organizations/create-organization/create-organization.component'
-                            ).then((c) => c.CreateOrganizationComponent),
-                        title: 'QuickFix - New Organization',
+                            import('./main/settings/settings.component').then(
+                                (c) => c.SettingsComponent
+                            ),
+                        title: 'QuickFix - Settings',
                     },
                     {
-                        path: ':organizationId/edit',
-                        loadComponent: () =>
-                            import(
-                                './main/organizations/edit-organization/edit-organization.component'
-                            ).then((c) => c.EditOrganizationComponent),
-                        title: 'QuickFix - Edit Organization',
+                        path: 'invitations',
+                        children: [
+                            {
+                                path: '',
+                                pathMatch: 'full',
+                                loadComponent: () =>
+                                    import(
+                                        './main/organization-invitation/organization-invitation.component'
+                                    ).then((c) => c.OrganizationInvitationComponent),
+                                title: 'QuickFix - Invitations',
+                            },
+                        ],
                     },
-                ],
+                ], // Close authenticated group
             },
             {
-                path: 'account',
-                loadComponent: () =>
-                    import('./main/account/account.component').then((c) => c.AccountComponent),
-                title: 'QuickFix - Account',
-            },
-            {
-                path: 'settings',
-                loadComponent: () =>
-                    import('./main/settings/settings.component').then((c) => c.SettingsComponent),
-                title: 'QuickFix - Settings',
-            },
-            {
-                path: 'invitations',
-                children: [
-                    {
-                        path: '',
-                        pathMatch: 'full',
-                        loadComponent: () =>
-                            import(
-                                './main/organization-invitation/organization-invitation.component'
-                            ).then((c) => c.OrganizationInvitationComponent),
-                        title: 'QuickFix - Invitations',
-                    },
-                ],
-            },
-            {
-                path: 'invitation/:token',
+                path: 'invitation/:invitationId',
+                canActivate: [invitationGuard, authenticatedGuard],
                 loadComponent: () =>
                     import(
                         './main/organization-invitation/organization-invitation-item/organization-invitation-item.component'

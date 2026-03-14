@@ -257,7 +257,13 @@
             </mat-form-field>
 
             <div>
-                <button type="submit" mat-flat-button color="primary" class="w-full !text-white">
+                <button
+                    type="submit"
+                    [disabled]="signupForm.invalid"
+                    mat-flat-button
+                    color="primary"
+                    class="w-full !text-white"
+                >
                     Sign Up
                 </button>
             </div>
