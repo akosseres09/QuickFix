@@ -72,9 +72,9 @@ class Project extends ActiveRecord
         self::STATUS_COMPLETED
     ];
 
-    public static function getKeyToIdCacheKey($key)
+    public static function getKeyToIdCacheKey(string $organizationId, string $projectKey): string
     {
-        return "project_key_to_id_{$key}";
+        return "project_key_to_id_{$organizationId}_{$projectKey}";
     }
 
     /**
@@ -99,7 +99,7 @@ class Project extends ActiveRecord
             ],
             [
                 'class' => InvalidateCacheBehavior::class,
-                'cacheKeys' => [$this->getKeyToIdCacheKey($this->key)],
+                'cacheKeys' => [$this->getKeyToIdCacheKey("$this->organization_id", "$this->key")],
             ]
         ];
     }
@@ -176,20 +176,11 @@ class Project extends ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
 
-        if (!$insert) {
-            return true;
-        }
+        $isNowPublic = $this->visibility === self::VISIBILITY_PUBLIC;
+        $wasNotPublic = !$insert && isset($changedAttributes['visibility']) && $changedAttributes['visibility'] !== self::VISIBILITY_PUBLIC;
 
-        $owner = new ProjectMember();
-        $owner->project_id = $this->id;
-        $owner->user_id = $this->owner_id; // Your intentional error might be here
-        $owner->role = ProjectMember::ROLE_OWNER;
-
-        if (!$owner->save()) {
-            $errors = json_encode($owner->getErrors());
-            Yii::error("Failed to create project owner. Errors: " . $errors, __METHOD__);
-
-            throw new \yii\db\Exception("Transaction aborted: Could not save Project Member. " . $errors);
+        if (($insert && $isNowPublic) || $wasNotPublic) {
+            $this->addOrganizationMembersToProject();
         }
     }
 
@@ -444,5 +435,57 @@ class Project extends ActiveRecord
     public function isActive(): bool
     {
         return $this->status === self::STATUS_ACTIVE;
+    }
+
+    /**
+     * Add all organization members to the project as members (or admins if they are the owner) 
+     * when a project is created or when its visibility changes to public.
+     * 
+     * Used by [[Project::afterSave()]] to ensure that all organization members are added 
+     * to the project when it's created as public or when its visibility changes to public.
+     */
+    private function addOrganizationMembersToProject()
+    {
+        // Get IDs of users already in this project (e.g., the creator)
+        $existingUserIds = ProjectMember::find()
+            ->select('user_id')
+            ->where(['project_id' => $this->id]);
+
+        // Get all organization members who are not in the project yet
+        // ->column() returns a flat array of IDs: [1, 5, 12, 45]
+        $usersToAdd = OrganizationMember::find()
+            ->select('user_id')
+            ->where(['organization_id' => $this->organization_id])
+            ->andWhere(['not in', 'user_id', $existingUserIds])
+            ->column();
+
+        if (empty($usersToAdd)) {
+            return;
+        }
+
+        // Prepare the data for batch insertion
+        $rows = [];
+        $time = time();
+
+        foreach ($usersToAdd as $userId) {
+            $rows[] = [
+                Uuid::v7()->toString(),
+                $this->id,
+                $userId,
+                $userId === $this->owner_id ? OrganizationMember::ROLE_OWNER : OrganizationMember::ROLE_MEMBER, // Owner gets admin role
+                $time,
+            ];
+        }
+
+        try {
+            Yii::$app->db->createCommand()->batchInsert(
+                ProjectMember::tableName(),
+                ['id', 'project_id', 'user_id', 'role', 'created_at'],
+                $rows
+            )->execute();
+        } catch (\Exception $e) {
+            Yii::error("Failed to batch insert project members. Error: " . $e->getMessage(), __METHOD__);
+            throw new \yii\db\Exception("Transaction aborted: Could not batch save Project Members.");
+        }
     }
 }

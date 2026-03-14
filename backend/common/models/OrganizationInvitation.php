@@ -163,18 +163,22 @@ class OrganizationInvitation extends ActiveRecord
 
         if ($insert) {
             $this->sendInvitationEmail();
+            return;
         }
 
-        if ($changedAttributes['status'] === self::STATUS_PENDING && $this->status === self::STATUS_ACCEPTED) {
-            $member = new OrganizationMember();
-            $member->organization_id = $this->organization_id;
-            $member->user_id = UserResource::find()->select('id')->where(['email' => $this->email])->scalar();
-            $member->role = $this->role;
-            if (!$member->save()) {
-                $errors = json_encode($member->getErrors());
-                Yii::error("Failed to create project owner. Errors: " . $errors, __METHOD__);
-                throw new \yii\db\Exception("Transaction aborted: Could not save Project Member. " . $errors);
+        // On acceptance: Assign them to the Org and the Public Projects
+        $wasPending = isset($changedAttributes['status']) && $changedAttributes['status'] === self::STATUS_PENDING;
+        $isNowAccepted = $this->status === self::STATUS_ACCEPTED;
+
+        if (!$insert && $wasPending && $isNowAccepted) {
+            $userId = UserResource::find()->select('id')->where(['email' => $this->email])->scalar();
+
+            if (!$userId) {
+                throw new \yii\web\ServerErrorHttpException("Cannot accept invitation: User does not exist.");
             }
+
+            $this->createOrganizationMember($userId);
+            $this->createProjectMemberForPublicProjects($userId);
         }
     }
 
@@ -254,5 +258,76 @@ class OrganizationInvitation extends ActiveRecord
             ->withClaim('orgId', $this->organization_id)
             ->getToken($this->jwtConfig->signer(), $this->jwtConfig->signingKey())
             ->toString();
+    }
+
+    /**
+     * Creates an OrganizationMember record for the user accepting the invitation,
+     * with the role specified in the invitation.
+     * Used by [[OrganizationInvitatio::afterSave()]] after accepting an invitation, 
+     * to add the user to the organization with the correct role.
+     */
+    private function createOrganizationMember($userId)
+    {
+        $member = new OrganizationMember();
+        $member->organization_id = $this->organization_id;
+        $member->user_id = $userId;
+        $member->role = $this->role;
+
+        if (!$member->save()) {
+            $errors = json_encode($member->getErrors());
+            Yii::error("Failed to create org member. Errors: " . $errors, __METHOD__);
+            throw new \yii\db\Exception("Transaction aborted: Could not save Organization Member. " . $errors);
+        }
+    }
+
+    /**
+     * Creates ProjectMember records for all public projects in the organization 
+     * that the user is not already a member of.
+     * 
+     * Used by [[OrganizationInvitatio::afterSave()]] after accepting an invitation, 
+     * to ensure that new members are added to all public projects in the org automatically.
+     */
+    private function createProjectMemberForPublicProjects($userId)
+    {
+        $existingProjectIds = ProjectMember::find()
+            ->select('project_id')
+            ->byUser($userId);
+
+        $publicProjectIds = Project::find()
+            ->select('id')
+            ->byOrganizationId($this->organization_id)
+            ->byVisibility(Project::VISIBILITY_PUBLIC)
+            ->andWhere(['not in', 'id', $existingProjectIds])
+            ->column();
+
+        if (empty($publicProjectIds)) {
+            return;
+        }
+
+        $rows = [];
+        $time = time();
+
+        foreach ($publicProjectIds as $projectId) {
+            $rows[] = [
+                Uuid::v7()->toString(),
+                $projectId,
+                $userId,
+                ProjectMember::ROLE_MEMBER,
+                $time,
+            ];
+        }
+
+        try {
+            Yii::$app->db->createCommand()
+                ->batchInsert(
+                    ProjectMember::tableName(),
+                    ['id', 'project_id', 'user_id', 'role', 'created_at'],
+                    $rows
+                )
+                ->execute();
+        } catch (\Exception $e) {
+            Yii::error("Failed to create project members for public projects. Error: " . $e->getMessage(), __METHOD__);
+            throw new \yii\db\Exception("Transaction aborted: Could not save Project Members for public projects. " . $e->getMessage());
+        }
     }
 }
