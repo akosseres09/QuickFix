@@ -102,13 +102,11 @@ class AuthController extends Controller
     public function actionRefresh(): array
     {
         $cookieRefreshToken = Yii::$app->request->cookies->getValue('refresh-token');
-
         if (!$cookieRefreshToken) {
             throw new BadRequestHttpException('Refresh token is required.');
         }
 
         $refreshToken = $this->getRefreshToken($cookieRefreshToken);
-
         if (!$refreshToken) {
             throw new BadRequestHttpException('Invalid or expired refresh token.');
         }
@@ -118,13 +116,11 @@ class AuthController extends Controller
         }
 
         $user = $refreshToken->user;
-
         if (!$user) {
             throw new BadRequestHttpException('Invalid user.');
         }
 
         $token = $this->createAccessToken($user->id, $user->is_admin, $user->email);
-
         return ResponseMaker::asSuccess([
             'access_token' => $token->toString(),
         ]);
@@ -133,14 +129,12 @@ class AuthController extends Controller
     public function actionLogout()
     {
         $cookieRefreshToken = Yii::$app->request->cookies->getValue('refresh-token');
-
         if (!$cookieRefreshToken) {
             throw new BadRequestHttpException('Refresh token is required.');
         }
 
         $refreshToken = $this->getRefreshToken($cookieRefreshToken, false);
         $refreshToken->delete();
-
         Yii::$app->response->cookies->remove('refresh-token');
 
         return ResponseMaker::asSuccess(['message' => 'Logged out successfully.']);
@@ -148,11 +142,7 @@ class AuthController extends Controller
 
     public function actionMe(): array
     {
-        /**
-         * @var User
-         */
         $user = Yii::$app->user->identity;
-
         if (!$user) {
             throw new UnauthorizedHttpException('User not authenticated.');
         }
@@ -188,9 +178,11 @@ class AuthController extends Controller
     public function actionVerify(): array
     {
         $token = Yii::$app->request->post('token');
+        if (!$token) {
+            throw new BadRequestHttpException('Verification token is required.');
+        }
 
         $user = User::findByVerificationToken($token);
-
         if (!$user) {
             throw new NotFoundHttpException('Invalid verification token.');
         }
@@ -214,22 +206,25 @@ class AuthController extends Controller
 
     public function actionResendVerificationEmail(): array
     {
-
         $email = trim(Yii::$app->request->post('email'));
-
         if (!$email) {
             throw new BadRequestHttpException('Email is required to resend verification email.');
         }
 
         $user = User::find()->byEmail($email)->inactive()->one();
-
         if (!$user) {
             throw new NotFoundHttpException('No inactive account found with this email address!', 410);
         }
 
         $user->generateEmailVerificationToken();
+        if ($user->save()) {
+            $this->queueEmail(
+                $user->email,
+                'Email Verification',
+                'emailVerification',
+                ['user' => $user]
+            );
 
-        if ($user->save() && $this->sendEmail($user)) {
             return ResponseMaker::asSuccess([
                 'success' => true,
                 'message' => 'Verification email sent successfully.'
@@ -241,7 +236,6 @@ class AuthController extends Controller
 
     public function actionResetPassword(): array
     {
-
         $email = Yii::$app->request->post('email');
         $token = Yii::$app->request->post('token');
 
@@ -256,10 +250,14 @@ class AuthController extends Controller
 
             $user->generatePasswordResetToken();
 
-            if (
-                $user->save() &&
-                $this->sendEmail($user, 'passwordResetToken-html', 'passwordResetToken-text', 'Password Reset Request')
-            ) {
+            if ($user->save()) {
+                $this->queueEmail(
+                    $user->email,
+                    'Password Reset Request',
+                    'passwordResetToken',
+                    ['user' => $user]
+                );
+
                 return ResponseMaker::asSuccess([
                     'success' => true,
                     'message' => 'Password reset email sent successfully.'
@@ -274,7 +272,6 @@ class AuthController extends Controller
         }
 
         $user = User::findByPasswordResetToken($token);
-
         if (!$user) {
             throw new NotFoundHttpException('Invalid password reset token.', 410);
         }
@@ -284,7 +281,6 @@ class AuthController extends Controller
         }
 
         $newPassword = Yii::$app->request->post('password');
-
         if (!$newPassword) {
             throw new BadRequestHttpException('New password is required.', 400);
         }

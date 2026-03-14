@@ -2,7 +2,7 @@
 
 namespace common\models;
 
-use common\jobs\SendInvitationEmailJob;
+use common\components\traits\EmailSenderTrait;
 use common\models\query\OrganizationInvitationQuery;
 use common\models\resource\UserResource;
 use Symfony\Component\Uid\Uuid;
@@ -30,6 +30,8 @@ use yii\db\ActiveRecord;
  */
 class OrganizationInvitation extends ActiveRecord
 {
+    use EmailSenderTrait;
+
     const STATUS_PENDING = 'pending';
     const STATUS_ACCEPTED = 'accepted';
     const STATUS_REVOKED = 'revoked';
@@ -147,9 +149,7 @@ class OrganizationInvitation extends ActiveRecord
         parent::afterSave($insert, $changedAttributes);
 
         if ($insert) {
-            Yii::$app->queue->push(new SendInvitationEmailJob([
-                'invitationId' => $this->id,
-            ]));
+            $this->sendInvitationEmail();
         }
 
         if ($changedAttributes['status'] === self::STATUS_PENDING && $this->status === self::STATUS_ACCEPTED) {
@@ -188,5 +188,33 @@ class OrganizationInvitation extends ActiveRecord
     public function isPending()
     {
         return $this->status === self::STATUS_PENDING;
+    }
+
+    private function sendInvitationEmail()
+    {
+        $invitation = OrganizationInvitation::find()
+            ->byId($this->invitationId)
+            ->joinWith('organization')
+            ->joinWith('inviter')
+            ->one();
+
+        // If the invite was somehow deleted before the queue processed it, just exit gracefully.
+        if (!$invitation) {
+            Yii::warning("Invitation ID {$this->invitationId} not found. Skipping email.", 'queue');
+            return;
+        }
+
+        $frontendUrl = Yii::$app->params['frontendUrl'] ?? 'http://localhost:4200';
+        $inviteLink = $frontendUrl . '/invitation/' . $invitation->token;
+
+        $this->queueEmail(
+            $invitation->email,
+            "You have been invited to join an organization!",
+            'invite',
+            [
+                'inviteLink' => $inviteLink,
+                'invitation' => $invitation
+            ]
+        );
     }
 }

@@ -2,6 +2,7 @@
 
 namespace common\models\forms;
 
+use common\components\traits\EmailSenderTrait;
 use common\models\User;
 use yii\base\Model;
 use yii\db\Exception;
@@ -11,7 +12,7 @@ use yii\db\Exception;
  */
 class SignupForm extends Model
 {
-    use \common\components\traits\EmailSenderTrait;
+    use EmailSenderTrait;
 
     public $first_name;
     public $last_name;
@@ -95,6 +96,12 @@ class SignupForm extends Model
      */
     protected function sendVerificationEmail(User $user): bool
     {
-        return $this->sendEmail($user);
+        $this->queueEmail(
+            $user->email,
+            'Verify your email address',
+            'emailVerify',
+            ['user' => $user]
+        );
+        return true;
     }
 }
