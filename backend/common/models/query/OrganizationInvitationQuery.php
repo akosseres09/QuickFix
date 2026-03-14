@@ -27,11 +27,6 @@ class OrganizationInvitationQuery extends ActiveQuery
         return $this->andWhere(['{{%organization_invitation}}.organization_id' => $organizationId]);
     }
 
-    public function byToken($token): self
-    {
-        return $this->andWhere(['{{%organization_invitation}}.token' => $token]);
-    }
-
     public function byEmail($email): self
     {
         return $this->andWhere(['{{%organization_invitation}}.email' => $email]);

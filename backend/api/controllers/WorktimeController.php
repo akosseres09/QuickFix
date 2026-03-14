@@ -127,7 +127,12 @@ class WorktimeController extends BaseRestController
 
     public function findModel($id): Worktime
     {
-        $model = Worktime::find()->byId($id)->byOrganizationId(Yii::$app->request->get('organization_id'))->one();
+        $organizationId = Yii::$app->request->get('organization_id');
+        if (!$organizationId) {
+            throw new BadRequestHttpException('Organization ID is required to find a worktime entry.');
+        }
+
+        $model = Worktime::find()->byId($id)->byOrganizationId($organizationId)->one();
         if (!$model) {
             throw new NotFoundHttpException('Worktime entry not found for the given id and organization id.');
         }

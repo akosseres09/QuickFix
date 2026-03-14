@@ -19,6 +19,11 @@ class OrganizationMemberQuery extends ActiveQuery
         return parent::one($db);
     }
 
+    public function byUserId(string $userId): OrganizationMemberQuery
+    {
+        return $this->andWhere(["{{organization_member}}.user_id" => $userId]);
+    }
+
     public function byId(string $id): OrganizationMemberQuery
     {
         return $this->andWhere(["{{organization_member}}.id" => $id]);

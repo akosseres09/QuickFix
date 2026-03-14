@@ -30,9 +30,12 @@ export class OrganizationMemberService {
             );
     }
 
-    getOrganizationMember(organizationId: number, memberId: number) {
+    getOrganizationMember(organizationId: string, memberId: string, params: ApiQueryParams = {}) {
+        const qp = ParamsHandler.convertToHttpParams(params);
+
         return this.http.get<OrganizationMember>(
-            `${this.url}/${organizationId}/member/${memberId}`
+            `${this.url}/${organizationId}/member/${memberId}`,
+            { params: qp }
         );
     }
 }

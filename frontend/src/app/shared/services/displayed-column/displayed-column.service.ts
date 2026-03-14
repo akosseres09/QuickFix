@@ -48,8 +48,8 @@ export class DisplayedColumnService {
                 sortable: false,
                 value: (e: Issue) => e.creator?.fullName ?? 'Unknown',
                 routerLink: (e: Issue) => {
-                    if (!e.creator?.username) return null;
-                    return ['../members/', e.creator.username];
+                    if (!e.creator) return null;
+                    return ['../member/', e.creator.id];
                 },
                 photoOnly: (e: Issue) => !!e.creator,
                 photoUrl: (e: Issue) => e.creator?.profilePictureUrl ?? null,
@@ -60,8 +60,8 @@ export class DisplayedColumnService {
                 sortable: false,
                 value: (e: Issue) => e.assignee?.fullName ?? 'Unassigned',
                 routerLink: (e: Issue) => {
-                    if (!e.assignee?.username) return null;
-                    return ['../members/', e.assignee.username];
+                    if (!e.assignee?.id) return null;
+                    return ['../member/', e.assignee.id];
                 },
                 photoOnly: (e: Issue) => !!e.assignee,
                 photoUrl: (e: Issue) => e.assignee?.profilePictureUrl || null,
@@ -113,7 +113,7 @@ export class DisplayedColumnService {
                 label: 'Owner',
                 sortable: false,
                 value: (e: Project) => e.owner?.fullName ?? 'Unknown',
-                routerLink: (e: Project) => (e.owner?.id ? ['../members', e.owner.username] : []),
+                routerLink: (e: Project) => (e.owner?.id ? ['../member/', e.owner.id] : []),
                 photoOnly: (e: Project) => !!e.owner,
                 photoUrl: (e: Project) => e.owner?.profilePictureUrl ?? '',
             },
@@ -190,7 +190,7 @@ export class DisplayedColumnService {
                 label: 'Owner',
                 sortable: false,
                 routerLink: (e: Organization) =>
-                    e.owner?.id ? ['../org', e.slug, 'members', e.owner.username] : [],
+                    e.owner?.id ? ['../org', e.slug, 'member', e.owner.id] : [],
                 photoUrl: (element: Organization) =>
                     element.owner ? element.owner.profilePictureUrl : null,
                 photoOnly: (e: Organization) => !!e.owner,
@@ -245,8 +245,8 @@ export class DisplayedColumnService {
                 sortable: false,
                 value: (e: OrganizationInvitation) => e.inviter?.fullName ?? 'Unknown',
                 routerLink: (e: OrganizationInvitation) => {
-                    if (!e.inviter?.username) return null;
-                    return ['../members/', e.inviter.username];
+                    if (!e.inviter) return null;
+                    return ['../member/', e.inviter.id];
                 },
                 photoOnly: (e: OrganizationInvitation) => !!e.inviter,
                 photoUrl: (e: OrganizationInvitation) => e.inviter?.profilePictureUrl ?? null,

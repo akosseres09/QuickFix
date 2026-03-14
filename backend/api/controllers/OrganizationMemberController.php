@@ -39,14 +39,15 @@ class OrganizationMemberController extends BaseRestController
     public function findModel($id)
     {
         $orgId = Yii::$app->request->get('organization_id');
+
         if (!$orgId) {
             throw new BadRequestHttpException('Organization ID is required!');
         }
 
         $orgMember = OrganizationMember::find()->byOrganization($orgId)
-            ->byId($id)->one();
+            ->byUserId($id)->one();
         if (!$orgMember) {
-            throw new NotFoundHttpException('The requested organization is not found!');
+            throw new NotFoundHttpException('The requested organization member is not found!');
         }
 
         return $orgMember;

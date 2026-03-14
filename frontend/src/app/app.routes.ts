@@ -142,7 +142,7 @@ export const routes: Routes = [
                             },
                         ],
                     },
-                ], // Close authenticated group
+                ],
             },
             {
                 path: 'invitation/:invitationId',
@@ -236,6 +236,14 @@ export const routes: Routes = [
                         './main/organizations/manage/organization-members/organization-members.component'
                     ).then((c) => c.OrganizationMembersComponent),
                 title: 'QuickFix - Members',
+            },
+            {
+                path: 'member/:memberId',
+                loadComponent: () =>
+                    import(
+                        './main/organizations/manage/organization-member-item/organization-member-item.component'
+                    ).then((c) => c.OrganizationMemberItemComponent),
+                title: 'QuickFix - Member Details',
             },
             {
                 path: 'activity',

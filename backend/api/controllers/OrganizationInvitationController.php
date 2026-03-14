@@ -6,6 +6,7 @@ use common\models\OrganizationInvitation;
 use common\models\search\OrganizationInvitationSearch;
 use Symfony\Component\Uid\Uuid;
 use Yii;
+use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 
@@ -46,7 +47,7 @@ class OrganizationInvitationController extends BaseRestController
         if (Uuid::isValid($id)) {
             $query->byId($id);
         } else {
-            $query->byToken($id);
+            throw new BadRequestHttpException('Invalid invitation ID format.');
         }
 
         $inv = $query->byEmail(Yii::$app->user->identity->email)->one();

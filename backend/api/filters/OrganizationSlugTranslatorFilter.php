@@ -24,7 +24,6 @@ class OrganizationSlugTranslatorFilter extends ActionFilter
         $bodyParams = $request->getBodyParams();
 
         $organizationSlug = $queryParams[$this->identifierParamName] ?? $bodyParams[$this->identifierParamName] ?? null;
-
         if ($organizationSlug && !Uuid::isValid($organizationSlug)) {
             $organizationId = Yii::$app->cache->getOrSet(Organization::getSlugToIdCache($organizationSlug), function () use ($organizationSlug) {
                 return Organization::find()->select('id')->bySlug($organizationSlug)->scalar();
