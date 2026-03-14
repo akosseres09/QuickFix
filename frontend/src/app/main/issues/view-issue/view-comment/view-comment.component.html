@@ -14,13 +14,17 @@
                 }"
                 class="relative flex gap-4 comment"
             >
-                <app-avatar class="hidden sm:block" [user]="comment.creator!"></app-avatar>
+                <app-avatar
+                    [organizationId]="organizationId()"
+                    class="hidden sm:block"
+                    [user]="comment.creator!"
+                ></app-avatar>
                 <div class="w-full border border-gray-700 rounded-md">
                     <div class="flex justify-between w-full px-4 py-2 border-b border-gray-700">
                         <div>
                             <a
                                 class="hover:underline hover:underline-offset-2"
-                                [routerLink]="['../../../members', comment.creator?.username]"
+                                [routerLink]="['../../../../../members', comment.creator?.username]"
                                 >{{ comment.creator?.fullName }}</a
                             >
                             <span
