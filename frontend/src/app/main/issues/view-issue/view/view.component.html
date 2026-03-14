@@ -33,6 +33,17 @@
                             <mat-icon>close</mat-icon>
                             Close Issue
                         </button>
+                        <a
+                            mat-menu-item
+                            [routerLink]="['../../../../../worktime/view']"
+                            [queryParams]="{
+                                project_id: projectId(),
+                                issue_id: issueId(),
+                            }"
+                        >
+                            <mat-icon>schedule</mat-icon>
+                            Record Time
+                        </a>
                     } @else {
                         <button (click)="updateIssueStatus(issueStatuses.OPEN)" mat-menu-item>
                             <mat-icon>play_circle_outline</mat-icon>

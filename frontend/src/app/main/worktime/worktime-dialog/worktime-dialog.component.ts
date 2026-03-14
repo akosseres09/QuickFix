@@ -57,6 +57,7 @@ export class WorktimeDialogComponent implements OnInit {
     private readonly fb = inject(FormBuilder);
 
     worktime = input<Worktime | null>(null);
+    issueId = input<string | null>(null);
     projectId = model<string | null>(null);
     organizationId = input.required<string>();
     worktimeSaved = output<Worktime>();
@@ -67,12 +68,7 @@ export class WorktimeDialogComponent implements OnInit {
     worktimeFormTemplate = viewChild<TemplateRef<unknown>>('worktimeFormTemplate');
     selectedIssue = signal<Issue | null>(null);
 
-    worktimeForm: FormGroup = this.fb.group({
-        issue: ['', Validators.required],
-        loggedAt: [new Date(), Validators.required],
-        hours: ['', [Validators.required, Validators.min(0.25), Validators.max(24)]],
-        description: ['', [Validators.required, Validators.maxLength(500)]],
-    });
+    worktimeForm!: FormGroup;
 
     constructor() {
         effect(() => {
@@ -99,6 +95,13 @@ export class WorktimeDialogComponent implements OnInit {
     }
 
     ngOnInit() {
+        this.worktimeForm = this.fb.group({
+            issue: [this.issueId() ?? '', Validators.required],
+            loggedAt: [new Date(), Validators.required],
+            hours: ['', [Validators.required, Validators.min(0.25), Validators.max(24)]],
+            description: ['', [Validators.required, Validators.maxLength(500)]],
+        });
+
         this.worktimeForm
             .get('issue')
             ?.valueChanges.pipe(

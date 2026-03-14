@@ -17,7 +17,7 @@ class WorktimeController extends BaseRestController
     {
         $behaviors = parent::behaviors();
 
-        unset($behaviors["projectTranslator"]);
+        $behaviors["projectTranslator"]["actions"] = ["index", "stats"];
         $behaviors["organizationTranslator"]["actions"] = ["index", "update", "delete", "create", "stats"];
 
         return $behaviors;

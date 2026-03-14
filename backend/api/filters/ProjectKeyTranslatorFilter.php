@@ -43,7 +43,7 @@ class ProjectKeyTranslatorFilter extends ActionFilter
         $organizationId = $request->get('organization_id'); // translated to valid id by OrganizationSlugTranslatorFilter
 
         // if the project_id from the request is not a valid UUID, treat it as a project key and translate it to project ID
-        if (!Uuid::isValid($projectKey)) {
+        if ($projectKey && !Uuid::isValid($projectKey)) {
             $projectId = Yii::$app->cache->getOrSet(
                 Project::getKeyToIdCacheKey($organizationId, $projectKey),
                 function () use ($organizationId, $projectKey) {
