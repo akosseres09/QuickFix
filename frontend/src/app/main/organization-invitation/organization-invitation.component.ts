@@ -82,5 +82,9 @@ export class OrganizationInvitationComponent {
 
     onRowChange(invitation: OrganizationInvitation | null) {
         this.selectedRow.set(invitation);
+
+        if (!invitation) return;
+
+        this.router.navigate(['../invitation', invitation.id], { relativeTo: this.activeRoute });
     }
 }

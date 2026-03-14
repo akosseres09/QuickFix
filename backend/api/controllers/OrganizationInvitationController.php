@@ -6,6 +6,7 @@ use common\models\OrganizationInvitation;
 use common\models\search\OrganizationInvitationSearch;
 use Symfony\Component\Uid\Uuid;
 use Yii;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 
 class OrganizationInvitationController extends BaseRestController
@@ -39,6 +40,8 @@ class OrganizationInvitationController extends BaseRestController
     public function findModel($id)
     {
         $query = OrganizationInvitation::find();
+        $action = Yii::$app->controller->action->id;
+        $actionsRequiringPendingStatus = ['update', 'delete'];
 
         if (Uuid::isValid($id)) {
             $query->byId($id);
@@ -52,7 +55,11 @@ class OrganizationInvitationController extends BaseRestController
         }
 
         if ($inv->isExpired()) {
-            throw new NotFoundHttpException('Organization invitation has expired.');
+            throw new ForbiddenHttpException('Organization invitation has expired.');
+        }
+
+        if (in_array($action, $actionsRequiringPendingStatus) && !$inv->isPending()) {
+            throw new ForbiddenHttpException('Only pending invitations can be updated or deleted.');
         }
 
         return $inv;

@@ -184,4 +184,9 @@ class OrganizationInvitation extends ActiveRecord
     {
         return time() > $this->expires_at;
     }
+
+    public function isPending()
+    {
+        return $this->status === self::STATUS_PENDING;
+    }
 }
