@@ -3,6 +3,7 @@
 namespace common\models;
 
 use api\models\UserRefreshToken;
+use common\components\behaviors\InvalidateCacheBehavior;
 use common\models\query\UserQuery;
 use Lcobucci\JWT\UnencryptedToken;
 use Symfony\Component\Uid\Uuid;
@@ -41,6 +42,9 @@ use yii\web\IdentityInterface;
  * @property Project[] $projects
  * @property Issue[] $createdIssues
  * @property Issue[] $assignedIssues
+ * @property Organization[] $organizations
+ * @property OrganizationMember[] $organizationMemberships
+ * @property ProjectMember[] $projectMemberships
  */
 class User extends ActiveRecord implements IdentityInterface
 {
@@ -81,12 +85,30 @@ class User extends ActiveRecord implements IdentityInterface
         return $fields;
     }
 
+    public function extraFields(): array
+    {
+        return [
+            'refreshTokens',
+            'projects',
+            'createdIssues',
+            'assignedIssues',
+            'organizations',
+            'organizationMemberships',
+            'projectMemberships',
+        ];
+    }
+
     /**
      * {@inheritdoc}
      */
     public static function tableName(): string
     {
         return '{{%user}}';
+    }
+
+    public static function getUsernameToIdCache($username)
+    {
+        return 'username_to_id_' . $username;
     }
 
     /**
@@ -96,6 +118,10 @@ class User extends ActiveRecord implements IdentityInterface
     {
         return [
             TimestampBehavior::class,
+            [
+                'class' => InvalidateCacheBehavior::class,
+                'cacheKeys' => [$this->getUsernameToIdCache($this->username)],
+            ],
         ];
     }
 
@@ -256,6 +282,15 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
+     * Gets query for [[ProjectMember]] records associated with the user
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProjectMemberships()
+    {
+        return $this->hasMany(ProjectMember::class, ['user_id' => 'id']);
+    }
+
+    /**
      * Gets query for [[Issue]] created by the user
      * 
      * @return \yii\db\ActiveQuery
@@ -273,6 +308,25 @@ class User extends ActiveRecord implements IdentityInterface
     public function getAssignedIssues()
     {
         return $this->hasMany(Issue::class, ['assigned_to' => 'id']);
+    }
+
+    /**
+     * Gets query for [[Organization]]s the user is a member of
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOrganizations()
+    {
+        return $this->hasMany(Organization::class, ['id' => 'organization_id'])
+            ->viaTable('organization_member', ['user_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[OrganizationMember]] records associated with the user
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOrganizationMemberships()
+    {
+        return $this->hasMany(OrganizationMember::class, ['user_id' => 'id']);
     }
 
     /**

@@ -49,6 +49,11 @@ class UserQuery extends ActiveQuery
         return $this->andWhere(['{{%user}}.is_admin' => User::USER]);
     }
 
+    public function byId(string $id): UserQuery
+    {
+        return $this->andWhere(['{{%user}}.id' => $id]);
+    }
+
     public function byEmail(string $email): UserQuery
     {
         return $this->andWhere(['{{%user}}.email' => $email]);

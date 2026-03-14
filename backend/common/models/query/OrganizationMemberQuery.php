@@ -24,6 +24,11 @@ class OrganizationMemberQuery extends ActiveQuery
         return $this->andWhere(["{{organization_member}}.user_id" => $userId]);
     }
 
+    public function byUsername(string $username): OrganizationMemberQuery
+    {
+        return $this->joinWith('user')->andWhere(["{{user}}.username" => $username]);
+    }
+
     public function byId(string $id): OrganizationMemberQuery
     {
         return $this->andWhere(["{{organization_member}}.id" => $id]);
