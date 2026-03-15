@@ -32,7 +32,11 @@
         </span>
 
         @if (issue().assignee) {
-            <app-avatar [user]="issue().assignee!" size="sm"></app-avatar>
+            <app-avatar
+                [organizationId]="organizationId()"
+                [user]="issue().assignee!"
+                size="sm"
+            ></app-avatar>
         } @else {
             <div
                 class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center"
