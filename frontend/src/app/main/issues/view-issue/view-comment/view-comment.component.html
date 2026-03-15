@@ -36,9 +36,31 @@
                             </span>
                         </div>
                         <div>
-                            <mat-icon class="cursor-pointer" (click)="editComment(comment)"
-                                >edit</mat-icon
+                            <button
+                                class="!bg-transparent !hover:bg-light-text-hover dark:hover:!bg-light-background-hover !shadow-none !rounded-md"
+                                mat-mini-fab
+                                [matMenuTriggerFor]="menu"
                             >
+                                <mat-icon>more_vert</mat-icon>
+                            </button>
+                            <mat-menu yPosition="below" xPosition="before" #menu>
+                                <button
+                                    class="cursor-pointer"
+                                    (click)="editComment(comment)"
+                                    mat-menu-item
+                                >
+                                    <mat-icon>edit</mat-icon>
+                                    Edit
+                                </button>
+                                <button
+                                    class="cursor-pointer"
+                                    (click)="openDeleteCommentDialog(comment)"
+                                    mat-menu-item
+                                >
+                                    <mat-icon>delete</mat-icon>
+                                    Delete
+                                </button>
+                            </mat-menu>
                         </div>
                     </div>
                     <div class="p-4">
@@ -74,3 +96,10 @@
         </div>
     }
 </div>
+
+<app-delete-comment-dialog
+    (commentDeleted)="onCommentDeleted($event)"
+    [organizationId]="organizationId()"
+    [projectId]="projectId()"
+    [issueId]="issueId()"
+></app-delete-comment-dialog>
