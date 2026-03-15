@@ -14,7 +14,7 @@ class IssueSearch extends Issue implements SearchInterface
         return [
             ['project_id', 'required'],
             [['id', 'project_id'], 'string'],
-            [['status', 'type', 'priority'], 'integer'],
+            [['status_label', 'type', 'priority'], 'integer'],
             [
                 'is_archived',
                 'filter',
@@ -78,7 +78,10 @@ class IssueSearch extends Issue implements SearchInterface
                         'asc' => ['updated_at' => SORT_ASC],
                         'desc' => ['updated_at' => SORT_DESC],
                     ],
-                    'status',
+                    'status' => [
+                        'asc' => ['status_label' => SORT_ASC],
+                        'desc' => ['status_label' => SORT_DESC],
+                    ],
                     'type',
                     'priority',
                 ]
@@ -96,7 +99,7 @@ class IssueSearch extends Issue implements SearchInterface
         }
 
         $query->andFilterWhere([
-            'status' => $this->status,
+            'status_label' => $this->status_label,
             'type' => $this->type,
             'priority' => $this->priority,
             'is_archived' => $this->is_archived

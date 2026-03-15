@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\components\behaviors\InvalidateCacheBehavior;
 use common\models\query\LabelQuery;
 use Symfony\Component\Uid\Uuid;
 use Yii;
@@ -13,6 +14,7 @@ use yii\db\ActiveRecord;
  * @property string $project_id
  * @property string $name
  * @property string $description
+ * @property int $index
  * @property string|null $color
  * 
  * @property Project $project
@@ -24,6 +26,29 @@ class Label extends ActiveRecord
         return "{{%label}}";
     }
 
+    public static function getLabelCacheKey(string $labelName, ?string $projectId = null): string
+    {
+        $base  = "issue_label_{$labelName}";
+        if (!$projectId) {
+            return $base;
+        }
+
+        return "issue_label_{$labelName}_{$projectId}}";
+    }
+
+    public function behaviors()
+    {
+        return [
+            [
+                'class' => InvalidateCacheBehavior::class,
+                'cacheKeys' => [
+                    self::getLabelCacheKey('open'),
+                    self::getLabelCacheKey('closed')
+                ]
+            ]
+        ];
+    }
+
     public function rules(): array
     {
         return [
@@ -33,7 +58,7 @@ class Label extends ActiveRecord
             ['color', 'string', 'max' => 7],
             ['color', 'match', 'pattern' => '/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/'],
             [['project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['project_id' => 'id']],
-            [['project_id', 'name'], 'unique', 'targetAttribute' => ['project_id', 'name'], 'message' => 'A label with this name already exists in the project.'],
+            [['project_id', 'name', 'index'], 'unique', 'targetAttribute' => ['project_id', 'name', 'index'], 'message' => 'A label with this name and index already exists in the project.'],
         ];
     }
 
@@ -66,6 +91,9 @@ class Label extends ActiveRecord
         if (empty($this->id)) {
             $this->id = Uuid::v7()->toString();
         }
+
+        $index = self::find()->byProjectId($this->project_id)->max('index');
+        $this->index = $index !== null ? $index + 1 : 0;
 
         return true;
     }

@@ -21,10 +21,6 @@ class LabelSearch extends Label implements SearchInterface
 
     public function search($params): ActiveDataProvider
     {
-        $page = isset($params['page']) ? (int) $params['page'] : 1;
-        $pageSize = isset($params['pageSize']) ? (int) $params['pageSize'] : 20;
-        $pageSize = min($pageSize, 100);
-
         $organizationId = $params['organization_id'] ?? null;
         if (!$organizationId) {
             throw new BadRequestHttpException('Organization ID is required for label search.');
@@ -41,19 +37,14 @@ class LabelSearch extends Label implements SearchInterface
             throw new NotFoundHttpException('Requested project not found!');
         }
 
-        $query = Label::find()->byProjectId($projectId);
+        $query = Label::find()->allForProject($projectId);
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'pagination' => [
-                'page' => $page - 1,
-                'pageSize' => $pageSize,
-                'pageSizeParam' => 'pageSize',
-                'pageParam' => 'page',
-            ],
+            'pagination' => false,
             'sort' => [
-                'defaultOrder' => ['name' => SORT_ASC],
+                'defaultOrder' => ['index' => SORT_ASC],
                 'attributes' => [
-                    'name'
+                    'index'
                 ]
             ]
         ]);

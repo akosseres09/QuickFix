@@ -1,8 +1,9 @@
 <?php
 
+use Symfony\Component\Uid\Uuid;
 use yii\db\Migration;
 
-class m260226_215831_create_label_table extends Migration
+class m260206_215831_create_label_table extends Migration
 {
     /**
      * {@inheritdoc}
@@ -13,9 +14,10 @@ class m260226_215831_create_label_table extends Migration
 
         $this->createTable('{{%label}}', [
             'id' => $this->string(36)->notNull(),
-            'project_id' => $this->string(36)->notNull(),
+            'project_id' => $this->string(36),
             'name' => $this->string(24)->notNull(),
             'description' => $this->string(64)->notNull(),
+            'index' => $this->integer()->notNull(),
             'color' => $this->string(32)->notNull(),
         ]);
 
@@ -31,9 +33,9 @@ class m260226_215831_create_label_table extends Migration
         );
 
         $this->createIndex(
-            'idx-label-project_id-name',
+            'idx-label-project_id-name-index',
             '{{%label}}',
-            ['project_id', 'name'],
+            ['project_id', 'name', 'index'],
             true
         );
 
@@ -42,6 +44,30 @@ class m260226_215831_create_label_table extends Migration
             ON {{%label}}
             USING GIN (name gin_trgm_ops);
         ');
+
+        $this->createIndex(
+            'idx-label-index',
+            '{{%label}}',
+            'index'
+        );
+
+        $this->insert('{{%label}}', [
+            'id' => Uuid::v7()->toString(),
+            'project_id' => null,
+            'name' => 'Open',
+            'description' => 'Issue is open and ready for work.',
+            'color' => '#14c93e',
+            'index' => 0,
+        ]);
+
+        $this->insert('{{%label}}', [
+            'id' => Uuid::v7()->toString(),
+            'project_id' => null,
+            'name' => 'Closed',
+            'description' => 'Issue is closed and no longer being worked on.',
+            'color' => '#cf2a11',
+            'index' => 99999
+        ]);
     }
 
     /**
