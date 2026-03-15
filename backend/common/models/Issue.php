@@ -6,6 +6,8 @@ use common\models\query\IssueQuery;
 use common\models\resource\UserResource;
 use Symfony\Component\Uid\Uuid;
 use Yii;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\web\NotFoundHttpException;
 
@@ -65,6 +67,17 @@ class Issue extends ActiveRecord
     public static function tableName()
     {
         return '{{%issue}}';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function behaviors()
+    {
+        return [
+            TimestampBehavior::class,
+            BlameableBehavior::class,
+        ];
     }
 
     public function beforeValidate()
