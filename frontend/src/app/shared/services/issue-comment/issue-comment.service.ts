@@ -90,4 +90,15 @@ export class IssueCommentService {
                 })
             );
     }
+
+    deleteComment(data: {
+        organizationId: string;
+        projectId: string;
+        issueId: string;
+        commentId: string;
+    }) {
+        return this.http.delete(
+            `${this.url}/${data.organizationId}/${data.projectId}/${data.issueId}/comment/${data.commentId}`
+        );
+    }
 }

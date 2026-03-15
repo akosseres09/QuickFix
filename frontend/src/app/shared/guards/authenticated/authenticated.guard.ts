@@ -1,12 +1,14 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+import { CanActivateFn, Router, RouterStateSnapshot } from '@angular/router';
 import { AuthService } from '../../services/auth/auth.service';
 import { catchError, map, of, switchMap } from 'rxjs';
 import { successResponse } from '../../model/Response';
+import { SnackbarService } from '../../services/snackbar/snackbar.service';
 
-export const authenticatedGuard: CanActivateFn = (route, state) => {
+export const authenticatedGuard: CanActivateFn = (route, state: RouterStateSnapshot) => {
     const authService = inject(AuthService);
     const router = inject(Router);
+    const snackbarService = inject(SnackbarService);
 
     const setClaims = (response: successResponse) => {
         const data = response.data;
@@ -19,7 +21,10 @@ export const authenticatedGuard: CanActivateFn = (route, state) => {
 
     const redirectToLogin = () => {
         authService.removeAccessToken();
+        sessionStorage.setItem('redirectUrl', state.url);
+
         router.navigate(['/auth/login']);
+        snackbarService.error('Please log in to access this page.');
         return of(false);
     };
 

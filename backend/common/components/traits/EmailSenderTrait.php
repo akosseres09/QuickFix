@@ -2,6 +2,7 @@
 
 namespace common\components\traits;
 
+use common\jobs\EmailJob;
 use Yii;
 
 trait EmailSenderTrait
@@ -9,24 +10,19 @@ trait EmailSenderTrait
     /**
      * Sends an email to the user.
      *
-     * @param \common\models\User $user
+     * @param string $to
+     * @param string $subject
+     * @param string $template the base name of the email template (without -html or -text suffix)
+     * @param array $data
      * @return bool whether the email was sent successfully
      */
-    public function sendEmail($user, string $htmlView = 'emailVerify-html', string $textView = 'emailVerify-text', string $subject = ''): bool
+    public function queueEmail(string $to, string $subject, string $template, array $data): void
     {
-        if (!$subject) {
-            $subject = 'Account registration at ' . Yii::$app->name;
-        }
-
-        return Yii::$app
-            ->mailer
-            ->compose(
-                ['html' => $htmlView, 'text' => $textView],
-                ['user' => $user]
-            )
-            ->setFrom([Yii::$app->params['supportEmail'] => Yii::$app->name . ' robot'])
-            ->setTo($user->email)
-            ->setSubject($subject)
-            ->send();
+        Yii::$app->queue->push(new EmailJob([
+            'to' => $to,
+            'subject' => $subject,
+            'template' => $template,
+            'data' => $data,
+        ]));
     }
 }

@@ -1,12 +1,12 @@
 <?php
 
-/** @var yii\web\View $this */
-/** @var common\models\User $user */
+/** @var string $username */
+/** @var string $passwordResetToken */
 
-$resetLink = Yii::$app->params['frontendUrl'] . '/auth/reset-password?token=' . $user->password_reset_token;
+$resetLink = Yii::$app->params['frontendUrl'] . '/auth/reset-password?token=' . $passwordResetToken;
 ?>
-Hello <?= $user->username ?>,
+Hello <?= $username ?>,
 You have requested to reset your password.
-Your verification token is: <?= $user->password_reset_token ?>
+Your verification token is: <?= $passwordResetToken ?>
 Click the link below to reset your password:
 <?= $resetLink ?>

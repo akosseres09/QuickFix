@@ -26,41 +26,46 @@ class UserQuery extends ActiveQuery
 
     public function active(): UserQuery
     {
-        return $this->andWhere(['status' => User::STATUS_ACTIVE]);
+        return $this->andWhere(['{{%user}}.status' => User::STATUS_ACTIVE]);
     }
 
     public function inactive(): UserQuery
     {
-        return $this->andWhere(['status' => User::STATUS_INACTIVE]);
+        return $this->andWhere(['{{%user}}.status' => User::STATUS_INACTIVE]);
     }
 
     public function deleted(): UserQuery
     {
-        return $this->andWhere(['status' => User::STATUS_DELETED]);
+        return $this->andWhere(['{{%user}}.status' => User::STATUS_DELETED]);
     }
 
     public function admin(): UserQuery
     {
-        return $this->andWhere(['is_admin' => User::ADMIN]);
+        return $this->andWhere(['{{%user}}.is_admin' => User::ADMIN]);
     }
 
     public function user(): UserQuery
     {
-        return $this->andWhere(['is_admin' => User::USER]);
+        return $this->andWhere(['{{%user}}.is_admin' => User::USER]);
+    }
+
+    public function byId(string $id): UserQuery
+    {
+        return $this->andWhere(['{{%user}}.id' => $id]);
     }
 
     public function byEmail(string $email): UserQuery
     {
-        return $this->andWhere(['email' => $email]);
+        return $this->andWhere(['{{%user}}.email' => $email]);
     }
 
     public function byEmailVerificationToken(string $token): UserQuery
     {
-        return $this->andWhere(['verification_token' => $token]);
+        return $this->andWhere(['{{%user}}.verification_token' => $token]);
     }
 
     public function byUsername(string $username): UserQuery
     {
-        return $this->andWhere(['username' => $username]);
+        return $this->andWhere(['{{%user}}.username' => $username]);
     }
 }

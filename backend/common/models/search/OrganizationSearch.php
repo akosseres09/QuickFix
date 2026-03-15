@@ -40,10 +40,11 @@ class OrganizationSearch extends Organization implements SearchInterface
                 'pageParam' => 'page',
             ],
             'sort' => [
-                'defaultOrder' => ['name' => SORT_ASC],
+                'defaultOrder' => ['slug' => SORT_ASC],
                 'sortParam' => 'sort',
                 'attributes' => [
                     'name',
+                    'slug',
                     'createdAt' => [
                         'asc' => ['created_at' => SORT_ASC],
                         'desc' => ['created_at' => SORT_DESC],

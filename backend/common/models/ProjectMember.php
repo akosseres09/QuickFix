@@ -24,10 +24,10 @@ use yii\db\ActiveRecord;
 class ProjectMember extends ActiveRecord
 {
     // Role constants
-    const ROLE_GUEST = 0;
-    const ROLE_MEMBER = 1;
-    const ROLE_ADMIN = 2;
-    const ROLE_OWNER = 3;
+    const ROLE_GUEST = 'guest';
+    const ROLE_MEMBER = 'member';
+    const ROLE_ADMIN = 'admin';
+    const ROLE_OWNER = 'owner';
 
     const ROLE_LIST = [
         self::ROLE_GUEST,
@@ -67,7 +67,7 @@ class ProjectMember extends ActiveRecord
             [['project_id', 'user_id'], 'required'],
             [['project_id', 'user_id'], 'string', 'max' => 36],
             [['created_at'], 'integer'],
-            [['role'], 'integer'],
+            ['role', 'string', 'max' => 16],
             [['role'], 'default', 'value' => self::ROLE_MEMBER],
             [['role'], 'in', 'range' => self::ROLE_LIST],
             [['project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['project_id' => 'id']],

@@ -24,7 +24,7 @@ use yii\db\ActiveRecord;
  * @property integer $updated_at
  * @property integer|null $deleted_at
  *
- * @property User $owner
+ * @property UserResource $owner
  * @property OrganizationMember[] $organizationMembers
  * @property Project[] $projects
  */

@@ -1,5 +1,6 @@
 <?php
 
+use common\models\OrganizationMember;
 use yii\db\Migration;
 
 class m260125_164515_create_organization_member_table extends Migration
@@ -10,7 +11,7 @@ class m260125_164515_create_organization_member_table extends Migration
             'id' => $this->string(36)->notNull(),
             'organization_id' => $this->string(36)->notNull(),
             'user_id' => $this->string(36)->notNull(),
-            'role' => $this->integer()->notNull(),
+            'role' => $this->string(16)->notNull()->defaultValue(OrganizationMember::ROLE_VIEWER),
             'created_at' => $this->integer()->notNull(),
         ]);
 

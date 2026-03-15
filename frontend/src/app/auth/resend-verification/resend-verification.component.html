@@ -1,20 +1,28 @@
-<div class="max-w-md p-5 xs:p-8 space-y-6 sm:m-4 bg-white rounded-xl shadow-lg dark:bg-slate-800">
-    <div class="text-center">
-        <h1 class="text-3xl font-bold text-slate-900 dark:text-white">Resend Verification Email</h1>
-        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
-            Please enter your email address to receive a new verification email.
-        </p>
-    </div>
-    <app-email-form (sendForm)="resend($event)"></app-email-form>
-    <div class="text-center text-sm flex flex-col gap-2">
-        <div class="text-sm">
-            Email received?
-            <a
-                routerLink="/auth/verify"
-                class="cursor-pointer font-medium text-light-accent dark:text-dark-primary hover:text-light-accent-hover dark:hover:text-dark-primary-hover"
-            >
-                Verify Account
-            </a>
+<div class="flex flex-1 items-center justify-center w-full">
+    <div
+        class="w-full max-w-md p-6 sm:p-8 space-y-6 bg-white rounded-xl shadow-lg dark:bg-slate-800"
+    >
+        <div class="text-center">
+            <h1 class="text-3xl font-bold text-slate-900 dark:text-white">
+                Resend Verification Email
+            </h1>
+            <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                Please enter your email address to receive a new verification email.
+            </p>
+        </div>
+
+        <app-email-form (sendForm)="resend($event)"></app-email-form>
+
+        <div class="flex flex-col gap-2 text-center text-sm">
+            <div>
+                Email received?
+                <a
+                    routerLink="/auth/verify"
+                    class="cursor-pointer font-medium text-light-accent dark:text-dark-primary hover:text-light-accent-hover dark:hover:text-dark-primary-hover"
+                >
+                    Verify Account
+                </a>
+            </div>
         </div>
     </div>
 </div>

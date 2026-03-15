@@ -1,15 +1,10 @@
-<main class="flex flex-col h-full">
-    <app-navbar [showSidebarToggleButton]="false"></app-navbar>
-    <div
-        class="my-6 lg:my-10"
-        [ngClass]="
-            innerPage()
-                ? 'max-w-7xl mx-auto w-full px-3 sm:px-6 xl:px-0 pb-8'
-                : 'flex justify-center flex-1'
-        "
-    >
+<main class="flex flex-col">
+    <app-navbar [showSidebarToggleButton]="false" [showBaseRoutes]="true"></app-navbar>
+
+    <div class="flex flex-col flex-1 mx-auto max-w-7xl w-full px-4 sm:px-6 py-8 lg:py-10">
         <router-outlet></router-outlet>
     </div>
+
     @if (!innerPage()) {
         <app-footer></app-footer>
     }

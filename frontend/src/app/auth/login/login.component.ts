@@ -41,6 +41,7 @@ export class LoginComponent {
     private readonly destroyRef = inject(DestroyRef);
     private readonly authService = inject(AuthService);
     private readonly snackbarService = inject(SnackbarService);
+    redirectUrl = sessionStorage.getItem('redirectUrl');
 
     pwVisible = signal(false);
     loginForm = this.fb.group({
@@ -78,7 +79,8 @@ export class LoginComponent {
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
                 next: (result) => {
-                    this.router.navigate(['/organizations']);
+                    sessionStorage.removeItem('redirectUrl');
+                    this.router.navigate([this.redirectUrl || '/organizations']);
                 },
                 error: (error) => {
                     console.error('Login error:', error.error?.message);

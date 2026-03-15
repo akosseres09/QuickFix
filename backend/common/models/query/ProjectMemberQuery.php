@@ -34,6 +34,16 @@ class ProjectMemberQuery extends ActiveQuery
         return $this->andWhere(['project_id' => $project_id]);
     }
 
+    public function notUser(string $userId): ProjectMemberQuery
+    {
+        return $this->andWhere(['!=', 'user_id', $userId]);
+    }
+
+    public function byCursor(string $cursor): ProjectMemberQuery
+    {
+        return $this->andWhere(['>', '{{%project_member}}.id', $cursor]);
+    }
+
     /**
      * Filter by user
      * @param string $userId

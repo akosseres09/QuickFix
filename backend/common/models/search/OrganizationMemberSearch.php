@@ -12,16 +12,50 @@ class OrganizationMemberSearch extends OrganizationMember implements SearchInter
 
     public function search($params): ActiveDataProvider
     {
+        $page = isset($params['page']) ? (int) $params['page'] : 1;
+        $pageSize = isset($params['pageSize']) ? (int) $params['pageSize'] : 20;
+        $pageSize = min($pageSize, 100);
+
         $organizationId = Yii::$app->request->get('organization_id');
         if (!$organizationId) {
             throw new BadRequestHttpException('Organization ID is required.');
         }
 
+        $cursor = $params['cursor'] ?? null;
+
         $query = OrganizationMember::find()->byOrganization($organizationId);
+
+        if ($cursor) {
+            $query->byCursor($cursor);
+        }
+
+        $query->limit($pageSize + 1); // Fetch one extra to determine if there's a next page
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => false,
+            'pagination' => false
         ]);
+
+        $models = $query->all();
+        $hasMore = 'false';
+
+        if (count($models) > $pageSize) {
+            $hasMore = 'true';
+            array_pop($models);
+        }
+
+        $headers = Yii::$app->response->headers;
+        if (!empty($models)) {
+            $dataProvider->setModels($models);
+
+            $lastModel = end($models);
+
+            $headers->set('X-Cursor', $lastModel->id);
+            $headers->set('X-Has-More', $hasMore);
+        } else {
+            $headers->set('X-Has-More', 'false');
+        }
 
         return $dataProvider;
     }

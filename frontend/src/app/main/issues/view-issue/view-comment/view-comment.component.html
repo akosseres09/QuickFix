@@ -14,13 +14,17 @@
                 }"
                 class="relative flex gap-4 comment"
             >
-                <app-avatar class="hidden sm:block" [user]="comment.creator!"></app-avatar>
+                <app-avatar
+                    [organizationId]="organizationId()"
+                    class="hidden sm:block"
+                    [user]="comment.creator!"
+                ></app-avatar>
                 <div class="w-full border border-gray-700 rounded-md">
                     <div class="flex justify-between w-full px-4 py-2 border-b border-gray-700">
                         <div>
                             <a
                                 class="hover:underline hover:underline-offset-2"
-                                [routerLink]="['../../../members', comment.creator?.username]"
+                                [routerLink]="['../../../../../members', comment.creator?.username]"
                                 >{{ comment.creator?.fullName }}</a
                             >
                             <span
@@ -32,9 +36,31 @@
                             </span>
                         </div>
                         <div>
-                            <mat-icon class="cursor-pointer" (click)="editComment(comment)"
-                                >edit</mat-icon
+                            <button
+                                class="!bg-transparent !hover:bg-light-text-hover dark:hover:!bg-light-background-hover !shadow-none !rounded-md"
+                                mat-mini-fab
+                                [matMenuTriggerFor]="menu"
                             >
+                                <mat-icon>more_vert</mat-icon>
+                            </button>
+                            <mat-menu yPosition="below" xPosition="before" #menu>
+                                <button
+                                    class="cursor-pointer"
+                                    (click)="editComment(comment)"
+                                    mat-menu-item
+                                >
+                                    <mat-icon>edit</mat-icon>
+                                    Edit
+                                </button>
+                                <button
+                                    class="cursor-pointer"
+                                    (click)="openDeleteCommentDialog(comment)"
+                                    mat-menu-item
+                                >
+                                    <mat-icon>delete</mat-icon>
+                                    Delete
+                                </button>
+                            </mat-menu>
                         </div>
                     </div>
                     <div class="p-4">
@@ -70,3 +96,10 @@
         </div>
     }
 </div>
+
+<app-delete-comment-dialog
+    (commentDeleted)="onCommentDeleted($event)"
+    [organizationId]="organizationId()"
+    [projectId]="projectId()"
+    [issueId]="issueId()"
+></app-delete-comment-dialog>

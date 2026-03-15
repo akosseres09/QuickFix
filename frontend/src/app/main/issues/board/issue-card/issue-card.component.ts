@@ -21,6 +21,7 @@ import { RouterLink } from '@angular/router';
     styleUrl: './issue-card.component.css',
 })
 export class IssueCardComponent {
+    organizationId = input.required<string>();
     issue = input.required<Issue>();
     cardClick = output<Issue>();
 

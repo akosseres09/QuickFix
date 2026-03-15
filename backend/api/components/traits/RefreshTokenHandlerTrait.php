@@ -1,6 +1,6 @@
 <?php
 
-namespace api\components;
+namespace api\components\traits;
 
 use api\models\UserRefreshToken;
 use Yii;

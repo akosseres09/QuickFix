@@ -3,6 +3,8 @@ import { User } from '../../model/User';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../auth/auth.service';
 import { environment } from '../../../../environments/environment';
+import { ApiQueryParams } from '../../constants/api/ApiQueryParams';
+import { ParamsHandler } from '../../utils/paramsHandler';
 
 @Injectable({
     providedIn: 'root',
@@ -16,6 +18,13 @@ export class UserService {
         const id = this.authService.currentUserClaims()?.uid;
 
         return this.http.get<User>(`${this.apiUrl}/user/${id}`);
+    }
+
+    getUserByUsername(username: string, params: ApiQueryParams = {}) {
+        const qp = ParamsHandler.convertToHttpParams(params);
+        return this.http.get<User>(`${this.apiUrl}/user/${username}`, {
+            params: qp,
+        });
     }
 
     updateUser(userData: Partial<User>) {

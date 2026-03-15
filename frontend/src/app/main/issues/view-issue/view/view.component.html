@@ -33,6 +33,10 @@
                             <mat-icon>close</mat-icon>
                             Close Issue
                         </button>
+                        <button mat-menu-item (click)="openWorktimeDialog()">
+                            <mat-icon>schedule</mat-icon>
+                            Record Time
+                        </button>
                     } @else {
                         <button (click)="updateIssueStatus(issueStatuses.OPEN)" mat-menu-item>
                             <mat-icon>play_circle_outline</mat-icon>
@@ -211,9 +215,16 @@
                     <h3 class="text-xs font-semibold uppercase tracking-wide mb-4">Assignee</h3>
                     @if (issue().assignee) {
                         <div class="flex items-center gap-2">
-                            <app-avatar [user]="issue().assignee!" size="sm"></app-avatar>
+                            <app-avatar
+                                [organizationId]="organizationId()"
+                                [user]="issue().assignee!"
+                                size="sm"
+                            ></app-avatar>
                             <a
-                                [routerLink]="'/users/@' + issue().assignee?.username"
+                                [routerLink]="[
+                                    '../../../../../member/',
+                                    issue().assignee?.username,
+                                ]"
                                 class="text-sm font-medium text-gray-900 dark:text-white hover:underline"
                             >
                                 {{ issue().assignee?.firstName }}
@@ -270,3 +281,9 @@
         </div>
     </div>
 </div>
+
+<app-worktime-dialog
+    [projectId]="projectId()"
+    [organizationId]="organizationId()"
+    [issueId]="issueId()"
+></app-worktime-dialog>

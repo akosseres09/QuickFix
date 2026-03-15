@@ -1,4 +1,13 @@
-import { Component, computed, effect, inject, input, model, signal } from '@angular/core';
+import {
+    Component,
+    computed,
+    effect,
+    inject,
+    input,
+    model,
+    signal,
+    viewChild,
+} from '@angular/core';
 import {
     Issue,
     IssueStatus,
@@ -29,6 +38,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { IssueComment } from '../../../../shared/model/IssueComment';
 import { finalize } from 'rxjs';
+import { WorktimeDialogComponent } from '../../../worktime/worktime-dialog/worktime-dialog.component';
 
 @Component({
     selector: 'app-view',
@@ -47,6 +57,7 @@ import { finalize } from 'rxjs';
         GMTPipe,
         TextEditorComponent,
         ViewCommentComponent,
+        WorktimeDialogComponent,
     ],
     templateUrl: './view.component.html',
     styleUrl: './view.component.css',
@@ -78,6 +89,8 @@ export class ViewComponent {
         commentId: [''],
         content: ['', [Validators.required, Validators.maxLength(15000)]],
     });
+
+    worktimeDialog = viewChild(WorktimeDialogComponent);
 
     // constants
     issueStatuses = IssueStatus;
@@ -182,6 +195,10 @@ export class ViewComponent {
                 this.snackbarService.error('Failed to copy issue link');
             }
         );
+    }
+
+    openWorktimeDialog(): void {
+        this.worktimeDialog()?.open();
     }
 
     onSubmit() {

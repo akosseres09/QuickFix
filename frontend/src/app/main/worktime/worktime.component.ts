@@ -1,15 +1,17 @@
 import {
+    AfterViewInit,
     Component,
     computed,
     DestroyRef,
     inject,
     input,
+    linkedSignal,
     OnInit,
     signal,
     viewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
@@ -63,7 +65,7 @@ import { DeleteWorktimeDialogComponent } from './delete-worktime-dialog/delete-w
     templateUrl: './worktime.component.html',
     styleUrl: './worktime.component.css',
 })
-export class WorktimeComponent implements OnInit {
+export class WorktimeComponent implements OnInit, AfterViewInit {
     private readonly dateService = inject(DateService);
     private readonly worktimeService = inject(WorktimeService);
     private readonly projectService = inject(ProjectService);
@@ -124,9 +126,7 @@ export class WorktimeComponent implements OnInit {
         ];
     });
 
-    form = this.fb.group({
-        projectName: [''],
-    });
+    form!: FormGroup;
 
     listState: ListState = this.listStateService.create(this.activeRoute, {
         defaultPageSize: 20,
@@ -134,6 +134,10 @@ export class WorktimeComponent implements OnInit {
     });
 
     ngOnInit() {
+        this.form = this.fb.group({
+            projectName: [this.selectedProjectId() ?? ''],
+        });
+
         this.dateRangeService.init(this.activeRoute, {
             minDate: this.minDate(),
             maxDate: this.maxDate(),
@@ -193,6 +197,12 @@ export class WorktimeComponent implements OnInit {
             });
 
         this.loadWorktime();
+    }
+
+    ngAfterViewInit(): void {
+        if (this.selectedProjectId()) {
+            this.openWorktimeDialog();
+        }
     }
 
     // used by autocomplete to show project name instead of id
@@ -257,6 +267,10 @@ export class WorktimeComponent implements OnInit {
         this.filteredEntries.update((current) => {
             return current.filter((wt) => wt.id !== worktimeId);
         });
+    }
+
+    onDeleteCanceled() {
+        this.onRowChange(null);
     }
 
     onWorktimeEdited(worktime: Worktime) {

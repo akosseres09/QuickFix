@@ -19,7 +19,11 @@
         (cdkDropListExited)="onDropListExited($event)"
     >
         @for (issue of issues(); track issue.id) {
-            <app-issue-card [issue]="issue" (cardClick)="onIssueClick($event)"></app-issue-card>
+            <app-issue-card
+                [organizationId]="organizationId()"
+                [issue]="issue"
+                (cardClick)="onIssueClick($event)"
+            ></app-issue-card>
         }
 
         @if (showEmptyText()) {

@@ -20,6 +20,12 @@ import { DisplayedColumn } from '../../constants/table/DisplayedColumn';
 import { Label } from '../../model/Label';
 import { Organization } from '../../model/Organization';
 import { Worktime } from '../../model/Worktime';
+import {
+    OrganizationInvitation,
+    ORGANIZATION_INVITATION_STATUS_COLOR_MAP,
+    ORGANIZATION_INVITATION_STATUS_MAP,
+} from '../../model/OrganizationInvitation';
+import { ORGANIZATION_MEMBER_ROLE_MAP } from '../../model/OrganizationMember';
 
 @Injectable({
     providedIn: 'root',
@@ -42,8 +48,8 @@ export class DisplayedColumnService {
                 sortable: false,
                 value: (e: Issue) => e.creator?.fullName ?? 'Unknown',
                 routerLink: (e: Issue) => {
-                    if (!e.creator?.username) return null;
-                    return ['../members/', e.creator.username];
+                    if (!e.creator) return null;
+                    return ['../../../member/', e.creator.username];
                 },
                 photoOnly: (e: Issue) => !!e.creator,
                 photoUrl: (e: Issue) => e.creator?.profilePictureUrl ?? null,
@@ -55,7 +61,7 @@ export class DisplayedColumnService {
                 value: (e: Issue) => e.assignee?.fullName ?? 'Unassigned',
                 routerLink: (e: Issue) => {
                     if (!e.assignee?.username) return null;
-                    return ['../members/', e.assignee.username];
+                    return ['../../../member/', e.assignee.username];
                 },
                 photoOnly: (e: Issue) => !!e.assignee,
                 photoUrl: (e: Issue) => e.assignee?.profilePictureUrl || null,
@@ -107,7 +113,8 @@ export class DisplayedColumnService {
                 label: 'Owner',
                 sortable: false,
                 value: (e: Project) => e.owner?.fullName ?? 'Unknown',
-                routerLink: (e: Project) => (e.owner?.id ? ['../members', e.owner.username] : []),
+                routerLink: (e: Project) =>
+                    e.owner?.username ? ['../member/', e.owner.username] : [],
                 photoOnly: (e: Project) => !!e.owner,
                 photoUrl: (e: Project) => e.owner?.profilePictureUrl ?? '',
             },
@@ -184,7 +191,7 @@ export class DisplayedColumnService {
                 label: 'Owner',
                 sortable: false,
                 routerLink: (e: Organization) =>
-                    e.owner?.id ? ['../org', e.slug, 'members', e.owner.username] : [],
+                    e.owner?.username ? ['../org', e.slug, 'member', e.owner.username] : [],
                 photoUrl: (element: Organization) =>
                     element.owner ? element.owner.profilePictureUrl : null,
                 photoOnly: (e: Organization) => !!e.owner,
@@ -221,6 +228,54 @@ export class DisplayedColumnService {
                 label: 'Description',
                 sortable: false,
                 value: (e: Worktime) => e.description,
+            },
+        ];
+    }
+
+    getOrganizationInvitationColumns(): DisplayedColumn<OrganizationInvitation>[] {
+        return [
+            {
+                id: 'organization_id',
+                label: 'Organization',
+                sortable: false,
+                value: (e: OrganizationInvitation) => e.organization?.name ?? 'Unknown',
+            },
+            {
+                id: 'inviter',
+                label: 'Invited By',
+                sortable: false,
+                value: (e: OrganizationInvitation) => e.inviter?.fullName ?? 'Unknown',
+                routerLink: (e: OrganizationInvitation) => {
+                    if (!e.inviter) return null;
+                    return ['../member/', e.inviter.username];
+                },
+                photoOnly: (e: OrganizationInvitation) => !!e.inviter,
+                photoUrl: (e: OrganizationInvitation) => e.inviter?.profilePictureUrl ?? null,
+            },
+            {
+                id: 'role',
+                label: 'Role',
+                sortable: false,
+                value: (e: OrganizationInvitation) =>
+                    ORGANIZATION_MEMBER_ROLE_MAP[e.role] ?? e.role,
+            },
+            {
+                id: 'status',
+                label: 'Status',
+                sortable: true,
+                badge: (e: OrganizationInvitation) =>
+                    ORGANIZATION_INVITATION_STATUS_COLOR_MAP[e.status],
+                value: (e: OrganizationInvitation) =>
+                    ORGANIZATION_INVITATION_STATUS_MAP[e.status] ?? e.status,
+            },
+            {
+                id: 'expires_at',
+                label: 'Expires At',
+                sortable: true,
+                value: (e: OrganizationInvitation) => {
+                    const date = this.dateService.parseTimestamp(e.expiresAt);
+                    return this.dateService.toGMTtime(date);
+                },
             },
         ];
     }

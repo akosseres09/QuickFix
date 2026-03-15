@@ -7,6 +7,7 @@
         <div class="flex-1 flex flex-col" cdkDropListGroup>
             <div class="flex flex-1 gap-4 overflow-x-auto pb-4">
                 <app-board-column
+                    [organizationId]="organizationId()"
                     [columnTitle]="STATUS_MAP[StatusEnum.OPEN]"
                     [issues]="openIssues()"
                     [status]="StatusEnum.OPEN"
@@ -14,6 +15,7 @@
                 ></app-board-column>
 
                 <app-board-column
+                    [organizationId]="organizationId()"
                     [columnTitle]="STATUS_MAP[StatusEnum.IN_PROGRESS]"
                     [issues]="inProgressIssues()"
                     [status]="StatusEnum.IN_PROGRESS"
@@ -21,6 +23,7 @@
                 ></app-board-column>
 
                 <app-board-column
+                    [organizationId]="organizationId()"
                     [columnTitle]="STATUS_MAP[StatusEnum.REVIEW]"
                     [issues]="reviewIssues()"
                     [status]="StatusEnum.REVIEW"
@@ -28,6 +31,7 @@
                 ></app-board-column>
 
                 <app-board-column
+                    [organizationId]="organizationId()"
                     [columnTitle]="STATUS_MAP[StatusEnum.RESOLVED]"
                     [issues]="resolvedIssues()"
                     [status]="StatusEnum.RESOLVED"
@@ -35,6 +39,7 @@
                 ></app-board-column>
 
                 <app-board-column
+                    [organizationId]="organizationId()"
                     [columnTitle]="STATUS_MAP[StatusEnum.CLOSED]"
                     [issues]="closedIssues()"
                     [status]="StatusEnum.CLOSED"

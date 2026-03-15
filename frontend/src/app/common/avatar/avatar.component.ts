@@ -1,4 +1,4 @@
-import { Component, input, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 import { User } from '../../shared/model/User';
@@ -9,7 +9,7 @@ import { RouterLink } from '@angular/router';
     imports: [CommonModule, MatIcon, RouterLink],
     template: `
         @if (user().profilePictureUrl) {
-            <a [routerLink]="'/users/@' + user().username">
+            <a [routerLink]="'/org/' + organizationId() + '/member/' + user().username">
                 <img
                     [src]="user().profilePictureUrl"
                     [alt]="user().username || 'User avatar'"
@@ -30,6 +30,7 @@ import { RouterLink } from '@angular/router';
 })
 export class AvatarComponent {
     user = input.required<User>();
+    organizationId = input.required<string>();
     size = input<'sm' | 'md' | 'lg' | 'xl'>('md');
     styleClass = input<string>('rounded-md');
 

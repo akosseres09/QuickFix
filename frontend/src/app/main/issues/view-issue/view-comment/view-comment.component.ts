@@ -1,4 +1,13 @@
-import { Component, DestroyRef, inject, input, OnInit, output, signal } from '@angular/core';
+import {
+    Component,
+    DestroyRef,
+    inject,
+    input,
+    OnInit,
+    output,
+    signal,
+    viewChild,
+} from '@angular/core';
 import { IssueCommentService } from '../../../../shared/services/issue-comment/issue-comment.service';
 import { IssueComment } from '../../../../shared/model/IssueComment';
 import { AvatarComponent } from '../../../../common/avatar/avatar.component';
@@ -8,13 +17,15 @@ import { RelativeTimePipe } from '../../../../shared/pipes/relative-time/relativ
 import { RouterLink } from '@angular/router';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { GMTPipe } from '../../../../shared/pipes/gmt/gmt.pipe';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatButtonModule, MatMiniFabButton } from '@angular/material/button';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SnackbarService } from '../../../../shared/services/snackbar/snackbar.service';
 import { AuthService } from '../../../../shared/services/auth/auth.service';
 import { MatIcon } from '@angular/material/icon';
 import { finalize } from 'rxjs';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatMenuModule } from '@angular/material/menu';
+import { DeleteCommentDialogComponent } from './delete-comment-dialog/delete-comment-dialog.component';
 
 @Component({
     selector: 'app-view-comment',
@@ -29,6 +40,10 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
         MatButton,
         MatIcon,
         MatProgressSpinnerModule,
+        MatMenuModule,
+        MatMiniFabButton,
+        MatButtonModule,
+        DeleteCommentDialogComponent,
     ],
     templateUrl: './view-comment.component.html',
     styleUrl: './view-comment.component.css',
@@ -51,6 +66,7 @@ export class ViewCommentComponent implements OnInit {
     isLoading = signal<boolean>(false);
 
     currentUser = this.authService.currentUserClaims;
+    deleteDialog = viewChild(DeleteCommentDialogComponent);
 
     constructor() {
         this.issueCommentService.commentUpdated$.pipe(takeUntilDestroyed()).subscribe({
@@ -121,5 +137,13 @@ export class ViewCommentComponent implements OnInit {
 
     editComment(comment: IssueComment) {
         this.editingComment.emit(comment);
+    }
+
+    openDeleteCommentDialog(comment: IssueComment) {
+        this.deleteDialog()?.open(comment.id);
+    }
+
+    onCommentDeleted(commentId: string) {
+        this.comments.update((current) => current.filter((c) => c.id !== commentId));
     }
 }

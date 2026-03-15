@@ -13,8 +13,9 @@ import { OrganizationMember } from '../../shared/model/OrganizationMember';
 })
 export class MemberCardComponent {
     member = input.required<ProjectMember | OrganizationMember>();
+    organizationId = input.required<string>();
     currentUser = input.required<Claims | null>();
 
-    RoleLabels = input.required<Record<number, string>>();
-    getRoleBadgeClass = input.required<(role: number) => string>();
+    RoleLabels = input.required<Record<string, string>>();
+    getRoleBadgeClass = input.required<(role: string) => string>();
 }

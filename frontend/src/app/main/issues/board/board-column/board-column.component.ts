@@ -11,6 +11,7 @@ import { IssueCardComponent } from '../issue-card/issue-card.component';
     styleUrl: './board-column.component.css',
 })
 export class BoardColumnComponent {
+    organizationId = input.required<string>();
     columnTitle = input.required<string>();
     issues = input.required<Issue[]>();
     status = input.required<number>();

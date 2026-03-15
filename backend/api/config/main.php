@@ -14,7 +14,6 @@ return [
     'basePath' => dirname(__DIR__),
     'controllerNamespace' => 'api\controllers', // Points directly to the api/controllers directory
     'bootstrap' => ['log'],
-    // The 'modules' section has been removed
     'components' => [
         'request' => [
             'parsers' => [
@@ -54,7 +53,7 @@ return [
                 ],
                 [
                     'class' => UrlRule::class,
-                    'controller' => ['organization'],
+                    'controller' => ['organization', 'invitation' => 'organization-invitation'],
                     'pluralize' => false,
                     'tokens' => [
                         '{id}' => '<id:[A-Za-z0-9_\-]+>',
@@ -70,7 +69,25 @@ return [
                 ],
                 [
                     'class' => UrlRule::class,
-                    'controller' => ['project', 'organization-member', 'worktime'],
+                    'controller' => ['project'],
+                    'pluralize' => false,
+                    'prefix' => '<organization_id:[A-Za-z0-9_\-]+>',
+                    'tokens' => [
+                        '{id}' => '<id:[A-Za-z0-9_\-]+>',
+                    ],
+                ],
+                [
+                    'class' => UrlRule::class,
+                    'controller' => ['member' => 'organization-member'],
+                    'pluralize' => false,
+                    'prefix' => '<organization_id:[A-Za-z0-9_\-]+>',
+                    'tokens' => [
+                        '{id}' => '<id:[A-Za-z0-9_\-.]+>',
+                    ],
+                ],
+                [
+                    'class' => UrlRule::class,
+                    'controller' => ['worktime'],
                     'pluralize' => false,
                     'prefix' => '<organization_id:[A-Za-z0-9_\-]+>',
                     'tokens' => [
@@ -94,7 +111,7 @@ return [
                 ],
                 [
                     'class' => UrlRule::class,
-                    'controller' => ['member', 'label'],
+                    'controller' => ['member' => 'project-member', 'label'],
                     'pluralize' => false,
                     'prefix' => '<organization_id:[A-Za-z0-9_\-]+>/<project_id:[A-Za-z0-9_\-]+>/',
                     'tokens' => [

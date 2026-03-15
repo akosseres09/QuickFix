@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import {
     AbstractControlOptions,
     FormBuilder,
@@ -18,13 +18,13 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../shared/services/auth/auth.service';
-import { passwordMatchValidator } from '../../shared/validators/passwordValidator/passwordValidator';
-import { phoneValidator } from '../../shared/validators/phoneValidator/phoneValidator';
-import { minAgeValidator } from '../../shared/validators/dateValidator/dateValidator';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 import { errorResponse } from '../../shared/model/Response';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SignupData } from '../../shared/constants/user/SignupData';
+import { CustomValidators } from '../../shared/validators/CustomValidators';
+import { decodeToken } from '../../shared/utils/jwtDecoder';
+import { InvitationTokenPayload } from '../../shared/constants/token/InvitationTokenPayload';
 
 @Component({
     selector: 'app-signup',
@@ -45,12 +45,18 @@ import { SignupData } from '../../shared/constants/user/SignupData';
     styleUrl: './signup.component.css',
     standalone: true,
 })
-export class SignupComponent {
+export class SignupComponent implements OnInit {
     private readonly router = inject(Router);
     private readonly fb = inject(FormBuilder);
     private readonly authService = inject(AuthService);
     private readonly snackbar = inject(SnackbarService);
     private readonly destroyRef = inject(DestroyRef);
+
+    private readonly token = signal<string>(sessionStorage.getItem('invitationToken') || '');
+    private readonly payload = computed<InvitationTokenPayload | null>(() => {
+        const tokenValue = this.token();
+        return tokenValue ? decodeToken<InvitationTokenPayload>(tokenValue) : null;
+    });
 
     pwVisible = signal(false);
     rePwVisible = signal(false);
@@ -60,16 +66,23 @@ export class SignupComponent {
             firstName: ['', [Validators.required]],
             lastName: ['', [Validators.required]],
             username: ['', [Validators.required, Validators.minLength(5)]],
-            email: ['', [Validators.required, Validators.email]],
+            email: [this.payload()?.email || '', [Validators.required, Validators.email]],
             password: ['', [Validators.required, Validators.minLength(6)]],
             confirmPassword: ['', [Validators.required, Validators.minLength(6)]],
-            dateOfBirth: [null as Date | null, [minAgeValidator(13)]],
-            phoneNumber: ['', [phoneValidator()]],
+            dateOfBirth: [null as Date | null, [CustomValidators.minAgeValidator(13)]],
+            phoneNumber: ['', [CustomValidators.phoneValidator()]],
         },
         {
-            validators: passwordMatchValidator('password', 'confirmPassword'),
+            validators: CustomValidators.passwordMatchValidator('password', 'confirmPassword'),
         } as AbstractControlOptions
     );
+
+    ngOnInit(): void {
+        const payload = this.payload();
+        if (payload) {
+            this.signupForm.get('email')?.disable();
+        }
+    }
 
     togglePwVisibility(event: MouseEvent): void {
         const input = (event.target as HTMLElement)
@@ -107,13 +120,14 @@ export class SignupComponent {
         if (!this.signupForm.valid) return;
 
         this.authService
-            .signup(this.signupForm.value as SignupData)
+            .signup(this.signupForm.getRawValue() as SignupData)
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
                 next: (result) => {
                     this.snackbar.success(
                         'Account created successfully! Please verify your email.'
                     );
+                    sessionStorage.removeItem('invitationToken');
                     this.router.navigateByUrl('/auth/verify');
                 },
                 error: (error) => {

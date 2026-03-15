@@ -5,6 +5,7 @@ import {
     DestroyRef,
     inject,
     input,
+    linkedSignal,
     model,
     output,
     signal,
@@ -49,11 +50,12 @@ export class NavbarComponent implements AfterViewInit {
     imageSource = model<string>('QuickFix_logo_dark.png');
     logoutClicked = output<void>();
     showMenuLogo = input<boolean>(true);
+    showBaseRoutes = input<boolean>(false);
 
     isMenuOpen = signal<boolean>(false);
     user = signal<Claims | null>(this.authService.currentUserClaims());
     htmlElement = signal<HTMLElement | null>(document.documentElement);
-    routes = signal<SidenavRoute[]>(this.getAppRoutes().filter((route) => route.show));
+    routes = linkedSignal<SidenavRoute[]>(() => this.getAppRoutes().filter((route) => route.show));
     theme = signal<'light' | 'dark'>(this.themeService.getTheme() || 'light');
     showSidebarToggleButton = model<boolean>(true);
     sidebarToggleButton = signal<boolean>(window.innerWidth <= 767);
@@ -102,6 +104,12 @@ export class NavbarComponent implements AfterViewInit {
 
     getAppRoutes(): Array<SidenavRoute> {
         return [
+            {
+                path: '/organizations',
+                name: 'Dashboard',
+                type: 'button',
+                show: this.user() !== null && this.showBaseRoutes(),
+            },
             {
                 path: '/auth/login',
                 name: 'Login',

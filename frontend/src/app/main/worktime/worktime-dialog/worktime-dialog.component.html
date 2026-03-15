@@ -1,7 +1,7 @@
 <ng-template #worktimeFormTemplate>
     <form [formGroup]="worktimeForm" class="flex flex-col gap-4">
         <div class="flex flex-col md:flex-row gap-4">
-            @if (!this.worktime()) {
+            @if (!this.worktime() && !this.issueId()) {
                 <mat-form-field appearance="outline" class="w-full">
                     <mat-label>Issue Name</mat-label>
                     <input

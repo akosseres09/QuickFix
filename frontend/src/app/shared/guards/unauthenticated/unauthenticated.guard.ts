@@ -19,7 +19,7 @@ export const unauthenticatedGuard: CanActivateFn = (route, state) => {
         take(1),
         map((response) => {
             if (response.success) {
-                router.navigate(['/projects']);
+                router.navigate(['/organizations']);
                 return false;
             }
             return true;

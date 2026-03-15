@@ -4,8 +4,9 @@ import { errorResponse, successResponse } from '../../model/Response';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { Claims } from '../../constants/user/Claims';
-import { DecodedToken } from '../../constants/user/DecodedToken';
+import { UserPayloadToken } from '../../constants/token/UserTokenPayload';
 import { SignupData } from '../../constants/user/SignupData';
+import { decodeToken } from '../../utils/jwtDecoder';
 
 @Injectable({
     providedIn: 'root',
@@ -94,7 +95,7 @@ export class AuthService {
                     if (response.success) {
                         const data = (response as successResponse).data;
                         localStorage.setItem(this.tokenKey, data['access_token']);
-                        const user = this.decodeToken(data['access_token']);
+                        const user = decodeToken<Claims>(data['access_token']);
                         this.currentUserClaims.set(user);
                     }
                 })
@@ -164,11 +165,11 @@ export class AuthService {
         };
     }
 
-    private getDecodedToken(): DecodedToken | null {
+    private getDecodedToken(): UserPayloadToken | null {
         const token = localStorage.getItem(this.tokenKey);
         if (!token) return null;
 
-        const decodedToken = this.decodeToken(token);
+        const decodedToken = decodeToken<UserPayloadToken>(token);
 
         if (!decodedToken || decodedToken.exp * 1000 < Date.now()) {
             localStorage.removeItem(this.tokenKey);
@@ -176,16 +177,5 @@ export class AuthService {
         }
 
         return decodedToken;
-    }
-
-    private decodeToken(token: string): DecodedToken | null {
-        try {
-            const payload = token.split('.')[1];
-            const decoded = JSON.parse(atob(payload));
-            return decoded;
-        } catch (e) {
-            console.error('Error decoding token', e);
-            return null;
-        }
     }
 }
