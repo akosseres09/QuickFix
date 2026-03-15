@@ -20,7 +20,9 @@
                     [user]="comment.creator!"
                 ></app-avatar>
                 <div class="w-full border border-gray-700 rounded-md">
-                    <div class="flex justify-between w-full px-4 py-2 border-b border-gray-700">
+                    <div
+                        class="flex justify-between items-center w-full px-4 py-2 border-b border-gray-700"
+                    >
                         <div>
                             <a
                                 class="hover:underline hover:underline-offset-2"
@@ -41,7 +43,7 @@
                                 mat-mini-fab
                                 [matMenuTriggerFor]="menu"
                             >
-                                <mat-icon>more_vert</mat-icon>
+                                <mat-icon>more_horiz</mat-icon>
                             </button>
                             <mat-menu yPosition="below" xPosition="before" #menu>
                                 <button
