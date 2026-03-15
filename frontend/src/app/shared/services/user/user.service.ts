@@ -27,6 +27,13 @@ export class UserService {
         });
     }
 
+    getUserByEmail(email: string, params: ApiQueryParams = {}) {
+        const qp = ParamsHandler.convertToHttpParams(params);
+        return this.http.get<User>(`${this.apiUrl}/user/${email}`, {
+            params: qp,
+        });
+    }
+
     updateUser(userData: Partial<User>) {
         const id = this.authService.currentUserClaims()?.uid;
 

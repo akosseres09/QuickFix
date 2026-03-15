@@ -15,6 +15,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
+import { OrganizationInvitationService } from '../../shared/services/organization-invitation/organization-invitation.service';
 
 @Component({
     selector: 'app-login',
@@ -41,6 +42,7 @@ export class LoginComponent {
     private readonly destroyRef = inject(DestroyRef);
     private readonly authService = inject(AuthService);
     private readonly snackbarService = inject(SnackbarService);
+    private readonly invitationService = inject(OrganizationInvitationService);
     redirectUrl = sessionStorage.getItem('redirectUrl');
 
     pwVisible = signal(false);
@@ -80,6 +82,7 @@ export class LoginComponent {
             .subscribe({
                 next: (result) => {
                     sessionStorage.removeItem('redirectUrl');
+                    this.invitationService.deleteInvitationToken();
                     this.router.navigate([this.redirectUrl || '/organizations']);
                 },
                 error: (error) => {

@@ -13,6 +13,7 @@ import { PaginatedResponse } from '../../constants/api/PaginatedResponse';
 export class OrganizationInvitationService {
     private readonly http = inject(HttpClient);
     private readonly url = environment.apiUrl;
+    private readonly invitationTokenKey = 'invitationToken';
 
     sendInvitation(
         invitation: Partial<OrganizationInvitation>
@@ -49,5 +50,17 @@ export class OrganizationInvitationService {
                 },
             }
         );
+    }
+
+    setInvitationToken(token: string) {
+        sessionStorage.setItem(this.invitationTokenKey, token);
+    }
+
+    deleteInvitationToken() {
+        sessionStorage.removeItem(this.invitationTokenKey);
+    }
+
+    getInvitationToken(): string | null {
+        return sessionStorage.getItem(this.invitationTokenKey);
     }
 }

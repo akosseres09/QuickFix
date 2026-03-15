@@ -64,7 +64,7 @@ return [
                     'controller' => ['user'],
                     'pluralize' => false,
                     'tokens' => [
-                        '{id}' => '<id:[A-Za-z0-9_\-]+>',
+                        '{id}' => '<id:[A-Za-z0-9_\-.@]+>',
                     ]
                 ],
                 [

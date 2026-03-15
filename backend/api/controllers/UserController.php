@@ -36,6 +36,8 @@ class UserController extends BaseRestController
         $isValidUuid = Uuid::isValid($id);
         if ($isValidUuid) {
             $query->byId($id);
+        } else if (str_contains($id, "@")) {
+            $query->byEmail($id);
         } else {
             $query->byUsername($id);
         }
