@@ -9,12 +9,14 @@ use yii\web\BadRequestHttpException;
 
 class IssueSearch extends Issue implements SearchInterface
 {
+    public $status;
+
     public function rules(): array
     {
         return [
             ['project_id', 'required'],
-            [['id', 'project_id'], 'string'],
-            [['status_label', 'type', 'priority'], 'integer'],
+            [['id', 'project_id', 'status'], 'string'],
+            [['type', 'priority'], 'integer'],
             [
                 'is_archived',
                 'filter',
@@ -98,8 +100,12 @@ class IssueSearch extends Issue implements SearchInterface
             $this->is_archived = false;
         }
 
+        if ($this->status) {
+            $query->joinWith('label');
+        }
+
         $query->andFilterWhere([
-            'status_label' => $this->status_label,
+            '{{%label}}.name' => $this->status,
             'type' => $this->type,
             'priority' => $this->priority,
             'is_archived' => $this->is_archived
