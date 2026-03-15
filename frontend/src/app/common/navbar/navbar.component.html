@@ -62,7 +62,7 @@
                                 }
                                 <mat-icon> keyboard_arrow_down </mat-icon>
                             </button>
-                            <mat-menu class="" #menu="matMenu">
+                            <mat-menu #menu="matMenu" xPosition="before">
                                 @for (children of route.children; track $index) {
                                     <a
                                         mat-menu-item
