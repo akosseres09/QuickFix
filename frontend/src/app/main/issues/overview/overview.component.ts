@@ -52,8 +52,29 @@ export class OverviewComponent implements OnInit {
     trendChartOptions: ChartConfiguration['options'] = {
         responsive: true,
         maintainAspectRatio: false,
-        elements: { line: { tension: 0.4 } }, // Smoothes the line
-        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+        elements: {
+            line: { tension: 0.4 },
+            point: { radius: 4, hoverRadius: 6 },
+        },
+        scales: {
+            y: { beginAtZero: true, ticks: { precision: 0 } },
+        },
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top',
+            },
+            tooltip: {
+                mode: 'index',
+                intersect: false,
+                padding: 10,
+                callbacks: {
+                    label: (context) => {
+                        return ` ${context.dataset.label}: ${context.parsed.y}`;
+                    },
+                },
+            },
+        },
     };
 
     ngOnInit(): void {
@@ -92,10 +113,8 @@ export class OverviewComponent implements OnInit {
             });
     }
 
-    // ... existing imports
-
     private buildCharts(data: IssueStats): void {
-        // 1. Status distribution doughnut (DYNAMIC)
+        //Status distribution doughnut (DYNAMIC)
         const statusLabels = data.statuses.map((s) => s.label);
         const statusCounts = data.statuses.map((s) => s.count);
         const statusColors = data.statuses.map((s) => s.color);
@@ -106,13 +125,13 @@ export class OverviewComponent implements OnInit {
                 {
                     data: statusCounts,
                     backgroundColor: statusColors,
-                    hoverBackgroundColor: statusColors, // Maintain color on hover
+                    hoverBackgroundColor: statusColors,
                     borderWidth: 0,
                 },
             ],
         };
 
-        // 2. Priority distribution bar (STAY THE SAME)
+        // Priority distribution bar
         this.priorityChartData = {
             labels: ['Low', 'Medium', 'High', 'Critical'],
             datasets: [
@@ -124,10 +143,10 @@ export class OverviewComponent implements OnInit {
                         data.priorities.critical,
                     ],
                     backgroundColor: [
-                        'rgba(34, 197, 94, 0.8)', // green-500
-                        'rgba(234, 179, 8, 0.8)', // yellow-500
-                        'rgba(249, 115, 22, 0.8)', // orange-500
-                        'rgba(239, 68, 68, 0.8)', // red-500
+                        'rgba(34, 197, 94, 0.8)',
+                        'rgba(234, 179, 8, 0.8)',
+                        'rgba(249, 115, 22, 0.8)',
+                        'rgba(239, 68, 68, 0.8)',
                     ],
                     borderColor: ['#22c55e', '#eab308', '#f97316', '#ef4444'],
                     borderWidth: 1,
