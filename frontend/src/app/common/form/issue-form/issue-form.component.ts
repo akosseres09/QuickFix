@@ -144,6 +144,8 @@ export class IssueFormComponent implements OnInit {
             .subscribe({
                 next: (response) => {
                     this.labels.set(response.items);
+                    console.log(this.labels());
+
                     this.setSelectedLabel();
                 },
                 error: (_) => {
@@ -156,11 +158,12 @@ export class IssueFormComponent implements OnInit {
         const labels = this.labels();
         const issue = this.issue();
 
-        if (!labels || !issue) {
+        if (!labels) {
+            console.error('Labels or issue data is missing');
             return;
         }
 
-        if (issue.label?.id) {
+        if (issue?.label?.id) {
             const currentLabel = labels.find((l) => l.id === issue.label?.id);
             if (currentLabel) {
                 this.selectedLabel.set(currentLabel);
