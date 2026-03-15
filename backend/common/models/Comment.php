@@ -117,7 +117,7 @@ class Comment extends ActiveRecord
             return;
         }
 
-        if ($this->issue->status === Issue::STATUS_CLOSED) {
+        if ($this->issue->label->name === Label::STATUS_CLOSED) {
             $this->issue->openIssue();
             if (!$this->issue->save()) {
                 Yii::error('Failed to update issue status after adding comment: ' . json_encode($this->issue->errors));

@@ -47,6 +47,15 @@ export class OverviewComponent implements OnInit {
         },
     };
 
+    trendChartType: ChartType = 'line';
+    trendChartData: ChartConfiguration['data'] = { labels: [], datasets: [] };
+    trendChartOptions: ChartConfiguration['options'] = {
+        responsive: true,
+        maintainAspectRatio: false,
+        elements: { line: { tension: 0.4 } }, // Smoothes the line
+        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+    };
+
     ngOnInit(): void {
         Chart.register(...registerables);
 
@@ -83,32 +92,27 @@ export class OverviewComponent implements OnInit {
             });
     }
 
+    // ... existing imports
+
     private buildCharts(data: IssueStats): void {
-        // Status distribution doughnut
+        // 1. Status distribution doughnut (DYNAMIC)
+        const statusLabels = data.statuses.map((s) => s.label);
+        const statusCounts = data.statuses.map((s) => s.count);
+        const statusColors = data.statuses.map((s) => s.color);
+
         this.statusChartData = {
-            labels: ['Open', 'In Progress', 'Review', 'Resolved', 'Closed'],
+            labels: statusLabels,
             datasets: [
                 {
-                    data: [
-                        data.totals.open,
-                        data.totals.inProgress,
-                        data.totals.inReview,
-                        data.totals.resolved,
-                        data.totals.closed,
-                    ],
-                    backgroundColor: [
-                        '#0ea5e9', // sky-500
-                        '#6366f1', // indigo-500
-                        '#d946ef', // fuchsia-500
-                        '#14b8a6', // teal-500
-                        '#f97316', // orange-500
-                    ],
+                    data: statusCounts,
+                    backgroundColor: statusColors,
+                    hoverBackgroundColor: statusColors, // Maintain color on hover
                     borderWidth: 0,
                 },
             ],
         };
 
-        // Priority distribution bar
+        // 2. Priority distribution bar (STAY THE SAME)
         this.priorityChartData = {
             labels: ['Low', 'Medium', 'High', 'Critical'],
             datasets: [
@@ -128,6 +132,28 @@ export class OverviewComponent implements OnInit {
                     borderColor: ['#22c55e', '#eab308', '#f97316', '#ef4444'],
                     borderWidth: 1,
                     borderRadius: 4,
+                },
+            ],
+        };
+
+        this.trendChartData = {
+            labels: data.trend.labels.map((d: string) =>
+                new Date(d).toLocaleDateString(undefined, { weekday: 'short' })
+            ),
+            datasets: [
+                {
+                    label: 'Created',
+                    data: data.trend.created,
+                    borderColor: '#0ea5e9',
+                    backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                    fill: true,
+                },
+                {
+                    label: 'Closed',
+                    data: data.trend.closed,
+                    borderColor: '#22c55e',
+                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                    fill: true,
                 },
             ],
         };

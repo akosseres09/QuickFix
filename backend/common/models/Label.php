@@ -21,6 +21,9 @@ use yii\db\ActiveRecord;
  */
 class Label extends ActiveRecord
 {
+    const STATUS_OPEN = 'Open';
+    const STATUS_CLOSED = 'Closed';
+
     public static function tableName()
     {
         return "{{%label}}";

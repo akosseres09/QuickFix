@@ -288,7 +288,7 @@ class Issue extends ActiveRecord
     public function openIssue()
     {
         $openStatusLabel = Yii::$app->cache->getOrSet(Label::getLabelCacheKey('open'), function () {
-            return Label::find()->statusOpen()->scalar('id');
+            return Label::find()->statusOpen()->select('id')->scalar();
         });
 
         if (!$openStatusLabel) {
@@ -306,7 +306,7 @@ class Issue extends ActiveRecord
     public function closeIssue()
     {
         $closedStatusLabel = Yii::$app->cache->getOrSet(Label::getLabelCacheKey('closed'), function () {
-            return Label::find()->statusClosed()->scalar('id');
+            return Label::find()->statusClosed()->select('id')->scalar();
         });
 
         if (!$closedStatusLabel) {

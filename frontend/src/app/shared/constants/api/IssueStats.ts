@@ -1,12 +1,8 @@
 export interface IssueStats {
     totals: {
         total: number;
-        open: number;
-        inProgress: number;
-        inReview: number;
-        resolved: number;
-        closed: number;
     };
+    statuses: { label: string; color: string; count: number }[];
     priorities: {
         low: number;
         medium: number;
@@ -23,4 +19,5 @@ export interface IssueStats {
         createdToday: number;
         closedToday: number;
     };
+    trend: { labels: string[]; created: number[]; closed: number[] };
 }
