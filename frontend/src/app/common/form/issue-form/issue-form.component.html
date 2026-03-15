@@ -61,32 +61,42 @@
                     Status
                 </label>
                 <mat-form-field class="w-full" appearance="fill">
-                    <mat-select formControlName="status" required>
+                    <mat-select formControlName="statusLabel" required>
                         <mat-select-trigger>
-                            @if (
-                                issueForm.get('status')?.value !== null &&
-                                issueForm.get('status')?.value !== undefined
-                            ) {
+                            @if (selectedLabel()) {
                                 <span
-                                    class="inline-block px-3 py-1 rounded-full font-semibold text-sm border-2"
-                                    [ngClass]="statusColorMap[issueForm.get('status')?.value ?? 0]"
+                                    class="inline-block px-3 py-1 rounded-full font-bold text-sm border-2 shadow-sm"
+                                    [style.border-color]="selectedLabel()?.color"
+                                    [style.color]="selectedLabel()?.color"
+                                    [style.background-color]="
+                                        'color-mix(in srgb, ' +
+                                        selectedLabel()?.color +
+                                        ' 30%, transparent)'
+                                    "
                                 >
-                                    {{ statusMap[issueForm.get('status')?.value ?? 0] }}
+                                    {{ selectedLabel()?.name }}
                                 </span>
                             }
                         </mat-select-trigger>
-                        @for (type of statusList; track type) {
-                            <mat-option [value]="type">
+                        @for (label of labels(); track label.id) {
+                            <mat-option [value]="label.id">
                                 <span
-                                    class="inline-block px-3 py-1 rounded-full font-semibold text-sm border-2"
-                                    [ngClass]="statusColorMap[type]"
+                                    class="inline-block px-3 py-1 rounded-full font-semibold text-sm border-2 shadow-sm"
+                                    [style.border-color]="label.color"
+                                    [style.color]="label.color"
+                                    [style.background-color]="
+                                        'color-mix(in srgb, ' + label.color + ' 15%, transparent)'
+                                    "
                                 >
-                                    {{ statusMap[type] }}
+                                    {{ label.name }}
                                 </span>
                             </mat-option>
                         }
                     </mat-select>
-                    @if (issueForm.get('status')?.invalid && issueForm.get('status')?.touched) {
+                    @if (
+                        issueForm.get('statusLabel')?.invalid &&
+                        issueForm.get('statusLabel')?.touched
+                    ) {
                         <mat-error>Status is required</mat-error>
                     }
                 </mat-form-field>

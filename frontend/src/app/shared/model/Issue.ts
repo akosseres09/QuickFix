@@ -1,38 +1,7 @@
 import { BaseModel } from './BaseModel';
+import { Label } from './Label';
 import { Project } from './Project';
 import { User } from './User';
-
-export enum IssueStatus {
-    OPEN = 0,
-    IN_PROGRESS = 1,
-    REVIEW = 2,
-    RESOLVED = 3,
-    CLOSED = 4,
-}
-
-export const STATUS_LIST = [
-    IssueStatus.OPEN,
-    IssueStatus.IN_PROGRESS,
-    IssueStatus.REVIEW,
-    IssueStatus.RESOLVED,
-    IssueStatus.CLOSED,
-];
-
-export const STATUS_MAP: { [key: number]: string } = {
-    [IssueStatus.OPEN]: 'Open',
-    [IssueStatus.IN_PROGRESS]: 'In Progress',
-    [IssueStatus.REVIEW]: 'Review',
-    [IssueStatus.RESOLVED]: 'Resolved',
-    [IssueStatus.CLOSED]: 'Closed',
-};
-
-export const STATUS_COLOR_MAP: { [key: number]: string } = {
-    [IssueStatus.OPEN]: 'text-sky-700 bg-sky-50',
-    [IssueStatus.IN_PROGRESS]: 'text-indigo-700 bg-indigo-100',
-    [IssueStatus.REVIEW]: 'text-fuchsia-700 bg-fuchsia-100',
-    [IssueStatus.RESOLVED]: 'text-teal-700 bg-teal-100',
-    [IssueStatus.CLOSED]: 'text-orange-500 bg-orange-200',
-};
 
 export enum IssuePriority {
     LOW = 0,
@@ -92,7 +61,7 @@ export interface Issue extends BaseModel {
     title: string;
     description: string;
     type: IssueType;
-    status: IssueStatus;
+    statusLabel: string;
     priority: IssuePriority;
     createdBy: string;
     updatedBy: string | null;
@@ -107,4 +76,5 @@ export interface Issue extends BaseModel {
     assignee?: User | null;
     project?: Project;
     updator?: User | null;
+    label?: Label;
 }
