@@ -79,8 +79,6 @@ export class WorktimeComponent implements OnInit, AfterViewInit {
 
     private readonly loadListTrigger$ = new Subject<void>();
     readonly organizationId = input.required<string>();
-    projectId = input.required<string>({ alias: 'project_id' });
-    issueId = input.required<string>({ alias: 'issue_id' });
 
     minDate = signal<Date>(new Date('2026-01-01'));
     maxDate = signal<Date>(new Date(new Date().setHours(23, 59, 59, 999)));
@@ -88,7 +86,7 @@ export class WorktimeComponent implements OnInit, AfterViewInit {
     endDate = this.dateRangeService.endDate;
 
     projects = signal<Project[]>([]);
-    selectedProjectId = linkedSignal<string | null>(() => this.projectId() || null);
+    selectedProjectId = signal<string | null>(null);
     filteredEntries = signal<Worktime[]>([]);
 
     selectedWorktime = signal<Worktime | null>(null);
@@ -202,7 +200,7 @@ export class WorktimeComponent implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit(): void {
-        if (this.selectedProjectId() && this.issueId()) {
+        if (this.selectedProjectId()) {
             this.openWorktimeDialog();
         }
     }
@@ -269,6 +267,10 @@ export class WorktimeComponent implements OnInit, AfterViewInit {
         this.filteredEntries.update((current) => {
             return current.filter((wt) => wt.id !== worktimeId);
         });
+    }
+
+    onDeleteCanceled() {
+        this.onRowChange(null);
     }
 
     onWorktimeEdited(worktime: Worktime) {

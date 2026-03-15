@@ -79,10 +79,10 @@
     (worktimeSaved)="onWorktimeSaved($event)"
     (worktimeEdited)="onWorktimeEdited($event)"
     (onCancel)="onRowChange(null)"
-    [issueId]="issueId()"
 ></app-worktime-dialog>
 
 <app-delete-worktime-dialog
+    (canceled)="onDeleteCanceled()"
     [organizationId]="organizationId()"
     [worktime]="selectedWorktime()"
     (worktimeDeleted)="onDelete($event)"

@@ -33,7 +33,10 @@ export class DialogComponent {
         this.data.showSaveButton = this.data.showSaveButton !== false;
         this.data.showCancelButton = this.data.showCancelButton !== false;
         this.data.saveDisabled = this.data.saveDisabled || false;
-        this.data.saveButtonClass = this.data.saveButtonClass ?? '!bg-red-300 !text-red-700';
+        this.data.saveButtonClass =
+            this.data.saveButtonClass !== undefined
+                ? this.data.saveButtonClass + ' !text-white'
+                : '!bg-red-300 !text-red-700';
         this.data.cancelButtonClass = this.data.cancelButtonClass;
     }
 

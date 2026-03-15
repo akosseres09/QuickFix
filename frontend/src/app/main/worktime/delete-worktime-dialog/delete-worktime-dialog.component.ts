@@ -29,6 +29,7 @@ export class DeleteWorktimeDialogComponent {
     worktime = input.required<Worktime | null>();
 
     worktimeDeleted = output<string>();
+    canceled = output<void>();
 
     template = viewChild<TemplateRef<any>>('deleteConfirmTemplate');
 
@@ -50,6 +51,8 @@ export class DeleteWorktimeDialogComponent {
             .subscribe((result) => {
                 if (result?.action === 'save') {
                     this.onDelete(orgId, worktime.id);
+                } else {
+                    this.canceled.emit();
                 }
             });
     }
