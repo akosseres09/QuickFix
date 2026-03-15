@@ -14,13 +14,13 @@ export class BoardColumnComponent {
     organizationId = input.required<string>();
     columnTitle = input.required<string>();
     issues = input.required<Issue[]>();
-    status = input.required<number>();
+    labelId = input.required<string>();
     issueClick = output<Issue>();
     dropEvent = output<CdkDragDrop<Issue[]>>();
     showEmptyText = linkedSignal<boolean>(() => this.issues().length <= 0);
 
     get dropListId(): string {
-        return `status-${this.status()}`;
+        return `label-${this.labelId()}`;
     }
 
     onIssueClick(issue: Issue) {

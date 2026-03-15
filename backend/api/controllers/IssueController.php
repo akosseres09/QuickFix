@@ -21,9 +21,10 @@ class IssueController extends BaseRestController
 
     public function behaviors(): array
     {
+        $actions = ['index', 'view', 'update', 'delete', 'create', 'stats', 'close', 'open'];
         $behaviors = parent::behaviors();
-        $behaviors["projectTranslator"]["actions"] = ['index', 'view', 'update', 'delete', 'create', 'stats'];
-        $behaviors['organizationTranslator']["actions"] = ['index', 'view', 'update', 'delete', 'create', 'stats'];
+        $behaviors["projectTranslator"]["actions"] = $actions;
+        $behaviors['organizationTranslator']["actions"] = $actions;
         return $behaviors;
     }
 

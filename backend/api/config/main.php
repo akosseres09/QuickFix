@@ -106,7 +106,9 @@ return [
                         '{id}' => '<id:[A-Za-z0-9_\-]+>',
                     ],
                     'extraPatterns' => [
-                        'GET stats' => 'stats'
+                        'GET stats' => 'stats',
+                        'POST {id}/close' => 'close',
+                        'POST {id}/open' => 'open',
                     ]
                 ],
                 [

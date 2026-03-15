@@ -10,12 +10,9 @@ import {
 } from '@angular/core';
 import {
     Issue,
-    IssueStatus,
     IssueType,
     PRIORITY_COLOR_MAP,
     PRIORITY_MAP,
-    STATUS_COLOR_MAP,
-    STATUS_MAP,
     TYPE_COLOR_MAP,
     TYPE_MAP,
 } from '../../../../shared/model/Issue';
@@ -93,11 +90,8 @@ export class ViewComponent {
     worktimeDialog = viewChild(WorktimeDialogComponent);
 
     // constants
-    issueStatuses = IssueStatus;
     PRIORITY_COLOR_MAP = PRIORITY_COLOR_MAP;
     PRIORITY_MAP = PRIORITY_MAP;
-    STATUS_COLOR_MAP = STATUS_COLOR_MAP;
-    STATUS_MAP = STATUS_MAP;
     TYPE_COLOR_MAP = TYPE_COLOR_MAP;
     TYPE_MAP = TYPE_MAP;
 
@@ -138,18 +132,17 @@ export class ViewComponent {
     isOverdue(): boolean {
         const issue = this.issue();
         if (!issue?.dueDate) return false;
-        return issue.dueDate * 1000 < Date.now() && issue.status < 3;
+        return issue.dueDate * 1000 < Date.now() && !issue.closedAt;
     }
 
-    updateIssueStatus(status: IssueStatus): void {
+    updateIssueLabel(labelId: string): void {
         this.issueService
             .updateIssue({
                 issueId: this.issue().id,
                 projectId: this.projectId(),
                 organizationId: this.organizationId(),
                 issue: {
-                    status: status,
-                    closedAt: status === IssueStatus.CLOSED ? Math.floor(Date.now() / 1000) : null,
+                    statusLabel: labelId,
                 },
             })
             .subscribe({
@@ -158,11 +151,55 @@ export class ViewComponent {
                         ...this.issue(),
                         ...updatedIssue,
                     });
-                    this.snackbarService.success('Issue status updated successfully');
+                    this.snackbarService.success('Issue label updated successfully');
                 },
                 error: (err) => {
-                    console.error('Failed to update issue status:', err);
-                    this.snackbarService.error('Failed to update issue status');
+                    console.error('Failed to update issue label:', err);
+                    this.snackbarService.error('Failed to update issue label');
+                },
+            });
+    }
+
+    closeIssue(): void {
+        this.issueService
+            .closeIssue({
+                issueId: this.issue().id,
+                projectId: this.projectId(),
+                organizationId: this.organizationId(),
+            })
+            .subscribe({
+                next: (updatedIssue) => {
+                    this.issue.set({
+                        ...this.issue(),
+                        ...updatedIssue,
+                    });
+                    this.snackbarService.success('Issue closed successfully');
+                },
+                error: (err) => {
+                    console.error('Failed to close issue:', err);
+                    this.snackbarService.error('Failed to close issue');
+                },
+            });
+    }
+
+    reopenIssue(): void {
+        this.issueService
+            .openIssue({
+                issueId: this.issue().id,
+                projectId: this.projectId(),
+                organizationId: this.organizationId(),
+            })
+            .subscribe({
+                next: (updatedIssue) => {
+                    this.issue.set({
+                        ...this.issue(),
+                        ...updatedIssue,
+                    });
+                    this.snackbarService.success('Issue reopened successfully');
+                },
+                error: (err) => {
+                    console.error('Failed to reopen issue:', err);
+                    this.snackbarService.error('Failed to reopen issue');
                 },
             });
     }

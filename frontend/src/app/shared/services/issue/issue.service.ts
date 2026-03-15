@@ -65,7 +65,7 @@ export class IssueService {
         organizationId: string;
         expand?: string;
     }): Observable<Issue> {
-        const expandParams = data.expand ?? 'creator,assignee,updator';
+        const expandParams = data.expand ?? 'creator,assignee,updator,label';
         return this.http.get<Issue>(
             `${this.url}/${data.organizationId}/${data.projectId}/issue/${data.issueId}`,
             {
@@ -131,6 +131,42 @@ export class IssueService {
     getStats(ids: { projectId: string; organizationId: string }): Observable<IssueStats> {
         return this.http.get<IssueStats>(
             `${this.url}/${ids.organizationId}/${ids.projectId}/issue/stats`
+        );
+    }
+
+    closeIssue(
+        data: {
+            issueId: string;
+            projectId: string;
+            organizationId: string;
+        },
+        params: ApiQueryParams = { expand: 'creator,assignee,updator,label' }
+    ): Observable<Issue> {
+        const qp = ParamsHandler.convertToHttpParams(params);
+        return this.http.post<Issue>(
+            `${this.url}/${data.organizationId}/${data.projectId}/issue/${data.issueId}/close`,
+            {},
+            {
+                params: qp,
+            }
+        );
+    }
+
+    openIssue(
+        data: {
+            issueId: string;
+            projectId: string;
+            organizationId: string;
+        },
+        params: ApiQueryParams = { expand: 'creator,assignee,updator,label' }
+    ): Observable<Issue> {
+        const qp = ParamsHandler.convertToHttpParams(params);
+        return this.http.post<Issue>(
+            `${this.url}/${data.organizationId}/${data.projectId}/issue/${data.issueId}/open`,
+            {},
+            {
+                params: qp,
+            }
         );
     }
 }
