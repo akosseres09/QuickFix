@@ -60,7 +60,7 @@ class Label extends ActiveRecord
             ['description', 'string', 'max' => 64],
             ['color', 'string', 'max' => 7],
             ['color', 'match', 'pattern' => '/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/'],
-            [['project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['project_id' => 'id']],
+            [['project_id'], 'exist', 'targetClass' => Project::class, 'targetAttribute' => ['project_id' => 'id']],
             [['project_id', 'name', 'index'], 'unique', 'targetAttribute' => ['project_id', 'name', 'index'], 'message' => 'A label with this name and index already exists in the project.'],
         ];
     }
@@ -96,7 +96,7 @@ class Label extends ActiveRecord
         }
 
         $index = self::find()->byProjectId($this->project_id)->max('index');
-        $this->index = $index !== null ? $index + 1 : 0;
+        $this->index = $index !== null ? $index + 1 : 1;
 
         return true;
     }

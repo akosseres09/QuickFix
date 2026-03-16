@@ -47,6 +47,8 @@ export class TableComponent<T extends BaseModel> {
     initialSortActive = input<string>('');
     initialSortDirection = input<SortDirection>('asc');
     totalCount = input<number>(0);
+    enablePagination = input<boolean>(true);
+    disableSelection = input<boolean | ((row: T) => boolean)>(false);
 
     edit = output<T>();
     delete = output<T>();
@@ -87,10 +89,13 @@ export class TableComponent<T extends BaseModel> {
     }
 
     onPageEvent(event: PageEvent) {
+        if (!this.enablePagination()) return;
         this.pageChange.emit(event);
     }
 
     toggleRow(row: T): void {
+        if (this.isRowDisabled(row)) return;
+
         const rowId = row.id;
         if (this.selectedRow()?.id === rowId) {
             this.selectedRow.set(null);
@@ -98,5 +103,17 @@ export class TableComponent<T extends BaseModel> {
         }
 
         this.selectedRow.set(row);
+    }
+
+    isRowDisabled(row: T): boolean {
+        const disabled = this.disableSelection();
+
+        // If it's a function, execute it with the current row
+        if (typeof disabled === 'function') {
+            return disabled(row);
+        }
+
+        // Otherwise, return the boolean value directly
+        return disabled;
     }
 }

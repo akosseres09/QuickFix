@@ -13,7 +13,11 @@ export class LabelService {
     private readonly http = inject(HttpClient);
     private readonly url = environment.apiUrl;
 
-    createLabel(data: { organizationId: string; projectId: string; label: Omit<Label, 'id'> }) {
+    createLabel(data: {
+        organizationId: string;
+        projectId: string;
+        label: Omit<Label, 'id' | 'projectId'>;
+    }) {
         return this.http.post<Label>(
             `${this.url}/${data.organizationId}/${data.projectId}/label`,
             data.label
@@ -32,6 +36,24 @@ export class LabelService {
             {
                 params: params,
             }
+        );
+    }
+
+    updateLabel(data: {
+        organizationId: string;
+        projectId: string;
+        labelId: string;
+        label: Omit<Label, 'id'>;
+    }) {
+        return this.http.put<Label>(
+            `${this.url}/${data.organizationId}/${data.projectId}/label/${data.labelId}`,
+            data.label
+        );
+    }
+
+    deleteLabel(data: { organizationId: string; projectId: string; labelId: string }) {
+        return this.http.delete(
+            `${this.url}/${data.organizationId}/${data.projectId}/label/${data.labelId}`
         );
     }
 }

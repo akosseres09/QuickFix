@@ -1,0 +1,43 @@
+<ng-template #formTemplate>
+    <form [formGroup]="form" class="flex flex-col space-y-4">
+        <mat-form-field>
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name" />
+            @if (name.invalid && (name.dirty || name.touched)) {
+                <mat-error>
+                    @if (name.errors?.['required']) {
+                        <span>Name is required</span>
+                    }
+                </mat-error>
+            }
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Description</mat-label>
+            <textarea matInput formControlName="description"></textarea>
+            @if (description.invalid && (description.dirty || description.touched)) {
+                <mat-error>
+                    @if (description.errors?.['required']) {
+                        <span>Description is required</span>
+                    }
+                    @if (description.errors?.['maxlength']) {
+                        <span>Description must be at most 64 characters long</span>
+                    }
+                </mat-error>
+            }
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Color</mat-label>
+            <input type="color" matInput formControlName="color" />
+            @if (color.invalid && (color.dirty || color.touched)) {
+                <mat-error>
+                    @if (color.errors?.['required']) {
+                        <span>Color is required</span>
+                    }
+                    @if (color.errors?.['pattern']) {
+                        <span>Invalid color format</span>
+                    }
+                </mat-error>
+            }
+        </mat-form-field>
+    </form>
+</ng-template>
