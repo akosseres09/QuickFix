@@ -4,6 +4,7 @@ namespace common\models;
 
 use common\components\behaviors\InvalidateCacheBehavior;
 use common\models\query\LabelQuery;
+use Exception;
 use Symfony\Component\Uid\Uuid;
 use Yii;
 use yii\db\ActiveRecord;
@@ -63,7 +64,8 @@ class Label extends ActiveRecord
             ['color', 'string', 'max' => 7],
             ['color', 'match', 'pattern' => '/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/'],
             [['project_id'], 'exist', 'targetClass' => Project::class, 'targetAttribute' => ['project_id' => 'id']],
-            [['project_id', 'name', 'index'], 'unique', 'targetAttribute' => ['project_id', 'name', 'index'], 'message' => 'A label with this name and index already exists in the project.'],
+            [['project_id', 'name'], 'unique', 'targetAttribute' => ['project_id', 'name'], 'message' => 'A label with this name already exists in the project.'],
+            [['project_id', 'index'], 'unique', 'targetAttribute' => ['project_id', 'index'], 'message' => 'A label with this index already exists in the project.'],
         ];
     }
 
@@ -160,5 +162,51 @@ class Label extends ActiveRecord
     public static function find(): LabelQuery
     {
         return new LabelQuery(get_called_class());
+    }
+
+    public function reorder(int $newIndex): bool
+    {
+        $oldIndex = $this->index;
+
+        if ($newIndex === $oldIndex) {
+            return true;
+        }
+
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            $this->index = -1; // Temporary index to avoid unique constraint violation
+            $this->save(false, ['index']);
+
+            if ($newIndex > $oldIndex) {
+                static::updateAllCounters(
+                    ['index' => -1],
+                    [
+                        'and',
+                        ['project_id' => $this->project_id],
+                        ['>', 'index', $oldIndex],
+                        ['<=', 'index', $newIndex]
+                    ]
+                );
+            } else {
+                static::updateAllCounters(
+                    ['index' => 1],
+                    [
+                        'and',
+                        ['project_id' => $this->project_id],
+                        ['>=', 'index', $newIndex],
+                        ['<', 'index', $oldIndex]
+                    ]
+                );
+            }
+
+            $this->index = $newIndex;
+            $this->save(false, ['index']);
+
+            $transaction->commit();
+            return true;
+        } catch (Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
     }
 }

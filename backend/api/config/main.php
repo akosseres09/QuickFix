@@ -113,11 +113,23 @@ return [
                 ],
                 [
                     'class' => UrlRule::class,
-                    'controller' => ['member' => 'project-member', 'label'],
+                    'controller' => ['member' => 'project-member'],
                     'pluralize' => false,
                     'prefix' => '<organization_id:[A-Za-z0-9_\-]+>/<project_id:[A-Za-z0-9_\-]+>/',
                     'tokens' => [
                         '{id}' => '<id:[A-Za-z0-9_\-]+>',
+                    ],
+                ],
+                [
+                    'class' => UrlRule::class,
+                    'controller' => ['label'],
+                    'pluralize' => false,
+                    'prefix' => '<organization_id:[A-Za-z0-9_\-]+>/<project_id:[A-Za-z0-9_\-]+>/',
+                    'tokens' => [
+                        '{id}' => '<id:[A-Za-z0-9_\-]+>',
+                    ],
+                    'extraPatterns' => [
+                        'POST {id}/reorder' => 'reorder',
                     ]
                 ],
                 [

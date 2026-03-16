@@ -33,9 +33,16 @@ class m260206_215831_create_label_table extends Migration
         );
 
         $this->createIndex(
-            'idx-label-project_id-name-index',
+            'idx-label-project_id-name',
             '{{%label}}',
-            ['project_id', 'name', 'index'],
+            ['project_id', 'name'],
+            true
+        );
+
+        $this->createIndex(
+            'idx-label-project_id-index',
+            '{{%label}}',
+            ['project_id', 'index'],
             true
         );
 

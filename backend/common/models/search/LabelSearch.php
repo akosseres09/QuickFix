@@ -44,7 +44,8 @@ class LabelSearch extends Label implements SearchInterface
             'sort' => [
                 'defaultOrder' => ['index' => SORT_ASC],
                 'attributes' => [
-                    'index'
+                    'index',
+                    'name'
                 ]
             ]
         ]);
