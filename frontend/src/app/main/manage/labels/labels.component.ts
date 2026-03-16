@@ -13,10 +13,16 @@ import { ActivatedRoute } from '@angular/router';
 import { SpeedDialComponent } from '../../../common/speed-dial/speed-dial.component';
 import { finalize } from 'rxjs/internal/operators/finalize';
 import { LabelFormDialogComponent } from './label-form-dialog/label-form-dialog.component';
+import { LabelDeleteDialogComponent } from './label-delete-dialog/label-delete-dialog.component';
 
 @Component({
     selector: 'app-labels',
-    imports: [TableComponent, SpeedDialComponent, LabelFormDialogComponent],
+    imports: [
+        TableComponent,
+        SpeedDialComponent,
+        LabelFormDialogComponent,
+        LabelDeleteDialogComponent,
+    ],
     templateUrl: './labels.component.html',
     styleUrl: './labels.component.css',
 })
@@ -72,7 +78,8 @@ export class LabelsComponent implements OnInit {
                         this.snackbarService.open('Please select a valid label to delete!');
                         return;
                     }
-                    // Implement delete functionality here
+
+                    this.openLabelDeleteDialog();
                 },
             },
         ];
@@ -86,6 +93,7 @@ export class LabelsComponent implements OnInit {
 
     speedDial = viewChild<SpeedDialComponent>('speedDial');
     labelFormDialog = viewChild(LabelFormDialogComponent);
+    labelDeleteDialog = viewChild(LabelDeleteDialogComponent);
 
     getLabels() {
         if (!this.projectId()) {
@@ -133,7 +141,7 @@ export class LabelsComponent implements OnInit {
         this.speedDial()?.onTogglerClick();
     }
 
-    onLabelFormCanceled() {
+    onDialogCanceled() {
         this.onRowChange(null);
     }
 
@@ -149,7 +157,15 @@ export class LabelsComponent implements OnInit {
         });
     }
 
+    onLabelDeleted(labelId: string) {
+        this.labels.update((labels) => labels.filter((l) => l.id !== labelId));
+    }
+
     private openLabelFormDialog() {
         this.labelFormDialog()?.open();
+    }
+
+    private openLabelDeleteDialog() {
+        this.labelDeleteDialog()?.open();
     }
 }

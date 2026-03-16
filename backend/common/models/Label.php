@@ -7,6 +7,7 @@ use common\models\query\LabelQuery;
 use Symfony\Component\Uid\Uuid;
 use Yii;
 use yii\db\ActiveRecord;
+use yii\web\ConflictHttpException;
 
 /**
  * This is the model class for table "{{%label}}".
@@ -18,6 +19,7 @@ use yii\db\ActiveRecord;
  * @property string|null $color
  * 
  * @property Project $project
+ * @property Issue[] $issues
  */
 class Label extends ActiveRecord
 {
@@ -101,6 +103,17 @@ class Label extends ActiveRecord
         return true;
     }
 
+    public function beforeDelete()
+    {
+        if (!parent::beforeDelete()) return false;
+
+        if ($this->getIssues()->exists()) {
+            throw new ConflictHttpException('Cannot delete label that is currently in use by issues.');
+        }
+
+        return true;
+    }
+
     public function fields(): array
     {
         return [
@@ -127,6 +140,16 @@ class Label extends ActiveRecord
     public function getProject()
     {
         return $this->hasOne(Project::class, ['id' => 'project_id']);
+    }
+
+    /**
+     * Gets query for [[Issue]].
+     * 
+     * @return \yii\db\ActiveQuery
+     */
+    public function getIssues()
+    {
+        return $this->hasMany(Issue::class, ['status_label' => 'id']);
     }
 
     public function canAccess(string $userId): bool

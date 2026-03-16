@@ -29,6 +29,14 @@
     [label]="selectedRow()"
     (labelSaved)="onLabelSaved($event)"
     (labelEdited)="onLabelSaved($event)"
-    (canceled)="onLabelFormCanceled()"
+    (canceled)="onDialogCanceled()"
 >
 </app-label-form-dialog>
+
+<app-label-delete-dialog
+    [organizationId]="organizationId()"
+    [projectId]="projectId()"
+    [labelId]="selectedRow()?.id || null"
+    (deleted)="onLabelDeleted($event)"
+    (canceled)="onDialogCanceled()"
+></app-label-delete-dialog>
