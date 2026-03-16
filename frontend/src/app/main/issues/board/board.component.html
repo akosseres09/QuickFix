@@ -5,9 +5,23 @@
         </div>
     } @else {
         <div class="flex-1 flex flex-col" cdkDropListGroup>
-            <div class="flex flex-1 gap-4 overflow-x-auto pb-4">
-                @for (column of columns(); track column.label.id) {
+            <div
+                class="flex flex-1 gap-4 overflow-x-auto pb-4"
+                cdkDropList
+                cdkDropListOrientation="horizontal"
+                [cdkDropListSortPredicate]="sortPredicate"
+                (cdkDropListDropped)="onColumnDrop($event)"
+            >
+                @for (
+                    column of columns();
+                    track column.label.id;
+                    let first = $first;
+                    let last = $last
+                ) {
                     <app-board-column
+                        cdkDrag
+                        [cdkDragDisabled]="first || last"
+                        [isDraggable]="!first && !last"
                         [organizationId]="organizationId()"
                         [columnTitle]="column.label.name"
                         [issues]="column.issues"

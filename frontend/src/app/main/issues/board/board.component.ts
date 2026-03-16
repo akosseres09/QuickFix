@@ -1,7 +1,14 @@
 import { Component, inject, input, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CdkDropListGroup, CdkDragDrop, transferArrayItem } from '@angular/cdk/drag-drop';
+import {
+    CdkDropListGroup,
+    CdkDropList,
+    CdkDrag,
+    CdkDragDrop,
+    moveItemInArray,
+    transferArrayItem,
+} from '@angular/cdk/drag-drop';
 import { Issue } from '../../../shared/model/Issue';
 import { IssueService } from '../../../shared/services/issue/issue.service';
 import { LabelService } from '../../../shared/services/label.service';
@@ -17,7 +24,7 @@ interface Column {
 
 @Component({
     selector: 'app-board',
-    imports: [CommonModule, CdkDropListGroup, BoardColumnComponent],
+    imports: [CommonModule, CdkDropListGroup, CdkDropList, CdkDrag, BoardColumnComponent],
     templateUrl: './board.component.html',
     styleUrl: './board.component.css',
 })
@@ -156,6 +163,52 @@ export class BoardComponent implements OnInit {
                 },
             });
     }
+
+    onColumnDrop(event: CdkDragDrop<Column[]>) {
+        if (event.previousIndex === event.currentIndex) {
+            return;
+        }
+
+        const columns = [...this.columns()];
+
+        // Prevent moving the first or last column, or dropping before first/after last
+        if (
+            event.previousIndex === 0 ||
+            event.previousIndex === columns.length - 1 ||
+            event.currentIndex === 0 ||
+            event.currentIndex === columns.length - 1
+        ) {
+            return;
+        }
+
+        moveItemInArray(columns, event.previousIndex, event.currentIndex);
+        this.columns.set(columns);
+
+        const movedColumn = columns[event.currentIndex];
+
+        let finalIndex = event.currentIndex;
+
+        this.labelService
+            .reorderLabel({
+                organizationId: this.organizationId(),
+                projectId: this.projectId(),
+                labelId: movedColumn.label.id,
+                newIndex: finalIndex,
+            })
+            .subscribe({
+                next: () => {},
+                error: (err) => {
+                    console.error('Error reordering column:', err);
+                    const reverted = [...this.columns()];
+                    moveItemInArray(reverted, event.currentIndex, event.previousIndex);
+                    this.columns.set(reverted);
+                },
+            });
+    }
+
+    sortPredicate = (index: number, drag: CdkDrag<any>, drop: CdkDropList<any>) => {
+        return index > 0 && index < this.columns().length - 1;
+    };
 
     onIssueClick(issue: Issue) {
         this.router.navigate(['../', 'overview'], {
