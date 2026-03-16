@@ -4,7 +4,7 @@
             <div class="text-gray-500">Loading issues...</div>
         </div>
     } @else {
-        <div class="flex-1 flex flex-col" cdkDropListGroup>
+        <div class="flex-1 flex flex-col">
             <div
                 class="flex flex-1 gap-4 overflow-x-auto pb-4"
                 cdkDropList
@@ -22,12 +22,12 @@
                         cdkDrag
                         [cdkDragDisabled]="first || last"
                         [isDraggable]="!first && !last"
+                        [connectedLists]="connectedLists()"
                         [organizationId]="organizationId()"
                         [columnTitle]="column.label.name"
                         [issues]="column.issues"
                         [labelId]="column.label.id"
                         (dropEvent)="onDrop($event, column.label.id)"
-                        (issueClick)="onIssueClick($event)"
                     ></app-board-column>
                 }
             </div>

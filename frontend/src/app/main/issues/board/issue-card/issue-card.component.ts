@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCard } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
@@ -23,16 +23,11 @@ import { RouterLink } from '@angular/router';
 export class IssueCardComponent {
     organizationId = input.required<string>();
     issue = input.required<Issue>();
-    cardClick = output<Issue>();
 
     PRIORITY_COLOR_MAP = PRIORITY_COLOR_MAP;
     PRIORITY_MAP = PRIORITY_MAP;
     TYPE_COLOR_MAP = TYPE_COLOR_MAP;
     TYPE_MAP = TYPE_MAP;
-
-    onCardClick() {
-        this.cardClick.emit(this.issue());
-    }
 
     getTypeIcon(): string {
         switch (this.issue().type) {

@@ -23,16 +23,12 @@ export class BoardColumnComponent {
     issues = input.required<Issue[]>();
     labelId = input.required<string>();
     isDraggable = input<boolean>(false);
-    issueClick = output<Issue>();
+    connectedLists = input<string[]>([]);
     dropEvent = output<CdkDragDrop<Issue[]>>();
     showEmptyText = linkedSignal<boolean>(() => this.issues().length <= 0);
 
     get dropListId(): string {
         return `label-${this.labelId()}`;
-    }
-
-    onIssueClick(issue: Issue) {
-        this.issueClick.emit(issue);
     }
 
     onDrop(event: CdkDragDrop<Issue[]>) {

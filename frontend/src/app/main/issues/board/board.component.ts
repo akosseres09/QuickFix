@@ -1,8 +1,7 @@
-import { Component, inject, input, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, input, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
-    CdkDropListGroup,
     CdkDropList,
     CdkDrag,
     CdkDragDrop,
@@ -24,7 +23,7 @@ interface Column {
 
 @Component({
     selector: 'app-board',
-    imports: [CommonModule, CdkDropListGroup, CdkDropList, CdkDrag, BoardColumnComponent],
+    imports: [CommonModule, CdkDropList, CdkDrag, BoardColumnComponent],
     templateUrl: './board.component.html',
     styleUrl: './board.component.css',
 })
@@ -41,6 +40,8 @@ export class BoardComponent implements OnInit {
     isLoading = signal<boolean>(true);
 
     columns = signal<Column[]>([]);
+
+    connectedLists = computed(() => this.columns().map((c) => `label-${c.label.id}`));
 
     ngOnInit() {
         this.loadBoardData();
@@ -96,20 +97,6 @@ export class BoardComponent implements OnInit {
                 issues: issues.filter((issue) => issue.statusLabel === label.id),
             };
         });
-
-        const unassignedIssues = issues.filter((issue) => !issue.statusLabel);
-        if (unassignedIssues.length > 0) {
-            newColumns.push({
-                label: {
-                    id: '',
-                    name: 'No Label',
-                    description: '',
-                    color: '#ccc',
-                    projectId: this.projectId(),
-                } as Label,
-                issues: unassignedIssues,
-            });
-        }
 
         this.columns.set(newColumns);
     }
@@ -209,11 +196,4 @@ export class BoardComponent implements OnInit {
     sortPredicate = (index: number, drag: CdkDrag<any>, drop: CdkDropList<any>) => {
         return index > 0 && index < this.columns().length - 1;
     };
-
-    onIssueClick(issue: Issue) {
-        this.router.navigate(['../', 'overview'], {
-            relativeTo: this.route,
-            queryParams: { issueId: issue.id },
-        });
-    }
 }
