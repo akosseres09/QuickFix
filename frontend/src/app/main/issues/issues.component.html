@@ -1,6 +1,6 @@
 <div class="max-w-7xl mx-auto">
     <app-filter
-        [filterFields]="filteredFields"
+        [filterFields]="filteredFields()"
         (onFilterChange)="onFilterChange($event)"
     ></app-filter>
     <app-table

@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, signal, viewChild } from '@angular/core';
+import { Component, computed, inject, input, OnInit, signal, viewChild } from '@angular/core';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { Issue } from '../../shared/model/Issue';
@@ -21,6 +21,8 @@ import { FilterService } from '../../shared/services/filter/filter.service';
 import { SpeedDialButtonFactory } from '../../shared/services/speed-dial/speed-dial-button.factory';
 import { ListState } from '../../shared/constants/table/ListState';
 import { ListStateService } from '../../shared/services/list-state/list-state.service';
+import { Label } from '../../shared/model/Label';
+import { LabelService } from '../../shared/services/label.service';
 
 @Component({
     selector: 'app-issues',
@@ -35,7 +37,7 @@ import { ListStateService } from '../../shared/services/list-state/list-state.se
     templateUrl: './issues.component.html',
     styleUrl: './issues.component.css',
 })
-export class IssuesComponent {
+export class IssuesComponent implements OnInit {
     private readonly snackbarService = inject(SnackbarService);
     private readonly issueService = inject(IssueService);
     private readonly activeRoute = inject(ActivatedRoute);
@@ -44,11 +46,12 @@ export class IssuesComponent {
     private readonly listStateService = inject(ListStateService);
     private readonly dialogService = inject(DialogService);
     private readonly buttonFactory = inject(SpeedDialButtonFactory);
+    private readonly labelService = inject(LabelService);
 
     // List state (pagination, sorting, filtering)
     readonly listState: ListState = this.listStateService.create(this.activeRoute, {
         defaultPageSize: 20,
-        expand: 'creator,assignee',
+        expand: 'creator,assignee,label',
     });
 
     projectId = input.required<string>();
@@ -57,6 +60,7 @@ export class IssuesComponent {
     selectedRow = signal<Issue | null>(null);
 
     filteredIssues = signal<Issue[]>([]);
+    labels = signal<Label[]>([]);
     shownIssues = computed(() => new MatTableDataSource<Issue>(this.filteredIssues()));
     displayedColumns: Array<DisplayedColumn<Issue>> =
         this.displayedColumService.getIssueDisplayColumns();
@@ -83,14 +87,18 @@ export class IssuesComponent {
         });
     });
 
-    filteredFields: Filter[] = this.filterService.getIssueFilters();
+    filteredFields = computed<Filter[]>(() => this.filterService.getIssueFilters(this.labels()));
 
     // template refs
     speedDial = viewChild<SpeedDialComponent>('speedDial');
     archiveConfirmTemplate = viewChild<any>('archiveConfirmTemplate');
     unarchiveConfirmTemplate = viewChild<any>('unarchiveConfirmTemplate');
 
-    getIssues() {
+    ngOnInit(): void {
+        this.loadLabels();
+    }
+
+    private getIssues() {
         const projectId = this.projectId();
         const organizationId = this.organizationId();
         if (!projectId) {
@@ -116,6 +124,28 @@ export class IssuesComponent {
                 error: (error) => {
                     console.error('Error fetching issues:', error);
                     this.snackbarService.error('Failed to load issues');
+                },
+            });
+    }
+
+    private loadLabels() {
+        const projectId = this.projectId();
+        const organizationId = this.organizationId();
+        if (!projectId || !organizationId) {
+            console.error('Project ID or Organization ID is missing');
+            return;
+        }
+
+        this.labelService
+            .getLabelsToProject({ organizationId, projectId })
+            .pipe(finalize(() => this.getIssues()))
+            .subscribe({
+                next: (response) => {
+                    this.labels.set(response.items);
+                },
+                error: (error) => {
+                    console.error('Error fetching labels:', error);
+                    this.snackbarService.error('Failed to load labels');
                 },
             });
     }

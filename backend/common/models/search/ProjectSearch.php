@@ -31,6 +31,7 @@ class ProjectSearch extends Project implements SearchInterface
     public function search($params): ActiveDataProvider
     {
         $userId = Yii::$app->user->id;
+        $organizationId = Yii::$app->request->get('organization_id');
 
         // Define a subquery to count ALL members for a project
         // This allows us to sort by 'total members' without breaking the main query
@@ -48,7 +49,7 @@ class ProjectSearch extends Project implements SearchInterface
                     ['p.visibility' => Project::VISIBILITY_TEAM],
                     ['is not', 'pm.id', null]
                 ]
-            ]);
+            ])->andWhere(['p.organization_id' => $organizationId]);
 
         // Extract pagination params from request
         $page = isset($params['page']) ? (int) $params['page'] : 1;

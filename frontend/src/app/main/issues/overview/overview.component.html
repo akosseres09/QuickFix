@@ -34,63 +34,39 @@
 
     <!-- Dashboard Content -->
     @if (stats(); as data) {
-        <!-- Key Metrics -->
-        <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-            <div class="bg-white dark:bg-dark-background-hover rounded-md p-5">
+        <div class="flex flex-wrap gap-4 mb-6">
+            <div
+                class="flex-1 min-w-[150px] bg-white dark:bg-dark-background-hover rounded-md p-5 border-l-4 border-gray-400"
+            >
                 <p
                     class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2"
                 >
-                    Total
+                    Total Issues
                 </p>
                 <p class="text-2xl font-semibold text-gray-900 dark:text-white">
                     {{ data.totals.total }}
                 </p>
             </div>
-            <div class="bg-white dark:bg-dark-background-hover rounded-md p-5">
-                <p
-                    class="text-xs font-medium text-sky-600 dark:text-sky-400 uppercase tracking-wide mb-2"
+
+            @for (status of data.statuses; track status.label) {
+                <div
+                    class="flex-1 min-w-[150px] bg-white dark:bg-dark-background-hover rounded-md p-5 border-l-4"
+                    [style.border-color]="status.color"
                 >
-                    Open
-                </p>
-                <p class="text-2xl font-semibold text-gray-900 dark:text-white">
-                    {{ data.totals.open }}
-                </p>
-            </div>
-            <div class="bg-white dark:bg-dark-background-hover rounded-md p-5">
-                <p
-                    class="text-xs font-medium text-indigo-600 dark:text-indigo-400 uppercase tracking-wide mb-2"
-                >
-                    In Progress
-                </p>
-                <p class="text-2xl font-semibold text-gray-900 dark:text-white">
-                    {{ data.totals.inProgress }}
-                </p>
-            </div>
-            <div class="bg-white dark:bg-dark-background-hover rounded-md p-5">
-                <p
-                    class="text-xs font-medium text-teal-600 dark:text-teal-400 uppercase tracking-wide mb-2"
-                >
-                    Resolved
-                </p>
-                <p class="text-2xl font-semibold text-gray-900 dark:text-white">
-                    {{ data.totals.resolved }}
-                </p>
-            </div>
-            <div class="bg-white dark:bg-dark-background-hover rounded-md p-5">
-                <p
-                    class="text-xs font-medium text-orange-600 dark:text-orange-400 uppercase tracking-wide mb-2"
-                >
-                    Closed
-                </p>
-                <p class="text-2xl font-semibold text-gray-900 dark:text-white">
-                    {{ data.totals.closed }}
-                </p>
-            </div>
+                    <p
+                        class="text-xs font-medium uppercase tracking-wide mb-2"
+                        [style.color]="status.color"
+                    >
+                        {{ status.label }}
+                    </p>
+                    <p class="text-2xl font-semibold text-gray-900 dark:text-white">
+                        {{ status.count }}
+                    </p>
+                </div>
+            }
         </div>
 
-        <!-- Charts Row -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <!-- Status Distribution (Doughnut) -->
             <div class="bg-white dark:bg-dark-background-hover rounded-md p-6">
                 <h2 class="text-base font-semibold text-gray-900 dark:text-white mb-4">
                     Status Distribution
@@ -105,7 +81,6 @@
                 </div>
             </div>
 
-            <!-- Priority Distribution (Bar) -->
             <div class="bg-white dark:bg-dark-background-hover rounded-md p-6">
                 <h2 class="text-base font-semibold text-gray-900 dark:text-white mb-4">
                     Priority Distribution
@@ -120,118 +95,22 @@
                 </div>
             </div>
         </div>
-
-        <!-- Type Breakdown & Activity -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Type Breakdown -->
-            <div class="lg:col-span-2 bg-white dark:bg-dark-background-hover rounded-md p-6">
-                <h2 class="text-base font-semibold text-gray-900 dark:text-white mb-4">
-                    Issue Types
+        <div class="bg-white dark:bg-dark-background-hover rounded-md p-6 mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-base font-semibold text-gray-900 dark:text-white">
+                    7-Day Velocity
                 </h2>
-                <div class="space-y-4">
-                    <!-- Bug -->
-                    <div class="flex items-center gap-4">
-                        <span
-                            class="w-20 text-sm font-medium text-gray-700 dark:text-gray-300 shrink-0"
-                            >Bug</span
-                        >
-                        <div class="flex-1 bg-gray-100 dark:bg-gray-700 rounded-full h-2.5">
-                            <div
-                                class="h-2.5 rounded-full bg-red-500 transition-all duration-500"
-                                [style.width.%]="typePercentage(data.types.bug)"
-                            ></div>
-                        </div>
-                        <span
-                            class="w-16 text-right text-sm tabular-nums text-gray-900 dark:text-white"
-                        >
-                            {{ data.types.bug }}
-                        </span>
-                    </div>
-                    <!-- Feature -->
-                    <div class="flex items-center gap-4">
-                        <span
-                            class="w-20 text-sm font-medium text-gray-700 dark:text-gray-300 shrink-0"
-                            >Feature</span
-                        >
-                        <div class="flex-1 bg-gray-100 dark:bg-gray-700 rounded-full h-2.5">
-                            <div
-                                class="h-2.5 rounded-full bg-purple-500 transition-all duration-500"
-                                [style.width.%]="typePercentage(data.types.feature)"
-                            ></div>
-                        </div>
-                        <span
-                            class="w-16 text-right text-sm tabular-nums text-gray-900 dark:text-white"
-                        >
-                            {{ data.types.feature }}
-                        </span>
-                    </div>
-                    <!-- Task -->
-                    <div class="flex items-center gap-4">
-                        <span
-                            class="w-20 text-sm font-medium text-gray-700 dark:text-gray-300 shrink-0"
-                            >Task</span
-                        >
-                        <div class="flex-1 bg-gray-100 dark:bg-gray-700 rounded-full h-2.5">
-                            <div
-                                class="h-2.5 rounded-full bg-blue-500 transition-all duration-500"
-                                [style.width.%]="typePercentage(data.types.task)"
-                            ></div>
-                        </div>
-                        <span
-                            class="w-16 text-right text-sm tabular-nums text-gray-900 dark:text-white"
-                        >
-                            {{ data.types.task }}
-                        </span>
-                    </div>
-                    <!-- Incident -->
-                    <div class="flex items-center gap-4">
-                        <span
-                            class="w-20 text-sm font-medium text-gray-700 dark:text-gray-300 shrink-0"
-                            >Incident</span
-                        >
-                        <div class="flex-1 bg-gray-100 dark:bg-gray-700 rounded-full h-2.5">
-                            <div
-                                class="h-2.5 rounded-full bg-orange-500 transition-all duration-500"
-                                [style.width.%]="typePercentage(data.types.incident)"
-                            ></div>
-                        </div>
-                        <span
-                            class="w-16 text-right text-sm tabular-nums text-gray-900 dark:text-white"
-                        >
-                            {{ data.types.incident }}
-                        </span>
-                    </div>
-                </div>
+                <span class="text-xs text-gray-500 uppercase tracking-widest"
+                    >Created vs Closed</span
+                >
             </div>
-
-            <!-- Today's Activity -->
-            <div class="bg-white dark:bg-dark-background-hover rounded-md p-6">
-                <h2 class="text-base font-semibold text-gray-900 dark:text-white mb-4">
-                    Today's Activity
-                </h2>
-                <div class="space-y-5">
-                    <div>
-                        <p
-                            class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1"
-                        >
-                            Created
-                        </p>
-                        <p class="text-3xl font-semibold text-gray-900 dark:text-white">
-                            {{ data.activity.createdToday }}
-                        </p>
-                    </div>
-                    <div class="border-t border-gray-100 dark:border-gray-700"></div>
-                    <div>
-                        <p
-                            class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1"
-                        >
-                            Closed
-                        </p>
-                        <p class="text-3xl font-semibold text-gray-900 dark:text-white">
-                            {{ data.activity.closedToday }}
-                        </p>
-                    </div>
-                </div>
+            <div class="relative h-80">
+                <canvas
+                    baseChart
+                    [type]="trendChartType"
+                    [data]="trendChartData"
+                    [options]="trendChartOptions"
+                ></canvas>
             </div>
         </div>
     }

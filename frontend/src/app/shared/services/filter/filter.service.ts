@@ -1,9 +1,5 @@
 import { Injectable } from '@angular/core';
-import {
-    PRIORITY_MAP as ISSUE_PRIORITY_MAP,
-    STATUS_MAP as ISSUE_STATUS_MAP,
-    TYPE_MAP as ISSUE_TYPE_MAP,
-} from '../../model/Issue';
+import { PRIORITY_MAP as ISSUE_PRIORITY_MAP, TYPE_MAP as ISSUE_TYPE_MAP } from '../../model/Issue';
 import { Filter } from '../../constants/Filter';
 import {
     PRIORITY_MAP as PROJECT_PRIORITY_MAP,
@@ -11,6 +7,7 @@ import {
 } from '../../model/Project';
 import { ORGANIZATION_INVITATION_STATUS_MAP } from '../../model/OrganizationInvitation';
 import { ORGANIZATION_MEMBER_ROLE_MAP } from '../../model/OrganizationMember';
+import { Label } from '../../model/Label';
 
 @Injectable({
     providedIn: 'root',
@@ -18,7 +15,7 @@ import { ORGANIZATION_MEMBER_ROLE_MAP } from '../../model/OrganizationMember';
 export class FilterService {
     constructor() {}
 
-    getIssueFilters(): Filter[] {
+    getIssueFilters(labels: Label[]): Filter[] {
         return [
             {
                 name: 'title',
@@ -27,9 +24,9 @@ export class FilterService {
             {
                 name: 'status',
                 type: 'select',
-                options: Object.entries(ISSUE_STATUS_MAP).map(([value, label]) => ({
-                    value,
-                    label,
+                options: labels.map((label) => ({
+                    value: label.name,
+                    label: label.name,
                 })),
             },
             {

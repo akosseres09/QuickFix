@@ -5,12 +5,15 @@ namespace api\controllers;
 use api\filters\OrganizationSlugTranslatorFilter;
 use api\filters\ProjectKeyTranslatorFilter;
 use common\models\Issue;
+use common\models\Label;
 use common\models\Project;
 use common\models\search\IssueSearch;
+use Exception;
 use Yii;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
+use yii\web\ServerErrorHttpException;
 
 class IssueController extends BaseRestController
 {
@@ -18,9 +21,10 @@ class IssueController extends BaseRestController
 
     public function behaviors(): array
     {
+        $actions = ['index', 'view', 'update', 'delete', 'create', 'stats', 'close', 'open'];
         $behaviors = parent::behaviors();
-        $behaviors["projectTranslator"]["actions"] = ['index', 'view', 'update', 'delete', 'create', 'stats'];
-        $behaviors['organizationTranslator']["actions"] = ['index', 'view', 'update', 'delete', 'create', 'stats'];
+        $behaviors["projectTranslator"]["actions"] = $actions;
+        $behaviors['organizationTranslator']["actions"] = $actions;
         return $behaviors;
     }
 
@@ -45,93 +49,166 @@ class IssueController extends BaseRestController
     public function actionStats(): array
     {
         $projectId = Yii::$app->request->get('project_id');
-        if (!$projectId) {
-            throw new BadRequestHttpException('Project ID is required.');
-        }
-
         $organizationId = Yii::$app->request->get('organization_id');
-        if (!$organizationId) {
-            throw new BadRequestHttpException('Organization ID is required.');
+
+        if (!$projectId || !$organizationId) {
+            throw new BadRequestHttpException('Project and Organization IDs are required.');
         }
 
-        $project = Project::find()->byOrganizationId($organizationId)
-            ->byId($projectId)->one();
-        if (!$project) {
-            throw new NotFoundHttpException('Requested project not found!');
+        $project = Project::find()->byOrganizationId($organizationId)->byId($projectId)->one();
+        if (!$project || !$project->canAccess(Yii::$app->user->id)) {
+            throw new ForbiddenHttpException('Access denied.');
         }
 
-        if (!$project->canAccess(Yii::$app->user->id)) {
-            throw new ForbiddenHttpException('You do not have permission to access this project.');
+        $today = mktime(0, 0, 0);
+
+        // Fetch dynamic status counts with names and colors
+        $statusData = Yii::$app->db->createCommand(
+            'SELECT 
+                l.name, 
+                l.color, 
+                COUNT(i.id) as count
+            FROM {{%label}} l
+            LEFT JOIN {{%issue}} i ON i.status_label = l.id 
+                AND i.project_id = :project_id
+                AND i.is_archived = FALSE
+                AND i.is_draft = FALSE
+            WHERE l.project_id = :project_id OR l.project_id IS NULL
+            GROUP BY l.id, l.name, l.color
+            HAVING COUNT(i.id) > 0 OR l.name IN (:open, :closed)',
+            [
+                ':project_id' => $projectId,
+                ':open' => Label::STATUS_OPEN,
+                ':closed' => Label::STATUS_CLOSED
+            ]
+        )->queryAll();
+
+        // Fetch priorities, types, and activity
+        $generalStats = Yii::$app->db->createCommand(
+            'SELECT
+                COUNT(*) AS total,
+                COUNT(*) FILTER (WHERE priority = :low)      AS priority_low,
+                COUNT(*) FILTER (WHERE priority = :medium)   AS priority_medium,
+                COUNT(*) FILTER (WHERE priority = :high)     AS priority_high,
+                COUNT(*) FILTER (WHERE priority = :critical) AS priority_critical,
+                COUNT(*) FILTER (WHERE type = :bug)          AS type_bug,
+                COUNT(*) FILTER (WHERE type = :feature)      AS type_feature,
+                COUNT(*) FILTER (WHERE type = :task)         AS type_task,
+                COUNT(*) FILTER (WHERE type = :incident)     AS type_incident,
+                COUNT(*) FILTER (WHERE created_at >= :today) AS created_today,
+                COUNT(*) FILTER (WHERE closed_at  >= :today) AS closed_today
+            FROM {{%issue}}
+            WHERE project_id = :project_id
+                AND is_archived = FALSE
+                AND is_draft    = FALSE',
+            [
+                ':project_id' => $projectId,
+                ':today' => $today,
+                ':low' => Issue::PRIORITY_LOW,
+                ':medium' => Issue::PRIORITY_MEDIUM,
+                ':high' => Issue::PRIORITY_HIGH,
+                ':critical' => Issue::PRIORITY_CRITICAL,
+                ':bug' => Issue::TYPE_BUG,
+                ':feature' => Issue::TYPE_FEATURE,
+                ':task' => Issue::TYPE_TASK,
+                ':incident' => Issue::TYPE_INCIDENT,
+            ]
+        )->queryOne();
+
+        // Generate last 7 days range
+        $statsRange = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = date('Y-m-d', strtotime("-$i days"));
+            $statsRange[$date] = ['created' => 0, 'closed' => 0];
         }
 
-        $today = mktime(0, 0, 0); // beginning of today (Unix timestamp)
+        // Fetch created counts
+        $createdData = Yii::$app->db->createCommand(
+            'SELECT TO_CHAR(TO_TIMESTAMP(created_at), \'YYYY-MM-DD\') as date, COUNT(*) as count
+            FROM {{%issue}}
+            WHERE project_id = :pid AND created_at >= :since
+            GROUP BY date',
+            [':pid' => $projectId, ':since' => strtotime('-7 days')]
+        )->queryAll();
 
-        $row = Yii::$app->db->createCommand('
-        SELECT
-            COUNT(*)                                        AS total,
-            COUNT(*) FILTER (WHERE status = :open)          AS status_open,
-            COUNT(*) FILTER (WHERE status = :in_progress)   AS status_in_progress,
-            COUNT(*) FILTER (WHERE status = :review)        AS status_review,
-            COUNT(*) FILTER (WHERE status = :resolved)      AS status_resolved,
-            COUNT(*) FILTER (WHERE status = :closed)        AS status_closed,
-            COUNT(*) FILTER (WHERE priority = :low)         AS priority_low,
-            COUNT(*) FILTER (WHERE priority = :medium)      AS priority_medium,
-            COUNT(*) FILTER (WHERE priority = :high)        AS priority_high,
-            COUNT(*) FILTER (WHERE priority = :critical)    AS priority_critical,
-            COUNT(*) FILTER (WHERE type = :bug)             AS type_bug,
-            COUNT(*) FILTER (WHERE type = :feature)         AS type_feature,
-            COUNT(*) FILTER (WHERE type = :task)            AS type_task,
-            COUNT(*) FILTER (WHERE type = :incident)        AS type_incident,
-            COUNT(*) FILTER (WHERE created_at >= :today)    AS created_today,
-            COUNT(*) FILTER (WHERE closed_at  >= :today)    AS closed_today
-        FROM {{%issue}}
-        WHERE project_id = :project_id
-          AND is_archived = FALSE
-          AND is_draft    = FALSE
-    ', [
-            ':project_id' => $projectId,
-            ':today' => $today,
-            ':open' => Issue::STATUS_OPEN,
-            ':in_progress' => Issue::STATUS_IN_PROGRESS,
-            ':review' => Issue::STATUS_REVIEW,
-            ':resolved' => Issue::STATUS_RESOLVED,
-            ':closed' => Issue::STATUS_CLOSED,
-            ':low' => Issue::PRIORITY_LOW,
-            ':medium' => Issue::PRIORITY_MEDIUM,
-            ':high' => Issue::PRIORITY_HIGH,
-            ':critical' => Issue::PRIORITY_CRITICAL,
-            ':bug' => Issue::TYPE_BUG,
-            ':feature' => Issue::TYPE_FEATURE,
-            ':task' => Issue::TYPE_TASK,
-            ':incident' => Issue::TYPE_INCIDENT,
-        ])->queryOne();
+        // Fetch closed counts
+        $closedData = Yii::$app->db->createCommand(
+            'SELECT TO_CHAR(TO_TIMESTAMP(closed_at), \'YYYY-MM-DD\') as date, COUNT(*) as count
+            FROM {{%issue}}
+            WHERE project_id = :pid AND closed_at >= :since
+            GROUP BY date',
+            [':pid' => $projectId, ':since' => strtotime('-7 days')]
+        )->queryAll();
+
+        // Map results back to our range
+        foreach ($createdData as $row) {
+            $statsRange[$row['date']]['created'] = (int)$row['count'];
+        }
+        foreach ($closedData as $row) {
+            $statsRange[$row['date']]['closed'] = (int)$row['count'];
+        }
 
         return [
+            'statuses' => array_map(function ($item) {
+                return [
+                    'label' => $item['name'],
+                    'color' => $item['color'],
+                    'count' => (int) $item['count']
+                ];
+            }, $statusData),
             'totals' => [
-                'total' => (int) $row['total'],
-                'open' => (int) $row['status_open'],
-                'inProgress' => (int) $row['status_in_progress'],
-                'inReview' => (int) $row['status_review'],
-                'resolved' => (int) $row['status_resolved'],
-                'closed' => (int) $row['status_closed'],
+                'total' => (int) $generalStats['total'],
             ],
             'priorities' => [
-                'low' => (int) $row['priority_low'],
-                'medium' => (int) $row['priority_medium'],
-                'high' => (int) $row['priority_high'],
-                'critical' => (int) $row['priority_critical'],
+                'low' => (int) $generalStats['priority_low'],
+                'medium' => (int) $generalStats['priority_medium'],
+                'high' => (int) $generalStats['priority_high'],
+                'critical' => (int) $generalStats['priority_critical'],
             ],
             'types' => [
-                'bug' => (int) $row['type_bug'],
-                'feature' => (int) $row['type_feature'],
-                'task' => (int) $row['type_task'],
-                'incident' => (int) $row['type_incident'],
+                'bug' => (int) $generalStats['type_bug'],
+                'feature' => (int) $generalStats['type_feature'],
+                'task' => (int) $generalStats['type_task'],
+                'incident' => (int) $generalStats['type_incident'],
             ],
             'activity' => [
-                'createdToday' => (int) $row['created_today'],
-                'closedToday' => (int) $row['closed_today'],
+                'createdToday' => (int) $generalStats['created_today'],
+                'closedToday' => (int) $generalStats['closed_today'],
             ],
+            'trend' => [
+                'labels' => array_keys($statsRange),
+                'created' => array_column($statsRange, 'created'),
+                'closed' => array_column($statsRange, 'closed'),
+            ]
         ];
+    }
+
+    public function actionClose($id): Issue
+    {
+        $issue = $this->findModel($id);
+
+        try {
+            $issue->closeIssue();
+            $issue->save();
+        } catch (Exception $e) {
+            throw new ServerErrorHttpException('Failed to close the issue');
+        }
+
+        return $issue;
+    }
+
+    public function actionOpen($id): Issue
+    {
+        $issue = $this->findModel($id);
+
+        try {
+            $issue->openIssue();
+            $issue->save();
+        } catch (Exception $e) {
+            throw new ServerErrorHttpException('Failed to open the issue');
+        }
+
+        return $issue;
     }
 
     /**

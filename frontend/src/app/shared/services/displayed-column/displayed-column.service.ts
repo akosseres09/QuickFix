@@ -4,8 +4,6 @@ import {
     Issue,
     PRIORITY_COLOR_MAP as issue_priority_color_map,
     PRIORITY_MAP as issue_priority_map,
-    STATUS_COLOR_MAP as issue_status_color_map,
-    STATUS_MAP as issue_status_map,
     TYPE_COLOR_MAP as issue_type_color_map,
     TYPE_MAP as issue_type_map,
 } from '../../model/Issue';
@@ -70,8 +68,8 @@ export class DisplayedColumnService {
                 id: 'status',
                 label: 'Status',
                 sortable: true,
-                badge: (e: Issue) => issue_status_color_map[e.status],
-                value: (e: Issue) => issue_status_map[e.status],
+                badge: (e: Issue) => e.label?.color ?? 'bg-gray-200 text-gray-800',
+                value: (e: Issue) => e.label?.name ?? 'No Label',
             },
             {
                 id: 'priority',

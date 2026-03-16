@@ -9,6 +9,7 @@ use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\web\NotFoundHttpException;
 
 /**
  * This is the model class for table "{{%issue}}".
@@ -18,7 +19,7 @@ use yii\db\ActiveRecord;
  * @property string $title
  * @property string $description
  * @property int $type
- * @property int $status
+ * @property string $status_label
  * @property int $priority
  * @property string $created_by
  * @property string $updated_by
@@ -34,6 +35,7 @@ use yii\db\ActiveRecord;
  * @property UserResource $creator
  * @property UserResource|null $assignee
  * @property UserResource $updator
+ * @property Label $label
  */
 class Issue extends ActiveRecord
 {
@@ -46,19 +48,6 @@ class Issue extends ActiveRecord
         self::TYPE_FEATURE,
         self::TYPE_TASK,
         self::TYPE_INCIDENT
-    ];
-
-    const STATUS_OPEN = 0;
-    const STATUS_IN_PROGRESS = 1;
-    const STATUS_REVIEW = 2;
-    const STATUS_RESOLVED = 3;
-    const STATUS_CLOSED = 4;
-    const STATUSES = [
-        self::STATUS_OPEN,
-        self::STATUS_IN_PROGRESS,
-        self::STATUS_REVIEW,
-        self::STATUS_RESOLVED,
-        self::STATUS_CLOSED
     ];
 
     const PRIORITY_LOW = 0;
@@ -149,25 +138,24 @@ class Issue extends ActiveRecord
     public function rules()
     {
         return [
-            [['project_id', 'title'], 'required'],
+            [['project_id', 'title', 'status_label'], 'required'],
             [['description'], 'safe'],
             [['title'], 'string', 'max' => 255],
             [['issue_key'], 'string', 'max' => 20],
-            [['type', 'status', 'priority', 'closed_at', 'due_date', 'created_at', 'updated_at'], 'integer'],
+            [['type', 'priority', 'closed_at', 'due_date', 'created_at', 'updated_at'], 'integer'],
             ['type', 'default', 'value' => self::TYPE_TASK],
-            ['status', 'default', 'value' => self::STATUS_OPEN],
             ['priority', 'default', 'value' => self::PRIORITY_MEDIUM],
             ['type', 'in', 'range' => self::TYPES],
-            ['status', 'in', 'range' => self::STATUSES],
             ['priority', 'in', 'range' => self::PRIORITIES],
             [['project_id', 'created_by', 'assigned_to'], 'string', 'max' => 36],
             [['is_archived', 'is_draft'], 'boolean', 'trueValue' => true, 'falseValue' => false],
             [['is_archived', 'is_draft'], 'default', 'value' => false],
             [['project_id', 'created_by', 'assigned_to'], 'string', 'max' => 36],
             [['project_id', 'issue_key'], 'unique', 'targetAttribute' => ['project_id', 'issue_key'], 'message' => 'The combination of Project ID and Issue Key has already been taken.'],
-            [['project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['project_id' => 'id']],
-            [['created_by'], 'exist', 'skipOnError' => true, 'targetClass' => UserResource::class, 'targetAttribute' => ['created_by' => 'id']],
-            [['assigned_to'], 'exist', 'skipOnError' => true, 'targetClass' => UserResource::class, 'targetAttribute' => ['assigned_to' => 'id']],
+            [['project_id'], 'exist',  'targetClass' => Project::class, 'targetAttribute' => ['project_id' => 'id']],
+            [['created_by'], 'exist',  'targetClass' => UserResource::class, 'targetAttribute' => ['created_by' => 'id']],
+            [['assigned_to'], 'exist', 'targetClass' => UserResource::class, 'targetAttribute' => ['assigned_to' => 'id']],
+            [['status_label'], 'exist', 'targetClass' => Label::class, 'targetAttribute' => ['status_label' => 'id']],
         ];
     }
 
@@ -183,7 +171,7 @@ class Issue extends ActiveRecord
             'title',
             'description',
             'type',
-            'status',
+            'statusLabel' => 'status_label',
             'priority',
             'createdBy' => 'created_by',
             'assignedTo' => 'assigned_to',
@@ -206,7 +194,8 @@ class Issue extends ActiveRecord
             'owner',
             'creator',
             'assignee',
-            'updator'
+            'updator',
+            'label'
         ];
     }
 
@@ -241,8 +230,18 @@ class Issue extends ActiveRecord
     }
 
     /**
+     * Gets query for [[Label]].
+     * 
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLabel()
+    {
+        return $this->hasOne(Label::class, ['id' => 'status_label']);
+    }
+
+    /**
      * Gets query for [[Updator]].
-     * @return Yii\db\ActiveQuery
+     * @return \yii\db\ActiveQuery
      */
     public function getUpdator()
     {
@@ -288,7 +287,15 @@ class Issue extends ActiveRecord
      */
     public function openIssue()
     {
-        $this->status = Issue::STATUS_OPEN;
+        $openStatusLabel = Yii::$app->cache->getOrSet(Label::getLabelCacheKey('open'), function () {
+            return Label::find()->statusOpen()->select('id')->scalar();
+        });
+
+        if (!$openStatusLabel) {
+            throw new NotFoundHttpException('Open status label not found!');
+        }
+
+        $this->status_label = $openStatusLabel;
         $this->closed_at = null;
     }
 
@@ -298,7 +305,15 @@ class Issue extends ActiveRecord
      */
     public function closeIssue()
     {
-        $this->status = Issue::STATUS_CLOSED;
+        $closedStatusLabel = Yii::$app->cache->getOrSet(Label::getLabelCacheKey('closed'), function () {
+            return Label::find()->statusClosed()->select('id')->scalar();
+        });
+
+        if (!$closedStatusLabel) {
+            throw new NotFoundHttpException('Closed status label not found!');
+        }
+
+        $this->status_label = $closedStatusLabel;
         $this->closed_at = time();
     }
 }

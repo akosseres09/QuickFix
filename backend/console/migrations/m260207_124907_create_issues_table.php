@@ -21,7 +21,7 @@ class m260207_124907_create_issues_table extends Migration
             'issue_key' => $this->string(20)->notNull(),
             'title' => $this->string(255)->notNull(),
             'type' => $this->smallInteger()->notNull()->defaultValue(Issue::TYPE_TASK),
-            'status' => $this->smallInteger()->notNull()->defaultValue(Issue::STATUS_OPEN),
+            'status_label' => $this->string(36)->notNull(),
             'priority' => $this->smallInteger()->notNull()->defaultValue(Issue::PRIORITY_MEDIUM),
             'created_by' => $this->string(36)->notNull(),
             'updated_by' => $this->string(36)->null(),
@@ -45,6 +45,16 @@ class m260207_124907_create_issues_table extends Migration
             '{{%project}}',
             'id',
             'CASCADE',
+            'CASCADE'
+        );
+
+        $this->addForeignKey(
+            'fk-issue-status_label',
+            '{{%issue}}',
+            'status_label',
+            '{{%label}}',
+            'id',
+            'RESTRICT',
             'CASCADE'
         );
 
@@ -117,7 +127,7 @@ class m260207_124907_create_issues_table extends Migration
         // Covers combinations of the equality filters and finishes with the sort column
         $this->execute('
             CREATE INDEX "idx-issue-active-dashboard" 
-            ON {{%issue}} (status, priority, type, created_at DESC) 
+            ON {{%issue}} (status_label, priority, type, created_at DESC) 
             WHERE is_archived = false;
         ');
 
@@ -138,6 +148,7 @@ class m260207_124907_create_issues_table extends Migration
         $this->dropForeignKey('fk-issue-project_id', '{{%issue}}');
         $this->dropForeignKey('fk-issue-created_by', '{{%issue}}');
         $this->dropForeignKey('fk-issue-assigned_to', '{{%issue}}');
+        $this->dropForeignKey('fk-issue-status_label', '{{%issue}}');
 
         $this->dropTable('{{%issue}}');
     }

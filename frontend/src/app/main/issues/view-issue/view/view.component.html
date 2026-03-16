@@ -28,8 +28,8 @@
                         <mat-icon>link</mat-icon>
                         Copy Issue Link
                     </button>
-                    @if (issue().status !== issueStatuses.CLOSED) {
-                        <button (click)="updateIssueStatus(issueStatuses.CLOSED)" mat-menu-item>
+                    @if (!issue().closedAt) {
+                        <button (click)="closeIssue()" mat-menu-item>
                             <mat-icon>close</mat-icon>
                             Close Issue
                         </button>
@@ -38,7 +38,7 @@
                             Record Time
                         </button>
                     } @else {
-                        <button (click)="updateIssueStatus(issueStatuses.OPEN)" mat-menu-item>
+                        <button (click)="reopenIssue()" mat-menu-item>
                             <mat-icon>play_circle_outline</mat-icon>
                             Reopen Issue
                         </button>
@@ -55,7 +55,7 @@
                 >by:
                 <a
                     class="text-black dark:text-white hover:underline hover:underline-offset-2"
-                    [routerLink]="['../../../members', issue().creator?.username]"
+                    [routerLink]="['../../../../../member', issue().creator?.username]"
                     >{{ issue().creator?.fullName ?? 'Unknown' }}</a
                 ></span
             >
@@ -122,7 +122,7 @@
                             >by:
                             <a
                                 class="text-black dark:text-white hover:underline hover:underline-offset-2"
-                                [routerLink]="['../../../members', issue().updator?.username]"
+                                [routerLink]="['../../../../../member', issue().updator?.username]"
                                 >{{ issue().updator?.fullName ?? 'Unknown' }}</a
                             ></span
                         >
@@ -192,23 +192,25 @@
         <div class="lg:order-2 order-1 lg:w-60 xl:w-72 shrink-0 lg:sticky lg:top-8 lg:self-start">
             <div class="space-y-3">
                 <div class="border-b border-gray-700 py-5">
-                    <h3 class="text-xs font-semibold uppercase tracking-wide mb-4">Status</h3>
-                    <span
-                        class="inline-flex px-3 py-1 rounded-full text-sm font-medium"
-                        [ngClass]="STATUS_COLOR_MAP[issue().status]"
-                    >
-                        {{ STATUS_MAP[issue().status] }}
-                    </span>
+                    <h3 class="text-xs font-semibold uppercase tracking-wide mb-4">Label</h3>
+                    @if (issue().label) {
+                        <app-badge
+                            [text]="issue().label?.name ?? ''"
+                            [color]="issue().label?.color ?? 'gray'"
+                        >
+                        </app-badge>
+                    } @else {
+                        <span class="text-sm text-gray-500 italic">No Label</span>
+                    }
                 </div>
 
                 <div class="border-b border-gray-700 py-5">
                     <h3 class="text-xs font-semibold uppercase tracking-wide mb-4">Priority</h3>
-                    <span
-                        class="inline-flex px-3 py-1 rounded-full text-sm font-medium"
-                        [ngClass]="PRIORITY_COLOR_MAP[issue().priority]"
-                    >
-                        {{ PRIORITY_MAP[issue().priority] }}
-                    </span>
+                    <app-badge
+                        [text]="PRIORITY_MAP[issue().priority]"
+                        [tailwindColor]="PRIORITY_COLOR_MAP[issue().priority]"
+                        fontWeight="semibold"
+                    ></app-badge>
                 </div>
 
                 <div class="border-b border-gray-700 py-5">
@@ -261,22 +263,6 @@
                         <span class="text-sm text-gray-600 dark:text-gray-400 italic">Not set</span>
                     }
                 </div>
-
-                @if (issue().project) {
-                    <div class="border-t border-gray-200 dark:border-gray-700 pt-5">
-                        <h3
-                            class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2"
-                        >
-                            Project
-                        </h3>
-                        <a
-                            [routerLink]="['/project', issue().projectId, 'issues']"
-                            class="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
-                        >
-                            {{ issue().project?.name }}
-                        </a>
-                    </div>
-                }
             </div>
         </div>
     </div>

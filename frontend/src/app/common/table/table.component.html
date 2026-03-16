@@ -11,17 +11,19 @@
             {{ tableHeader() }}
         </h2>
         <div class="flex lg:justify-center">
-            <mat-paginator
-                [disabled]="isLoading()"
-                [pageSizeOptions]="pageSizes"
-                [pageIndex]="initialPageIndex()"
-                [pageSize]="initialPageSize()"
-                [length]="totalCount()"
-                (page)="onPageEvent($event)"
-                showFirstLastButtons
-                aria-label="Select page of periodic elements"
-            >
-            </mat-paginator>
+            @if (enablePagination()) {
+                <mat-paginator
+                    [disabled]="isLoading()"
+                    [pageSizeOptions]="pageSizes"
+                    [pageIndex]="initialPageIndex()"
+                    [pageSize]="initialPageSize()"
+                    [length]="totalCount()"
+                    (page)="onPageEvent($event)"
+                    showFirstLastButtons
+                    aria-label="Select page of periodic elements"
+                >
+                </mat-paginator>
+            }
         </div>
     </div>
 
@@ -100,21 +102,17 @@
                                 } @else if (col.badge) {
                                     <div class="flex justify-center items-center">
                                         @if (badge?.includes('#')) {
-                                            <span
-                                                class="px-3 py-1 rounded-full font-semibold text-sm border-2"
-                                                [style.backgroundColor]="badge + '33'"
-                                                [style.borderColor]="badge"
-                                                [style.color]="badge"
-                                            >
-                                                {{ value }}
-                                            </span>
+                                            <app-badge
+                                                [text]="value"
+                                                [fontWeight]="'semibold'"
+                                                [color]="badge ?? ''"
+                                            ></app-badge>
                                         } @else {
-                                            <span
-                                                class="px-3 py-1 rounded-full font-semibold text-sm border-2"
-                                                [ngClass]="badge"
-                                            >
-                                                {{ value }}
-                                            </span>
+                                            <app-badge
+                                                [text]="value"
+                                                [tailwindColor]="badge ?? ''"
+                                                [fontWeight]="'semibold'"
+                                            ></app-badge>
                                         }
                                     </div>
                                 } @else {
@@ -127,9 +125,11 @@
                     @let columns = columnIds();
                     <tr mat-header-row *matHeaderRowDef="columns"></tr>
                     <tr
-                        (click)="toggleRow(row)"
-                        class="cursor-pointer transition-colors"
+                        (click)="!isRowDisabled(row) && toggleRow(row)"
+                        class="transition-colors"
                         [ngClass]="{
+                            'cursor-not-allowed opacity-60': isRowDisabled(row),
+                            'cursor-pointer': !isRowDisabled(row),
                             '!bg-light-primary !text-white hover:!bg-light-primary/70 dark:!bg-dark-hover dark:hover:!bg-dark-hover/50':
                                 selectedRow()?.id === row.id,
                             'odd:!bg-light-text-hover/20 hover:!bg-light-text-hover/40 dark:odd:!bg-dark-hover/20 dark:hover:!bg-dark-hover/50':

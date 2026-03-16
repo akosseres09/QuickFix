@@ -45,6 +45,7 @@ export class EditIssueComponent implements OnInit {
                 projectId: projectId,
                 organizationId: organizationId,
                 issueId: this.issueId(),
+                expand: 'label,assignee',
             })
             .subscribe({
                 next: (issue) => {

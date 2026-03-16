@@ -2,12 +2,12 @@
 
 namespace api\controllers;
 
-use api\filters\ProjectKeyTranslatorFilter;
 use common\models\Label;
 use common\models\Project;
 use common\models\search\LabelSearch;
 use Yii;
 use yii\web\BadRequestHttpException;
+use yii\web\ConflictHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 
@@ -18,6 +18,9 @@ class LabelController extends BaseRestController
     public function behaviors(): array
     {
         $behaviors = parent::behaviors();
+        $actions = ['index', 'view', 'create', 'update', 'delete', 'reorder'];
+        $behaviors['projectTranslator']['actions'] = $actions;
+        $behaviors['organizationTranslator']['actions'] = $actions;
         return $behaviors;
     }
 
@@ -38,6 +41,30 @@ class LabelController extends BaseRestController
         return $actions;
     }
 
+    public function actionReorder($id)
+    {
+        $label = $this->findModel($id);
+
+        if (!$label) {
+            throw new NotFoundHttpException('The requested label does not exist.');
+        }
+
+        $newIndex = Yii::$app->request->post('new_index');
+        if ($newIndex === null || !is_numeric($newIndex)) {
+            throw new BadRequestHttpException('New index is required.');
+        }
+
+        if ($newIndex <= 0 || $newIndex > 30) {
+            throw new BadRequestHttpException('Index must be between 1 and 30.');
+        }
+
+        if ($label->reorder($newIndex)) {
+            return $label;
+        }
+
+        throw new ConflictHttpException('Failed to reorder label.');
+    }
+
     public function checkAccess($action, $model = null, $params = [])
     {
         if ($model && !$model->canAccess(Yii::$app->user->id)) {
@@ -45,7 +72,7 @@ class LabelController extends BaseRestController
         }
     }
 
-    public function findModel($id)
+    public function findModel($id): Label
     {
         $organization_id = Yii::$app->request->get('organization_id');
         if (!$organization_id) {

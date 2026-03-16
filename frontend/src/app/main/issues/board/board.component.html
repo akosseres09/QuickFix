@@ -4,47 +4,32 @@
             <div class="text-gray-500">Loading issues...</div>
         </div>
     } @else {
-        <div class="flex-1 flex flex-col" cdkDropListGroup>
-            <div class="flex flex-1 gap-4 overflow-x-auto pb-4">
-                <app-board-column
-                    [organizationId]="organizationId()"
-                    [columnTitle]="STATUS_MAP[StatusEnum.OPEN]"
-                    [issues]="openIssues()"
-                    [status]="StatusEnum.OPEN"
-                    (dropEvent)="onDrop($event, StatusEnum.OPEN)"
-                ></app-board-column>
-
-                <app-board-column
-                    [organizationId]="organizationId()"
-                    [columnTitle]="STATUS_MAP[StatusEnum.IN_PROGRESS]"
-                    [issues]="inProgressIssues()"
-                    [status]="StatusEnum.IN_PROGRESS"
-                    (dropEvent)="onDrop($event, StatusEnum.IN_PROGRESS)"
-                ></app-board-column>
-
-                <app-board-column
-                    [organizationId]="organizationId()"
-                    [columnTitle]="STATUS_MAP[StatusEnum.REVIEW]"
-                    [issues]="reviewIssues()"
-                    [status]="StatusEnum.REVIEW"
-                    (dropEvent)="onDrop($event, StatusEnum.REVIEW)"
-                ></app-board-column>
-
-                <app-board-column
-                    [organizationId]="organizationId()"
-                    [columnTitle]="STATUS_MAP[StatusEnum.RESOLVED]"
-                    [issues]="resolvedIssues()"
-                    [status]="StatusEnum.RESOLVED"
-                    (dropEvent)="onDrop($event, StatusEnum.RESOLVED)"
-                ></app-board-column>
-
-                <app-board-column
-                    [organizationId]="organizationId()"
-                    [columnTitle]="STATUS_MAP[StatusEnum.CLOSED]"
-                    [issues]="closedIssues()"
-                    [status]="StatusEnum.CLOSED"
-                    (dropEvent)="onDrop($event, StatusEnum.CLOSED)"
-                ></app-board-column>
+        <div class="flex-1 flex flex-col">
+            <div
+                class="flex flex-1 gap-4 overflow-x-auto pb-4"
+                cdkDropList
+                cdkDropListOrientation="horizontal"
+                [cdkDropListSortPredicate]="sortPredicate"
+                (cdkDropListDropped)="onColumnDrop($event)"
+            >
+                @for (
+                    column of columns();
+                    track column.label.id;
+                    let first = $first;
+                    let last = $last
+                ) {
+                    <app-board-column
+                        cdkDrag
+                        [cdkDragDisabled]="first || last"
+                        [isDraggable]="!first && !last"
+                        [connectedLists]="connectedLists()"
+                        [organizationId]="organizationId()"
+                        [columnTitle]="column.label.name"
+                        [issues]="column.issues"
+                        [labelId]="column.label.id"
+                        (dropEvent)="onDrop($event, column.label.id)"
+                    ></app-board-column>
+                }
             </div>
         </div>
     }
