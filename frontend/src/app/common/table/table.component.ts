@@ -19,6 +19,7 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { BadgeComponent } from '../badge/badge.component';
 
 @Component({
     selector: 'app-table',
@@ -31,6 +32,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
         MatProgressSpinner,
         RouterLink,
         MatTooltipModule,
+        BadgeComponent,
     ],
     templateUrl: './table.component.html',
     styleUrl: './table.component.css',

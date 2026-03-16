@@ -36,6 +36,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { IssueComment } from '../../../../shared/model/IssueComment';
 import { finalize } from 'rxjs';
 import { WorktimeDialogComponent } from '../../../worktime/worktime-dialog/worktime-dialog.component';
+import { BadgeComponent } from '../../../../common/badge/badge.component';
 
 @Component({
     selector: 'app-view',
@@ -55,6 +56,7 @@ import { WorktimeDialogComponent } from '../../../worktime/worktime-dialog/workt
         TextEditorComponent,
         ViewCommentComponent,
         WorktimeDialogComponent,
+        BadgeComponent,
     ],
     templateUrl: './view.component.html',
     styleUrl: './view.component.css',

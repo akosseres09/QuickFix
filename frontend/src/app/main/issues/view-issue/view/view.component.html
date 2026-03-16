@@ -194,12 +194,11 @@
                 <div class="border-b border-gray-700 py-5">
                     <h3 class="text-xs font-semibold uppercase tracking-wide mb-4">Label</h3>
                     @if (issue().label) {
-                        <span
-                            class="inline-flex px-3 py-1 rounded-full text-sm font-medium"
-                            [style.background-color]="issue().label?.color"
+                        <app-badge
+                            [text]="issue().label?.name ?? ''"
+                            [color]="issue().label?.color ?? 'gray'"
                         >
-                            {{ issue().label?.name }}
-                        </span>
+                        </app-badge>
                     } @else {
                         <span class="text-sm text-gray-500 italic">No Label</span>
                     }
@@ -207,12 +206,11 @@
 
                 <div class="border-b border-gray-700 py-5">
                     <h3 class="text-xs font-semibold uppercase tracking-wide mb-4">Priority</h3>
-                    <span
-                        class="inline-flex px-3 py-1 rounded-full text-sm font-medium"
-                        [ngClass]="PRIORITY_COLOR_MAP[issue().priority]"
-                    >
-                        {{ PRIORITY_MAP[issue().priority] }}
-                    </span>
+                    <app-badge
+                        [text]="PRIORITY_MAP[issue().priority]"
+                        [tailwindColor]="PRIORITY_COLOR_MAP[issue().priority]"
+                        fontWeight="semibold"
+                    ></app-badge>
                 </div>
 
                 <div class="border-b border-gray-700 py-5">

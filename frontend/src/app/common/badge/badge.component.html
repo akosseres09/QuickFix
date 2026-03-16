@@ -1,0 +1,14 @@
+<div
+    [class]="badgeClasses"
+    [style.background-color]="lightBackgroundColor"
+    [style.border-color]="color() ? color() : null"
+    [style.color]="color() ? color() : null"
+    [style.display]="icon() ? 'flex' : 'inline-block'"
+    [style.align-items]="icon() ? 'center' : null"
+    [style.gap]="icon() ? '0.5rem' : null"
+>
+    @if (icon()) {
+        <mat-icon [inline]="true">{{ icon() }}</mat-icon>
+    }
+    {{ text() }}
+</div>

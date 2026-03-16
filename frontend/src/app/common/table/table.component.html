@@ -102,21 +102,17 @@
                                 } @else if (col.badge) {
                                     <div class="flex justify-center items-center">
                                         @if (badge?.includes('#')) {
-                                            <span
-                                                class="px-3 py-1 rounded-full font-semibold text-sm border-2"
-                                                [style.backgroundColor]="badge + '33'"
-                                                [style.borderColor]="badge"
-                                                [style.color]="badge"
-                                            >
-                                                {{ value }}
-                                            </span>
+                                            <app-badge
+                                                [text]="value"
+                                                [fontWeight]="'semibold'"
+                                                [color]="badge ?? ''"
+                                            ></app-badge>
                                         } @else {
-                                            <span
-                                                class="px-3 py-1 rounded-full font-semibold text-sm border-2"
-                                                [ngClass]="badge"
-                                            >
-                                                {{ value }}
-                                            </span>
+                                            <app-badge
+                                                [text]="value"
+                                                [tailwindColor]="badge ?? ''"
+                                                [fontWeight]="'semibold'"
+                                            ></app-badge>
                                         }
                                     </div>
                                 } @else {

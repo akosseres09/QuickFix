@@ -13,10 +13,11 @@ import {
 } from '../../../../shared/model/Issue';
 import { AvatarComponent } from '../../../../common/avatar/avatar.component';
 import { RouterLink } from '@angular/router';
+import { BadgeComponent } from '../../../../common/badge/badge.component';
 
 @Component({
     selector: 'app-issue-card',
-    imports: [CommonModule, MatCard, MatIcon, CdkDrag, AvatarComponent, RouterLink],
+    imports: [CommonModule, MatCard, MatIcon, CdkDrag, AvatarComponent, RouterLink, BadgeComponent],
     templateUrl: './issue-card.component.html',
     styleUrl: './issue-card.component.css',
 })

@@ -30,6 +30,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { finalize } from 'rxjs';
 import { LabelService } from '../../../shared/services/label.service';
 import { Label } from '../../../shared/model/Label';
+import { BadgeComponent } from '../../badge/badge.component';
 
 @Component({
     selector: 'app-issue-form',
@@ -46,6 +47,7 @@ import { Label } from '../../../shared/model/Label';
         MatProgressSpinnerModule,
         MatButtonModule,
         RouterLink,
+        BadgeComponent,
     ],
     templateUrl: './issue-form.component.html',
     styleUrl: './issue-form.component.css',
