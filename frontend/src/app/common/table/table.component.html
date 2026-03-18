@@ -128,12 +128,11 @@
                         (click)="!isRowDisabled(row) && toggleRow(row)"
                         class="transition-colors"
                         [ngClass]="{
-                            'cursor-not-allowed opacity-60': isRowDisabled(row),
                             'cursor-pointer': !isRowDisabled(row),
                             '!bg-light-primary !text-white hover:!bg-light-primary/70 dark:!bg-dark-hover dark:hover:!bg-dark-hover/50':
-                                selectedRow()?.id === row.id,
+                                selectedRow()?.id === row.id && !isRowDisabled(row),
                             'odd:!bg-light-text-hover/20 hover:!bg-light-text-hover/40 dark:odd:!bg-dark-hover/20 dark:hover:!bg-dark-hover/50':
-                                selectedRow()?.id !== row.id,
+                                selectedRow()?.id !== row.id && !isRowDisabled(row),
                         }"
                         mat-row
                         *matRowDef="let row; columns: columns"

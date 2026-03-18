@@ -2,6 +2,8 @@ import { Routes } from '@angular/router';
 import { authenticatedGuard } from './shared/guards/authenticated/authenticated.guard';
 import { unauthenticatedGuard } from './shared/guards/unauthenticated/unauthenticated.guard';
 import { invitationGuard } from './shared/guards/invitation/invitation.guard';
+import { permissionGuard } from './shared/guards/permission/permission.guard';
+import { OrganizationPermissions } from './shared/constants/user/Permissions';
 
 export const routes: Routes = [
     {
@@ -10,7 +12,8 @@ export const routes: Routes = [
             import('./layouts/base-layout/base-layout.component').then(
                 (c) => c.BaseLayoutComponent
             ),
-        canActivate: [unauthenticatedGuard], // Applied once at the parent level
+        canActivate: [unauthenticatedGuard],
+        runGuardsAndResolvers: 'always',
         children: [
             { path: '', redirectTo: 'login', pathMatch: 'full' },
             {
@@ -61,6 +64,8 @@ export const routes: Routes = [
             import('./layouts/base-layout/base-layout.component').then(
                 (c) => c.BaseLayoutComponent
             ),
+        canActivate: [authenticatedGuard],
+        runGuardsAndResolvers: 'always',
         children: [
             {
                 path: '',
@@ -77,76 +82,80 @@ export const routes: Routes = [
             import('./layouts/main-layout/main-layout.component').then(
                 (c) => c.MainLayoutComponent
             ),
+        canActivate: [authenticatedGuard],
+        runGuardsAndResolvers: 'always',
         children: [
             {
-                path: '',
-                canActivate: [authenticatedGuard],
+                path: 'organizations',
                 children: [
                     {
-                        path: 'organizations',
-                        children: [
-                            {
-                                path: '',
-                                pathMatch: 'full',
-                                loadComponent: () =>
-                                    import('./main/organizations/organizations.component').then(
-                                        (c) => c.OrganizationsComponent
-                                    ),
-                                title: 'QuickFix - Organizations',
-                            },
-                            {
-                                path: 'new',
-                                loadComponent: () =>
-                                    import(
-                                        './main/organizations/create-organization/create-organization.component'
-                                    ).then((c) => c.CreateOrganizationComponent),
-                                title: 'QuickFix - New Organization',
-                            },
-                            {
-                                path: ':organizationId/edit',
-                                loadComponent: () =>
-                                    import(
-                                        './main/organizations/edit-organization/edit-organization.component'
-                                    ).then((c) => c.EditOrganizationComponent),
-                                title: 'QuickFix - Edit Organization',
-                            },
-                        ],
-                    },
-                    {
-                        path: 'account',
+                        path: '',
+                        pathMatch: 'full',
                         loadComponent: () =>
-                            import('./main/account/account.component').then(
-                                (c) => c.AccountComponent
+                            import('./main/organizations/organizations.component').then(
+                                (c) => c.OrganizationsComponent
                             ),
-                        title: 'QuickFix - Account',
+                        title: 'QuickFix - Organizations',
                     },
                     {
-                        path: 'settings',
+                        path: 'new',
                         loadComponent: () =>
-                            import('./main/settings/settings.component').then(
-                                (c) => c.SettingsComponent
-                            ),
-                        title: 'QuickFix - Settings',
+                            import(
+                                './main/organizations/create-organization/create-organization.component'
+                            ).then((c) => c.CreateOrganizationComponent),
+                        title: 'QuickFix - New Organization',
+                        canActivate: [permissionGuard],
+                        data: {
+                            permission: OrganizationPermissions.CREATE,
+                        },
                     },
                     {
-                        path: 'invitations',
-                        children: [
-                            {
-                                path: '',
-                                pathMatch: 'full',
-                                loadComponent: () =>
-                                    import(
-                                        './main/organization-invitation/organization-invitation.component'
-                                    ).then((c) => c.OrganizationInvitationComponent),
-                                title: 'QuickFix - Invitations',
-                            },
-                        ],
+                        path: ':organizationId/edit',
+                        loadComponent: () =>
+                            import(
+                                './main/organizations/edit-organization/edit-organization.component'
+                            ).then((c) => c.EditOrganizationComponent),
+                        title: 'QuickFix - Edit Organization',
+                        canActivate: [permissionGuard],
+                        data: {
+                            permission: OrganizationPermissions.UPDATE,
+                        },
+                    },
+                ],
+            },
+            {
+                path: 'account',
+                loadComponent: () =>
+                    import('./main/account/account.component').then((c) => c.AccountComponent),
+                title: 'QuickFix - Account',
+            },
+            {
+                path: 'settings',
+                loadComponent: () =>
+                    import('./main/settings/settings.component').then((c) => c.SettingsComponent),
+                title: 'QuickFix - Settings',
+            },
+            {
+                path: 'invitations',
+                children: [
+                    {
+                        path: '',
+                        pathMatch: 'full',
+                        loadComponent: () =>
+                            import(
+                                './main/organization-invitation/organization-invitation.component'
+                            ).then((c) => c.OrganizationInvitationComponent),
+                        title: 'QuickFix - Invitations',
+                        canActivate: [permissionGuard],
+                        data: {
+                            permission: OrganizationPermissions.MEMBER_INVITE,
+                        },
                     },
                 ],
             },
             {
                 path: 'invitation/:invitationId',
-                canActivate: [invitationGuard, authenticatedGuard],
+                canActivate: [invitationGuard],
                 loadComponent: () =>
                     import(
                         './main/organization-invitation/organization-invitation-item/organization-invitation-item.component'
@@ -162,7 +171,8 @@ export const routes: Routes = [
             import('./layouts/main-layout/main-layout.component').then(
                 (c) => c.MainLayoutComponent
             ),
-        canActivate: [authenticatedGuard], // Applied once at the parent level
+        canActivate: [authenticatedGuard],
+        runGuardsAndResolvers: 'always',
         children: [
             { path: '', pathMatch: 'full', redirectTo: 'projects' },
             {
@@ -184,6 +194,10 @@ export const routes: Routes = [
                                 (c) => c.NewProjectComponent
                             ),
                         title: 'QuickFix - New Project',
+                        canActivate: [permissionGuard],
+                        data: {
+                            permission: 'project.create',
+                        },
                     },
                 ],
             },
@@ -366,9 +380,6 @@ export const routes: Routes = [
         ],
     },
 
-    // ---------------------------------------------------------
-    // GLOBAL WILDCARD (404)
-    // ---------------------------------------------------------
     {
         path: '**',
         loadComponent: () =>

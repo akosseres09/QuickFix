@@ -3,14 +3,14 @@ import { Organization } from './Organization';
 import { User } from './User';
 
 export enum OrganizationMemberRole {
-    VIEWER = 'viewer',
+    GUEST = 'viewer',
     MEMBER = 'member',
     ADMIN = 'admin',
     OWNER = 'owner',
 }
 
 export const ORGANIZATION_MEMBER_ROLE_MAP: { [key: string]: string } = {
-    [OrganizationMemberRole.VIEWER]: 'Viewer',
+    [OrganizationMemberRole.GUEST]: 'Guest',
     [OrganizationMemberRole.MEMBER]: 'Member',
     [OrganizationMemberRole.ADMIN]: 'Admin',
     [OrganizationMemberRole.OWNER]: 'Owner',

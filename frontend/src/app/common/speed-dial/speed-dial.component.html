@@ -1,4 +1,9 @@
-<div class="flex flex-col-reverse gap-2 items-end">
+<div
+    [ngClass]="{
+        hidden: buttons().length === 0,
+        'flex flex-col-reverse gap-2 items-end': buttons().length > 0,
+    }"
+>
     <button mat-fab color="secondary" (click)="onTogglerClick()" aria-label="Add Project">
         <mat-icon [@speedDialToggler]="dialState()">{{ mainIconName() }}</mat-icon>
     </button>
