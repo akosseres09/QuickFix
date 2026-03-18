@@ -2,6 +2,7 @@
 
 namespace api\components\traits;
 
+use common\models\UserRole;
 use Yii;
 use DateTimeImmutable;
 use Lcobucci\JWT\UnencryptedToken;
@@ -15,7 +16,7 @@ trait AccessTokenHandler
      * @param string $email
      * @return UnencryptedToken
      */
-    protected function createAccessToken(string $userId, int $role, string $email): UnencryptedToken
+    protected function createAccessToken(string $userId, UserRole $role, string $email): UnencryptedToken
     {
         $now = new DateTimeImmutable();
         $issuer = Yii::$app->params['backendUrl'] ?? 'http://api.ticketing.test';

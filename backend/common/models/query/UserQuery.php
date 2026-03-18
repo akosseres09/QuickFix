@@ -3,6 +3,8 @@
 namespace common\models\query;
 
 use common\models\User;
+use common\models\UserRole;
+use common\models\UserStatus;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
@@ -26,27 +28,27 @@ class UserQuery extends ActiveQuery
 
     public function active(): UserQuery
     {
-        return $this->andWhere(['{{%user}}.status' => User::STATUS_ACTIVE]);
+        return $this->andWhere(['{{%user}}.status' => UserStatus::ACTIVE->value]);
     }
 
     public function inactive(): UserQuery
     {
-        return $this->andWhere(['{{%user}}.status' => User::STATUS_INACTIVE]);
+        return $this->andWhere(['{{%user}}.status' => UserStatus::INACTIVE->value]);
     }
 
     public function deleted(): UserQuery
     {
-        return $this->andWhere(['{{%user}}.status' => User::STATUS_DELETED]);
+        return $this->andWhere(['{{%user}}.status' => UserStatus::DELETED->value]);
     }
 
     public function admin(): UserQuery
     {
-        return $this->andWhere(['{{%user}}.is_admin' => User::ADMIN]);
+        return $this->andWhere(['{{%user}}.is_admin' => UserRole::ADMIN->value]);
     }
 
     public function user(): UserQuery
     {
-        return $this->andWhere(['{{%user}}.is_admin' => User::USER]);
+        return $this->andWhere(['{{%user}}.is_admin' => UserRole::USER->value]);
     }
 
     public function byId(string $id): UserQuery

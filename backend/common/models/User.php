@@ -13,6 +13,20 @@ use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
 
+enum UserRole: int
+{
+    case ADMIN = 1;
+    case USER = 0;
+};
+
+enum UserStatus: int
+{
+    case DELETED = 0;
+    case INACTIVE = 9;
+    case ACTIVE = 10;
+};
+
+
 /**
  * User model
  *
@@ -48,11 +62,17 @@ use yii\web\IdentityInterface;
  */
 class User extends ActiveRecord implements IdentityInterface
 {
-    const STATUS_DELETED = 0;
-    const STATUS_INACTIVE = 9;
-    const STATUS_ACTIVE = 10;
-    const ADMIN = 1;
-    const USER = 0;
+    const STATUS_LIST = [
+        UserStatus::ACTIVE->value => 'Active',
+        UserStatus::INACTIVE->value => 'Inactive',
+        UserStatus::DELETED->value => 'Deleted',
+    ];
+
+    const ROLE_LIST = [
+        UserRole::USER->value => 'User',
+        UserRole::ADMIN->value => 'Admin',
+    ];
+
     const LOGIN_SCENARIO = 'login';
     const SIGNUP_SCENARIO = 'signup';
     const TOKEN_EXPIRE = 3600; // 1 hour
@@ -160,10 +180,10 @@ class User extends ActiveRecord implements IdentityInterface
             [['auth_key'], 'string', 'max' => 32],
             [['email'], 'email'],
             [['email', 'password_hash', 'username', 'password_reset_token', 'verification_token', 'first_name', 'last_name', 'phone_number'], 'string', 'max' => 255],
-            ['is_admin', 'default', 'value' => self::USER],
-            ['is_admin', 'in', 'range' => [self::USER, self::ADMIN]],
-            ['status', 'default', 'value' => self::STATUS_INACTIVE],
-            ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_INACTIVE]],
+            ['is_admin', 'default', 'value' => UserRole::USER->value],
+            ['is_admin', 'in', 'range' => self::ROLE_LIST],
+            ['status', 'default', 'value' => UserStatus::INACTIVE->value],
+            ['status', 'in', 'range' => self::STATUS_LIST],
             [['created_at', 'updated_at', 'deleted_at', 'email_verification_token_expires_at'], 'integer'],
             [['date_of_birth'], 'date', 'format' => 'php:Y-m-d'],
         ];
@@ -180,7 +200,7 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public static function findIdentity($id)
     {
-        return static::findOne(['id' => $id, 'status' => self::STATUS_ACTIVE, 'deleted_at' => null]);
+        return static::findOne(['id' => $id, 'status' => UserStatus::ACTIVE->value, 'deleted_at' => null]);
     }
 
     /**
@@ -217,12 +237,12 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public static function findByUsername($username)
     {
-        return static::findOne(['username' => $username, 'status' => self::STATUS_ACTIVE]);
+        return static::findOne(['username' => $username, 'status' => UserStatus::ACTIVE->value]);
     }
 
     public static function findByEmail($email)
     {
-        return static::findOne(['email' => $email, 'status' => self::STATUS_ACTIVE]);
+        return static::findOne(['email' => $email, 'status' => UserStatus::ACTIVE->value]);
     }
 
     /**
@@ -235,7 +255,7 @@ class User extends ActiveRecord implements IdentityInterface
     {
         return static::findOne([
             'password_reset_token' => $token,
-            'status' => self::STATUS_ACTIVE,
+            'status' => UserStatus::ACTIVE->value,
         ]);
     }
 
@@ -352,7 +372,7 @@ class User extends ActiveRecord implements IdentityInterface
 
     public function isActive(): bool
     {
-        return $this->status === self::STATUS_ACTIVE && $this->deleted_at === null;
+        return $this->status === UserStatus::ACTIVE->value && $this->deleted_at === null;
     }
 
     /**

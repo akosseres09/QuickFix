@@ -30,6 +30,7 @@ use yii\web\NotFoundHttpException;
 class ProjectKeyTranslatorFilter extends ActionFilter
 {
     public $identifierParamName = "project_id";
+    public $organizationIdParamName = "organization_id";
     public $actions = ['index', 'view', 'update', 'delete', 'create']; // Actions to apply the filter to
 
     public function beforeAction($action): bool
@@ -40,10 +41,14 @@ class ProjectKeyTranslatorFilter extends ActionFilter
 
         $request = Yii::$app->getRequest();
         $projectKey = $request->get($this->identifierParamName);
-        $organizationId = $request->get('organization_id'); // translated to valid id by OrganizationSlugTranslatorFilter
+        $organizationId = $request->get($this->organizationIdParamName); // translated to valid id by OrganizationSlugTranslatorFilter
+
+        if (!$projectKey || !$organizationId) {
+            return parent::beforeAction($action);
+        }
 
         // if the project_id from the request is not a valid UUID, treat it as a project key and translate it to project ID
-        if ($projectKey && !Uuid::isValid($projectKey)) {
+        if (!Uuid::isValid($projectKey)) {
             $projectId = Yii::$app->cache->getOrSet(
                 Project::getKeyToIdCacheKey($organizationId, $projectKey),
                 function () use ($organizationId, $projectKey) {

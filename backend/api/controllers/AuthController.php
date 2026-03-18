@@ -2,13 +2,18 @@
 
 namespace api\controllers;
 
+use api\components\permissions\PermissionService;
 use Yii;
 use api\components\ResponseMaker;
 use api\components\traits\AccessTokenHandler;
 use api\components\traits\RefreshTokenHandlerTrait;
+use api\filters\OrganizationSlugTranslatorFilter;
+use api\filters\ProjectKeyTranslatorFilter;
 use common\components\traits\EmailSenderTrait;
 use common\models\forms\SignupForm;
 use common\models\User;
+use common\models\UserRole;
+use common\models\UserStatus;
 use yii\filters\Cors;
 use yii\rest\Controller;
 use yii\web\BadRequestHttpException;
@@ -58,6 +63,19 @@ class AuthController extends Controller
             'except' => ['login', 'refresh', 'signup', 'verify', 'resend-verification-email', 'reset-password'],
         ];
 
+        $behaviors['organizationTranslator'] = [
+            'class' => OrganizationSlugTranslatorFilter::class,
+            'actions' => ['me'],
+            'identifierParamName' => 'organizationId'
+        ];
+
+        $behaviors["projectTranslator"] = [
+            'class' => ProjectKeyTranslatorFilter::class,
+            'actions' => ['me'],
+            'identifierParamName' => 'projectId',
+            'organizationIdParamName' => 'organizationId'
+        ];
+
         return $behaviors;
     }
 
@@ -88,7 +106,8 @@ class AuthController extends Controller
             throw new UnauthorizedHttpException('Invalid credentials.');
         }
 
-        $token = $this->createAccessToken($user->id, $user->is_admin, $user->email);
+        $role = UserRole::tryFrom((int)$user->is_admin);
+        $token = $this->createAccessToken($user->id, $role, $user->email);
 
         $refreshToken = $this->createRefreshToken($user->id);
         $this->addToCookie($refreshToken->token);
@@ -120,7 +139,8 @@ class AuthController extends Controller
             throw new BadRequestHttpException('Invalid user.');
         }
 
-        $token = $this->createAccessToken($user->id, $user->is_admin, $user->email);
+        $role = UserRole::tryFrom((int)$user->is_admin);
+        $token = $this->createAccessToken($user->id, $role, $user->email);
         return ResponseMaker::asSuccess([
             'access_token' => $token->toString(),
         ]);
@@ -140,20 +160,29 @@ class AuthController extends Controller
         return ResponseMaker::asSuccess(['message' => 'Logged out successfully.']);
     }
 
-    public function actionMe(): array
+    public function actionMe(?string $organizationId = null, ?string $projectId = null): array
     {
         $user = Yii::$app->user->identity;
         if (!$user) {
             throw new UnauthorizedHttpException('User not authenticated.');
         }
 
+        $orgId = Yii::$app->request->get('organizationId');
+        $projId = Yii::$app->request->get('projectId');
+
+        $role = UserRole::tryFrom((int)$user->is_admin);
+        $basePermissions = PermissionService::getBasePermissions($role);
+        $organizationPermissions = $organizationId ? PermissionService::getOrganizationPermissions($orgId, $user->id) : [];
+        $projectPermissions = $projectId ? PermissionService::getProjectPermissions($projId, $user->id) : [];
+
         return ResponseMaker::asSuccess([
             'id' => $user->id,
             'email' => $user->email,
             'username' => $user->username,
-            'is_admin' => (bool) $user->is_admin,
+            'role' => $role,
             'status' => $user->status,
             'created_at' => $user->created_at,
+            'permissions' => [...$basePermissions, ...$organizationPermissions, ...$projectPermissions],
         ]);
     }
 
@@ -192,7 +221,7 @@ class AuthController extends Controller
         }
 
         $user->removeEmailVerifyToken();
-        $user->status = User::STATUS_ACTIVE;
+        $user->status = UserStatus::ACTIVE->value;
 
         if ($user->save()) {
             return ResponseMaker::asSuccess([
