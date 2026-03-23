@@ -3,7 +3,7 @@ import { authenticatedGuard } from './shared/guards/authenticated/authenticated.
 import { unauthenticatedGuard } from './shared/guards/unauthenticated/unauthenticated.guard';
 import { invitationGuard } from './shared/guards/invitation/invitation.guard';
 import { permissionGuard } from './shared/guards/permission/permission.guard';
-import { OrganizationPermissions } from './shared/constants/user/Permissions';
+import { OrganizationPermissions, ProjectPermissions } from './shared/constants/user/Permissions';
 import { permissionResolver } from './shared/resolvers/permission/permission.resolver';
 
 export const routes: Routes = [
@@ -105,21 +105,18 @@ export const routes: Routes = [
                             ).then((c) => c.CreateOrganizationComponent),
                         title: 'QuickFix - New Organization',
                         canActivate: [permissionGuard],
-                        data: {
-                            permission: OrganizationPermissions.CREATE,
-                        },
+                        data: { permission: OrganizationPermissions.CREATE },
                     },
                     {
                         path: ':organizationId/edit',
+                        resolve: { permissions: permissionResolver },
                         loadComponent: () =>
                             import(
                                 './main/organizations/edit-organization/edit-organization.component'
                             ).then((c) => c.EditOrganizationComponent),
                         title: 'QuickFix - Edit Organization',
                         canActivate: [permissionGuard],
-                        data: {
-                            permission: OrganizationPermissions.UPDATE,
-                        },
+                        data: { permission: OrganizationPermissions.UPDATE },
                     },
                 ],
             },
@@ -137,7 +134,7 @@ export const routes: Routes = [
             },
             {
                 path: 'invitations',
-                resolve: { permissions: permissionResolver },
+                // Base permissions from authenticatedGuard cover this page.
                 children: [
                     {
                         path: '',
@@ -161,8 +158,9 @@ export const routes: Routes = [
             },
         ],
     },
-
     {
+        // KEPT: resolver here — :organizationId is owned by this segment.
+        // This loads org + all project permissions for the org context.
         path: 'org/:organizationId',
         loadComponent: () =>
             import('./layouts/main-layout/main-layout.component').then(
@@ -170,7 +168,7 @@ export const routes: Routes = [
             ),
         canActivate: [authenticatedGuard],
         resolve: { permissions: permissionResolver },
-        runGuardsAndResolvers: 'always',
+        runGuardsAndResolvers: 'paramsChange',
         children: [
             { path: '', pathMatch: 'full', redirectTo: 'projects' },
             {
@@ -184,6 +182,8 @@ export const routes: Routes = [
                                 (c) => c.ProjectsComponent
                             ),
                         title: 'QuickFix - Projects',
+                        canActivate: [permissionGuard],
+                        data: { permission: OrganizationPermissions.VIEW },
                     },
                     {
                         path: 'new',
@@ -193,9 +193,7 @@ export const routes: Routes = [
                             ),
                         title: 'QuickFix - New Project',
                         canActivate: [permissionGuard],
-                        data: {
-                            permission: 'project.create',
-                        },
+                        data: { permission: ProjectPermissions.CREATE },
                     },
                 ],
             },
@@ -205,25 +203,16 @@ export const routes: Routes = [
                     import('./layouts/tabs-layout/tabs-layout.component').then(
                         (c) => c.TabsLayoutComponent
                     ),
-                resolve: { permissions: permissionResolver },
+                // REMOVED: resolver here — :organizationId already loaded by the
+                // parent org/:organizationId resolver. No new params here.
                 data: {
                     tabs: [
-                        {
-                            label: 'Worktime',
-                            route: 'view',
-                        },
-                        {
-                            label: 'Stats',
-                            route: 'stats',
-                        },
+                        { label: 'Worktime', route: 'view' },
+                        { label: 'Stats', route: 'stats' },
                     ],
                 },
                 children: [
-                    {
-                        path: '',
-                        pathMatch: 'full',
-                        redirectTo: 'view',
-                    },
+                    { path: '', pathMatch: 'full', redirectTo: 'view' },
                     {
                         path: 'view',
                         loadComponent: () =>
@@ -267,6 +256,9 @@ export const routes: Routes = [
                 title: 'QuickFix - Activity',
             },
             {
+                // KEPT: resolver here — :projectId is owned by this segment.
+                // Loads precise single-project permissions on top of the org permissions
+                // already set by the parent resolver.
                 path: 'project/:projectId',
                 resolve: { permissions: permissionResolver },
                 children: [
@@ -309,6 +301,7 @@ export const routes: Routes = [
                             import('./layouts/tabs-layout/tabs-layout.component').then(
                                 (c) => c.TabsLayoutComponent
                             ),
+                        canActivate: [permissionGuard],
                         data: {
                             tabs: [
                                 { label: 'Overview', route: 'overview' },
@@ -316,6 +309,7 @@ export const routes: Routes = [
                                 { label: 'Board', route: 'board' },
                                 { label: 'New Issue', route: 'add' },
                             ],
+                            permission: ProjectPermissions.VIEW,
                         },
                         children: [
                             {
@@ -379,7 +373,6 @@ export const routes: Routes = [
             },
         ],
     },
-
     {
         path: '**',
         loadComponent: () =>

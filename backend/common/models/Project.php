@@ -400,4 +400,19 @@ class Project extends ActiveRecord
     {
         return $this->status === self::STATUS_ACTIVE;
     }
+
+    public function isTeamProject(): bool
+    {
+        return $this->visibility === self::VISIBILITY_TEAM;
+    }
+
+    public function isPrivateProject(): bool
+    {
+        return $this->visibility === self::VISIBILITY_PRIVATE;
+    }
+
+    public function isPublicProject(): bool
+    {
+        return $this->visibility === self::VISIBILITY_PUBLIC;
+    }
 }

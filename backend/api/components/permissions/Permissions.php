@@ -42,8 +42,6 @@ enum Permissions: string
         // WORKTIME PERMISSIONS
     case WORKTIME_VIEW = 'worktime.view';
     case WORKTIME_CREATE = 'worktime.create';
-    case WORKTIME_UPDATE = 'worktime.update';
-    case WORKTIME_DELETE = 'worktime.delete';
     case WORKTIME_VIEW_ANY = 'worktime.view.any';
     case WORKTIME_UPDATE_ANY = 'worktime.update.any';
     case WORKTIME_DELETE_ANY = 'worktime.delete.any';

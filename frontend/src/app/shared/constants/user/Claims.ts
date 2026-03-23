@@ -1,4 +1,3 @@
-import { UserRole } from '../../model/User';
 import { Permissions } from './Permissions';
 
 export interface Claims {
@@ -34,7 +33,10 @@ export class UserClaims implements Claims {
     }
 
     private hasProjectPermission(projectId: string, permission: string): boolean {
-        return false;
+        return (
+            this.permissions.project[projectId] &&
+            this.permissions.project[projectId].includes(permission)
+        );
     }
 
     canDo(permission: string, context?: { orgId?: string; projectId?: string }): boolean {

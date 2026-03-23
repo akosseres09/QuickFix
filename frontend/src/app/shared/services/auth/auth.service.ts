@@ -140,13 +140,7 @@ export class AuthService {
             );
     }
 
-    me(): Observable<errorResponse | successResponse> {
-        return this.http.get<errorResponse | successResponse>(this.url + '/auth/me', {
-            headers: this.headers,
-        });
-    }
-
-    permissions(
+    me(
         organizationId?: string | null,
         projectId?: string | null
     ): Observable<errorResponse | successResponse> {
@@ -154,9 +148,21 @@ export class AuthService {
         if (organizationId) params.organizationId = organizationId;
         if (projectId) params.projectId = projectId;
 
-        return this.http.get<errorResponse | successResponse>(this.url + '/auth/permissions', {
+        return this.http.get<errorResponse | successResponse>(this.url + '/auth/me', {
             headers: this.headers,
             params: params,
+        });
+    }
+
+    permissions(orgId?: string | null, projectId?: string | null): Observable<any> {
+        const params: Record<string, string> = {};
+        if (orgId) params['organizationId'] = orgId;
+        if (projectId) params['projectId'] = projectId;
+
+        return this.http.get<successResponse | errorResponse>(this.url + '/auth/permissions', {
+            headers: this.headers,
+            withCredentials: true,
+            params,
         });
     }
 

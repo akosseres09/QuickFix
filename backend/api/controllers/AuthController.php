@@ -179,26 +179,34 @@ class AuthController extends Controller
         ]);
     }
 
-    public function actionPermissions()
+    public function actionPermissions(): array
     {
-        $user = Yii::$app->user->identity;
-        if (!$user) {
-            throw new UnauthorizedHttpException('User not authenticated.');
-        }
-
+        /** @var User $user */
+        $user  = Yii::$app->user->identity;
         $orgId = Yii::$app->request->get('organizationId');
         $projId = Yii::$app->request->get('projectId');
 
-        $role = UserRole::tryFrom((int)$user->is_admin);
-        $basePermissions = PermissionService::getBasePermissions($role);
-        $organizationPermissions = $orgId ? PermissionService::getOrganizationPermissions($orgId, $user->id) : [];
-        $projectPermissions = $projId ? PermissionService::getProjectPermissions($projId, $user->id) : [];
+        $role = $user->getRole();
+        $permissions = PermissionService::getBasePermissions($role);
+
+        if ($orgId) {
+            $permissions = array_merge_recursive(
+                $permissions,
+                PermissionService::getOrganizationPermissions($orgId, $user->id),
+                PermissionService::getAllProjectPermissions($orgId, $user->id)
+            );
+        }
+
+        if ($projId) {
+            $projectPermissions = PermissionService::getProjectPermissions($projId, $user->id);
+            $permissions = array_merge_recursive($permissions, $projectPermissions);
+        }
 
         return ResponseMaker::asSuccess([
-            'id' => $user->id,
-            'role' => $role,
-            'email' => $user->email,
-            'permissions' => [...$basePermissions, ...$organizationPermissions, ...$projectPermissions],
+            'id'          => $user->id,
+            'role'        => $role,
+            'email'       => $user->email,
+            'permissions' => $permissions,
         ]);
     }
 

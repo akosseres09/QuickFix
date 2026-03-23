@@ -476,4 +476,9 @@ class User extends ActiveRecord implements IdentityInterface
     {
         return "{$this->last_name} {$this->first_name}";
     }
+
+    public function getRole()
+    {
+        return UserRole::tryFrom((int)$this->is_admin);
+    }
 }

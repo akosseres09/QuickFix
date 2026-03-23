@@ -27,6 +27,11 @@ export const authenticatedGuard: CanActivateFn = (
         return of(false);
     };
 
+    const setUserData = (response: any) => {
+        authService.setClaimsFromResponse((response as successResponse).data);
+        return true;
+    };
+
     if (authService.currentClaimsWithPermissions()) {
         return true;
     }
@@ -36,8 +41,7 @@ export const authenticatedGuard: CanActivateFn = (
             switchMap(() =>
                 authService.me().pipe(
                     map((response) => {
-                        authService.setClaimsFromResponse((response as successResponse).data);
-                        return true;
+                        return setUserData(response);
                     })
                 )
             ),
@@ -47,8 +51,7 @@ export const authenticatedGuard: CanActivateFn = (
 
     return authService.me().pipe(
         map((response) => {
-            authService.setClaimsFromResponse((response as successResponse).data);
-            return true;
+            return setUserData(response);
         }),
         catchError(() => redirectToLogin())
     );
