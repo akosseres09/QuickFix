@@ -1,7 +1,8 @@
 <div
     [ngClass]="{
-        hidden: buttons().length === 0,
-        'flex flex-col-reverse gap-2 items-end': buttons().length > 0,
+        'flex flex-col-reverse gap-2 items-end transition-all duration-200': true,
+        'opacity-100 translate-y-0 visible': hasButtons(),
+        'opacity-0 translate-y-2 invisible pointer-events-none': !hasButtons(),
     }"
 >
     <button mat-fab color="secondary" (click)="onTogglerClick()" aria-label="Add Project">
