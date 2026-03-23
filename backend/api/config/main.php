@@ -149,6 +149,7 @@ return [
                 'auth/reset-password' => 'auth/reset-password',
                 'auth/refresh' => 'auth/refresh',
                 'auth/me' => 'auth/me',
+                'auth/permissions' => 'auth/permissions',
             ],
         ],
         'jwt' => function () {

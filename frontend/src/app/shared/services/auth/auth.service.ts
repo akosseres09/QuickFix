@@ -134,13 +134,19 @@ export class AuthService {
                 tap((response) => {
                     if (response.success) {
                         localStorage.removeItem('access_token');
-                        this.currentUserClaims.set(null);
+                        this.setClaimsFromResponse(null);
                     }
                 })
             );
     }
 
-    me(
+    me(): Observable<errorResponse | successResponse> {
+        return this.http.get<errorResponse | successResponse>(this.url + '/auth/me', {
+            headers: this.headers,
+        });
+    }
+
+    permissions(
         organizationId?: string | null,
         projectId?: string | null
     ): Observable<errorResponse | successResponse> {
@@ -148,9 +154,8 @@ export class AuthService {
         if (organizationId) params.organizationId = organizationId;
         if (projectId) params.projectId = projectId;
 
-        return this.http.get<errorResponse | successResponse>(this.url + '/auth/me', {
+        return this.http.get<errorResponse | successResponse>(this.url + '/auth/permissions', {
             headers: this.headers,
-            withCredentials: true,
             params: params,
         });
     }
@@ -161,7 +166,30 @@ export class AuthService {
 
     removeAccessToken() {
         localStorage.removeItem('access_token');
-        this.currentUserClaims.set(null);
+    }
+
+    setClaimsFromResponse(data: any | null): void {
+        if (!data) {
+            this.currentUserClaims.set(null);
+            return;
+        }
+
+        this.currentUserClaims.set({
+            uid: data['id'],
+            email: data['email'],
+            role: data['role'],
+        });
+    }
+
+    setPermissionsFromResponse(data: any | null): void {
+        if (!data) {
+            this.currentClaimsWithPermissions.set(null);
+            return;
+        }
+
+        this.currentClaimsWithPermissions.set(
+            new UserClaims(data['id'], data['role'], data['email'], data['permissions'])
+        );
     }
 
     private getUserFromToken(): Claims | null {

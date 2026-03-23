@@ -4,6 +4,7 @@ import { unauthenticatedGuard } from './shared/guards/unauthenticated/unauthenti
 import { invitationGuard } from './shared/guards/invitation/invitation.guard';
 import { permissionGuard } from './shared/guards/permission/permission.guard';
 import { OrganizationPermissions } from './shared/constants/user/Permissions';
+import { permissionResolver } from './shared/resolvers/permission/permission.resolver';
 
 export const routes: Routes = [
     {
@@ -64,8 +65,6 @@ export const routes: Routes = [
             import('./layouts/base-layout/base-layout.component').then(
                 (c) => c.BaseLayoutComponent
             ),
-        canActivate: [authenticatedGuard],
-        runGuardsAndResolvers: 'always',
         children: [
             {
                 path: '',
@@ -83,6 +82,7 @@ export const routes: Routes = [
                 (c) => c.MainLayoutComponent
             ),
         canActivate: [authenticatedGuard],
+        resolve: { permissions: permissionResolver },
         runGuardsAndResolvers: 'always',
         children: [
             {
@@ -137,6 +137,7 @@ export const routes: Routes = [
             },
             {
                 path: 'invitations',
+                resolve: { permissions: permissionResolver },
                 children: [
                     {
                         path: '',
@@ -146,10 +147,6 @@ export const routes: Routes = [
                                 './main/organization-invitation/organization-invitation.component'
                             ).then((c) => c.OrganizationInvitationComponent),
                         title: 'QuickFix - Invitations',
-                        canActivate: [permissionGuard],
-                        data: {
-                            permission: OrganizationPermissions.MEMBER_INVITE,
-                        },
                     },
                 ],
             },
@@ -172,6 +169,7 @@ export const routes: Routes = [
                 (c) => c.MainLayoutComponent
             ),
         canActivate: [authenticatedGuard],
+        resolve: { permissions: permissionResolver },
         runGuardsAndResolvers: 'always',
         children: [
             { path: '', pathMatch: 'full', redirectTo: 'projects' },
@@ -207,6 +205,7 @@ export const routes: Routes = [
                     import('./layouts/tabs-layout/tabs-layout.component').then(
                         (c) => c.TabsLayoutComponent
                     ),
+                resolve: { permissions: permissionResolver },
                 data: {
                     tabs: [
                         {
@@ -269,6 +268,7 @@ export const routes: Routes = [
             },
             {
                 path: 'project/:projectId',
+                resolve: { permissions: permissionResolver },
                 children: [
                     { path: '', pathMatch: 'full', redirectTo: 'issues' },
                     {

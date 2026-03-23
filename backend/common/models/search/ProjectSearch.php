@@ -46,7 +46,7 @@ class ProjectSearch extends Project implements SearchInterface
                 ['p.owner_id' => $userId],
                 [
                     'and',
-                    ['p.visibility' => Project::VISIBILITY_TEAM],
+                    ['in', 'p.visibility', [Project::VISIBILITY_TEAM, Project::VISIBILITY_PRIVATE]],
                     ['is not', 'pm.id', null]
                 ]
             ])->andWhere(['p.organization_id' => $organizationId]);

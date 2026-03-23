@@ -9,7 +9,6 @@ import { AuthService } from '../../services/auth/auth.service';
 import { catchError, map, of, switchMap } from 'rxjs';
 import { successResponse } from '../../model/Response';
 import { SnackbarService } from '../../services/snackbar/snackbar.service';
-import { UserClaims } from '../../constants/user/Claims';
 
 export const authenticatedGuard: CanActivateFn = (
     route: ActivatedRouteSnapshot,
@@ -19,37 +18,25 @@ export const authenticatedGuard: CanActivateFn = (
     const router = inject(Router);
     const snackbarService = inject(SnackbarService);
 
-    const projectId = route.paramMap.get('projectId');
-    const organizationId = route.paramMap.get('organizationId');
-
-    const setClaims = (response: successResponse) => {
-        const data = response.data;
-        authService.currentUserClaims.set({
-            uid: data['id'],
-            email: data['email'],
-            role: data['role'],
-        });
-        authService.currentClaimsWithPermissions.set(
-            new UserClaims(data['id'], data['role'], data['email'], data['permissions'])
-        );
-    };
-
     const redirectToLogin = () => {
         authService.removeAccessToken();
+        authService.setClaimsFromResponse(null);
         sessionStorage.setItem('redirectUrl', state.url);
-
         router.navigate(['/auth/login']);
         snackbarService.error('Please log in to access this page.');
         return of(false);
     };
 
-    // No access token (e.g. expired on page load) — try refreshing via cookie first
+    if (authService.currentClaimsWithPermissions()) {
+        return true;
+    }
+
     if (!authService.getAccessToken()) {
         return authService.refresh().pipe(
             switchMap(() =>
-                authService.me(organizationId, projectId).pipe(
+                authService.me().pipe(
                     map((response) => {
-                        setClaims(response as successResponse);
+                        authService.setClaimsFromResponse((response as successResponse).data);
                         return true;
                     })
                 )
@@ -58,10 +45,9 @@ export const authenticatedGuard: CanActivateFn = (
         );
     }
 
-    // Token exists — call /me directly. The interceptor handles 401 → refresh → retry.
-    return authService.me(organizationId, projectId).pipe(
+    return authService.me().pipe(
         map((response) => {
-            setClaims(response as successResponse);
+            authService.setClaimsFromResponse((response as successResponse).data);
             return true;
         }),
         catchError(() => redirectToLogin())

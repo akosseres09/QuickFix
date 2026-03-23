@@ -26,6 +26,7 @@ export const unauthenticatedGuard: CanActivateFn = (route, state) => {
         }),
         catchError(() => {
             authService.removeAccessToken();
+            authService.setClaimsFromResponse(null);
             return of(true);
         })
     );

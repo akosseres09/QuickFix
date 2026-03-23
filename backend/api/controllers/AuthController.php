@@ -65,13 +65,13 @@ class AuthController extends Controller
 
         $behaviors['organizationTranslator'] = [
             'class' => OrganizationSlugTranslatorFilter::class,
-            'actions' => ['me'],
+            'actions' => ['permissions'],
             'identifierParamName' => 'organizationId'
         ];
 
         $behaviors["projectTranslator"] = [
             'class' => ProjectKeyTranslatorFilter::class,
-            'actions' => ['me'],
+            'actions' => ['permissions'],
             'identifierParamName' => 'projectId',
             'organizationIdParamName' => 'organizationId'
         ];
@@ -84,6 +84,7 @@ class AuthController extends Controller
         return [
             '*' => ['POST', 'OPTIONS'],
             'me' => ['GET', 'OPTIONS'],
+            'permissions' => ['GET', 'OPTIONS'],
             'refresh' => ['GET', 'OPTIONS'],
         ];
     }
@@ -160,7 +161,25 @@ class AuthController extends Controller
         return ResponseMaker::asSuccess(['message' => 'Logged out successfully.']);
     }
 
-    public function actionMe(?string $organizationId = null, ?string $projectId = null): array
+    public function actionMe(): array
+    {
+        $user = Yii::$app->user->identity;
+        if (!$user) {
+            throw new UnauthorizedHttpException('User not authenticated.');
+        }
+
+        $role = UserRole::tryFrom((int)$user->is_admin);
+        return ResponseMaker::asSuccess([
+            'id' => $user->id,
+            'email' => $user->email,
+            'username' => $user->username,
+            'role' => $role,
+            'status' => $user->status,
+            'created_at' => $user->created_at,
+        ]);
+    }
+
+    public function actionPermissions()
     {
         $user = Yii::$app->user->identity;
         if (!$user) {
@@ -172,16 +191,13 @@ class AuthController extends Controller
 
         $role = UserRole::tryFrom((int)$user->is_admin);
         $basePermissions = PermissionService::getBasePermissions($role);
-        $organizationPermissions = $organizationId ? PermissionService::getOrganizationPermissions($orgId, $user->id) : [];
-        $projectPermissions = $projectId ? PermissionService::getProjectPermissions($projId, $user->id) : [];
+        $organizationPermissions = $orgId ? PermissionService::getOrganizationPermissions($orgId, $user->id) : [];
+        $projectPermissions = $projId ? PermissionService::getProjectPermissions($projId, $user->id) : [];
 
         return ResponseMaker::asSuccess([
             'id' => $user->id,
-            'email' => $user->email,
-            'username' => $user->username,
             'role' => $role,
-            'status' => $user->status,
-            'created_at' => $user->created_at,
+            'email' => $user->email,
             'permissions' => [...$basePermissions, ...$organizationPermissions, ...$projectPermissions],
         ]);
     }
