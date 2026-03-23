@@ -35,7 +35,7 @@ export class OrganizationsComponent {
     private readonly filterService = inject(FilterService);
     private readonly displayedColumnService = inject(DisplayedColumnService);
     private readonly listStateService = inject(ListStateService);
-    private dialogService = inject(DialogService);
+    private readonly dialogService = inject(DialogService);
     private readonly authService = inject(AuthService);
 
     currentUser = this.authService.currentClaimsWithPermissions;
@@ -86,7 +86,7 @@ export class OrganizationsComponent {
                         confirmAction: () => this.deleteOrganization(),
                     }),
             },
-        ].filter((b) => b.shown);
+        ];
 
         return buttons;
     });

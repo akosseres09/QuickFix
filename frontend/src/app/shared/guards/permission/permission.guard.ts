@@ -9,6 +9,7 @@ export const permissionGuard: CanActivateFn = (route, state) => {
     const authService = inject(AuthService);
     const snackbarService = inject(SnackbarService);
     const router = inject(Router);
+    const isDirectNavigation = !router.lastSuccessfulNavigation;
 
     const permission = route.data['permission'];
     if (!permission) {
@@ -37,6 +38,11 @@ export const permissionGuard: CanActivateFn = (route, state) => {
         });
     };
 
+    const denied = () => {
+        snackbarService.error("You don't have permission to access this page.");
+        return isDirectNavigation ? router.createUrlTree(['/organizations']) : false;
+    };
+
     if (hasBasePermission()) {
         return true;
     }
@@ -51,12 +57,10 @@ export const permissionGuard: CanActivateFn = (route, state) => {
                 return true;
             }
 
-            snackbarService.error("You don't have permission to access this page.");
-            return router.createUrlTree(['/']);
+            return denied();
         }),
         catchError(() => {
-            snackbarService.error("You don't have permission to access this page.");
-            return of(router.createUrlTree(['/']));
+            return of(denied());
         })
     );
 };

@@ -39,13 +39,17 @@ export class UserClaims implements Claims {
         );
     }
 
-    canDo(permission: string, context?: { orgId?: string; projectId?: string }): boolean {
-        if (this.hasBasePermission(permission)) return true;
+    canDo(
+        permission: string | string[],
+        context?: { orgId?: string; projectId?: string }
+    ): boolean {
+        const permissions = Array.isArray(permission) ? permission : [permission];
 
-        if (context?.projectId && this.hasProjectPermission(context.projectId, permission))
-            return true;
-        if (context?.orgId && this.hasOrgPermission(context.orgId, permission)) return true;
-
-        return false;
+        return permissions.every((p) => {
+            if (this.hasBasePermission(p)) return true;
+            if (context?.projectId && this.hasProjectPermission(context.projectId, p)) return true;
+            if (context?.orgId && this.hasOrgPermission(context.orgId, p)) return true;
+            return false;
+        });
     }
 }

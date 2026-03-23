@@ -218,6 +218,16 @@ class PermissionService
             Permissions::ORG_MEMBERS_VIEW->value,
         ];
 
+        if (in_array($role, [OrganizationMember::ROLE_MEMBER, OrganizationMember::ROLE_ADMIN, OrganizationMember::ROLE_OWNER])) {
+            $permissions = array_merge(
+                $permissions,
+                [
+                    Permissions::WORKTIME_VIEW->value,
+                    Permissions::WORKTIME_CREATE->value,
+                ]
+            );
+        }
+
         if (in_array($role, [OrganizationMember::ROLE_ADMIN, OrganizationMember::ROLE_OWNER])) {
             $permissions = array_merge($permissions, [
                 Permissions::ORG_UPDATE->value,

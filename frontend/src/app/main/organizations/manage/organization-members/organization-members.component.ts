@@ -14,6 +14,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar/snackbar.s
 import { MemberCardComponent } from '../../../../common/member-card/member-card.component';
 import { AuthService } from '../../../../shared/services/auth/auth.service';
 import { OrgInviteDialogComponent } from '../org-invite-dialog/org-invite-dialog.component';
+import { OrganizationPermissions } from '../../../../shared/constants/user/Permissions';
 
 @Component({
     selector: 'app-organization-members',
@@ -38,7 +39,7 @@ export class OrganizationMembersComponent implements OnInit {
     cursor = signal<string | null>(null);
     hasMore = signal<boolean>(false);
     isLoading = signal<boolean>(false);
-    currentUser = this.authService.currentUserClaims;
+    currentUser = this.authService.currentClaimsWithPermissions;
 
     readonly RoleMap = ORGANIZATION_MEMBER_ROLE_MAP;
     readonly OrganizationMemberRole = OrganizationMemberRole;
@@ -97,5 +98,13 @@ export class OrganizationMembersComponent implements OnInit {
                     this.snackbarService.error('Failed to fetch members');
                 },
             });
+    }
+
+    protected canUserInvite(): boolean {
+        return (
+            this.currentUser()?.canDo(OrganizationPermissions.MEMBER_INVITE, {
+                orgId: this.organizationId(),
+            }) ?? false
+        );
     }
 }
