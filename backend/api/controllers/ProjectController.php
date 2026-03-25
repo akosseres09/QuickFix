@@ -2,8 +2,7 @@
 
 namespace api\controllers;
 
-use api\filters\OrganizationSlugTranslatorFilter;
-use api\filters\ProjectKeyTranslatorFilter;
+use api\components\permissions\PermissionService;
 use common\models\Project;
 use common\models\search\ProjectSearch;
 use Yii;
@@ -50,22 +49,31 @@ class ProjectController extends BaseRestController
             return;
         }
 
+        $userId = Yii::$app->user->id;
+
         // For create action, no model exists yet
         if ($action === 'create') {
             return;
         }
 
-        // For view action, check if user can access the project
+        // For view action, check if user has project view permission
         if ($action === 'view') {
-            if (!$model->canAccess(Yii::$app->user->id)) {
+            if (!PermissionService::canViewProject($model, $userId)) {
                 throw new ForbiddenHttpException('You do not have permission to access this project.');
             }
         }
 
-        // For update and delete actions, only owner can perform
-        if ($action === 'update' || $action === 'delete') {
-            if ($model->owner_id !== Yii::$app->user->id) {
-                throw new ForbiddenHttpException('Only the project owner can perform this action.');
+        // For update action, check project update permission
+        if ($action === 'update') {
+            if (!PermissionService::canUpdateProject($model, $userId)) {
+                throw new ForbiddenHttpException('You do not have permission to update this project.');
+            }
+        }
+
+        // For delete action, check project delete permission
+        if ($action === 'delete') {
+            if (!PermissionService::canDeleteProject($model, $userId)) {
+                throw new ForbiddenHttpException('You do not have permission to delete this project.');
             }
         }
     }
@@ -98,12 +106,12 @@ class ProjectController extends BaseRestController
     }
 
     /**
-     * Check if current user is the owner of the project
+     * Check if current user has permission to update the project
      */
     protected function checkOwnership(Project $project): void
     {
-        if ($project->owner_id !== Yii::$app->user->id) {
-            throw new ForbiddenHttpException('Only the project owner can perform this action.');
+        if (!PermissionService::canUpdateProject($project, Yii::$app->user->id)) {
+            throw new ForbiddenHttpException('You do not have permission to perform this action.');
         }
     }
 }

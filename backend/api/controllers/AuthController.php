@@ -9,6 +9,7 @@ use api\components\traits\AccessTokenHandler;
 use api\components\traits\RefreshTokenHandlerTrait;
 use api\filters\OrganizationSlugTranslatorFilter;
 use api\filters\ProjectKeyTranslatorFilter;
+use api\helpers\ArrayMergerHelper;
 use common\components\traits\EmailSenderTrait;
 use common\models\forms\SignupForm;
 use common\models\User;
@@ -190,7 +191,7 @@ class AuthController extends Controller
         $permissions = PermissionService::getBasePermissions($role);
 
         if ($orgId) {
-            $permissions = array_merge_recursive(
+            $permissions = ArrayMergerHelper::mergePermissions(
                 $permissions,
                 PermissionService::getOrganizationPermissions($orgId, $user->id),
                 PermissionService::getAllProjectPermissions($orgId, $user->id)
@@ -199,7 +200,7 @@ class AuthController extends Controller
 
         if ($projId) {
             $projectPermissions = PermissionService::getProjectPermissions($projId, $user->id);
-            $permissions = array_merge_recursive($permissions, $projectPermissions);
+            $permissions = ArrayMergerHelper::mergePermissions($permissions, $projectPermissions);
         }
 
         return ResponseMaker::asSuccess([

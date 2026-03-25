@@ -156,10 +156,59 @@ class PermissionService
     // Resource-level authorization helpers
     // -------------------------------------------------------------------------
 
+    public static function canViewProject(Project $project, string $userId): bool
+    {
+        $permissions = self::getProjectPermissions($project->id, $userId);
+        return self::projectCan($permissions, $project->id, Permissions::PROJECT_VIEW);
+    }
+
+    public static function canUpdateProject(Project $project, string $userId): bool
+    {
+        $permissions = self::getProjectPermissions($project->id, $userId);
+        return self::projectCan($permissions, $project->id, Permissions::PROJECT_UPDATE);
+    }
+
+    public static function canDeleteProject(Project $project, string $userId): bool
+    {
+        $permissions = self::getProjectPermissions($project->id, $userId);
+        return self::projectCan($permissions, $project->id, Permissions::PROJECT_DELETE);
+    }
+
+    public static function canViewIssue(Issue $issue, string $userId): bool
+    {
+        $permissions = self::getProjectPermissions($issue->project_id, $userId);
+        return self::projectCan($permissions, $issue->project_id, Permissions::ISSUE_VIEW);
+    }
+
+    public static function canCreateIssue(string $projectId, string $userId): bool
+    {
+        $permissions = self::getProjectPermissions($projectId, $userId);
+        return self::projectCan($permissions, $projectId, Permissions::ISSUE_CREATE);
+    }
+
     public static function canUpdateIssue(Issue $issue, string $userId): bool
     {
         $permissions = self::getProjectPermissions($issue->project_id, $userId);
         return self::projectCan($permissions, $issue->project_id, Permissions::ISSUE_UPDATE);
+    }
+
+    public static function canDeleteIssue(Issue $issue, string $userId): bool
+    {
+        $permissions = self::getProjectPermissions($issue->project_id, $userId);
+        return self::projectCan($permissions, $issue->project_id, Permissions::ISSUE_DELETE);
+    }
+
+    public static function canViewComment(Comment $comment, string $userId): bool
+    {
+        $projectId = $comment->issue->project_id;
+        $permissions = self::getProjectPermissions($projectId, $userId);
+        return self::projectCan($permissions, $projectId, Permissions::ISSUE_VIEW);
+    }
+
+    public static function canCreateComment(string $projectId, string $userId): bool
+    {
+        $permissions = self::getProjectPermissions($projectId, $userId);
+        return self::projectCan($permissions, $projectId, Permissions::COMMENT_CREATE);
     }
 
     public static function canDeleteComment(Comment $comment, string $userId): bool
@@ -178,6 +227,15 @@ class PermissionService
 
         return self::projectCan($permissions, $projectId, Permissions::COMMENT_UPDATE_ANY)
             || $comment->user_id === $userId;
+    }
+
+    /**
+     * Generic project-scoped permission check.
+     */
+    public static function canDoInProject(string $projectId, string $userId, Permissions $permission): bool
+    {
+        $permissions = self::getProjectPermissions($projectId, $userId);
+        return self::projectCan($permissions, $projectId, $permission);
     }
 
     // -------------------------------------------------------------------------
@@ -203,7 +261,7 @@ class PermissionService
             return $projectWeight > $orgWeight ? $projectRole : $orgRole;
         }
 
-        if ($visibility === Project::VISIBILITY_PUBLIC) {
+        if ($visibility === Project::VISIBILITY_PUBLIC || $visibility === Project::VISIBILITY_TEAM) {
             $memberWeight = RoleManager::getWeight(RoleManager::ROLE_MEMBER);
             return $projectWeight > $memberWeight ? $projectRole : RoleManager::ROLE_MEMBER;
         }

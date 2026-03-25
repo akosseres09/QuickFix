@@ -2,7 +2,7 @@
 
 namespace api\controllers;
 
-use api\filters\ProjectKeyTranslatorFilter;
+use api\components\permissions\PermissionService;
 use common\models\Comment;
 use common\models\Project;
 use common\models\search\CommentSearch;
@@ -40,8 +40,26 @@ class CommentController extends BaseRestController
 
     public function checkAccess($action, $model = null, $params = [])
     {
-        if ($model && !$model->canAccess(Yii::$app->user->id)) {
-            throw new ForbiddenHttpException('You do not have permission to access this comment.');
+        $userId = Yii::$app->user->id;
+
+        if ($model instanceof Comment) {
+            switch ($action) {
+                case 'view':
+                    if (!PermissionService::canViewComment($model, $userId)) {
+                        throw new ForbiddenHttpException('You do not have permission to view this comment.');
+                    }
+                    break;
+                case 'update':
+                    if (!PermissionService::canUpdateComment($model, $userId)) {
+                        throw new ForbiddenHttpException('You do not have permission to update this comment.');
+                    }
+                    break;
+                case 'delete':
+                    if (!PermissionService::canDeleteComment($model, $userId)) {
+                        throw new ForbiddenHttpException('You do not have permission to delete this comment.');
+                    }
+                    break;
+            }
         }
     }
 
