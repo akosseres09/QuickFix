@@ -5,13 +5,15 @@
                 {{ issue().title }}
             </h1>
             <div class="md:flex-1 flex md:justify-end items-start gap-3">
-                <a
-                    mat-button
-                    class="!bg-light-text-hover dark:!bg-light-background-hover"
-                    [routerLink]="['../edit']"
-                >
-                    Edit
-                </a>
+                @if (canUpdateIssue()) {
+                    <a
+                        mat-button
+                        class="!bg-light-text-hover dark:!bg-light-background-hover"
+                        [routerLink]="['../edit']"
+                    >
+                        Edit
+                    </a>
+                }
                 <button
                     class="!bg-transparent !hover:bg-light-text-hover dark:hover:!bg-light-background-hover !shadow-none !rounded-md"
                     mat-mini-fab
@@ -29,19 +31,25 @@
                         Copy Issue Link
                     </button>
                     @if (!issue().closedAt) {
-                        <button (click)="closeIssue()" mat-menu-item>
-                            <mat-icon>close</mat-icon>
-                            Close Issue
-                        </button>
-                        <button mat-menu-item (click)="openWorktimeDialog()">
-                            <mat-icon>schedule</mat-icon>
-                            Record Time
-                        </button>
+                        @if (canUpdateIssue()) {
+                            <button (click)="closeIssue()" mat-menu-item>
+                                <mat-icon>close</mat-icon>
+                                Close Issue
+                            </button>
+                        }
+                        @if (canCreateWorktime()) {
+                            <button mat-menu-item (click)="openWorktimeDialog()">
+                                <mat-icon>schedule</mat-icon>
+                                Record Time
+                            </button>
+                        }
                     } @else {
-                        <button (click)="reopenIssue()" mat-menu-item>
-                            <mat-icon>play_circle_outline</mat-icon>
-                            Reopen Issue
-                        </button>
+                        @if (canUpdateIssue()) {
+                            <button (click)="reopenIssue()" mat-menu-item>
+                                <mat-icon>play_circle_outline</mat-icon>
+                                Reopen Issue
+                            </button>
+                        }
                     }
                 </mat-menu>
             </div>
@@ -135,57 +143,62 @@
                 [projectId]="projectId()"
                 [organizationId]="organizationId()"
             ></app-view-comment>
-            <form
-                [formGroup]="commentForm"
-                class="flex my-6 gap-6 flex-col items-end"
-                (submit)="onSubmit()"
-            >
-                <div class="flex flex-col gap-2 w-full">
-                    <label class="font-semibold">
-                        @if (editingComment()) {
-                            Edit Comment
-                        } @else {
-                            Add a Comment
-                        }
-                    </label>
-                    <app-text-editor id="text-editor" formControlName="content"></app-text-editor>
-                    @if (comment.invalid && (comment.touched || comment.dirty)) {
-                        <mat-error class="text-[var(--mat-form-field-error-text-color)]">
-                            @if (comment.getError('required')) {
-                                <span>Comment is required</span>
+            @if (canCreateComment() || editingComment()) {
+                <form
+                    [formGroup]="commentForm"
+                    class="flex my-6 gap-6 flex-col items-end"
+                    (submit)="onSubmit()"
+                >
+                    <div class="flex flex-col gap-2 w-full">
+                        <label class="font-semibold">
+                            @if (editingComment()) {
+                                Edit Comment
+                            } @else {
+                                Add a Comment
                             }
-                            @if (comment.getError('maxlength')) {
-                                <span>Comment is too long</span>
-                            }
-                        </mat-error>
-                    }
-                </div>
-                <div class="flex gap-2">
-                    <button
-                        class="!text-white"
-                        [disabled]="commentForm.invalid"
-                        mat-flat-button
-                        color="primary"
-                    >
-                        <ng-container>
-                            <span class="flex items-center gap-2">
-                                @if (this.editingComment()) {
-                                    <mat-icon>edit</mat-icon>
-                                    Edit
-                                } @else {
-                                    <mat-icon>add</mat-icon>
-                                    Add comment
+                        </label>
+                        <app-text-editor
+                            id="text-editor"
+                            formControlName="content"
+                        ></app-text-editor>
+                        @if (comment.invalid && (comment.touched || comment.dirty)) {
+                            <mat-error class="text-[var(--mat-form-field-error-text-color)]">
+                                @if (comment.getError('required')) {
+                                    <span>Comment is required</span>
                                 }
-                            </span>
-                        </ng-container>
-                    </button>
-                    @if (this.editingComment()) {
-                        <button mat-flat-button type="button" (click)="onCommentEditCancel()">
-                            Cancel
+                                @if (comment.getError('maxlength')) {
+                                    <span>Comment is too long</span>
+                                }
+                            </mat-error>
+                        }
+                    </div>
+                    <div class="flex gap-2">
+                        <button
+                            class="!text-white"
+                            [disabled]="commentForm.invalid"
+                            mat-flat-button
+                            color="primary"
+                        >
+                            <ng-container>
+                                <span class="flex items-center gap-2">
+                                    @if (this.editingComment()) {
+                                        <mat-icon>edit</mat-icon>
+                                        Edit
+                                    } @else {
+                                        <mat-icon>add</mat-icon>
+                                        Add comment
+                                    }
+                                </span>
+                            </ng-container>
                         </button>
-                    }
-                </div>
-            </form>
+                        @if (this.editingComment()) {
+                            <button mat-flat-button type="button" (click)="onCommentEditCancel()">
+                                Cancel
+                            </button>
+                        }
+                    </div>
+                </form>
+            }
         </div>
 
         <!-- Right side -->

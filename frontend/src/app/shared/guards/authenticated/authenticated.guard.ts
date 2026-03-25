@@ -32,7 +32,7 @@ export const authenticatedGuard: CanActivateFn = (
         return true;
     };
 
-    if (authService.currentClaimsWithPermissions()) {
+    if (authService.currentUserClaims()) {
         return true;
     }
 

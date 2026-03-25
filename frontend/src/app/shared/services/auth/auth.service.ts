@@ -1,7 +1,7 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { errorResponse, successResponse } from '../../model/Response';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, shareReplay, tap } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { Claims, UserClaims } from '../../constants/user/Claims';
 import { UserPayloadToken } from '../../constants/token/UserTokenPayload';
@@ -25,6 +25,8 @@ export class AuthService {
     isLoggedIn = computed(() => this.currentUserClaims() !== null);
     isRefreshing = false;
     refreshTokenSubject = new BehaviorSubject<string | null>(null);
+    private pendingPermissions$: Observable<any> | null = null;
+    private pendingPermissionsKey: string | null = null;
 
     signup(data: SignupData): Observable<errorResponse | successResponse> {
         const fixed = {
@@ -164,6 +166,35 @@ export class AuthService {
             withCredentials: true,
             params,
         });
+    }
+
+    /**
+     * Deduplicated permission fetch — if the same request is already in-flight
+     * (e.g. guard and resolver both fire on hard refresh), reuses the same Observable.
+     */
+    fetchPermissions(orgId?: string | null, projectId?: string | null): Observable<any> {
+        const key = `${orgId ?? ''}_${projectId ?? ''}`;
+
+        if (this.pendingPermissions$ && this.pendingPermissionsKey === key) {
+            return this.pendingPermissions$;
+        }
+
+        this.pendingPermissionsKey = key;
+        this.pendingPermissions$ = this.permissions(orgId, projectId).pipe(
+            tap({
+                complete: () => {
+                    this.pendingPermissions$ = null;
+                    this.pendingPermissionsKey = null;
+                },
+                error: () => {
+                    this.pendingPermissions$ = null;
+                    this.pendingPermissionsKey = null;
+                },
+            }),
+            shareReplay(1)
+        );
+
+        return this.pendingPermissions$;
     }
 
     getAccessToken(): string | null {

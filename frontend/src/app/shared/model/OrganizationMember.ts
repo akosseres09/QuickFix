@@ -3,7 +3,7 @@ import { Organization } from './Organization';
 import { User } from './User';
 
 export enum OrganizationMemberRole {
-    GUEST = 'viewer',
+    GUEST = 'guest',
     MEMBER = 'member',
     ADMIN = 'admin',
     OWNER = 'owner',

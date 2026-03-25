@@ -8,7 +8,7 @@
                 Manage team members and their roles
             </p>
         </div>
-        @if (project()?.visibility === ProjectVisibility.TEAM) {
+        @if (canInvite()) {
             <button mat-flat-button color="primary" class="!text-white">
                 <mat-icon class="block md:hidden">add</mat-icon>
                 <span class="block">Invite Members</span>

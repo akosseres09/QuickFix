@@ -1,4 +1,4 @@
-import { Component, inject, input, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, input, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
     ProjectMember,
@@ -15,6 +15,7 @@ import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MemberCardComponent } from '../../../common/member-card/member-card.component';
 import { ApiQueryParams } from '../../../shared/constants/api/ApiQueryParams';
+import { ProjectPermissions } from '../../../shared/constants/user/Permissions';
 
 @Component({
     selector: 'app-members',
@@ -40,6 +41,16 @@ export class MembersComponent implements OnInit {
 
     ProjectVisibility = ProjectVisibility;
     roleLabels = ROLE_LABELS;
+
+    canInvite = computed(() => {
+        const user = this.authService.currentClaimsWithPermissions();
+        const project = this.project();
+        if (!user || !project || project.visibility !== ProjectVisibility.TEAM) return false;
+        return user.canDo(ProjectPermissions.MEMBER_INVITE, {
+            projectId: this.projectId(),
+            orgId: this.organizationId(),
+        });
+    });
 
     ngOnInit(): void {
         this.getProject();

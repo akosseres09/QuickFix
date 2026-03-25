@@ -37,6 +37,12 @@ import { IssueComment } from '../../../../shared/model/IssueComment';
 import { finalize } from 'rxjs';
 import { WorktimeDialogComponent } from '../../../worktime/worktime-dialog/worktime-dialog.component';
 import { BadgeComponent } from '../../../../common/badge/badge.component';
+import { AuthService } from '../../../../shared/services/auth/auth.service';
+import {
+    IssuePermissions,
+    WorktimePermissions,
+    CommentPermissions,
+} from '../../../../shared/constants/user/Permissions';
 
 @Component({
     selector: 'app-view',
@@ -68,6 +74,36 @@ export class ViewComponent {
     private readonly fb = inject(FormBuilder);
     private readonly router = inject(Router);
     private readonly activeRoute = inject(ActivatedRoute);
+    private readonly authService = inject(AuthService);
+
+    currentUser = this.authService.currentClaimsWithPermissions;
+
+    canUpdateIssue = computed(() => {
+        const user = this.currentUser();
+        if (!user) return false;
+        return user.canDo(IssuePermissions.UPDATE, {
+            projectId: this.projectId(),
+            orgId: this.organizationId(),
+        });
+    });
+
+    canCreateWorktime = computed(() => {
+        const user = this.currentUser();
+        if (!user) return false;
+        return user.canDo(WorktimePermissions.CREATE, {
+            projectId: this.projectId(),
+            orgId: this.organizationId(),
+        });
+    });
+
+    canCreateComment = computed(() => {
+        const user = this.currentUser();
+        if (!user) return false;
+        return user.canDo(CommentPermissions.CREATE, {
+            projectId: this.projectId(),
+            orgId: this.organizationId(),
+        });
+    });
 
     // inputs
     issueId = input.required<string>();

@@ -19,7 +19,6 @@ export const routes: Routes = [
                 (c) => c.BaseLayoutComponent
             ),
         canActivate: [unauthenticatedGuard],
-        runGuardsAndResolvers: 'always',
         children: [
             { path: '', redirectTo: 'login', pathMatch: 'full' },
             {
@@ -88,7 +87,7 @@ export const routes: Routes = [
             ),
         canActivate: [authenticatedGuard],
         resolve: { permissions: permissionResolver },
-        runGuardsAndResolvers: 'always',
+        runGuardsAndResolvers: 'paramsChange',
         children: [
             {
                 path: 'organizations',
@@ -114,7 +113,6 @@ export const routes: Routes = [
                     },
                     {
                         path: ':organizationId/edit',
-                        resolve: { permissions: permissionResolver },
                         loadComponent: () =>
                             import(
                                 './main/organizations/edit-organization/edit-organization.component'
@@ -163,8 +161,6 @@ export const routes: Routes = [
         ],
     },
     {
-        // KEPT: resolver here — :organizationId is owned by this segment.
-        // This loads org + all project permissions for the org context.
         path: 'org/:organizationId',
         loadComponent: () =>
             import('./layouts/main-layout/main-layout.component').then(
@@ -209,8 +205,8 @@ export const routes: Routes = [
                     ),
                 data: {
                     tabs: [
-                        { label: 'Worktime', route: 'view' },
-                        { label: 'Stats', route: 'stats' },
+                        { label: 'Worktime', route: 'view', permission: WorktimePermissions.VIEW },
+                        { label: 'Stats', route: 'stats', permission: WorktimePermissions.VIEW },
                     ],
                 },
                 children: [
@@ -267,7 +263,6 @@ export const routes: Routes = [
             },
             {
                 path: 'project/:projectId',
-                resolve: { permissions: permissionResolver },
                 children: [
                     { path: '', pathMatch: 'full', redirectTo: 'issues' },
                     {
@@ -315,10 +310,22 @@ export const routes: Routes = [
                         canActivate: [permissionGuard],
                         data: {
                             tabs: [
-                                { label: 'Overview', route: 'overview' },
-                                { label: 'Issues', route: '.' },
-                                { label: 'Board', route: 'board' },
-                                { label: 'New Issue', route: 'add' },
+                                {
+                                    label: 'Overview',
+                                    route: 'overview',
+                                    permission: IssuePermissions.VIEW,
+                                },
+                                { label: 'Issues', route: '.', permission: IssuePermissions.VIEW },
+                                {
+                                    label: 'Board',
+                                    route: 'board',
+                                    permission: IssuePermissions.VIEW,
+                                },
+                                {
+                                    label: 'New Issue',
+                                    route: 'add',
+                                    permission: IssuePermissions.CREATE,
+                                },
                             ],
                             permission: IssuePermissions.VIEW,
                         },

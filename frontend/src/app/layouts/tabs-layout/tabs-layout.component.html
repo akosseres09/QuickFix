@@ -5,22 +5,25 @@
     class="border-b border-gray-700"
 >
     @for (tab of tabs(); track $index) {
-        <a
-            mat-tab-link
-            [routerLink]="tab.route"
-            routerLinkActive
-            [routerLinkActiveOptions]="{
-                paths: 'exact',
-                queryParams: 'ignored',
-                matrixParams: 'ignored',
-                fragment: 'ignored',
-            }"
-            #rla="routerLinkActive"
-            [active]="rla.isActive"
-            class="w-[12.5rem]"
-        >
-            {{ tab.label }}
-        </a>
+        @let shown = showTab(tab);
+        @if (shown) {
+            <a
+                mat-tab-link
+                [routerLink]="tab.route"
+                routerLinkActive
+                [routerLinkActiveOptions]="{
+                    paths: 'exact',
+                    queryParams: 'ignored',
+                    matrixParams: 'ignored',
+                    fragment: 'ignored',
+                }"
+                #rla="routerLinkActive"
+                [active]="rla.isActive"
+                class="w-[12.5rem]"
+            >
+                {{ tab.label }}
+            </a>
+        }
     }
 </nav>
 

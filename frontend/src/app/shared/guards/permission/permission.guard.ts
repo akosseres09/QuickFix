@@ -48,7 +48,7 @@ export const permissionGuard: CanActivateFn = (route, state) => {
     }
 
     // On hard refresh, guards run before resolvers. Fetch permissions here, then re-check.
-    return authService.permissions(orgId, projectId).pipe(
+    return authService.fetchPermissions(orgId, projectId).pipe(
         map((response) => {
             const data = (response as successResponse).data;
             authService.setPermissionsFromResponse(data);

@@ -4,7 +4,7 @@ import { AuthService } from '../../services/auth/auth.service';
 import { map } from 'rxjs/internal/operators/map';
 import { successResponse } from '../../model/Response';
 import { catchError } from 'rxjs/internal/operators/catchError';
-import { of } from 'rxjs';
+import { EMPTY } from 'rxjs';
 
 export const permissionResolver: ResolveFn<void> = (route) => {
     const authService = inject(AuthService);
@@ -20,11 +20,15 @@ export const permissionResolver: ResolveFn<void> = (route) => {
         current = current.parent;
     }
 
-    return authService.permissions(orgId, projectId).pipe(
+    return authService.fetchPermissions(orgId, projectId).pipe(
         map((response) => {
             const data = (response as successResponse).data;
             authService.setPermissionsFromResponse(data);
         }),
-        catchError(() => of(void 0))
+        catchError(() => {
+            // Permission fetch failed — clear stale permissions so guards deny correctly
+            authService.setPermissionsFromResponse(null);
+            return EMPTY;
+        })
     );
 };
