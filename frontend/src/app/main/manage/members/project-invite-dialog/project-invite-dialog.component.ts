@@ -4,6 +4,7 @@ import {
     inject,
     input,
     OnInit,
+    output,
     signal,
     TemplateRef,
     viewChild,
@@ -50,6 +51,8 @@ export class ProjectInviteDialogComponent implements OnInit {
 
     organizationId = input.required<string>();
     projectId = input.required<string>();
+
+    memberAdded = output<void>();
 
     roles = ROLES.filter((r) => r !== ProjectMemberRoles.OWNER);
     userClaims = this.authService.currentUserClaims();
@@ -144,6 +147,7 @@ export class ProjectInviteDialogComponent implements OnInit {
             .subscribe({
                 next: () => {
                     this.snackbarService.success('Member added successfully');
+                    this.memberAdded.emit();
                 },
                 error: (err) => {
                     console.error('Failed to add member', err);

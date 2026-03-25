@@ -3,6 +3,7 @@
         #inviteDialog
         [organizationId]="organizationId()"
         [projectId]="projectId()"
+        (memberAdded)="onMemberAdded()"
     />
     <div class="flex flex-col sm:flex-row gap-2 sm:gap-0 justify-between mb-8">
         <div>
@@ -34,6 +35,10 @@
                 [currentUser]="currentUser()"
                 [RoleLabels]="roleLabels"
                 [getRoleBadgeClass]="getRoleBadgeClass"
+                [canManage]="canManage()"
+                [availableRoles]="availableRoles"
+                (roleChanged)="onRoleChanged($event)"
+                (memberRemoved)="onMemberRemoved($event)"
             ></app-member-card>
         } @empty {
             <div

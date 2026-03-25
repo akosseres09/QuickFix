@@ -4,6 +4,7 @@ import {
     ProjectMember,
     ProjectMemberRoles,
     ROLE_LABELS,
+    ROLES,
 } from '../../../shared/model/ProjectMember';
 import { ProjectMemberService } from '../../../shared/services/project-member/project-member.service';
 import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
@@ -42,6 +43,16 @@ export class MembersComponent implements OnInit {
 
     ProjectVisibility = ProjectVisibility;
     roleLabels = ROLE_LABELS;
+    availableRoles = ROLES.filter((r) => r !== ProjectMemberRoles.OWNER);
+
+    canManage = computed(() => {
+        const user = this.authService.currentClaimsWithPermissions();
+        if (!user) return false;
+        return user.canDo(ProjectPermissions.MEMBERS_MANAGE, {
+            projectId: this.projectId(),
+            orgId: this.organizationId(),
+        });
+    });
 
     canInvite = computed(() => {
         const user = this.authService.currentClaimsWithPermissions();
@@ -60,14 +71,50 @@ export class MembersComponent implements OnInit {
 
     loadMore() {
         const currentCursor = this.cursor();
-        console.log(currentCursor);
-        console.log(this.isLoading());
-
         if (currentCursor && !this.isLoading()) {
             this.getMembers(currentCursor);
-        } else {
-            console.warn('No more members to load');
         }
+    }
+
+    onMemberAdded(): void {
+        this.members.set([]);
+        this.cursor.set(null);
+        this.hasMore.set(false);
+        this.getMembers();
+    }
+
+    onRoleChanged(event: { memberId: string; role: string }): void {
+        this.memberService
+            .updateProjectMember(this.organizationId(), this.projectId(), event.memberId, {
+                role: event.role,
+            })
+            .subscribe({
+                next: (updated) => {
+                    this.members.update((members) =>
+                        members.map((m) =>
+                            m.id === event.memberId ? { ...m, role: updated.role } : m
+                        )
+                    );
+                    this.snackbarService.success('Role updated successfully');
+                },
+                error: () => {
+                    this.snackbarService.error('Failed to update role');
+                },
+            });
+    }
+
+    onMemberRemoved(memberId: string): void {
+        this.memberService
+            .deleteProjectMember(this.organizationId(), this.projectId(), memberId)
+            .subscribe({
+                next: () => {
+                    this.members.update((members) => members.filter((m) => m.id !== memberId));
+                    this.snackbarService.success('Member removed successfully');
+                },
+                error: () => {
+                    this.snackbarService.error('Failed to remove member');
+                },
+            });
     }
 
     private getMembers(cursor?: string) {

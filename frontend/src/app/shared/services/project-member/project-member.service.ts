@@ -50,4 +50,20 @@ export class ProjectMemberService {
             payload
         );
     }
+
+    updateProjectMember(
+        organizationId: string,
+        projectId: string,
+        memberId: string,
+        payload: { role: string }
+    ) {
+        return this.http.put<ProjectMember>(
+            `${this.apiUrl}/${organizationId}/${projectId}/member/${memberId}`,
+            payload
+        );
+    }
+
+    deleteProjectMember(organizationId: string, projectId: string, memberId: string) {
+        return this.http.delete(`${this.apiUrl}/${organizationId}/${projectId}/member/${memberId}`);
+    }
 }
