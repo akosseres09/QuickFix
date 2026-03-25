@@ -1,4 +1,9 @@
 <div class="max-w-7xl mx-auto">
+    <app-project-invite-dialog
+        #inviteDialog
+        [organizationId]="organizationId()"
+        [projectId]="projectId()"
+    />
     <div class="flex flex-col sm:flex-row gap-2 sm:gap-0 justify-between mb-8">
         <div>
             <h3 class="font-bold text-3xl text-light-text dark:text-dark-text mb-2">
@@ -9,7 +14,12 @@
             </p>
         </div>
         @if (canInvite()) {
-            <button mat-flat-button color="primary" class="!text-white">
+            <button
+                mat-flat-button
+                color="primary"
+                class="!text-white"
+                (click)="inviteDialog.open()"
+            >
                 <mat-icon class="block md:hidden">add</mat-icon>
                 <span class="block">Invite Members</span>
             </button>

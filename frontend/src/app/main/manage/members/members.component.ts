@@ -16,10 +16,11 @@ import { MatIcon } from '@angular/material/icon';
 import { MemberCardComponent } from '../../../common/member-card/member-card.component';
 import { ApiQueryParams } from '../../../shared/constants/api/ApiQueryParams';
 import { ProjectPermissions } from '../../../shared/constants/user/Permissions';
+import { ProjectInviteDialogComponent } from './project-invite-dialog/project-invite-dialog.component';
 
 @Component({
     selector: 'app-members',
-    imports: [CommonModule, MatButton, MatIcon, MemberCardComponent],
+    imports: [CommonModule, MatButton, MatIcon, MemberCardComponent, ProjectInviteDialogComponent],
     templateUrl: './members.component.html',
     styleUrl: './members.component.css',
 })

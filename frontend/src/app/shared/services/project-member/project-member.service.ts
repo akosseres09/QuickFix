@@ -39,4 +39,15 @@ export class ProjectMemberService {
                 }))
             );
     }
+
+    addProjectMember(
+        organizationId: string,
+        projectId: string,
+        payload: { user_id: string; role: string }
+    ) {
+        return this.http.post<ProjectMember>(
+            `${this.apiUrl}/${organizationId}/${projectId}/member`,
+            payload
+        );
+    }
 }

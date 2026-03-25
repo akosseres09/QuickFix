@@ -1,0 +1,60 @@
+<ng-template #projectInviteFormTemplate>
+    <form [formGroup]="form" class="flex flex-col gap-4">
+        <mat-form-field appearance="outline">
+            <mat-label>Search Member</mat-label>
+            <input
+                matInput
+                formControlName="member"
+                [matAutocomplete]="auto"
+                placeholder="Search by name or email..."
+            />
+            <mat-autocomplete
+                #auto="matAutocomplete"
+                [displayWith]="displayFn"
+                (optionSelected)="onMemberSelected($event.option.value)"
+            >
+                @for (member of filteredMembers(); track member.id) {
+                    <mat-option [value]="member">
+                        <div class="flex align-middle py-1 gap-3">
+                            <img
+                                [src]="member.user?.profilePictureUrl"
+                                alt="Profile Picture"
+                                class="w-6 h-6 rounded-md mb-1 self-center"
+                            />
+                            <div class="flex flex-col">
+                                <span class="font-medium">{{ member.user?.fullName }}</span>
+                                <span class="text-sm text-gray-500">{{ member.user?.email }}</span>
+                            </div>
+                        </div>
+                    </mat-option>
+                } @empty {
+                    @if (member.value && member.value.length >= 2) {
+                        <mat-option disabled>No members found</mat-option>
+                    }
+                }
+            </mat-autocomplete>
+            @if (member.invalid && (member.dirty || member.touched)) {
+                <mat-error>
+                    @if (member.hasError('required')) {
+                        <span>Please select a member</span>
+                    }
+                </mat-error>
+            }
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+            <mat-label>Role</mat-label>
+            <mat-select matNativeControl formControlName="role">
+                @for (role of roles; track $index) {
+                    <mat-option [value]="role">{{ role | titlecase }}</mat-option>
+                }
+            </mat-select>
+            @if (role.invalid && (role.dirty || role.touched)) {
+                <mat-error>
+                    @if (role.hasError('required')) {
+                        <span>Role is required</span>
+                    }
+                </mat-error>
+            }
+        </mat-form-field>
+    </form>
+</ng-template>
