@@ -4,7 +4,7 @@
             #sidenav
             [mode]="sidebarMode()"
             [opened]="isSidebarOpened()"
-            (openedChange)="isSidebarOpened.set($event)"
+            (openedChange)="onSidebarOpenedChange($event)"
             [disableClose]="sidebarMode() === 'side' ? true : false"
             position="start"
             class="!w-56 lg:!w-64 px-2 py-4 overflow-hidden"
@@ -28,7 +28,7 @@
             <app-navbar
                 [showMenuLogo]="false"
                 [isSidebarOpened]="isSidebarOpened()"
-                (isSidebarOpenedChange)="isSidebarOpened.set($event)"
+                (isSidebarOpenedChange)="onSidebarOpenedChange($event)"
                 (imageSourceChange)="imageSource.set($event)"
                 class="row-span-1 col-span-2"
             ></app-navbar>

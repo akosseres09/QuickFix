@@ -37,50 +37,12 @@
                 class="flex justify-between py-4 gap-8 md:flex-row flex-col md:items-center items-start"
             >
                 <div class="flex flex-col gap-1 flex-1">
-                    <span class="font-medium text-base">Font Size</span>
-                    <span class="text-sm opacity-70"
-                        >Adjust the base font size ({{ appearance().fontSize }}px)</span
-                    >
-                </div>
-                <div class="min-w-[200px] md:w-[200px] w-full">
-                    <mat-slider min="12" max="20" step="1" discrete class="w-full">
-                        <input
-                            matSliderThumb
-                            [ngModel]="appearance().fontSize"
-                            (ngModelChange)="updateSettings('fontSize', $event)"
-                        />
-                    </mat-slider>
-                </div>
-            </div>
-
-            <mat-divider></mat-divider>
-
-            <div
-                class="flex justify-between py-4 gap-8 md:flex-row flex-col md:items-center items-start"
-            >
-                <div class="flex flex-col gap-1 flex-1">
-                    <span class="font-medium text-base">Compact Mode</span>
-                    <span class="text-sm opacity-70">Reduce spacing for a more condensed view</span>
+                    <span class="font-medium text-base">Sidebar Default</span>
+                    <span class="text-sm opacity-70">Keep sidebar open by default on desktop</span>
                 </div>
                 <mat-slide-toggle
-                    [ngModel]="appearance().compactMode"
-                    (ngModelChange)="updateSettings('compactMode', $event)"
-                    color="primary"
-                ></mat-slide-toggle>
-            </div>
-
-            <mat-divider></mat-divider>
-
-            <div
-                class="flex justify-between py-4 gap-8 md:flex-row flex-col md:items-center items-start"
-            >
-                <div class="flex flex-col gap-1 flex-1">
-                    <span class="font-medium text-base">Animations</span>
-                    <span class="text-sm opacity-70">Enable smooth transitions and animations</span>
-                </div>
-                <mat-slide-toggle
-                    [ngModel]="appearance().animationsEnabled"
-                    (ngModelChange)="updateSettings('animationsEnabled', $event)"
+                    [ngModel]="sidebarOpen()"
+                    (ngModelChange)="onSidebarToggle($event)"
                     color="primary"
                 ></mat-slide-toggle>
             </div>

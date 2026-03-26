@@ -22,6 +22,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Claims } from '../../shared/constants/user/Claims';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { MatButtonModule } from '@angular/material/button';
+import { SidebarService } from '../../shared/services/sidebar/sidebar.service';
 
 @Component({
     selector: 'app-navbar',
@@ -45,6 +46,7 @@ export class NavbarComponent implements AfterViewInit {
     private router = inject(Router);
     private authService = inject(AuthService);
     private destroyRef = inject(DestroyRef);
+    private sidebarService = inject(SidebarService);
 
     isSidebarOpened = model<boolean>(window.innerWidth > 767);
     imageSource = model<string>('QuickFix_logo_dark.png');
@@ -169,6 +171,7 @@ export class NavbarComponent implements AfterViewInit {
     }
 
     toggleSidebar(value: boolean = !this.isSidebarOpened()): void {
+        this.sidebarService.set(value);
         this.isSidebarOpened.set(value);
     }
 

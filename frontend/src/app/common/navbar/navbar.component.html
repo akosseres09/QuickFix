@@ -9,7 +9,9 @@
                     class="flex p-2 rounded-md cursor-pointer hover:bg-light-text-hover dark:hover:bg-dark-hover transition-[background-color]"
                     [attr.aria-label]="isSidebarOpened() ? 'Collapse sidebar' : 'Expand sidebar'"
                 >
-                    <mat-icon [class.rotate-180]="isSidebarOpened()"> vertical_split </mat-icon>
+                    <mat-icon title="Close sidebar" [class.rotate-180]="isSidebarOpened()">
+                        vertical_split
+                    </mat-icon>
                 </button>
             }
             @if (showMenuLogo()) {
