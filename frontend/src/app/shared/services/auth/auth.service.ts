@@ -1,12 +1,13 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { errorResponse, successResponse } from '../../model/Response';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, shareReplay, tap } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { Claims } from '../../constants/user/Claims';
+import { Claims, UserClaims } from '../../constants/user/Claims';
 import { UserPayloadToken } from '../../constants/token/UserTokenPayload';
 import { SignupData } from '../../constants/user/SignupData';
 import { decodeToken } from '../../utils/jwtDecoder';
+import { UserRole } from '../../model/User';
 
 @Injectable({
     providedIn: 'root',
@@ -19,10 +20,13 @@ export class AuthService {
     private url: string = environment.apiUrl;
     private tokenKey: string = 'access_token';
 
+    currentClaimsWithPermissions = signal<UserClaims | null>(null);
     currentUserClaims = signal<Claims | null>(this.getUserFromToken());
     isLoggedIn = computed(() => this.currentUserClaims() !== null);
     isRefreshing = false;
     refreshTokenSubject = new BehaviorSubject<string | null>(null);
+    private pendingPermissions$: Observable<any> | null = null;
+    private pendingPermissionsKey: string | null = null;
 
     signup(data: SignupData): Observable<errorResponse | successResponse> {
         const fixed = {
@@ -132,17 +136,65 @@ export class AuthService {
                 tap((response) => {
                     if (response.success) {
                         localStorage.removeItem('access_token');
-                        this.currentUserClaims.set(null);
+                        this.setClaimsFromResponse(null);
                     }
                 })
             );
     }
 
-    me(): Observable<errorResponse | successResponse> {
+    me(
+        organizationId?: string | null,
+        projectId?: string | null
+    ): Observable<errorResponse | successResponse> {
+        const params: any = {};
+        if (organizationId) params.organizationId = organizationId;
+        if (projectId) params.projectId = projectId;
+
         return this.http.get<errorResponse | successResponse>(this.url + '/auth/me', {
             headers: this.headers,
-            withCredentials: true,
+            params: params,
         });
+    }
+
+    permissions(orgId?: string | null, projectId?: string | null): Observable<any> {
+        const params: Record<string, string> = {};
+        if (orgId) params['organizationId'] = orgId;
+        if (projectId) params['projectId'] = projectId;
+
+        return this.http.get<successResponse | errorResponse>(this.url + '/auth/permissions', {
+            headers: this.headers,
+            withCredentials: true,
+            params,
+        });
+    }
+
+    /**
+     * Deduplicated permission fetch — if the same request is already in-flight
+     * (e.g. guard and resolver both fire on hard refresh), reuses the same Observable.
+     */
+    fetchPermissions(orgId?: string | null, projectId?: string | null): Observable<any> {
+        const key = `${orgId ?? ''}_${projectId ?? ''}`;
+
+        if (this.pendingPermissions$ && this.pendingPermissionsKey === key) {
+            return this.pendingPermissions$;
+        }
+
+        this.pendingPermissionsKey = key;
+        this.pendingPermissions$ = this.permissions(orgId, projectId).pipe(
+            tap({
+                complete: () => {
+                    this.pendingPermissions$ = null;
+                    this.pendingPermissionsKey = null;
+                },
+                error: () => {
+                    this.pendingPermissions$ = null;
+                    this.pendingPermissionsKey = null;
+                },
+            }),
+            shareReplay(1)
+        );
+
+        return this.pendingPermissions$;
     }
 
     getAccessToken(): string | null {
@@ -151,7 +203,30 @@ export class AuthService {
 
     removeAccessToken() {
         localStorage.removeItem('access_token');
-        this.currentUserClaims.set(null);
+    }
+
+    setClaimsFromResponse(data: any | null): void {
+        if (!data) {
+            this.currentUserClaims.set(null);
+            return;
+        }
+
+        this.currentUserClaims.set({
+            uid: data['id'],
+            email: data['email'],
+            role: data['role'],
+        });
+    }
+
+    setPermissionsFromResponse(data: any | null): void {
+        if (!data) {
+            this.currentClaimsWithPermissions.set(null);
+            return;
+        }
+
+        this.currentClaimsWithPermissions.set(
+            new UserClaims(data['id'], data['role'], data['email'], data['permissions'])
+        );
     }
 
     private getUserFromToken(): Claims | null {

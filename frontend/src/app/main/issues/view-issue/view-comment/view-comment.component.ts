@@ -26,6 +26,7 @@ import { finalize } from 'rxjs';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatMenuModule } from '@angular/material/menu';
 import { DeleteCommentDialogComponent } from './delete-comment-dialog/delete-comment-dialog.component';
+import { CommentPermissions } from '../../../../shared/constants/user/Permissions';
 
 @Component({
     selector: 'app-view-comment',
@@ -65,8 +66,24 @@ export class ViewCommentComponent implements OnInit {
     hasMore = signal<boolean>(false);
     isLoading = signal<boolean>(false);
 
-    currentUser = this.authService.currentUserClaims;
+    currentUser = this.authService.currentClaimsWithPermissions;
     deleteDialog = viewChild(DeleteCommentDialogComponent);
+
+    canEditComment(comment: IssueComment): boolean {
+        const user = this.currentUser();
+        if (!user) return false;
+        return comment.createdBy === user.uid;
+    }
+
+    canDeleteComment(comment: IssueComment): boolean {
+        const user = this.currentUser();
+        if (!user) return false;
+        if (comment.createdBy === user.uid) return true;
+        return user.canDo(CommentPermissions.DELETE_ANY, {
+            projectId: this.projectId(),
+            orgId: this.organizationId(),
+        });
+    }
 
     constructor() {
         this.issueCommentService.commentUpdated$.pipe(takeUntilDestroyed()).subscribe({

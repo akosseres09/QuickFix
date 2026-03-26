@@ -12,6 +12,7 @@ import { AuthService } from '../../shared/services/auth/auth.service';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 import { OrganizationService } from '../../shared/services/organization/organization.service';
 import { Organization } from '../../shared/model/Organization';
+import { IssuePermissions, ProjectPermissions } from '../../shared/constants/user/Permissions';
 
 @Component({
     selector: 'app-main-layout',
@@ -122,6 +123,70 @@ export class MainLayoutComponent implements OnInit {
 
         const basePath = `/org/${orgId}`;
         const projPath = `${basePath}/project/${projId}`;
+        const user = this.authService.currentClaimsWithPermissions();
+        const projCtx = projId ? { projectId: projId, orgId } : undefined;
+
+        const issueChildren: ChildRoute[] = [
+            {
+                name: 'Overview',
+                path: `${projPath}/issues/overview`,
+                icon: 'travel_explore',
+            },
+            {
+                name: 'All Issues',
+                path: `${projPath}/issues`,
+                icon: 'assignment',
+            },
+            {
+                name: 'Board',
+                path: `${projPath}/issues/board`,
+                icon: 'space_dashboard',
+            },
+            ...(user && projCtx && user.canDo(IssuePermissions.CREATE, projCtx)
+                ? [
+                      {
+                          name: 'Create Issue',
+                          path: `${projPath}/issues/add`,
+                          icon: 'add_task',
+                      },
+                  ]
+                : []),
+        ];
+
+        const manageChildrenProject: ChildRoute[] = projId
+            ? [
+                  {
+                      name: 'Members',
+                      path: `${projPath}/members`,
+                      icon: 'group',
+                  },
+                  {
+                      name: 'Activity',
+                      path: `${projPath}/activity`,
+                      icon: 'local_activity',
+                  },
+                  ...(user && projCtx && user.canDo(ProjectPermissions.UPDATE, projCtx)
+                      ? [
+                            {
+                                name: 'Labels',
+                                path: `${projPath}/labels`,
+                                icon: 'label',
+                            },
+                        ]
+                      : []),
+              ]
+            : [
+                  {
+                      name: 'Activity',
+                      path: `${basePath}/activity`,
+                      icon: 'local_activity',
+                  },
+                  {
+                      name: 'Members',
+                      path: `${basePath}/members`,
+                      icon: 'person',
+                  },
+              ];
 
         return [
             ...baseRoute,
@@ -153,28 +218,7 @@ export class MainLayoutComponent implements OnInit {
                           type: 'menu',
                           icon: 'report_problem',
                           path: `${projPath}/issues`,
-                          children: [
-                              {
-                                  name: 'Overview',
-                                  path: `${projPath}/issues/overview`,
-                                  icon: 'travel_explore',
-                              },
-                              {
-                                  name: 'All Issues',
-                                  path: `${projPath}/issues`,
-                                  icon: 'assignment',
-                              },
-                              {
-                                  name: 'Board',
-                                  path: `${projPath}/issues/board`,
-                                  icon: 'space_dashboard',
-                              },
-                              {
-                                  name: 'Create Issue',
-                                  path: `${projPath}/issues/add`,
-                                  icon: 'add_task',
-                              },
-                          ],
+                          children: issueChildren,
                       },
                   ] as SidenavRoute[])
                 : []),
@@ -183,38 +227,7 @@ export class MainLayoutComponent implements OnInit {
                 name: 'Manage',
                 type: 'menu',
                 icon: 'manage_accounts',
-                children: [
-                    ...(projId
-                        ? [
-                              {
-                                  name: 'Members',
-                                  path: `${projPath}/members`,
-                                  icon: 'group',
-                              },
-                              {
-                                  name: 'Activity',
-                                  path: `${projPath}/activity`,
-                                  icon: 'local_activity',
-                              },
-                              {
-                                  name: 'Labels',
-                                  path: `${projPath}/labels`,
-                                  icon: 'label',
-                              },
-                          ]
-                        : [
-                              {
-                                  name: 'Activity',
-                                  path: `${basePath}/activity`,
-                                  icon: 'local_activity',
-                              },
-                              {
-                                  name: 'Members',
-                                  path: `${basePath}/members`,
-                                  icon: 'person',
-                              },
-                          ]),
-                ],
+                children: manageChildrenProject,
             },
             {
                 name: 'Time Tracking',

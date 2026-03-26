@@ -26,6 +26,11 @@ class ProjectMemberController extends BaseRestController
             $searchModel = new ProjectMemberSearch();
             return $searchModel->search(Yii::$app->request->queryParams);
         };
+
+        $actions['view']['findModel'] = [$this, 'findModel'];
+        $actions['update']['findModel'] = [$this, 'findModel'];
+        $actions['delete']['findModel'] = [$this, 'findModel'];
+
         return $actions;
     }
 

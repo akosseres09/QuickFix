@@ -14,6 +14,8 @@ import { SpeedDialComponent } from '../../../common/speed-dial/speed-dial.compon
 import { finalize } from 'rxjs/internal/operators/finalize';
 import { LabelFormDialogComponent } from './label-form-dialog/label-form-dialog.component';
 import { LabelDeleteDialogComponent } from './label-delete-dialog/label-delete-dialog.component';
+import { AuthService } from '../../../shared/services/auth/auth.service';
+import { ProjectPermissions } from '../../../shared/constants/user/Permissions';
 
 @Component({
     selector: 'app-labels',
@@ -32,6 +34,9 @@ export class LabelsComponent implements OnInit {
     private readonly snackbarService = inject(SnackbarService);
     private readonly listStateService = inject(ListStateService);
     private readonly activeRoute = inject(ActivatedRoute);
+    private readonly authService = inject(AuthService);
+
+    private readonly currentUser = this.authService.currentClaimsWithPermissions;
 
     readonly listState: ListState = this.listStateService.create(this.activeRoute, {
         defaultPageSize: 20,
@@ -48,18 +53,23 @@ export class LabelsComponent implements OnInit {
 
     speedDialButtons = computed<SpeedDialButton[]>(() => {
         const selected = this.selectedRow();
+        const user = this.currentUser();
+        if (!user) return [];
+
+        const ctx = { projectId: this.projectId(), orgId: this.organizationId() };
+        const canUpdate = user.canDo(ProjectPermissions.UPDATE, ctx);
 
         return [
             {
                 iconName: 'add',
                 label: `Create Label`,
-                shown: selected === null,
+                shown: selected === null && canUpdate,
                 onClick: () => this.openLabelFormDialog(),
             },
             {
                 iconName: 'edit',
                 label: `Edit Label`,
-                shown: selected !== null,
+                shown: selected !== null && canUpdate,
                 onClick: () => {
                     if (!selected) {
                         this.snackbarService.open('Please select a valid label to edit!');
@@ -72,7 +82,7 @@ export class LabelsComponent implements OnInit {
             {
                 iconName: 'delete',
                 label: `Delete Label`,
-                shown: selected !== null,
+                shown: selected !== null && canUpdate,
                 onClick: () => {
                     if (!selected) {
                         this.snackbarService.open('Please select a valid label to delete!');

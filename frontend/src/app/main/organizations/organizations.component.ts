@@ -7,7 +7,6 @@ import { SnackbarService } from '../../shared/services/snackbar/snackbar.service
 import { FilterService } from '../../shared/services/filter/filter.service';
 import { DisplayedColumnService } from '../../shared/services/displayed-column/displayed-column.service';
 import { ListStateService } from '../../shared/services/list-state/list-state.service';
-import { SpeedDialButtonFactory } from '../../shared/services/speed-dial/speed-dial-button.factory';
 import { DialogService } from '../../shared/services/dialog/dialog.service';
 import { ListState } from '../../shared/constants/table/ListState';
 import { Organization } from '../../shared/model/Organization';
@@ -20,6 +19,8 @@ import { PageEvent } from '@angular/material/paginator';
 import { Sort } from '@angular/material/sort';
 import { OrganizationService } from '../../shared/services/organization/organization.service';
 import { finalize } from 'rxjs';
+import { AuthService } from '../../shared/services/auth/auth.service';
+import { OrganizationPermissions } from '../../shared/constants/user/Permissions';
 
 @Component({
     selector: 'app-organizations',
@@ -34,8 +35,10 @@ export class OrganizationsComponent {
     private readonly filterService = inject(FilterService);
     private readonly displayedColumnService = inject(DisplayedColumnService);
     private readonly listStateService = inject(ListStateService);
-    private readonly buttonFactory = inject(SpeedDialButtonFactory);
-    private dialogService = inject(DialogService);
+    private readonly dialogService = inject(DialogService);
+    private readonly authService = inject(AuthService);
+
+    currentUser = this.authService.currentClaimsWithPermissions;
 
     // List state (pagination, sorting, filtering)
     readonly listState: ListState = this.listStateService.create(this.activeRoute, {
@@ -54,25 +57,38 @@ export class OrganizationsComponent {
 
     speedDialButtons = computed<SpeedDialButton[]>(() => {
         const selected = this.selectedRow();
-        return this.buttonFactory.createBaseCrudButtons({
-            entityName: 'Organization',
-            hasSelection: selected !== null,
-            createRoute: ['new'],
-            editRouteBuilder: () => {
-                const org = this.selectedRow();
-                if (!org) {
-                    this.snackbarService.error('Please select a valid project to edit!');
-                    return null;
-                }
-                return ['/organizations', org.slug, 'edit'];
+        const user = this.currentUser();
+        if (!user) return [];
+
+        const ctx = selected ? { orgId: selected.id } : undefined;
+
+        const buttons: SpeedDialButton[] = [
+            {
+                shown: !selected && user.canDo(OrganizationPermissions.CREATE),
+                iconName: 'add',
+                label: 'New Organization',
+                action: () => ['new'],
             },
-            onDelete: () =>
-                this.openConfirmationDialog({
-                    header: 'Delete Organization',
-                    confirmLabel: 'Delete',
-                    confirmAction: () => this.deleteOrganization(),
-                }),
-        });
+            {
+                shown: !!selected && user.canDo(OrganizationPermissions.UPDATE, ctx),
+                iconName: 'edit',
+                label: 'Edit Organization',
+                action: () => (selected ? ['/organizations', selected.slug, 'edit'] : []),
+            },
+            {
+                shown: !!selected && user.canDo(OrganizationPermissions.DELETE, ctx),
+                iconName: 'delete',
+                label: 'Delete Organization',
+                onClick: () =>
+                    this.openConfirmationDialog({
+                        header: 'Delete Organization',
+                        confirmLabel: 'Delete',
+                        confirmAction: () => this.deleteOrganization(),
+                    }),
+            },
+        ];
+
+        return buttons;
     });
 
     selectedOrgName = computed(() => {

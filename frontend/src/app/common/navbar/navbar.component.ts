@@ -58,7 +58,6 @@ export class NavbarComponent implements AfterViewInit {
     routes = linkedSignal<SidenavRoute[]>(() => this.getAppRoutes().filter((route) => route.show));
     theme = signal<'light' | 'dark'>(this.themeService.getTheme() || 'light');
     showSidebarToggleButton = model<boolean>(true);
-    sidebarToggleButton = signal<boolean>(window.innerWidth <= 767);
     logo = this.themeService.logos;
 
     constructor() {
@@ -69,11 +68,9 @@ export class NavbarComponent implements AfterViewInit {
                 .pipe(takeUntilDestroyed())
                 .subscribe(() => {
                     if (window.innerWidth <= 767) {
-                        this.sidebarToggleButton.set(true);
                         this.isMenuOpen.set(false);
                         this.isSidebarOpened.set(false);
                     } else {
-                        this.sidebarToggleButton.set(false);
                         this.isSidebarOpened.set(true);
                     }
                 });

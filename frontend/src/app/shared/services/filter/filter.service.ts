@@ -6,8 +6,8 @@ import {
     STATUS_MAP as PROJECT_STATUS_MAP,
 } from '../../model/Project';
 import { ORGANIZATION_INVITATION_STATUS_MAP } from '../../model/OrganizationInvitation';
-import { ORGANIZATION_MEMBER_ROLE_MAP } from '../../model/OrganizationMember';
 import { Label } from '../../model/Label';
+import { ROLE_MAP } from '../../constants/Role';
 
 @Injectable({
     providedIn: 'root',
@@ -113,7 +113,7 @@ export class FilterService {
             {
                 name: 'role',
                 type: 'select',
-                options: Object.entries(ORGANIZATION_MEMBER_ROLE_MAP).map(([value, label]) => ({
+                options: Object.entries(ROLE_MAP).map(([value, label]) => ({
                     value,
                     label,
                 })),

@@ -23,7 +23,7 @@ import {
     ORGANIZATION_INVITATION_STATUS_COLOR_MAP,
     ORGANIZATION_INVITATION_STATUS_MAP,
 } from '../../model/OrganizationInvitation';
-import { ORGANIZATION_MEMBER_ROLE_MAP } from '../../model/OrganizationMember';
+import { ROLE_MAP } from '../../constants/Role';
 
 @Injectable({
     providedIn: 'root',
@@ -254,8 +254,7 @@ export class DisplayedColumnService {
                 id: 'role',
                 label: 'Role',
                 sortable: false,
-                value: (e: OrganizationInvitation) =>
-                    ORGANIZATION_MEMBER_ROLE_MAP[e.role] ?? e.role,
+                value: (e: OrganizationInvitation) => ROLE_MAP[e.role] ?? e.role,
             },
             {
                 id: 'status',

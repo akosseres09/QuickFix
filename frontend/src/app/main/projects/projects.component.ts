@@ -32,6 +32,8 @@ import { ListStateService } from '../../shared/services/list-state/list-state.se
 import { ListState } from '../../shared/constants/table/ListState';
 import { DialogService } from '../../shared/services/dialog/dialog.service';
 import { finalize } from 'rxjs';
+import { AuthService } from '../../shared/services/auth/auth.service';
+import { ProjectPermissions } from '../../shared/constants/user/Permissions';
 
 @Component({
     selector: 'app-projects',
@@ -55,10 +57,12 @@ export class ProjectsComponent {
     private readonly filterService = inject(FilterService);
     private readonly displayedColumnService = inject(DisplayedColumnService);
     private readonly listStateService = inject(ListStateService);
+    private readonly authService = inject(AuthService);
     private readonly buttonFactory = inject(SpeedDialButtonFactory);
     private dialogService = inject(DialogService);
 
     organizationId = input.required<string>();
+    currentUser = this.authService.currentClaimsWithPermissions;
 
     // List state (pagination, sorting, filtering)
     readonly listState: ListState = this.listStateService.create(this.activeRoute, {
@@ -76,46 +80,62 @@ export class ProjectsComponent {
 
     speedDialButtons = computed<SpeedDialButton[]>(() => {
         const selected = this.selectedRow();
-        return this.buttonFactory.createArchivableButtons({
-            entityName: 'Project',
-            hasSelection: selected !== null,
-            createRoute: ['new'],
-            editRouteBuilder: () => {
-                if (!selected) {
-                    this.snackbarService.error('Please select a valid project to edit!');
-                    return null;
-                }
-                return ['../project', selected.key, 'edit'];
+        const user = this.currentUser();
+
+        if (!user) return [];
+
+        const ctx = { orgId: this.organizationId(), projectId: selected?.key };
+
+        const buttons: SpeedDialButton[] = [
+            {
+                shown: !selected && user.canDo(ProjectPermissions.CREATE, ctx),
+                iconName: 'add',
+                label: 'New Project',
+                action: () => ['new'],
             },
-            isArchived: !!selected && selected.isArchived,
-            onArchive: () =>
-                this.openConfirmationDialog({
-                    header: 'Archive Project',
-                    confirmLabel: 'Archive',
-                    confirmAction: () =>
-                        this.updateProject({
-                            isArchived: true,
-                        }),
-                    template: this.archiveConfirmTemplate(),
-                }),
-            onUnarchive: () =>
-                this.openConfirmationDialog({
-                    header: 'Unarchive Project',
-                    confirmLabel: 'Unarchive',
-                    confirmAction: () =>
-                        this.updateProject({
-                            isArchived: false,
-                        }),
-                    template: this.archiveConfirmTemplate(),
-                }),
-            onDelete: () =>
-                this.openConfirmationDialog({
-                    header: 'Delete Project',
-                    confirmLabel: 'Delete',
-                    confirmAction: () => this.deleteProject(),
-                    template: this.deleteConfirmTemplate(),
-                }),
-        });
+            {
+                shown: !!selected && user.canDo(ProjectPermissions.UPDATE, ctx),
+                iconName: 'edit',
+                label: 'Edit Project',
+                action: () => (selected ? ['/projects', selected.key, 'edit'] : []),
+            },
+            {
+                shown: !!selected && user.canDo(ProjectPermissions.DELETE, ctx),
+                iconName: 'delete',
+                label: 'Delete Project',
+                onClick: () =>
+                    this.openConfirmationDialog({
+                        header: 'Delete Project',
+                        confirmLabel: 'Delete',
+                        confirmAction: () => this.deleteProject(),
+                        template: this.deleteConfirmTemplate(),
+                    }),
+            },
+            {
+                shown: !!selected && user.canDo(ProjectPermissions.UPDATE, ctx),
+                iconName: selected?.isArchived ? 'unarchive' : 'archive',
+                label: selected?.isArchived ? 'Unarchive Project' : 'Archive Project',
+                onClick: () =>
+                    this.openConfirmationDialog({
+                        header: selected?.isArchived ? 'Unarchive Project' : 'Archive Project',
+                        confirmLabel: selected?.isArchived ? 'Unarchive' : 'Archive',
+                        confirmAction: () => {
+                            const selected = this.selectedRow();
+                            if (!selected) {
+                                this.snackbarService.error('No project selected');
+                                return;
+                            }
+
+                            this.updateProject({
+                                isArchived: !selected.isArchived,
+                            });
+                        },
+                        template: this.archiveConfirmTemplate(),
+                    }),
+            },
+        ];
+
+        return buttons;
     });
 
     selectedProjectName = computed(() => {

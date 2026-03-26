@@ -162,29 +162,6 @@ class Project extends ActiveRecord
     }
 
     /**
-     * After saving a new project, we need to create a corresponding ProjectMember record to assign 
-     * the owner as a member of the project with the appropriate role. 
-     * This ensures that the owner has the necessary permissions to manage the project and its related entities. 
-     * If the save operation for the ProjectMember fails, we log the error and throw an exception 
-     * to trigger a transaction rollback, maintaining data integrity.
-     * 
-     * Documentation:
-     *
-     * {@inheritdoc}
-     */
-    public function afterSave($insert, $changedAttributes)
-    {
-        parent::afterSave($insert, $changedAttributes);
-
-        $isNowPublic = $this->visibility === self::VISIBILITY_PUBLIC;
-        $wasNotPublic = !$insert && isset($changedAttributes['visibility']) && $changedAttributes['visibility'] !== self::VISIBILITY_PUBLIC;
-
-        if (($insert && $isNowPublic) || $wasNotPublic) {
-            $this->addOrganizationMembersToProject();
-        }
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function rules(): array
@@ -389,19 +366,6 @@ class Project extends ActiveRecord
     }
 
     /**
-     * Get all available statuses
-     * @return array
-     */
-    public static function getStatuses(): array
-    {
-        return [
-            self::STATUS_ACTIVE => 'Active',
-            self::STATUS_ON_HOLD => 'On Hold',
-            self::STATUS_COMPLETED => 'Completed',
-        ];
-    }
-
-    /**
      * Get all available visibilities
      * @return array
      */
@@ -437,55 +401,18 @@ class Project extends ActiveRecord
         return $this->status === self::STATUS_ACTIVE;
     }
 
-    /**
-     * Add all organization members to the project as members (or admins if they are the owner) 
-     * when a project is created or when its visibility changes to public.
-     * 
-     * Used by [[Project::afterSave()]] to ensure that all organization members are added 
-     * to the project when it's created as public or when its visibility changes to public.
-     */
-    private function addOrganizationMembersToProject()
+    public function isTeamProject(): bool
     {
-        // Get IDs of users already in this project (e.g., the creator)
-        $existingUserIds = ProjectMember::find()
-            ->select('user_id')
-            ->where(['project_id' => $this->id]);
+        return $this->visibility === self::VISIBILITY_TEAM;
+    }
 
-        // Get all organization members who are not in the project yet
-        // ->column() returns a flat array of IDs: [1, 5, 12, 45]
-        $usersToAdd = OrganizationMember::find()
-            ->select('user_id')
-            ->where(['organization_id' => $this->organization_id])
-            ->andWhere(['not in', 'user_id', $existingUserIds])
-            ->column();
+    public function isPrivateProject(): bool
+    {
+        return $this->visibility === self::VISIBILITY_PRIVATE;
+    }
 
-        if (empty($usersToAdd)) {
-            return;
-        }
-
-        // Prepare the data for batch insertion
-        $rows = [];
-        $time = time();
-
-        foreach ($usersToAdd as $userId) {
-            $rows[] = [
-                Uuid::v7()->toString(),
-                $this->id,
-                $userId,
-                $userId === $this->owner_id ? OrganizationMember::ROLE_OWNER : OrganizationMember::ROLE_MEMBER, // Owner gets admin role
-                $time,
-            ];
-        }
-
-        try {
-            Yii::$app->db->createCommand()->batchInsert(
-                ProjectMember::tableName(),
-                ['id', 'project_id', 'user_id', 'role', 'created_at'],
-                $rows
-            )->execute();
-        } catch (\Exception $e) {
-            Yii::error("Failed to batch insert project members. Error: " . $e->getMessage(), __METHOD__);
-            throw new \yii\db\Exception("Transaction aborted: Could not batch save Project Members.");
-        }
+    public function isPublicProject(): bool
+    {
+        return $this->visibility === self::VISIBILITY_PUBLIC;
     }
 }

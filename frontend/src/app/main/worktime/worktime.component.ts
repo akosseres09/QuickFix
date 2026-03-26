@@ -43,6 +43,8 @@ import { SpeedDialComponent } from '../../common/speed-dial/speed-dial.component
 import { SpeedDialButton } from '../../shared/constants/speed-dial/SpeedDialButton';
 import { DisplayedColumnService } from '../../shared/services/displayed-column/displayed-column.service';
 import { DeleteWorktimeDialogComponent } from './delete-worktime-dialog/delete-worktime-dialog.component';
+import { AuthService } from '../../shared/services/auth/auth.service';
+import { WorktimePermissions } from '../../shared/constants/user/Permissions';
 
 @Component({
     selector: 'app-worktime',
@@ -76,6 +78,9 @@ export class WorktimeComponent implements OnInit, AfterViewInit {
     private readonly listStateService = inject(ListStateService);
     private readonly dateRangeService = inject(DateRangeService);
     private readonly displayedColumnService = inject(DisplayedColumnService);
+    private readonly authService = inject(AuthService);
+
+    private readonly currentUser = this.authService.currentClaimsWithPermissions;
 
     private readonly loadListTrigger$ = new Subject<void>();
     readonly organizationId = input.required<string>();
@@ -103,24 +108,29 @@ export class WorktimeComponent implements OnInit, AfterViewInit {
     speedDialButtons = computed<SpeedDialButton[]>(() => {
         const selected = this.selectedWorktime();
         const selectedProjectId = this.selectedProjectId();
+        const user = this.currentUser();
+        if (!user) return [];
+
+        const ctx = { orgId: this.organizationId(), projectId: selectedProjectId ?? undefined };
 
         return [
             {
                 iconName: 'add',
                 label: 'Add Worktime',
-                shown: !!selectedProjectId && !selected,
+                shown:
+                    !!selectedProjectId && !selected && user.canDo(WorktimePermissions.CREATE, ctx),
                 onClick: () => this.openWorktimeDialog(),
             },
             {
                 iconName: 'edit',
                 label: 'Edit Worktime',
-                shown: !!selected,
+                shown: !!selected && user.canDo(WorktimePermissions.UPDATE_ANY, ctx),
                 onClick: () => this.openWorktimeDialog(),
             },
             {
                 iconName: 'delete',
                 label: 'Delete Worktime',
-                shown: !!selected,
+                shown: !!selected && user.canDo(WorktimePermissions.DELETE_ANY, ctx),
                 onClick: () => this.openDeleteDialog(),
             },
         ];

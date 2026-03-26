@@ -1,10 +1,6 @@
-import { Component, inject, input, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, input, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-    ProjectMember,
-    ProjectMemberRoles,
-    ROLE_LABELS,
-} from '../../../shared/model/ProjectMember';
+import { ProjectMember } from '../../../shared/model/ProjectMember';
 import { ProjectMemberService } from '../../../shared/services/project-member/project-member.service';
 import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
 import { AuthService } from '../../../shared/services/auth/auth.service';
@@ -15,10 +11,13 @@ import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MemberCardComponent } from '../../../common/member-card/member-card.component';
 import { ApiQueryParams } from '../../../shared/constants/api/ApiQueryParams';
+import { ProjectPermissions } from '../../../shared/constants/user/Permissions';
+import { ProjectInviteDialogComponent } from './project-invite-dialog/project-invite-dialog.component';
+import { MemberRole, ROLES } from '../../../shared/constants/Role';
 
 @Component({
     selector: 'app-members',
-    imports: [CommonModule, MatButton, MatIcon, MemberCardComponent],
+    imports: [CommonModule, MatButton, MatIcon, MemberCardComponent, ProjectInviteDialogComponent],
     templateUrl: './members.component.html',
     styleUrl: './members.component.css',
 })
@@ -39,7 +38,26 @@ export class MembersComponent implements OnInit {
     project = signal<Project | null>(null);
 
     ProjectVisibility = ProjectVisibility;
-    roleLabels = ROLE_LABELS;
+    availableRoles = ROLES.filter((r) => r !== MemberRole.OWNER);
+
+    canManage = computed(() => {
+        const user = this.authService.currentClaimsWithPermissions();
+        if (!user) return false;
+        return user.canDo(ProjectPermissions.MEMBERS_MANAGE, {
+            projectId: this.projectId(),
+            orgId: this.organizationId(),
+        });
+    });
+
+    canInvite = computed(() => {
+        const user = this.authService.currentClaimsWithPermissions();
+        const project = this.project();
+        if (!user || !project || project.visibility !== ProjectVisibility.TEAM) return false;
+        return user.canDo(ProjectPermissions.MEMBER_INVITE, {
+            projectId: this.projectId(),
+            orgId: this.organizationId(),
+        });
+    });
 
     ngOnInit(): void {
         this.getProject();
@@ -48,14 +66,50 @@ export class MembersComponent implements OnInit {
 
     loadMore() {
         const currentCursor = this.cursor();
-        console.log(currentCursor);
-        console.log(this.isLoading());
-
         if (currentCursor && !this.isLoading()) {
             this.getMembers(currentCursor);
-        } else {
-            console.warn('No more members to load');
         }
+    }
+
+    onMemberAdded(): void {
+        this.members.set([]);
+        this.cursor.set(null);
+        this.hasMore.set(false);
+        this.getMembers();
+    }
+
+    onRoleChanged(event: { memberId: string; role: string }): void {
+        this.memberService
+            .updateProjectMember(this.organizationId(), this.projectId(), event.memberId, {
+                role: event.role,
+            })
+            .subscribe({
+                next: (updated) => {
+                    this.members.update((members) =>
+                        members.map((m) =>
+                            m.id === event.memberId ? { ...m, role: updated.role } : m
+                        )
+                    );
+                    this.snackbarService.success('Role updated successfully');
+                },
+                error: () => {
+                    this.snackbarService.error('Failed to update role');
+                },
+            });
+    }
+
+    onMemberRemoved(memberId: string): void {
+        this.memberService
+            .deleteProjectMember(this.organizationId(), this.projectId(), memberId)
+            .subscribe({
+                next: () => {
+                    this.members.update((members) => members.filter((m) => m.id !== memberId));
+                    this.snackbarService.success('Member removed successfully');
+                },
+                error: () => {
+                    this.snackbarService.error('Failed to remove member');
+                },
+            });
     }
 
     private getMembers(cursor?: string) {
@@ -110,19 +164,5 @@ export class MembersComponent implements OnInit {
                 this.snackbarService.open('Failed to fetch project details', ['snackbar-error']);
             },
         });
-    }
-
-    getRoleBadgeClass(role: string): string {
-        const baseClasses = 'shadow-sm';
-        switch (role) {
-            case ProjectMemberRoles.OWNER:
-                return `${baseClasses} bg-light-accent dark:bg-dark-accent text-white`;
-            case ProjectMemberRoles.ADMIN:
-                return `${baseClasses} bg-light-primary dark:bg-dark-primary text-white dark:text-dark-background`;
-            case ProjectMemberRoles.MEMBER:
-                return `${baseClasses} bg-light-secondary dark:bg-dark-secondary text-white`;
-            default:
-                return `${baseClasses} bg-gray-400 dark:bg-gray-600 text-white`;
-        }
     }
 }

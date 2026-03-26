@@ -76,11 +76,13 @@ const handle401Error = (req: HttpRequest<any>, next: HttpHandlerFn, authService:
 
                 // No access token returned — let the error propagate to the caller
                 authService.removeAccessToken();
+                authService.setClaimsFromResponse(null);
                 return throwError(() => new Error('Refresh failed'));
             }),
             catchError((err) => {
                 authService.isRefreshing = false;
                 authService.removeAccessToken();
+                authService.setClaimsFromResponse(null);
                 return throwError(() => err);
             })
         );

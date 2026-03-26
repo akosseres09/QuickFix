@@ -45,16 +45,7 @@
         <div
             class="inline-flex items-center gap-2 dark:bg-dark-primary/50 bg-light-primary/20 text-light-primary dark:text-dark-text px-4 py-2 rounded-full mb-6"
         >
-            <svg
-                class="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-            >
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 8v4M12 16h.01" />
-            </svg>
+            <mat-icon fontSet="material-icons-outlined">cancel</mat-icon>
             <span class="font-semibold">Status: Not Found</span>
         </div>
 
@@ -64,44 +55,36 @@
         </p>
 
         <div
-            class="bg-dark-secondary backdrop-blur-sm rounded-lg p-6 mb-8 max-w-md mx-auto text-left"
+            class="bg-white dark:bg-dark-background-hover backdrop-blur-sm rounded-lg p-6 mb-8 max-w-md mx-auto text-left"
         >
-            <div class="flex items-start gap-3 mb-4">
-                <svg
-                    class="w-6 h-6 text-slate-400 flex-shrink-0 mt-1"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    viewBox="0 0 24 24"
+            <div class="flex items-start gap-3 mb-4 text-black dark:text-white">
+                <mat-icon color="currentColor" fontSet="material-icons-outlined"
+                    >assignment</mat-icon
                 >
-                    <path
-                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                    />
-                </svg>
                 <div class="flex-1 text-lg">
-                    <h3 class="text-white font-semibold mb-2">Error Details</h3>
-                    <div class="space-y-2 text-sm font-semibold">
+                    <h3 class="font-semibold mb-2">Error Details</h3>
+                    <div class="text-slate-600 dark:text-slate-300 space-y-2 text-sm font-semibold">
                         <div class="flex justify-between">
-                            <span class="text-slate-400">Priority:</span>
+                            <span>Priority:</span>
                             <span class="text-red-400 font-medium">Critical</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-slate-400">Assignee:</span>
-                            <span class="text-slate-300">Unassigned</span>
+                            <span>Assignee:</span>
+                            <span>Unassigned</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-slate-400">Reporter:</span>
-                            <span class="text-slate-300">You</span>
+                            <span>Reporter:</span>
+                            <span>You</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-slate-400">Created:</span>
-                            <span class="text-slate-300">Just now</span>
+                            <span>Created:</span>
+                            <span>Just now</span>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="border-t border-dark-text pt-4">
-                <p class="text-slate-400 text-sm italic">
+                <p class="text-slate-700 dark:text-slate-400 text-sm italic">
                     "The requested resource could not be located in the system. Please verify the
                     URL or contact support."
                 </p>
@@ -110,42 +93,28 @@
         <div class="flex flex-wrap gap-4 justify-center mb-6">
             @if (!user()) {
                 <button
+                    color="primary"
+                    mat-flat-button
                     (click)="goBack()"
-                    class="cursor-pointer flex items-center gap-2 px-6 py-3 bg-light-secondary-hover dark:bg-dark-primary-hover text-white dark:text-black rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                    class="flex-1 !text-white"
                 >
-                    <svg
-                        class="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        viewBox="0 0 24 24"
-                    >
-                        <path d="M19 12H5M12 19l-7-7 7-7" />
-                    </svg>
+                    <mat-icon>arrow_back</mat-icon>
                     Go Back
                 </button>
-                <button
-                    (click)="goHome()"
-                    class="cursor-pointer flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg shadow-purple-500/50"
-                >
+                <a mat-flat-button [routerLink]="'/auth/login'" class="flex-1 !text-white">
                     <mat-icon>login</mat-icon>
                     Login
-                </button>
+                </a>
             } @else {
-                <button
-                    (click)="goHome()"
-                    class="cursor-pointer flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg shadow-purple-500/50"
+                <a
+                    mat-flat-button
+                    color="primary"
+                    [routerLink]="'/organizations'"
+                    class="flex-1 !text-white"
                 >
-                    <mat-icon>home</mat-icon>
-                    Projects
-                </button>
-                <button
-                    (click)="viewAllIssues()"
-                    class="cursor-pointer flex items-center gap-2 px-6 py-3 bg-light-secondary-hover dark:bg-dark-primary-hover text-white dark:text-black rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg"
-                >
-                    <mat-icon>assignment</mat-icon>
-                    View All Issues
-                </button>
+                    <mat-icon fontSet="material-icons-outlined">apartment</mat-icon>
+                    Organizations
+                </a>
             }
         </div>
     </div>

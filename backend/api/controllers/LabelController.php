@@ -2,6 +2,8 @@
 
 namespace api\controllers;
 
+use api\components\permissions\Permissions;
+use api\components\permissions\PermissionService;
 use common\models\Label;
 use common\models\Project;
 use common\models\search\LabelSearch;
@@ -67,8 +69,28 @@ class LabelController extends BaseRestController
 
     public function checkAccess($action, $model = null, $params = [])
     {
-        if ($model && !$model->canAccess(Yii::$app->user->id)) {
-            throw new ForbiddenHttpException('You do not have permission to access this label.');
+        $userId = Yii::$app->user->id;
+        $projectId = Yii::$app->request->get('project_id');
+
+        if (!$projectId) {
+            return;
+        }
+
+        switch ($action) {
+            case 'index':
+            case 'view':
+                if (!PermissionService::canDoInProject($projectId, $userId, Permissions::PROJECT_VIEW)) {
+                    throw new ForbiddenHttpException('You do not have permission to view labels in this project.');
+                }
+                break;
+            case 'create':
+            case 'update':
+            case 'delete':
+            case 'reorder':
+                if (!PermissionService::canDoInProject($projectId, $userId, Permissions::PROJECT_UPDATE)) {
+                    throw new ForbiddenHttpException('You do not have permission to manage labels in this project.');
+                }
+                break;
         }
     }
 

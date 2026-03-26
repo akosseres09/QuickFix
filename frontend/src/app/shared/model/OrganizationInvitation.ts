@@ -1,6 +1,6 @@
+import { MemberRole } from '../constants/Role';
 import { BaseModel } from './BaseModel';
 import { Organization } from './Organization';
-import { OrganizationMemberRole } from './OrganizationMember';
 import { User } from './User';
 
 export enum OrganizationInvitationStatus {
@@ -33,7 +33,7 @@ export interface OrganizationInvitation extends BaseModel {
     organizationId: string;
     inviterId: string;
     email: string;
-    role: OrganizationMemberRole;
+    role: MemberRole;
     status: OrganizationInvitationStatus;
     createdAt: number;
     updatedAt: number;

@@ -146,8 +146,6 @@ export class IssueFormComponent implements OnInit {
             .subscribe({
                 next: (response) => {
                     this.labels.set(response.items);
-                    console.log(this.labels());
-
                     this.setSelectedLabel();
                 },
                 error: (_) => {

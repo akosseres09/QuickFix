@@ -25,13 +25,13 @@ use yii\db\ActiveRecord;
 class OrganizationMember extends ActiveRecord
 {
 
-    const ROLE_VIEWER = 'viewer';
+    const ROLE_GUEST = 'guest';
     const ROLE_MEMBER = 'member';
     const ROLE_ADMIN = 'admin';
     const ROLE_OWNER = 'owner';
 
     const ROLE_LIST = [
-        self::ROLE_VIEWER,
+        self::ROLE_GUEST,
         self::ROLE_MEMBER,
         self::ROLE_ADMIN,
         self::ROLE_OWNER

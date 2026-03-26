@@ -2,8 +2,7 @@
 
 namespace api\controllers;
 
-use api\filters\OrganizationSlugTranslatorFilter;
-use api\filters\ProjectKeyTranslatorFilter;
+use api\components\permissions\PermissionService;
 use common\models\Issue;
 use common\models\Label;
 use common\models\Project;
@@ -56,7 +55,7 @@ class IssueController extends BaseRestController
         }
 
         $project = Project::find()->byOrganizationId($organizationId)->byId($projectId)->one();
-        if (!$project || !$project->canAccess(Yii::$app->user->id)) {
+        if (!$project || !PermissionService::canViewProject($project, Yii::$app->user->id)) {
             throw new ForbiddenHttpException('Access denied.');
         }
 
@@ -216,8 +215,26 @@ class IssueController extends BaseRestController
      */
     public function checkAccess($action, $model = null, $params = [])
     {
-        if ($model && !$model->canAccess(Yii::$app->user->id)) {
-            throw new ForbiddenHttpException('You do not have permission to access this issue.');
+        $userId = Yii::$app->user->id;
+
+        if ($model instanceof Issue) {
+            switch ($action) {
+                case 'view':
+                    if (!PermissionService::canViewIssue($model, $userId)) {
+                        throw new ForbiddenHttpException('You do not have permission to view this issue.');
+                    }
+                    break;
+                case 'update':
+                    if (!PermissionService::canUpdateIssue($model, $userId)) {
+                        throw new ForbiddenHttpException('You do not have permission to update this issue.');
+                    }
+                    break;
+                case 'delete':
+                    if (!PermissionService::canDeleteIssue($model, $userId)) {
+                        throw new ForbiddenHttpException('You do not have permission to delete this issue.');
+                    }
+                    break;
+            }
         }
     }
 

@@ -3,6 +3,7 @@
 namespace common\models\forms;
 
 use common\models\User;
+use common\models\UserStatus;
 use yii\base\InvalidArgumentException;
 use yii\base\Model;
 
@@ -46,7 +47,7 @@ class VerifyEmailForm extends Model
     public function verifyEmail()
     {
         $user = $this->_user;
-        $user->status = User::STATUS_ACTIVE;
+        $user->status = UserStatus::ACTIVE->value;
         return $user->save(false) ? $user : null;
     }
 }

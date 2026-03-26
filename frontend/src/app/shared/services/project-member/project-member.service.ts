@@ -39,4 +39,31 @@ export class ProjectMemberService {
                 }))
             );
     }
+
+    addProjectMember(
+        organizationId: string,
+        projectId: string,
+        payload: { user_id: string; role: string }
+    ) {
+        return this.http.post<ProjectMember>(
+            `${this.apiUrl}/${organizationId}/${projectId}/member`,
+            payload
+        );
+    }
+
+    updateProjectMember(
+        organizationId: string,
+        projectId: string,
+        memberId: string,
+        payload: { role: string }
+    ) {
+        return this.http.put<ProjectMember>(
+            `${this.apiUrl}/${organizationId}/${projectId}/member/${memberId}`,
+            payload
+        );
+    }
+
+    deleteProjectMember(organizationId: string, projectId: string, memberId: string) {
+        return this.http.delete(`${this.apiUrl}/${organizationId}/${projectId}/member/${memberId}`);
+    }
 }

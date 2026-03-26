@@ -1,5 +1,6 @@
 <div class="max-w-7xl mx-auto">
     <!-- Page Header -->
+    @let canInvite = canUserInvite();
     <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
         <div>
             <h3 class="font-bold text-3xl text-light-text dark:text-dark-text mb-2">Members</h3>
@@ -8,15 +9,17 @@
                 {{ members().length === 1 ? 'member' : 'members' }} in this organization
             </p>
         </div>
-        <button
-            (click)="openDialog()"
-            mat-flat-button
-            color="primary"
-            class="!text-white shrink-0 self-start sm:self-auto"
-        >
-            <mat-icon>person_add</mat-icon>
-            Invite Members
-        </button>
+        @if (canInvite) {
+            <button
+                (click)="openDialog()"
+                mat-flat-button
+                color="primary"
+                class="!text-white shrink-0 self-start sm:self-auto"
+            >
+                <mat-icon>person_add</mat-icon>
+                Invite Members
+            </button>
+        }
     </div>
     <!-- Members Grid -->
     @if (members().length > 0) {
@@ -24,10 +27,12 @@
             @for (member of members(); track member.id) {
                 <app-member-card
                     [organizationId]="organizationId()"
-                    [RoleLabels]="RoleMap"
                     [member]="member"
                     [currentUser]="currentUser()"
-                    [getRoleBadgeClass]="getRoleBadgeClass"
+                    [canManage]="canManage()"
+                    [availableRoles]="availableRoles"
+                    (roleChanged)="onRoleChanged($event)"
+                    (memberRemoved)="onMemberRemoved($event)"
                 ></app-member-card>
             }
         </div>

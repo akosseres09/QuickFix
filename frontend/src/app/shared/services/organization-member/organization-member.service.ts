@@ -38,4 +38,15 @@ export class OrganizationMemberService {
             { params: qp }
         );
     }
+
+    updateOrganizationMember(organizationId: string, memberId: string, data: { role: string }) {
+        return this.http.put<OrganizationMember>(
+            `${this.url}/${organizationId}/member/${memberId}`,
+            data
+        );
+    }
+
+    deleteOrganizationMember(organizationId: string, memberId: string) {
+        return this.http.delete<void>(`${this.url}/${organizationId}/member/${memberId}`);
+    }
 }

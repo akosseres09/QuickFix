@@ -19,6 +19,7 @@ import { RouterLink } from '@angular/router';
 export class SpeedDialComponent {
     mainIconName = input<string>('add');
     buttons = input<SpeedDialButton[]>([]);
+    protected hasButtons = computed(() => this.buttons().some((b) => b.shown));
     protected dialState = signal<'open' | 'closed'>('closed');
     protected shownButtons = computed(() =>
         this.isDialOpen() ? this.buttons().filter((b) => b.shown) : []
@@ -31,15 +32,9 @@ export class SpeedDialComponent {
     selectedRow = model<any>(null);
 
     /**
-     * Toggles the speed dial open/closed state if there are any buttons.
-     * Emits togglerClick event if no buttons provided.
+     * Toggles the speed dial open/closed state.
      */
     onTogglerClick(): void {
-        if (this.buttons().length === 0) {
-            this.togglerClick.emit();
-            return;
-        }
-
         this.dialState.set(this.isDialOpen() ? 'closed' : 'open');
         if (this.dialState() === 'closed') {
             this.selectedRow.set(null);
@@ -54,7 +49,7 @@ export class SpeedDialComponent {
     }
 
     open(): void {
-        if (this.isDialOpen()) return;
+        if (this.isDialOpen() || !this.hasButtons()) return;
 
         this.dialState.set('open');
     }

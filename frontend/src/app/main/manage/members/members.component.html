@@ -1,4 +1,10 @@
 <div class="max-w-7xl mx-auto">
+    <app-project-invite-dialog
+        #inviteDialog
+        [organizationId]="organizationId()"
+        [projectId]="projectId()"
+        (memberAdded)="onMemberAdded()"
+    />
     <div class="flex flex-col sm:flex-row gap-2 sm:gap-0 justify-between mb-8">
         <div>
             <h3 class="font-bold text-3xl text-light-text dark:text-dark-text mb-2">
@@ -8,8 +14,13 @@
                 Manage team members and their roles
             </p>
         </div>
-        @if (project()?.visibility === ProjectVisibility.TEAM) {
-            <button mat-flat-button color="primary" class="!text-white">
+        @if (canInvite()) {
+            <button
+                mat-flat-button
+                color="primary"
+                class="!text-white"
+                (click)="inviteDialog.open()"
+            >
                 <mat-icon class="block md:hidden">add</mat-icon>
                 <span class="block">Invite Members</span>
             </button>
@@ -22,8 +33,10 @@
                 [organizationId]="organizationId()"
                 [member]="item"
                 [currentUser]="currentUser()"
-                [RoleLabels]="roleLabels"
-                [getRoleBadgeClass]="getRoleBadgeClass"
+                [canManage]="canManage()"
+                [availableRoles]="availableRoles"
+                (roleChanged)="onRoleChanged($event)"
+                (memberRemoved)="onMemberRemoved($event)"
             ></app-member-card>
         } @empty {
             <div

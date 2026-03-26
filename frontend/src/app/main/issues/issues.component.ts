@@ -18,11 +18,12 @@ import { DialogService } from '../../shared/services/dialog/dialog.service';
 import { finalize } from 'rxjs';
 import { DisplayedColumnService } from '../../shared/services/displayed-column/displayed-column.service';
 import { FilterService } from '../../shared/services/filter/filter.service';
-import { SpeedDialButtonFactory } from '../../shared/services/speed-dial/speed-dial-button.factory';
 import { ListState } from '../../shared/constants/table/ListState';
 import { ListStateService } from '../../shared/services/list-state/list-state.service';
 import { Label } from '../../shared/model/Label';
 import { LabelService } from '../../shared/services/label.service';
+import { AuthService } from '../../shared/services/auth/auth.service';
+import { IssuePermissions } from '../../shared/constants/user/Permissions';
 
 @Component({
     selector: 'app-issues',
@@ -45,8 +46,10 @@ export class IssuesComponent implements OnInit {
     private readonly filterService = inject(FilterService);
     private readonly listStateService = inject(ListStateService);
     private readonly dialogService = inject(DialogService);
-    private readonly buttonFactory = inject(SpeedDialButtonFactory);
     private readonly labelService = inject(LabelService);
+    private readonly authService = inject(AuthService);
+
+    private readonly currentUser = this.authService.currentClaimsWithPermissions;
 
     // List state (pagination, sorting, filtering)
     readonly listState: ListState = this.listStateService.create(this.activeRoute, {
@@ -68,23 +71,45 @@ export class IssuesComponent implements OnInit {
     // Transform the signal into a computed signal
     speedDialButtons = computed<SpeedDialButton[]>(() => {
         const selected = this.selectedRow();
+        const user = this.currentUser();
+        if (!user) return [];
 
-        return this.buttonFactory.createArchivableButtons({
-            entityName: 'Issue',
-            hasSelection: selected !== null,
-            isArchived: selected?.isArchived ?? false,
-            createRoute: ['add'],
-            editRouteBuilder: () => {
-                const issueId = this.selectedRow()?.id;
-                if (!issueId) {
-                    this.snackbarService.error('Please select a valid issue to edit!');
-                    return null;
-                }
-                return ['../issue', issueId, 'edit'];
+        const ctx = { projectId: this.projectId(), orgId: this.organizationId() };
+        const canUpdate = !!selected && user.canDo(IssuePermissions.UPDATE, ctx);
+
+        return [
+            {
+                iconName: 'add',
+                label: 'Create Issue',
+                shown: !selected && user.canDo(IssuePermissions.CREATE, ctx),
+                action: () => ['add'],
             },
-            onArchive: () => this.openArchiveConfirmation(),
-            onUnarchive: () => this.openUnarchiveConfirmation(),
-        });
+            {
+                iconName: 'archive',
+                label: 'Archive Issue',
+                shown: canUpdate && !selected.isArchived,
+                onClick: () => this.openArchiveConfirmation(),
+            },
+            {
+                iconName: 'unarchive',
+                label: 'Unarchive Issue',
+                shown: canUpdate && !!selected?.isArchived,
+                onClick: () => this.openUnarchiveConfirmation(),
+            },
+            {
+                iconName: 'edit',
+                label: 'Edit Issue',
+                shown: canUpdate,
+                action: () => {
+                    const issueId = this.selectedRow()?.id;
+                    if (!issueId) {
+                        this.snackbarService.error('Please select a valid issue to edit!');
+                        return null;
+                    }
+                    return ['../issue', issueId, 'edit'];
+                },
+            },
+        ];
     });
 
     filteredFields = computed<Filter[]>(() => this.filterService.getIssueFilters(this.labels()));

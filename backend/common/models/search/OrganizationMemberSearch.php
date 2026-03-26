@@ -22,8 +22,20 @@ class OrganizationMemberSearch extends OrganizationMember implements SearchInter
         }
 
         $cursor = $params['cursor'] ?? null;
+        $search = $params['search'] ?? null;
 
         $query = OrganizationMember::find()->byOrganization($organizationId);
+
+        if ($search) {
+            $query->joinWith('user')
+                ->andWhere([
+                    'or',
+                    ['like', '{{%user}}.first_name', $search],
+                    ['like', '{{%user}}.last_name', $search],
+                    ['like', '{{%user}}.email', $search],
+                    ['like', '{{%user}}.username', $search],
+                ]);
+        }
 
         if ($cursor) {
             $query->byCursor($cursor);

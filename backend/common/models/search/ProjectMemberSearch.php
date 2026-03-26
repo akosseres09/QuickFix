@@ -6,6 +6,7 @@ use common\models\Project;
 use common\models\ProjectMember;
 use Yii;
 use yii\data\ActiveDataProvider;
+use yii\db\Expression;
 use yii\web\BadRequestHttpException;
 
 class ProjectMemberSearch extends ProjectMember implements SearchInterface
@@ -33,22 +34,45 @@ class ProjectMemberSearch extends ProjectMember implements SearchInterface
             throw new BadRequestHttpException('Project ID is required.');
         }
 
-        $exists = Project::find()->byOrganizationId($organizationId)
-            ->byId($projectId)->exists();
+        $project = Project::find()->byOrganizationId($organizationId)
+            ->byId($projectId)->one();
 
-        if (!$exists) {
+        if (!$project) {
             throw new BadRequestHttpException('Project does not exist in the specified organization.');
         }
 
         $cursor = $params['cursor'] ?? null;
 
-        $userId = Yii::$app->user->id;
-        $query = ProjectMember::find()->byProjectId($projectId);
-        if ($cursor) {
-            $query->byCursor($cursor);
+        if ($project->visibility === Project::VISIBILITY_PUBLIC) {
+            $memberIdExpr = new Expression('COALESCE(pm.id, om.id)');
+
+            // Public projects show all organization members with project role override when present.
+            $query = ProjectMember::find()
+                ->alias('pm')
+                ->select([
+                    'id' => $memberIdExpr,
+                    'project_id' => new Expression(':projectId', [':projectId' => $projectId]),
+                    'user_id' => 'om.user_id',
+                    'role' => new Expression('COALESCE(pm.role, om.role)'),
+                    'created_at' => new Expression('COALESCE(pm.created_at, om.created_at)'),
+                ])
+                ->rightJoin('{{%organization_member}} om', 'om.user_id = pm.user_id AND pm.project_id = :projectId', [':projectId' => $projectId])
+                ->andWhere(['om.organization_id' => $organizationId]);
+
+            if ($cursor) {
+                $query->andWhere(new Expression('COALESCE(pm.id, om.id) > :cursor', [':cursor' => $cursor]));
+            }
+
+            $query->orderBy(new Expression('COALESCE(pm.id, om.id) ASC'));
+        } else {
+            $query = ProjectMember::find()->byProjectId($projectId);
+            if ($cursor) {
+                $query->byCursor($cursor);
+            }
+
+            $query->orderBy(['{{%project_member}}.id' => SORT_ASC]);
         }
 
-        $query->orderBy(['{{%project_member}}.id' => SORT_ASC]);
         $query->limit($pageSize + 1);
 
         $dataprovider = new ActiveDataProvider([
