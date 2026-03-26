@@ -1,11 +1,6 @@
 import { Component, computed, inject, input, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-    ProjectMember,
-    ProjectMemberRoles,
-    ROLE_LABELS,
-    ROLES,
-} from '../../../shared/model/ProjectMember';
+import { ProjectMember } from '../../../shared/model/ProjectMember';
 import { ProjectMemberService } from '../../../shared/services/project-member/project-member.service';
 import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
 import { AuthService } from '../../../shared/services/auth/auth.service';
@@ -18,6 +13,7 @@ import { MemberCardComponent } from '../../../common/member-card/member-card.com
 import { ApiQueryParams } from '../../../shared/constants/api/ApiQueryParams';
 import { ProjectPermissions } from '../../../shared/constants/user/Permissions';
 import { ProjectInviteDialogComponent } from './project-invite-dialog/project-invite-dialog.component';
+import { MemberRole, ROLES } from '../../../shared/constants/Role';
 
 @Component({
     selector: 'app-members',
@@ -42,8 +38,7 @@ export class MembersComponent implements OnInit {
     project = signal<Project | null>(null);
 
     ProjectVisibility = ProjectVisibility;
-    roleLabels = ROLE_LABELS;
-    availableRoles = ROLES.filter((r) => r !== ProjectMemberRoles.OWNER);
+    availableRoles = ROLES.filter((r) => r !== MemberRole.OWNER);
 
     canManage = computed(() => {
         const user = this.authService.currentClaimsWithPermissions();
@@ -169,19 +164,5 @@ export class MembersComponent implements OnInit {
                 this.snackbarService.open('Failed to fetch project details', ['snackbar-error']);
             },
         });
-    }
-
-    getRoleBadgeClass(role: string): string {
-        const baseClasses = 'shadow-sm';
-        switch (role) {
-            case ProjectMemberRoles.OWNER:
-                return `${baseClasses} bg-light-accent dark:bg-dark-accent text-white`;
-            case ProjectMemberRoles.ADMIN:
-                return `${baseClasses} bg-light-primary dark:bg-dark-primary text-white dark:text-dark-background`;
-            case ProjectMemberRoles.MEMBER:
-                return `${baseClasses} bg-light-secondary dark:bg-dark-secondary text-white`;
-            default:
-                return `${baseClasses} bg-gray-400 dark:bg-gray-600 text-white`;
-        }
     }
 }

@@ -27,10 +27,12 @@
             @for (member of members(); track member.id) {
                 <app-member-card
                     [organizationId]="organizationId()"
-                    [RoleLabels]="RoleMap"
                     [member]="member"
                     [currentUser]="currentUser()"
-                    [getRoleBadgeClass]="getRoleBadgeClass"
+                    [canManage]="canManage()"
+                    [availableRoles]="availableRoles"
+                    (roleChanged)="onRoleChanged($event)"
+                    (memberRemoved)="onMemberRemoved($event)"
                 ></app-member-card>
             }
         </div>

@@ -10,7 +10,6 @@ import {
     viewChild,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ProjectMemberRoles, ROLES } from '../../../../shared/model/ProjectMember';
 import { DialogService } from '../../../../shared/services/dialog/dialog.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -25,6 +24,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar/snackbar.s
 import { AuthService } from '../../../../shared/services/auth/auth.service';
 import { OrganizationMember } from '../../../../shared/model/OrganizationMember';
 import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs';
+import { MemberRole, ROLES } from '../../../../shared/constants/Role';
 
 @Component({
     selector: 'app-project-invite-dialog',
@@ -54,7 +54,7 @@ export class ProjectInviteDialogComponent implements OnInit {
 
     memberAdded = output<void>();
 
-    roles = ROLES.filter((r) => r !== ProjectMemberRoles.OWNER);
+    roles = ROLES.filter((r) => r !== MemberRole.OWNER);
     userClaims = this.authService.currentUserClaims();
 
     filteredMembers = signal<OrganizationMember[]>([]);
@@ -62,7 +62,7 @@ export class ProjectInviteDialogComponent implements OnInit {
 
     form = this.fb.group({
         member: ['', [Validators.required]],
-        role: [ProjectMemberRoles.MEMBER, [Validators.required]],
+        role: [MemberRole.MEMBER, [Validators.required]],
     });
 
     inviteFormTemplate = viewChild<TemplateRef<any>>('projectInviteFormTemplate');
@@ -128,7 +128,7 @@ export class ProjectInviteDialogComponent implements OnInit {
                 if (result?.action === 'save' && this.form.valid && this.selectedMember()) {
                     this.addMember();
                 }
-                this.form.reset({ member: '', role: ProjectMemberRoles.MEMBER });
+                this.form.reset({ member: '', role: MemberRole.MEMBER });
                 this.selectedMember.set(null);
                 this.filteredMembers.set([]);
             });

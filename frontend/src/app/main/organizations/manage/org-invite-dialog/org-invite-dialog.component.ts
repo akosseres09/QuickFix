@@ -1,7 +1,6 @@
 import { Component, DestroyRef, inject, input, TemplateRef, viewChild } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CustomValidators } from '../../../../shared/validators/CustomValidators';
-import { OrganizationMemberRole } from '../../../../shared/model/OrganizationMember';
 import { DialogService } from '../../../../shared/services/dialog/dialog.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -12,6 +11,7 @@ import { TitleCasePipe } from '@angular/common';
 import { OrganizationInvitationService } from '../../../../shared/services/organization-invitation/organization-invitation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar/snackbar.service';
 import { AuthService } from '../../../../shared/services/auth/auth.service';
+import { MemberRole } from '../../../../shared/constants/Role';
 
 @Component({
     selector: 'app-org-invite-dialog',
@@ -35,7 +35,7 @@ export class OrgInviteDialogComponent {
     private readonly authService = inject(AuthService);
 
     organizationId = input.required<string>();
-    roles = Object.values(OrganizationMemberRole);
+    roles = Object.values(MemberRole);
     userClaims = this.authService.currentUserClaims();
 
     form = this.fb.group({
@@ -47,10 +47,7 @@ export class OrgInviteDialogComponent {
                 CustomValidators.notOwnEmailValidator(this.userClaims?.email ?? ''),
             ],
         ],
-        role: [
-            OrganizationMemberRole.MEMBER,
-            [Validators.required, CustomValidators.enum(OrganizationMemberRole)],
-        ],
+        role: [MemberRole.MEMBER, [Validators.required, CustomValidators.enum(MemberRole)]],
     });
 
     inviteFormTemplate = viewChild<TemplateRef<any>>('orgInviteFormTemplate');
@@ -82,7 +79,7 @@ export class OrgInviteDialogComponent {
                 if (result?.action === 'save' && this.form && this.form.valid) {
                     this.sendInvite();
                 }
-                this.form.reset({ email: '', role: OrganizationMemberRole.MEMBER });
+                this.form.reset({ email: '', role: MemberRole.MEMBER });
             });
     }
 

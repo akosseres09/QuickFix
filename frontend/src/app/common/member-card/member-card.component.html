@@ -2,11 +2,7 @@
     class="relative bg-white dark:bg-dark-background-hover rounded-md shadow-md hover:shadow-xl dark:shadow-gray-900 p-6 transition-shadow duration-300"
 >
     <!-- Actions Menu -->
-    @if (
-        canManage() &&
-        member().userId !== currentUser()?.uid &&
-        member().role !== ProjectMemberRoles.OWNER
-    ) {
+    @if (canManage() && member().userId !== currentUser()?.uid && member().role !== ownerRole) {
         <button mat-icon-button [matMenuTriggerFor]="memberMenu" class="!absolute top-2 right-2">
             <mat-icon>more_vert</mat-icon>
         </button>
@@ -27,7 +23,7 @@
                     [disabled]="role === member().role"
                     (click)="roleChanged.emit({ memberId: member().id, role: role })"
                 >
-                    {{ RoleLabels()[role] }}
+                    {{ getRoleLabel(role) }}
                     @if (role === member().role) {
                         <mat-icon>check</mat-icon>
                     }
@@ -43,9 +39,9 @@
             <!-- Role Badge -->
             <span
                 class="absolute -bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 text-xs font-semibold rounded-full whitespace-nowrap"
-                [class]="getRoleBadgeClass()(member().role)"
+                [class]="roleBadgeClass()"
             >
-                {{ RoleLabels()[member().role] }}
+                {{ getRoleLabel(member().role) }}
             </span>
         </div>
 
