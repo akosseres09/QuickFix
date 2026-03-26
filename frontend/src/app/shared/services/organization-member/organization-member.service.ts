@@ -47,8 +47,6 @@ export class OrganizationMemberService {
     }
 
     deleteOrganizationMember(organizationId: string, memberId: string) {
-        return this.http.delete<void>(
-            `${this.url}/${organizationId}/member/${memberId}`
-        );
+        return this.http.delete<void>(`${this.url}/${organizationId}/member/${memberId}`);
     }
 }

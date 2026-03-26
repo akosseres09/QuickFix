@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
-import { UserService } from '../../shared/services/user/user.service';
-import { MatIcon } from '@angular/material/icon';
+import { Router, RouterLink } from '@angular/router';
+import { MatIcon, MatIconModule } from '@angular/material/icon';
+import { MatButton, MatButtonModule } from '@angular/material/button';
+import { AuthService } from '../../shared/services/auth/auth.service';
 
 @Component({
     selector: 'app-not-found',
-    imports: [CommonModule, MatIcon],
+    imports: [CommonModule, MatIconModule, MatButtonModule, RouterLink],
     templateUrl: './not-found.component.html',
     styleUrl: './not-found.component.css',
 })
@@ -15,11 +16,11 @@ export class NotFoundComponent {
     floatingOffset = signal(0);
     rotationOffset = signal(0);
 
-    private router = inject(Router);
-    private userService = inject(UserService);
-    private destroyRef = inject(DestroyRef);
+    private readonly router = inject(Router);
+    private readonly destroyRef = inject(DestroyRef);
+    private readonly authService = inject(AuthService);
 
-    protected user = signal(this.userService.getUser());
+    protected user = this.authService.currentUserClaims;
     floatingTickets = Array.from({ length: 20 }, () => ({
         left: Math.random() * 100,
         top: Math.random() * 100,

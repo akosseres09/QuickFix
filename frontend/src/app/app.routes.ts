@@ -61,6 +61,10 @@ export const routes: Routes = [
                     import('./auth/not-found/not-found.component').then((c) => c.NotFoundComponent),
                 title: 'QuickFix - Not Found',
             },
+            {
+                path: '**',
+                redirectTo: 'not-found',
+            },
         ],
     },
     {
@@ -254,14 +258,6 @@ export const routes: Routes = [
                 data: { permission: OrganizationPermissions.MEMBERS_VIEW },
             },
             {
-                path: 'activity',
-                loadComponent: () =>
-                    import(
-                        './main/organizations/manage/organization-activity/organization-activity.component'
-                    ).then((c) => c.OrganizationActivityComponent),
-                title: 'QuickFix - Activity',
-            },
-            {
                 path: 'project/:projectId',
                 children: [
                     { path: '', pathMatch: 'full', redirectTo: 'issues' },
@@ -284,14 +280,6 @@ export const routes: Routes = [
                         title: 'QuickFix - Members',
                         canActivate: [permissionGuard],
                         data: { permission: ProjectPermissions.MEMBERS_VIEW },
-                    },
-                    {
-                        path: 'activity',
-                        loadComponent: () =>
-                            import('./main/manage/activity/activity.component').then(
-                                (c) => c.ActivityComponent
-                            ),
-                        title: 'QuickFix - Activity',
                     },
                     {
                         path: 'labels',
@@ -406,8 +394,8 @@ export const routes: Routes = [
     {
         path: '**',
         loadComponent: () =>
-            import('./layouts/base-layout/base-layout.component').then(
-                (c) => c.BaseLayoutComponent
+            import('./layouts/main-layout/main-layout.component').then(
+                (c) => c.MainLayoutComponent
             ),
         children: [
             {
