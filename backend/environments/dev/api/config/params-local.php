@@ -1,5 +1,10 @@
-<?php 
+<?php
 
 return [
-    'jwtSecret' => ''
+    'jwtSecret' => '',
+    'cloudinary' => [
+        'cloudName' => '',
+        'apiKey' => '',
+        'apiSecret' => '',
+    ],
 ];

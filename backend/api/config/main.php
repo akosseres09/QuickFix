@@ -1,5 +1,6 @@
 <?php
 
+use api\components\CloudinaryService;
 use yii\rest\UrlRule;
 
 $params = array_merge(
@@ -18,8 +19,12 @@ return [
         'request' => [
             'parsers' => [
                 'application/json' => 'yii\web\JsonParser',
+                'multipart/form-data' => 'yii\web\MultipartFormDataParser',
             ],
             'enableCookieValidation' => false, // Disable cookie validation for API
+        ],
+        'cloudinary' => [
+            'class' => CloudinaryService::class,
         ],
         'response' => [
             'format' => yii\web\Response::FORMAT_JSON,
@@ -65,6 +70,9 @@ return [
                     'pluralize' => false,
                     'tokens' => [
                         '{id}' => '<id:[A-Za-z0-9_\-.@]+>',
+                    ],
+                    'extraPatterns' => [
+                        'POST {id}/upload-profile-picture' => 'upload-profile-picture',
                     ]
                 ],
                 [
