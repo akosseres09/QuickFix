@@ -2,13 +2,14 @@
 
 namespace common\models\search;
 
+use common\components\traits\EagerExpandTrait;
 use common\models\Project;
 use yii\data\ActiveDataProvider;
-use yii\db\Expression;
 use Yii;
 
 class ProjectSearch extends Project implements SearchInterface
 {
+    use EagerExpandTrait;
     public function rules(): array
     {
         return [
@@ -52,7 +53,7 @@ class ProjectSearch extends Project implements SearchInterface
             ])->andWhere(['p.organization_id' => $organizationId]);
 
         // Dynamically eager-load relations and add count subqueries based on expand param
-        $this->applyExpand($query);
+        $this->applyExpand($query, 'p');
 
         // Extract pagination params from request
         $page = isset($params['page']) ? (int) $params['page'] : 1;
@@ -118,43 +119,11 @@ class ProjectSearch extends Project implements SearchInterface
         return $dataProvider;
     }
 
-    /**
-     * Parses the `expand` query param and applies eager loading / count subqueries.
-     *
-     * - Relations (owner, organization, members, etc.) → `->with()`
-     * - Counts (issueCount, memberCount) → added as SELECT subqueries
-     */
-    private function applyExpand($query): void
+    protected function countSubqueries(string $alias): array
     {
-        $expand = Yii::$app->request->get('expand', '');
-        if (empty($expand)) {
-            return;
-        }
-
-        $requested = array_map('trim', explode(',', $expand));
-
-        // Relations that can be eager-loaded with ->with()
-        $eagerLoadable = ['owner', 'organization', 'labels', 'issues', 'members', 'projectMembers'];
-
-        // Count fields that use subquery selects
-        $countSubqueries = [
-            'issueCount' => '(SELECT COUNT(*) FROM issue i WHERE i.project_id = p.id)',
-            'memberCount' => '(SELECT COUNT(*) FROM project_member pm2 WHERE pm2.project_id = p.id)',
+        return [
+            'issueCount' => "(SELECT COUNT(*) FROM issue i WHERE i.project_id = {$alias}.id)",
+            'memberCount' => "(SELECT COUNT(*) FROM project_member pm2 WHERE pm2.project_id = {$alias}.id)",
         ];
-
-        $withRelations = [];
-        foreach ($requested as $field) {
-            if (in_array($field, $eagerLoadable, true)) {
-                $withRelations[] = $field;
-            }
-
-            if (isset($countSubqueries[$field])) {
-                $query->addSelect([$field => new Expression($countSubqueries[$field])]);
-            }
-        }
-
-        if (!empty($withRelations)) {
-            $query->with($withRelations);
-        }
     }
 }
