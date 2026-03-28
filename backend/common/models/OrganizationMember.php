@@ -7,9 +7,7 @@ use common\models\query\OrganizationMemberQuery;
 use common\models\resource\UserResource;
 use Symfony\Component\Uid\Uuid;
 use Yii;
-use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
-use yii\db\ActiveRecord;
 
 /**
  * OrganizationMember model
@@ -18,31 +16,20 @@ use yii\db\ActiveRecord;
  * @property string $organization_id
  * @property string $user_id
  * @property string $role
+ * @property string $created_by
  * @property integer $created_at
+ * @property string|null $updated_by
+ * @property integer|null $updated_at
  *
  * @property Organization $organization
  * @property User $user
  */
-class OrganizationMember extends ActiveRecord
+class OrganizationMember extends BaseModel
 {
 
     public static function tableName()
     {
         return '{{%organization_member}}';
-    }
-
-
-    /**
-     * {@inheritdoc}
-     */
-    public function behaviors()
-    {
-        return [
-            [
-                'class' => TimestampBehavior::class,
-                'updatedAtAttribute' => false
-            ]
-        ];
     }
 
     public function rules(): array
@@ -101,6 +88,9 @@ class OrganizationMember extends ActiveRecord
             'userId' => 'user_id',
             'role',
             'createdAt' => 'created_at',
+            'createdBy' => 'created_by',
+            'updatedAt' => 'updated_at',
+            'updatedBy' => 'updated_by',
         ];
     }
 
@@ -109,6 +99,8 @@ class OrganizationMember extends ActiveRecord
         return [
             'organization',
             'user',
+            'creator',
+            'updator',
         ];
     }
 
@@ -120,6 +112,16 @@ class OrganizationMember extends ActiveRecord
     public function getOrganization(): ActiveQuery
     {
         return $this->hasOne(Organization::class, ['id' => 'organization_id']);
+    }
+
+    public function getCreator(): ActiveQuery
+    {
+        return $this->hasOne(UserResource::class, ['id' => 'created_by']);
+    }
+
+    public function getUpdator(): ActiveQuery
+    {
+        return $this->hasOne(UserResource::class, ['id' => 'updated_by']);
     }
 
     public static function find(): OrganizationMemberQuery

@@ -8,7 +8,6 @@ use common\models\resource\UserResource;
 use Symfony\Component\Uid\Uuid;
 use Yii;
 use yii\behaviors\TimestampBehavior;
-use yii\db\ActiveRecord;
 
 /**
  * ProjectMember model
@@ -18,11 +17,16 @@ use yii\db\ActiveRecord;
  * @property string $user_id
  * @property string $role
  * @property integer $created_at
- * 
+ * @property string $created_by
+ * @property string|null $updated_by
+ * @property integer $updated_at
+ *  
  * @property Project $project
  * @property UserResource $user
+ * @property UserResource $updator
+ * @property UserResource $creator
  */
-class ProjectMember extends ActiveRecord
+class ProjectMember extends BaseModel
 {
     /**
      * {@inheritdoc}
@@ -30,19 +34,6 @@ class ProjectMember extends ActiveRecord
     public static function tableName(): string
     {
         return '{{%project_member}}';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function behaviors(): array
-    {
-        return [
-            [
-                'class' => TimestampBehavior::class,
-                'updatedAtAttribute' => false,
-            ],
-        ];
     }
 
     /**
@@ -74,6 +65,9 @@ class ProjectMember extends ActiveRecord
             'user_id' => 'User ID',
             'role' => 'Role',
             'created_at' => 'Created At',
+            'created_by' => 'Created By',
+            'updated_at' => 'Updated At',
+            'updated_by' => 'Updated By',
         ];
     }
 
@@ -84,13 +78,16 @@ class ProjectMember extends ActiveRecord
             'projectId' => 'project_id',
             'userId' => 'user_id',
             'role',
-            'createdAt' => 'created_at'
+            'createdAt' => 'created_at',
+            'updatedAt' => 'updated_at',
+            'updatedBy' => 'updated_by',
+            'createdBy' => 'created_by',
         ];
     }
 
     public function extraFields()
     {
-        return ['project', 'user'];
+        return ['project', 'user', 'updator', 'creator'];
     }
 
     /**
@@ -151,6 +148,26 @@ class ProjectMember extends ActiveRecord
     public function getUser()
     {
         return $this->hasOne(UserResource::class, ['id' => 'user_id']);
+    }
+
+    /**
+     * Gets query for [[Creator]].
+     * 
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCreator()
+    {
+        return $this->hasOne(UserResource::class, ['id' => 'created_by']);
+    }
+
+    /**
+     * Gets query for [[Updator]].
+     * 
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUpdator()
+    {
+        return $this->hasOne(UserResource::class, ['id' => 'updated_by']);
     }
 
     /**

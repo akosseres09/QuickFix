@@ -5,8 +5,6 @@ namespace common\models;
 use common\models\query\WorktimeQuery;
 use common\models\resource\UserResource;
 use Symfony\Component\Uid\Uuid;
-use yii\behaviors\BlameableBehavior;
-use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
@@ -27,19 +25,11 @@ use yii\db\ActiveRecord;
  * @property UserResource $creator
  * @property UserResource|null $updator
  */
-class Worktime extends ActiveRecord
+class Worktime extends BaseModel
 {
     public static function tableName(): string
     {
         return "{{%worktime}}";
-    }
-
-    public function behaviors(): array
-    {
-        return [
-            TimestampBehavior::class,
-            BlameableBehavior::class
-        ];
     }
 
     public function rules(): array
@@ -113,5 +103,4 @@ class Worktime extends ActiveRecord
     {
         return new WorktimeQuery(get_called_class());
     }
-
 }

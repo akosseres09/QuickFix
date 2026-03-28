@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\components\traits\EagerExpandTrait;
 use common\models\Label;
 use common\models\Project;
 use yii\data\ActiveDataProvider;
@@ -11,6 +12,7 @@ use yii\web\NotFoundHttpException;
 
 class LabelSearch extends Label implements SearchInterface
 {
+    use EagerExpandTrait;
     public function rules(): array
     {
         return [
@@ -38,6 +40,8 @@ class LabelSearch extends Label implements SearchInterface
         }
 
         $query = Label::find()->allForProject($projectId);
+        $this->applyExpand($query);
+
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'pagination' => false,

@@ -8,9 +8,6 @@ use common\models\query\OrganizationQuery;
 use common\models\resource\UserResource;
 use Symfony\Component\Uid\Uuid;
 use Yii;
-use yii\behaviors\BlameableBehavior;
-use yii\behaviors\TimestampBehavior;
-use yii\db\ActiveRecord;
 
 /**
  * Organization model
@@ -23,14 +20,17 @@ use yii\db\ActiveRecord;
  * @property string|null $logo_url
  * @property integer $created_at
  * @property integer $updated_at
+ * @property string|null $updated_by
  * @property integer|null $deleted_at
  *
  * @property UserResource $owner
  * @property OrganizationMember[] $organizationMembers
  * @property Project[] $projects
  */
-class Organization extends ActiveRecord
+class Organization extends BaseModel
 {
+    protected string | bool $blameableCreatedByAttribute = 'owner_id';
+
     public static function tableName()
     {
         return "{{%organization}}";
@@ -46,20 +46,16 @@ class Organization extends ActiveRecord
      */
     public function behaviors()
     {
-        return [
-            [
-                "class" => TimestampBehavior::class,
-            ],
-            [
-                "class" => BlameableBehavior::class,
-                "createdByAttribute" => "owner_id",
-                "updatedByAttribute" => false
-            ],
-            [
-                "class" => InvalidateCacheBehavior::class,
-                'cacheKeys' => [$this->getSlugToIdCache($this->id)],
+        $behaviors = parent::behaviors();
+
+        $behaviors['invalidateCache'] = [
+            'class' => InvalidateCacheBehavior::class,
+            'cacheKeys' => [
+                $this->getSlugToIdCache($this->slug),
             ]
         ];
+
+        return $behaviors;
     }
 
     public function rules(): array
@@ -139,6 +135,7 @@ class Organization extends ActiveRecord
             'logoUrl' => 'logo_url',
             'createdAt' => 'created_at',
             'updatedAt' => 'updated_at',
+            'updatedBy' => 'updated_by',
             'deletedAt' => 'deleted_at',
         ];
     }
@@ -151,7 +148,8 @@ class Organization extends ActiveRecord
         return [
             'owner',
             'projects',
-            'organizationMembers'
+            'organizationMembers',
+            'updator'
         ];
     }
 
@@ -184,6 +182,16 @@ class Organization extends ActiveRecord
     {
         return $this->hasMany(UserResource::class, ['id' => 'user_id'])
             ->viaTable('{{%organization_member}}', ['organization_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[Updator]].
+     * 
+     * @return Yii\db\ActiveQuery
+     */
+    public function getUpdator()
+    {
+        return $this->hasOne(UserResource::class, ['id' => 'updated_by']);
     }
 
     public static function find(): OrganizationQuery

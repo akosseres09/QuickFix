@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\components\traits\EagerExpandTrait;
 use common\models\Organization;
 use Yii;
 use yii\data\ActiveDataProvider;
@@ -9,6 +10,7 @@ use yii\web\BadRequestHttpException;
 
 class OrganizationSearch extends Organization implements SearchInterface
 {
+    use EagerExpandTrait;
     public function rules(): array
     {
         return [
@@ -30,6 +32,7 @@ class OrganizationSearch extends Organization implements SearchInterface
             'om.organization_id = o.id AND om.user_id = :userId',
             [':userId' => $userId]
         )->where(['om.user_id' => $userId]);
+        $this->applyExpand($query, 'o');
 
         $dataProvider = new ActiveDataProvider([
             "query" => $query,

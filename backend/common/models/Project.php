@@ -8,9 +8,6 @@ use common\models\query\ProjectQuery;
 use common\models\resource\UserResource;
 use Symfony\Component\Uid\Uuid;
 use Yii;
-use yii\behaviors\BlameableBehavior;
-use yii\behaviors\TimestampBehavior;
-use yii\db\ActiveRecord;
 use yii\db\Exception;
 use yii\db\Expression;
 
@@ -24,6 +21,7 @@ use yii\db\Expression;
  * @property string $description
  * @property string $status
  * @property string $owner_id
+ * @property string|null $updated_by
  * @property string $visibility
  * @property int $priority
  * @property integer $created_at
@@ -32,13 +30,14 @@ use yii\db\Expression;
  * @property bool | null $is_archived
  * 
  * @property UserResource $owner
+ * @property UserResource $updator
  * @property Organization $organization
  * @property ProjectMember[] $projectMembers
  * @property User[] $members
  * @property Issue[] $issues
  * @property Label[] $labels
  */
-class Project extends ActiveRecord
+class Project extends BaseModel
 {
     // Status constants
     const STATUS_ACTIVE = 'active';
@@ -75,6 +74,8 @@ class Project extends ActiveRecord
         self::STATUS_COMPLETED
     ];
 
+    protected string | bool $blameableCreatedByAttribute = 'owner_id';
+
     public static function getKeyToIdCacheKey(string $organizationId, string $projectKey): string
     {
         return "project_key_to_id_{$organizationId}_{$projectKey}";
@@ -93,18 +94,12 @@ class Project extends ActiveRecord
      */
     public function behaviors(): array
     {
-        return [
-            TimestampBehavior::class,
-            [
-                'class' => BlameableBehavior::class,
-                'createdByAttribute' => 'owner_id',
-                'updatedByAttribute' => false,
-            ],
-            [
-                'class' => InvalidateCacheBehavior::class,
-                'cacheKeys' => [$this->getKeyToIdCacheKey("$this->organization_id", "$this->key")],
-            ]
+        $behaviors = parent::behaviors();
+        $behaviors['invalidateCache'] = [
+            'class' => InvalidateCacheBehavior::class,
+            'cacheKeys' => [$this->getKeyToIdCacheKey("$this->organization_id", "$this->key")],
         ];
+        return $behaviors;
     }
 
     /**
@@ -245,7 +240,8 @@ class Project extends ActiveRecord
             'createdAt' => 'created_at',
             'updatedAt' => 'updated_at',
             'isArchived' => 'is_archived',
-            'archivedAt' => 'archived_at'
+            'archivedAt' => 'archived_at',
+            'updatedBy' => 'updated_by',
         ];
     }
 
@@ -272,6 +268,7 @@ class Project extends ActiveRecord
                 $attr = $this->getAttribute('memberCount');
                 return $attr !== null ? (int) $attr : count($this->getEffectiveMembers());
             },
+            'updator'
         ];
     }
 
@@ -393,6 +390,16 @@ class Project extends ActiveRecord
     public function getOrganization()
     {
         return $this->hasOne(Organization::class, ['id' => 'organization_id']);
+    }
+
+    /**
+     * Gets query for [[Updator]].
+     * 
+     * @return Yii\db\ActiveQuery
+     */
+    public function getUpdator()
+    {
+        return $this->hasOne(UserResource::class, ['id' => 'updated_by']);
     }
 
     /**

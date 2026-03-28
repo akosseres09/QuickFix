@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\components\traits\EagerExpandTrait;
 use common\models\Project;
 use common\models\ProjectMember;
 use Yii;
@@ -11,6 +12,7 @@ use yii\web\BadRequestHttpException;
 
 class ProjectMemberSearch extends ProjectMember implements SearchInterface
 {
+    use EagerExpandTrait;
     public function rules(): array
     {
         return [
@@ -73,6 +75,7 @@ class ProjectMemberSearch extends ProjectMember implements SearchInterface
             $query->orderBy(['{{%project_member}}.id' => SORT_ASC]);
         }
 
+        $this->applyExpand($query);
         $query->limit($pageSize + 1);
 
         $dataprovider = new ActiveDataProvider([

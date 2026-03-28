@@ -78,11 +78,12 @@ export interface Project extends BaseModel {
     description: string;
     status: ProjectStatus;
     ownerId: string;
+    updatedBy: string | null;
     visibility: ProjectVisibility;
     priority: ProjectPriority;
     createdAt: number;
     updatedAt: number;
-    archivedat: number;
+    archivedAt: number;
     isArchived: boolean;
     organization?: Organization;
     owner?: User;
@@ -92,4 +93,5 @@ export interface Project extends BaseModel {
     issues?: Issue[];
     issueCount?: number;
     memberCount?: number;
+    updator?: User;
 }

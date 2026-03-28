@@ -3,6 +3,7 @@
 namespace common\models\search;
 
 use api\components\permissions\RoleManager;
+use common\components\traits\EagerExpandTrait;
 use common\models\OrganizationInvitation;
 use common\models\OrganizationMember;
 use Yii;
@@ -10,6 +11,7 @@ use yii\data\ActiveDataProvider;
 
 class OrganizationInvitationSearch extends OrganizationInvitation implements SearchInterface
 {
+    use EagerExpandTrait;
     public function rules(): array
     {
         return [
@@ -26,6 +28,7 @@ class OrganizationInvitationSearch extends OrganizationInvitation implements Sea
         $pageSize = min($pageSize, 100);
 
         $query = OrganizationInvitation::find()->byEmail(Yii::$app->user->identity->email);
+        $this->applyExpand($query);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
