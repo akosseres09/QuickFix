@@ -120,6 +120,54 @@ body {
     font-family: var(--font-mono), Roboto, 'Helvetica Neue', sans-serif;
 }
 
+/* ── Modern custom scrollbar (global) ── */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(150, 150, 150, 0.3) transparent;
+
+    &::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: rgba(150, 150, 150, 0.3);
+        border-radius: 9999px;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        background: rgba(150, 150, 150, 0.55);
+    }
+
+    &::-webkit-scrollbar-thumb:active {
+        background: rgba(150, 150, 150, 0.75);
+    }
+}
+
+/* Elements where scrollbar is hidden until hovered */
+.custom-scrollbar,
+.ql-toolbar,
+.ql-editor,
+pre {
+    scrollbar-color: transparent transparent;
+
+    &:hover {
+        scrollbar-color: rgba(150, 150, 150, 0.45) transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: transparent;
+    }
+
+    &:hover::-webkit-scrollbar-thumb {
+        background: rgba(150, 150, 150, 0.45);
+    }
+}
+
 .mat-expansion-panel {
     box-shadow: none !important;
 }
@@ -154,6 +202,13 @@ body {
         overflow-x: auto;
         display: flex;
         flex-wrap: nowrap;
+
+        /* When a picker dropdown is open, clip horizontal (no page scroll)
+           but allow vertical overflow so dropdowns escape the toolbar */
+        &:has(.ql-picker.ql-expanded) {
+            overflow-x: clip;
+            overflow-y: visible;
+        }
         /* Group separators — Quill wraps each toolbar group in .ql-formats */
         .ql-formats {
             white-space: nowrap;
@@ -343,7 +398,7 @@ body {
 
 quill-view {
     .ql-editor {
-        @apply p-0;
+        @apply p-0 font-mono;
     }
 }
 
@@ -374,5 +429,40 @@ quill-view .ql-editor,
 
     h4 {
         @apply text-lg font-bold mb-4;
+    }
+
+    blockquote {
+        @apply border-l-4 border-light-secondary/50 dark:border-dark-primary/40
+               pl-4 my-4 italic text-gray-600 dark:text-gray-400;
+    }
+
+    pre {
+        @apply bg-gray-100 dark:bg-gray-800 rounded-lg p-4 my-4
+               text-sm font-mono overflow-x-auto;
+    }
+
+    code {
+        @apply bg-gray-100 dark:bg-gray-800 rounded px-1.5 py-0.5
+               text-sm font-mono text-pink-600 dark:text-pink-400;
+    }
+
+    pre code {
+        @apply bg-transparent p-0 text-inherit;
+    }
+
+    img {
+        @apply max-w-full h-auto rounded my-4;
+    }
+
+    hr {
+        @apply border-gray-300 dark:border-gray-600 my-6;
+    }
+
+    sub {
+        @apply text-xs align-sub;
+    }
+
+    sup {
+        @apply text-xs align-super;
     }
 }
