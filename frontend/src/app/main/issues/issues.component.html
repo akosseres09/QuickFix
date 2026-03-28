@@ -1,12 +1,12 @@
-<div class="max-w-7xl mx-auto">
+<div class="min-h-full">
     <app-filter
         [filterFields]="filteredFields()"
         (onFilterChange)="onFilterChange($event)"
     ></app-filter>
-    <app-table
-        [dataSource]="shownIssues()"
-        [displayedColumns]="displayedColumns"
-        tableHeader="Issues"
+    <app-list
+        [data]="filteredIssues()"
+        [sortableColumns]="issueSortableColumns"
+        listHeader="Issues"
         [initialPageSize]="listState.pageSize()"
         [initialPageIndex]="listState.pageIndex()"
         [initialSortActive]="listState.sortActive()"
@@ -17,7 +17,75 @@
         (pageChange)="onPageChange($event)"
         [selectedRow]="selectedRow()"
         (selectedRowChange)="onRowChange($event)"
-    ></app-table>
+    >
+        <ng-template appListItem [appListItemOf]="filteredIssues()" let-issue>
+            <!-- Left: Type icon + issue key & title -->
+            <div class="flex items-center gap-3">
+                <div class="flex-shrink-0">
+                    <app-badge
+                        [text]="typeMap[issue.type]"
+                        [tailwindColor]="typeColorMap[issue.type]"
+                        [fontWeight]="'semibold'"
+                        [textSize]="'xs'"
+                    ></app-badge>
+                </div>
+
+                <div class="flex-1 min-w-0 text-left">
+                    <a
+                        [routerLink]="['../issue', issue.id]"
+                        (click)="$event.stopPropagation()"
+                        class="text-md font-semibold hover:underline underline-offset-3 truncate"
+                    >
+                        <span class="text-gray-400 dark:text-gray-500">{{ issue.issueKey }}</span>
+                        {{ issue.title }}
+                    </a>
+                    <div class="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
+                        @if (issue.label) {
+                            <span
+                                class="inline-flex items-center gap-1"
+                                [matTooltip]="'Label: ' + issue.label.name"
+                            >
+                                <span
+                                    class="w-2 h-2 rounded-full inline-block"
+                                    [style.background-color]="issue.label.color"
+                                ></span>
+                                {{ issue.label.name }}
+                            </span>
+                        }
+                        @if (issue.assignee) {
+                            <span class="inline-flex items-center gap-1" matTooltip="Assignee">
+                                <mat-icon class="!text-[14px] !w-[14px] !h-[14px]">person</mat-icon>
+                                {{ issue.assignee.firstName }} {{ issue.assignee.lastName }}
+                            </span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Priority, Status, Created At -->
+            <div class="flex items-center gap-3 flex-shrink-0 flex-wrap justify-end">
+                <app-badge
+                    class="hidden sm:block"
+                    [text]="priorityMap[issue.priority]"
+                    [tailwindColor]="priorityColorMap[issue.priority]"
+                    [fontWeight]="'semibold'"
+                    [textSize]="'sm'"
+                ></app-badge>
+                @if (issue.label) {
+                    <app-badge
+                        [text]="issue.label.name"
+                        [fontWeight]="'semibold'"
+                        [color]="issue.label.color"
+                    ></app-badge>
+                }
+                <div class="flex flex-col text-sm text-gray-500 dark:text-gray-400">
+                    <span class="self-end" [matTooltip]="issue.createdAt * 1000 | gmt">
+                        Created {{ issue.createdAt * 1000 | relativeTime }}
+                    </span>
+                </div>
+            </div>
+        </ng-template>
+    </app-list>
     <div class="fixed right-6 bottom-6 z-50">
         <app-speed-dial
             #speedDial
