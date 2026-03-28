@@ -11,6 +11,8 @@ use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\db\Exception;
+use yii\db\Expression;
 
 /**
  * Project model
@@ -165,6 +167,25 @@ class Project extends ActiveRecord
     /**
      * {@inheritdoc}
      */
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        if ($insert) {
+            $member = new ProjectMember();
+            $member->project_id = $this->id;
+            $member->user_id = $this->owner_id;
+            $member->role = RoleManager::ROLE_OWNER;
+            if (!$member->save(false)) {
+                Yii::error("Failed to add project owner as member: " . json_encode($member->errors));
+                throw new Exception('Failed to add project owner as member.');
+            }
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function rules(): array
     {
         return [
@@ -230,7 +251,18 @@ class Project extends ActiveRecord
 
     public function extraFields()
     {
-        return ['members', 'owner', 'projectMembers', 'issues', 'labels', 'organization'];
+        return [
+            'members' => function () {
+                return $this->getEffectiveMembers();
+            },
+            'owner',
+            'projectMembers' => function () {
+                return $this->getEffectiveProjectMembers();
+            },
+            'issues',
+            'labels',
+            'organization',
+        ];
     }
 
     /**
@@ -254,7 +286,7 @@ class Project extends ActiveRecord
     }
 
     /**
-     * Gets query for [[Members]].
+     * Gets query for [[Members]] (raw relation via project_member table).
      *
      * @return \yii\db\ActiveQuery
      */
@@ -262,6 +294,65 @@ class Project extends ActiveRecord
     {
         return $this->hasMany(UserResource::class, ['id' => 'user_id'])
             ->viaTable('{{%project_member}}', ['project_id' => 'id']);
+    }
+
+    /**
+     * Gets effective project members accounting for project visibility.
+     *
+     * Public: all organization members, with project-level role overrides.
+     * Private: only the owner.
+     * Team: stored project members.
+     *
+     * @return ProjectMember[]
+     */
+    public function getEffectiveProjectMembers(): array
+    {
+        if ($this->visibility === self::VISIBILITY_PUBLIC) {
+            return ProjectMember::find()
+                ->alias('pm')
+                ->select([
+                    'id' => new Expression('COALESCE(pm.id, om.id)'),
+                    'project_id' => new Expression(':projectId', [':projectId' => $this->id]),
+                    'user_id' => 'om.user_id',
+                    'role' => new Expression('COALESCE(pm.role, om.role)'),
+                    'created_at' => new Expression('COALESCE(pm.created_at, om.created_at)'),
+                ])
+                ->rightJoin(
+                    '{{%organization_member}} om',
+                    'om.user_id = pm.user_id AND pm.project_id = :projectId',
+                    [':projectId' => $this->id]
+                )
+                ->andWhere(['om.organization_id' => $this->organization_id])
+                ->all();
+        }
+
+        // Team and private: return stored project members
+        return $this->projectMembers;
+    }
+
+    /**
+     * Gets effective member users accounting for project visibility.
+     *
+     * Public: all organization member users.
+     * Private: only the owner.
+     * Team: stored project member users.
+     *
+     * @return UserResource[]
+     */
+    public function getEffectiveMembers(): array
+    {
+        if ($this->visibility === self::VISIBILITY_PUBLIC) {
+            return UserResource::find()
+                ->innerJoin(
+                    '{{%organization_member}} om',
+                    'om.user_id = {{%user}}.id AND om.organization_id = :orgId',
+                    [':orgId' => $this->organization_id]
+                )
+                ->all();
+        }
+
+        // Team and private: return stored members via relation
+        return $this->members;
     }
 
     /**
@@ -307,9 +398,11 @@ class Project extends ActiveRecord
             return true;
         }
 
-        // Public projects - everyone can access
+        // Public projects - all organization members can access
         if ($this->visibility === self::VISIBILITY_PUBLIC) {
-            return true;
+            return OrganizationMember::find()
+                ->where(['organization_id' => $this->organization_id, 'user_id' => $userId])
+                ->exists();
         }
 
         // Private - only owner
@@ -317,7 +410,7 @@ class Project extends ActiveRecord
             return false;
         }
 
-        // Team - check if user is a member
+        // Team - check if user is a project member
         if ($this->visibility === self::VISIBILITY_TEAM) {
             return ProjectMember::find()
                 ->where(['project_id' => $this->id, 'user_id' => $userId])
@@ -335,6 +428,12 @@ class Project extends ActiveRecord
      */
     public function isMember(string $userId): bool
     {
+        if ($this->visibility === self::VISIBILITY_PUBLIC) {
+            return OrganizationMember::find()
+                ->where(['organization_id' => $this->organization_id, 'user_id' => $userId])
+                ->exists();
+        }
+
         return ProjectMember::find()
             ->where(['project_id' => $this->id, 'user_id' => $userId])
             ->exists();
@@ -348,13 +447,31 @@ class Project extends ActiveRecord
      */
     public function isMemberAdmin(string $userId): bool
     {
-        return ProjectMember::find()
+        // Check for an explicit project-level admin role
+        $isProjectAdmin = ProjectMember::find()
             ->where([
                 'project_id' => $this->id,
                 'user_id' => $userId,
-                'role' => RoleManager::ROLE_ADMIN
+                'role' => RoleManager::ROLE_ADMIN,
             ])
             ->exists();
+
+        if ($isProjectAdmin) {
+            return true;
+        }
+
+        // For public projects, also check the organization-level role
+        if ($this->visibility === self::VISIBILITY_PUBLIC) {
+            return OrganizationMember::find()
+                ->where([
+                    'organization_id' => $this->organization_id,
+                    'user_id' => $userId,
+                    'role' => RoleManager::ROLE_ADMIN,
+                ])
+                ->exists();
+        }
+
+        return false;
     }
 
     /**
