@@ -180,11 +180,6 @@ export class MainLayoutComponent implements OnInit {
                       path: `${projPath}/members`,
                       icon: 'group',
                   },
-                  {
-                      name: 'Activity',
-                      path: `${projPath}/activity`,
-                      icon: 'local_activity',
-                  },
                   ...(user && projCtx && user.canDo(ProjectPermissions.UPDATE, projCtx)
                       ? [
                             {
@@ -196,11 +191,6 @@ export class MainLayoutComponent implements OnInit {
                       : []),
               ]
             : [
-                  {
-                      name: 'Activity',
-                      path: `${basePath}/activity`,
-                      icon: 'local_activity',
-                  },
                   {
                       name: 'Members',
                       path: `${basePath}/members`,
