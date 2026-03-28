@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, OnInit, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, OnInit, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { NavbarComponent } from '../../common/navbar/navbar.component';
 import { MatSidenavContainer, MatSidenav, MatSidenavContent } from '@angular/material/sidenav';
@@ -13,6 +13,8 @@ import { SnackbarService } from '../../shared/services/snackbar/snackbar.service
 import { OrganizationService } from '../../shared/services/organization/organization.service';
 import { Organization } from '../../shared/model/Organization';
 import { IssuePermissions, ProjectPermissions } from '../../shared/constants/user/Permissions';
+import { SidebarService } from '../../shared/services/sidebar/sidebar.service';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
     selector: 'app-main-layout',
@@ -24,6 +26,7 @@ import { IssuePermissions, ProjectPermissions } from '../../shared/constants/use
         MatSidenavContent,
         NavitemComponent,
         CommonModule,
+        MatButtonModule,
     ],
     templateUrl: './main-layout.component.html',
     styleUrl: './main-layout.component.css',
@@ -34,12 +37,15 @@ export class MainLayoutComponent implements OnInit {
     private readonly router = inject(Router);
     private readonly snackbarService = inject(SnackbarService);
     private readonly organizationService = inject(OrganizationService);
+    private readonly sidebarService = inject(SidebarService);
 
     projectId = signal<string | null>(null);
     organizationId = input.required<string>();
     organization = signal<Organization | null>(null);
 
-    isSidebarOpened = signal<boolean>(window.innerWidth > 767);
+    isSidebarOpened = signal<boolean>(
+        window.innerWidth > 767 ? this.sidebarService.isOpen() : false
+    );
     sidenavRoutes = computed(() => {
         return this.getSidenavRoutes();
     });
@@ -51,9 +57,16 @@ export class MainLayoutComponent implements OnInit {
         fromEvent(window, 'resize')
             .pipe(takeUntilDestroyed())
             .subscribe(() => {
-                this.sidebarMode.set(window.innerWidth < 768 ? 'over' : 'side');
-                this.isSidebarOpened.set(window.innerWidth > 767);
+                const isDesktop = window.innerWidth >= 768;
+                this.sidebarMode.set(isDesktop ? 'side' : 'over');
+                this.isSidebarOpened.set(isDesktop ? this.sidebarService.isOpen() : false);
             });
+
+        effect(() => {
+            if (this.sidebarMode() === 'side') {
+                this.isSidebarOpened.set(this.sidebarService.isOpen());
+            }
+        });
 
         this.router.events
             .pipe(
@@ -95,6 +108,13 @@ export class MainLayoutComponent implements OnInit {
             this.getOrganization();
         }
         this.bottomSidenavRoutes.set(this.getBottomSidenavRoutes());
+    }
+
+    onSidebarOpenedChange(opened: boolean): void {
+        this.isSidebarOpened.set(opened);
+        if (this.sidebarMode() === 'side') {
+            this.sidebarService.set(opened);
+        }
     }
 
     getSidenavRoutes(): SidenavRoute[] {

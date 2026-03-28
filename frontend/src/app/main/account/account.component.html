@@ -63,15 +63,26 @@
                                 Upload New Photo
                             </button>
 
-                            @if (selectedFile() || previewUrl()) {
+                            @if (selectedFile()) {
+                                <button
+                                    mat-flat-button
+                                    color="primary"
+                                    class="w-full flex items-center justify-center gap-2 !text-dark-text"
+                                    [disabled]="isUploading()"
+                                    (click)="uploadProfilePicture()"
+                                >
+                                    <mat-icon>cloud_upload</mat-icon>
+                                    {{ isUploading() ? 'Uploading...' : 'Save Photo' }}
+                                </button>
                                 <button
                                     mat-stroked-button
                                     color="warn"
                                     class="w-full flex items-center justify-center gap-2"
+                                    [disabled]="isUploading()"
                                     (click)="removeProfilePicture()"
                                 >
                                     <mat-icon>delete</mat-icon>
-                                    Remove Photo
+                                    Discard Photo
                                 </button>
                             }
                         </div>
@@ -330,8 +341,8 @@
                             mat-flat-button
                             color="primary"
                             class="flex items-center justify-center gap-2 px-6 py-3 md:flex-3/5 !text-dark-text"
-                            [class.!text-light-text]="!hasChanges() || profileForm.invalid"
-                            [disabled]="!hasChanges() || profileForm.invalid"
+                            [class.!text-light-text]="!hasFormChanges() || profileForm.invalid"
+                            [disabled]="!hasFormChanges() || profileForm.invalid"
                             (click)="saveChanges()"
                         >
                             <mat-icon>save</mat-icon>
@@ -340,7 +351,7 @@
                         <button
                             mat-stroked-button
                             class="flex items-center justify-center gap-2 px-6 py-3 md:flex-2/5"
-                            [disabled]="!hasChanges() || profileForm.invalid"
+                            [disabled]="!hasFormChanges() || profileForm.invalid"
                             (click)="cancelChanges()"
                         >
                             <mat-icon>cancel</mat-icon>

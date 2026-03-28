@@ -46,4 +46,15 @@ export class UserService {
 
         return this.http.put<User>(`${this.apiUrl}/user/${id}`, data);
     }
+
+    uploadProfilePicture(file: File) {
+        const id = this.authService.currentUserClaims()?.uid;
+        const formData = new FormData();
+        formData.append('profile_picture', file);
+
+        return this.http.post<{ success: boolean; data: { profilePictureUrl: string } }>(
+            `${this.apiUrl}/user/${id}/upload-profile-picture`,
+            formData
+        );
+    }
 }

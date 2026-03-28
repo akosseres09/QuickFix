@@ -63,11 +63,13 @@ export class AccountComponent {
     previewUrl = signal<string | null>(null);
     fileInput = viewChild<ElementRef>('fileInput');
 
-    hasChanges = computed(() => {
+    hasFormChanges = computed(() => {
         const current = JSON.stringify(this.formValues());
         const initial = JSON.stringify(this.initialFormSnapshot());
-        return this.canEdit() && (current !== initial || this.selectedFile() !== null);
+        return this.canEdit() && current !== initial;
     });
+
+    isUploading = signal(false);
 
     minDate = signal<Date>(this.getMinDate());
 
@@ -151,14 +153,31 @@ export class AccountComponent {
         this.resetFileInput();
     }
 
+    uploadProfilePicture(): void {
+        const file = this.selectedFile();
+        if (!file) return;
+
+        this.isUploading.set(true);
+        this.userService.uploadProfilePicture(file).subscribe({
+            next: (response) => {
+                this.profilePictureUrl.set(response.data.profilePictureUrl);
+                this.selectedFile.set(null);
+                this.previewUrl.set(null);
+                this.resetFileInput();
+                this.snackbarService.success('Profile picture updated!');
+                this.isUploading.set(false);
+            },
+            error: () => {
+                this.snackbarService.error('Failed to upload profile picture');
+                this.isUploading.set(false);
+            },
+        });
+    }
+
     saveChanges(): void {
         if (this.profileForm.invalid) {
             this.snackbarService.error('Please fill in all required fields correctly');
             return;
-        }
-
-        if (this.selectedFile()) {
-            this.profilePictureUrl.set(this.previewUrl() || this.profilePictureUrl());
         }
 
         this.userService.updateUser(this.profileForm.value as Partial<User>).subscribe({
@@ -167,20 +186,14 @@ export class AccountComponent {
                 this.initialFormSnapshot.set(this.profileForm.value);
                 this.snackbarService.success('Profile updated successfully!');
             },
-            error: (error) => {
+            error: () => {
                 this.snackbarService.error('Failed to update profile');
             },
         });
-
-        this.selectedFile.set(null);
-        this.previewUrl.set(null);
     }
 
     cancelChanges(): void {
         this.profileForm.patchValue(this.initialFormSnapshot());
-        this.selectedFile.set(null);
-        this.previewUrl.set(null);
-        this.resetFileInput();
     }
 
     resetFileInput(): void {
