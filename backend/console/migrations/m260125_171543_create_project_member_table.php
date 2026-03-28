@@ -1,5 +1,6 @@
 <?php
 
+use api\components\permissions\RoleManager;
 use common\models\ProjectMember;
 use yii\db\Migration;
 
@@ -17,7 +18,7 @@ class m260125_171543_create_project_member_table extends Migration
             'id' => $this->string(36)->notNull(),
             'project_id' => $this->string(36)->notNull(),
             'user_id' => $this->string(36)->notNull(),
-            'role' => $this->string(16)->notNull()->defaultValue(ProjectMember::ROLE_GUEST),
+            'role' => $this->string(16)->notNull()->defaultValue(RoleManager::ROLE_GUEST),
             'created_at' => $this->integer()->notNull(),
         ]);
 

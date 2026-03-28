@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use api\components\permissions\RoleManager;
 use common\components\traits\EmailSenderTrait;
 use common\models\query\OrganizationInvitationQuery;
 use common\models\resource\UserResource;
@@ -98,8 +99,8 @@ class OrganizationInvitation extends ActiveRecord
             ['status', 'in', 'range' => self::STATUSES],
             ['status', 'default', 'value' => self::STATUS_PENDING],
             ['role', 'string', 'max' => 16],
-            ['role', 'default', 'value' => OrganizationMember::ROLE_VIEWER],
-            ['role', 'in', 'range' => OrganizationMember::ROLE_LIST],
+            ['role', 'default', 'value' => RoleManager::ROLE_GUEST],
+            ['role', 'in', 'range' => RoleManager::ROLE_LIST],
             [
                 ['email', 'organization_id'],
                 'unique',
@@ -312,7 +313,7 @@ class OrganizationInvitation extends ActiveRecord
                 Uuid::v7()->toString(),
                 $projectId,
                 $userId,
-                ProjectMember::ROLE_MEMBER,
+                RoleManager::ROLE_MEMBER,
                 $time,
             ];
         }

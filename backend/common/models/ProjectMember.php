@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use api\components\permissions\RoleManager;
 use common\models\query\ProjectMemberQuery;
 use common\models\resource\UserResource;
 use Symfony\Component\Uid\Uuid;
@@ -23,20 +24,6 @@ use yii\db\ActiveRecord;
  */
 class ProjectMember extends ActiveRecord
 {
-    // Role constants
-    const ROLE_GUEST = 'guest';
-    const ROLE_MEMBER = 'member';
-    const ROLE_ADMIN = 'admin';
-    const ROLE_OWNER = 'owner';
-
-    const ROLE_LIST = [
-        self::ROLE_GUEST,
-        self::ROLE_MEMBER,
-        self::ROLE_ADMIN,
-        self::ROLE_OWNER
-    ];
-
-
     /**
      * {@inheritdoc}
      */
@@ -68,8 +55,8 @@ class ProjectMember extends ActiveRecord
             [['project_id', 'user_id'], 'string', 'max' => 36],
             [['created_at'], 'integer'],
             ['role', 'string', 'max' => 16],
-            [['role'], 'default', 'value' => self::ROLE_MEMBER],
-            [['role'], 'in', 'range' => self::ROLE_LIST],
+            [['role'], 'default', 'value' => RoleManager::ROLE_MEMBER],
+            [['role'], 'in', 'range' => RoleManager::ROLE_LIST],
             [['project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['project_id' => 'id']],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => UserResource::class, 'targetAttribute' => ['user_id' => 'id']],
             [['project_id', 'user_id'], 'unique', 'targetAttribute' => ['project_id', 'user_id'], 'message' => 'This user is already a member of this project.'],
@@ -182,10 +169,10 @@ class ProjectMember extends ActiveRecord
     public static function getRoles(): array
     {
         return [
-            self::ROLE_GUEST => 'Guest',
-            self::ROLE_MEMBER => 'Member',
-            self::ROLE_ADMIN => 'Admin',
-            self::ROLE_OWNER => 'Owner',
+            RoleManager::ROLE_GUEST => 'Guest',
+            RoleManager::ROLE_MEMBER => 'Member',
+            RoleManager::ROLE_ADMIN => 'Admin',
+            RoleManager::ROLE_OWNER => 'Owner',
         ];
     }
 
@@ -195,7 +182,7 @@ class ProjectMember extends ActiveRecord
      */
     public function isAdmin(): bool
     {
-        return $this->role === self::ROLE_ADMIN;
+        return $this->role === RoleManager::ROLE_ADMIN;
     }
 
     /**
@@ -204,6 +191,6 @@ class ProjectMember extends ActiveRecord
      */
     public function isMember(): bool
     {
-        return $this->role === self::ROLE_MEMBER;
+        return $this->role === RoleManager::ROLE_MEMBER;
     }
 }

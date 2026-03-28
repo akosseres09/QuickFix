@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use api\components\permissions\RoleManager;
 use common\models\query\OrganizationMemberQuery;
 use common\models\resource\UserResource;
 use Symfony\Component\Uid\Uuid;
@@ -24,18 +25,6 @@ use yii\db\ActiveRecord;
  */
 class OrganizationMember extends ActiveRecord
 {
-
-    const ROLE_GUEST = 'guest';
-    const ROLE_MEMBER = 'member';
-    const ROLE_ADMIN = 'admin';
-    const ROLE_OWNER = 'owner';
-
-    const ROLE_LIST = [
-        self::ROLE_GUEST,
-        self::ROLE_MEMBER,
-        self::ROLE_ADMIN,
-        self::ROLE_OWNER
-    ];
 
     public static function tableName()
     {
@@ -61,8 +50,8 @@ class OrganizationMember extends ActiveRecord
         return [
             ['user_id', 'required'],
             ['role', 'string', 'max' => 16],
-            ['role', 'in', 'range' => self::ROLE_LIST],
-            ['role', 'default', 'value' => self::ROLE_MEMBER],
+            ['role', 'in', 'range' => RoleManager::ROLE_LIST],
+            ['role', 'default', 'value' => RoleManager::ROLE_MEMBER],
             [['organization_id', 'user_id'], 'unique', 'targetAttribute' => ['organization_id', 'user_id'], 'message' => 'This user is already a member of this organization.'],
             ['organization_id', 'exist', 'skipOnError' => true, 'targetClass' => Organization::class, 'targetAttribute' => ['organization_id' => 'id']],
             ['user_id', 'exist', 'skipOnError' => true, 'targetClass' => UserResource::class, 'targetAttribute' => ['user_id' => 'id']],

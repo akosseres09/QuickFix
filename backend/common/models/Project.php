@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use api\components\permissions\RoleManager;
 use common\components\behaviors\InvalidateCacheBehavior;
 use common\models\query\ProjectQuery;
 use common\models\resource\UserResource;
@@ -351,7 +352,7 @@ class Project extends ActiveRecord
             ->where([
                 'project_id' => $this->id,
                 'user_id' => $userId,
-                'role' => ProjectMember::ROLE_ADMIN
+                'role' => RoleManager::ROLE_ADMIN
             ])
             ->exists();
     }

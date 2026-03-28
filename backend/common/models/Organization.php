@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use api\components\permissions\RoleManager;
 use common\components\behaviors\InvalidateCacheBehavior;
 use common\models\query\OrganizationQuery;
 use common\models\resource\UserResource;
@@ -106,7 +107,7 @@ class Organization extends ActiveRecord
         $owner = new OrganizationMember();
         $owner->organization_id = $this->id;
         $owner->user_id = $this->owner_id;
-        $owner->role = OrganizationMember::ROLE_OWNER;
+        $owner->role = RoleManager::ROLE_OWNER;
 
         if (!$owner->save()) {
             $errors = json_encode($owner->getErrors());

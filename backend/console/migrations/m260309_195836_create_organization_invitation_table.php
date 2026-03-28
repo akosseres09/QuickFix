@@ -1,7 +1,7 @@
 <?php
 
+use api\components\permissions\RoleManager;
 use common\models\OrganizationInvitation;
-use common\models\OrganizationMember;
 use yii\db\Migration;
 
 /**
@@ -19,7 +19,7 @@ class m260309_195836_create_organization_invitation_table extends Migration
             'organization_id' => $this->string(36)->notNull(),
             'inviter_id' => $this->string(36)->notNull(),
             'email' => $this->string(255)->notNull(),
-            'role' => $this->string(64)->notNull()->defaultValue(OrganizationMember::ROLE_VIEWER),
+            'role' => $this->string(64)->notNull()->defaultValue(RoleManager::ROLE_GUEST),
             'status' => $this->string(16)->notNull()->defaultValue(OrganizationInvitation::STATUS_PENDING),
             'expires_at' => $this->integer()->notNull(),
             'created_at' => $this->integer()->notNull(),

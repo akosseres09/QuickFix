@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use api\components\permissions\RoleManager;
 use common\models\OrganizationInvitation;
 use common\models\OrganizationMember;
 use Yii;
@@ -12,7 +13,7 @@ class OrganizationInvitationSearch extends OrganizationInvitation implements Sea
     public function rules(): array
     {
         return [
-            ['role', 'in', 'range' => OrganizationMember::ROLE_LIST],
+            ['role', 'in', 'range' => RoleManager::ROLE_LIST],
             ['status', 'in', 'range' => self::STATUSES],
             [['organization_id'], 'string', 'max' => 36],
         ];

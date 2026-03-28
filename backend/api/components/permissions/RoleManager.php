@@ -9,6 +9,13 @@ class RoleManager
     const ROLE_ADMIN = 'admin';
     const ROLE_OWNER = 'owner';
 
+    const ROLE_LIST = [
+        self::ROLE_GUEST,
+        self::ROLE_MEMBER,
+        self::ROLE_ADMIN,
+        self::ROLE_OWNER,
+    ];
+
     public static function getWeight(?string $role): int
     {
         return match ($role) {
