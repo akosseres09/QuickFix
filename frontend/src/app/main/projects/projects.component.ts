@@ -1,22 +1,17 @@
 import { CommonModule } from '@angular/common';
+import { Component, computed, inject, input, signal, TemplateRef, viewChild } from '@angular/core';
+import { PageEvent } from '@angular/material/paginator';
+import { ListComponent, SortableColumn } from '../../common/list/list.component';
+import { ListItemDirective } from '../../common/list/list-item.directive';
 import {
-    Component,
-    computed,
-    inject,
-    input,
-    linkedSignal,
-    signal,
-    TemplateRef,
-    viewChild,
-} from '@angular/core';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { TableComponent } from '../../common/table/table.component';
-import { Project } from '../../shared/model/Project';
-import { DisplayedColumn } from '../../shared/constants/table/DisplayedColumn';
+    Project,
+    STATUS_MAP,
+    STATUS_COLOR_MAP,
+    PRIORITY_MAP,
+    PRIORITY_COLOR_MAP,
+} from '../../shared/model/Project';
 import { ProjectService } from '../../shared/services/project/project.service';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { MatOptionModule } from '@angular/material/core';
+import { RouterLink } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { SpeedDialComponent } from '../../common/speed-dial/speed-dial.component';
 import { Sort } from '@angular/material/sort';
@@ -26,26 +21,32 @@ import { SnackbarService } from '../../shared/services/snackbar/snackbar.service
 import { Filter } from '../../shared/constants/Filter';
 import { FilterComponent } from '../../common/filter/filter.component';
 import { FilterService } from '../../shared/services/filter/filter.service';
-import { DisplayedColumnService } from '../../shared/services/displayed-column/displayed-column.service';
-import { SpeedDialButtonFactory } from '../../shared/services/speed-dial/speed-dial-button.factory';
 import { ListStateService } from '../../shared/services/list-state/list-state.service';
 import { ListState } from '../../shared/constants/table/ListState';
 import { DialogService } from '../../shared/services/dialog/dialog.service';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { ProjectPermissions } from '../../shared/constants/user/Permissions';
+import { BadgeComponent } from '../../common/badge/badge.component';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { RelativeTimePipe } from '../../shared/pipes/relative-time/relative-time.pipe';
+import { GMTPipe } from '../../shared/pipes/gmt/gmt.pipe';
 
 @Component({
     selector: 'app-projects',
     imports: [
-        MatTableModule,
-        MatPaginatorModule,
         CommonModule,
-        TableComponent,
-        MatAutocompleteModule,
-        MatOptionModule,
+        ListComponent,
+        ListItemDirective,
         SpeedDialComponent,
         FilterComponent,
+        BadgeComponent,
+        RouterLink,
+        MatIconModule,
+        MatTooltipModule,
+        RelativeTimePipe,
+        GMTPipe,
     ],
     templateUrl: './projects.component.html',
     styleUrl: './projects.component.css',
@@ -55,10 +56,8 @@ export class ProjectsComponent {
     private readonly activeRoute = inject(ActivatedRoute);
     private readonly snackbarService = inject(SnackbarService);
     private readonly filterService = inject(FilterService);
-    private readonly displayedColumnService = inject(DisplayedColumnService);
     private readonly listStateService = inject(ListStateService);
     private readonly authService = inject(AuthService);
-    private readonly buttonFactory = inject(SpeedDialButtonFactory);
     private dialogService = inject(DialogService);
 
     organizationId = input.required<string>();
@@ -67,16 +66,25 @@ export class ProjectsComponent {
     // List state (pagination, sorting, filtering)
     readonly listState: ListState = this.listStateService.create(this.activeRoute, {
         defaultPageSize: 10,
-        expand: 'owner,members',
+        expand: 'owner,organization,issueCount,memberCount',
     });
 
     projects = signal<Project[]>([]);
     selectedRow = signal<Project | null>(null);
     filteredProjects = signal<Project[]>([]);
-    shownProjects = computed(() => new MatTableDataSource<Project>(this.filteredProjects()));
-    displayedColumns = linkedSignal<DisplayedColumn<Project>[]>(() =>
-        this.displayedColumnService.getProjectColumns()
-    );
+
+    // Expose maps for the template
+    readonly projectStatusMap = STATUS_MAP;
+    readonly projectStatusColorMap = STATUS_COLOR_MAP;
+    readonly projectPriorityMap = PRIORITY_MAP;
+    readonly projectPriorityColorMap = PRIORITY_COLOR_MAP;
+
+    readonly projectSortableColumns: SortableColumn[] = [
+        { id: 'name', label: 'Name' },
+        { id: 'status', label: 'Status' },
+        { id: 'priority', label: 'Priority' },
+        { id: 'createdAt', label: 'Created At' },
+    ];
 
     speedDialButtons = computed<SpeedDialButton[]>(() => {
         const selected = this.selectedRow();

@@ -1,4 +1,5 @@
 import { BaseModel } from './BaseModel';
+import { Issue } from './Issue';
 import { Label } from './Label';
 import { Organization } from './Organization';
 import { User } from './User';
@@ -88,4 +89,7 @@ export interface Project extends BaseModel {
     projectMembers?: Array<User>;
     members?: Array<User>;
     labels?: Array<Label>;
+    issues?: Issue[];
+    issueCount?: number;
+    memberCount?: number;
 }

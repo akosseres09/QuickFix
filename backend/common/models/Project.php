@@ -262,6 +262,16 @@ class Project extends ActiveRecord
             'issues',
             'labels',
             'organization',
+            'issueCount' => function () {
+                // Use pre-selected count from search query if available, otherwise fallback to query
+                $attr = $this->getAttribute('issueCount');
+                return $attr !== null ? (int) $attr : $this->getIssues()->count();
+            },
+            'memberCount' => function () {
+                // Use pre-selected count from search query if available, otherwise fallback to query
+                $attr = $this->getAttribute('memberCount');
+                return $attr !== null ? (int) $attr : count($this->getEffectiveMembers());
+            },
         ];
     }
 
@@ -368,7 +378,7 @@ class Project extends ActiveRecord
     /**
      * Gets query for [[Labels]].
      * 
-     * @return Yii\db\ActiveQuery
+     * @return \yii\db\ActiveQuery
      */
     public function getLabels()
     {

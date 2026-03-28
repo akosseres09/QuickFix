@@ -69,7 +69,7 @@ export class NavbarComponent implements AfterViewInit {
             fromEvent(window, 'resize')
                 .pipe(takeUntilDestroyed())
                 .subscribe(() => {
-                    if (window.innerWidth <= 767) {
+                    if (window.innerWidth <= 1024) {
                         this.isMenuOpen.set(false);
                         this.isSidebarOpened.set(false);
                     } else {
@@ -87,7 +87,7 @@ export class NavbarComponent implements AfterViewInit {
             )
             .subscribe(() => {
                 this.isMenuOpen.set(false);
-                if (window.innerWidth <= 767) {
+                if (window.innerWidth <= 1024) {
                     this.isSidebarOpened.set(false);
                 }
             });

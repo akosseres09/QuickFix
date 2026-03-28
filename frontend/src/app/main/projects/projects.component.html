@@ -3,10 +3,10 @@
         [filterFields]="filterFields"
         (onFilterChange)="onFilterChange($event)"
     ></app-filter>
-    <app-table
-        [dataSource]="shownProjects()"
-        [displayedColumns]="displayedColumns()"
-        tableHeader="Projects"
+    <app-list
+        [data]="filteredProjects()"
+        [sortableColumns]="projectSortableColumns"
+        listHeader="Projects"
         [initialPageSize]="listState.pageSize()"
         [initialPageIndex]="listState.pageIndex()"
         [initialSortActive]="listState.sortActive()"
@@ -17,7 +17,86 @@
         (pageChange)="onPageChange($event)"
         [selectedRow]="selectedRow()"
         (selectedRowChange)="onRowChange($event)"
-    ></app-table>
+    >
+        <ng-template appListItem [appListItemOf]="filteredProjects()" let-project>
+            <!-- Left: Owner avatar -->
+            <div class="flex items-center gap-3">
+                <div class="flex-shrink-0">
+                    @if (project.organization && project.organization.logoUrl) {
+                        <img
+                            [src]="project.organization.logoUrl"
+                            [alt]="project.organization.name"
+                            [matTooltip]="project.organization.name"
+                            class="w-8 h-8 rounded-md object-cover"
+                        />
+                    } @else {
+                        <div
+                            class="w-8 h-8 rounded-md bg-gray-300 dark:bg-gray-600 flex items-center justify-center"
+                        >
+                            <mat-icon class="text-gray-500 dark:text-gray-400">folder</mat-icon>
+                        </div>
+                    }
+                </div>
+
+                <!-- Center: Project name -->
+                <div class="flex-1 min-w-0 text-left">
+                    <a
+                        [routerLink]="['../', 'project', project.key]"
+                        (click)="$event.stopPropagation()"
+                        class="text-md font-semibold hover:underline underline-offset-3 truncate"
+                    >
+                        @if (project.organization) {
+                            <span> {{ project.organization.name }} / </span>
+                        }
+                        {{ project.name }}
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right: Status, Priority, Created At -->
+            <div class="flex items-center gap-3 flex-shrink-0 flex-wrap justify-end">
+                <app-badge
+                    class="hidden sm:block"
+                    [text]="projectStatusMap[project.status]"
+                    [tailwindColor]="projectStatusColorMap[project.status]"
+                    [fontWeight]="'semibold'"
+                    [textSize]="'sm'"
+                ></app-badge>
+                <app-badge
+                    class="hidden sm:block"
+                    [text]="projectPriorityMap[project.priority]"
+                    [tailwindColor]="projectPriorityColorMap[project.priority]"
+                    [fontWeight]="'semibold'"
+                    [textSize]="'sm'"
+                ></app-badge>
+                <div class="flex flex-col text-sm text-gray-500 dark:text-gray-400">
+                    <div class="flex gap-2 justify-end">
+                        @if (project.issueCount !== undefined) {
+                            <a
+                                [routerLink]="['../project', project.key, 'issues']"
+                                matTooltip="issues"
+                                class="w-fit flex items-center gap-1 hover:underline underline-offset-3 hover:text-blue-400"
+                            >
+                                <mat-icon>layers</mat-icon> {{ project.issueCount }}
+                            </a>
+                        }
+                        @if (project.memberCount !== undefined) {
+                            <a
+                                [routerLink]="['../project', project.key, 'members']"
+                                matTooltip="members"
+                                class="w-fit flex items-center gap-1 hover:underline underline-offset-3 hover:text-blue-400"
+                            >
+                                <mat-icon>group</mat-icon> {{ project.memberCount }}
+                            </a>
+                        }
+                    </div>
+                    <span class="self-end" [matTooltip]="project.createdAt * 1000 | gmt">
+                        Created {{ project.createdAt * 1000 | relativeTime }}
+                    </span>
+                </div>
+            </div>
+        </ng-template>
+    </app-list>
     <div class="fixed right-6 bottom-6 z-50">
         <app-speed-dial
             #speedDial
