@@ -18,4 +18,6 @@ export interface Organization extends BaseModel {
     updator?: User;
     projects?: Project[];
     organizationMembers?: OrganizationMember[];
+    memberCount?: number;
+    projectCount?: number;
 }

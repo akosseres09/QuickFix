@@ -74,7 +74,7 @@
                         @if (project.issueCount !== undefined) {
                             <a
                                 [routerLink]="['../project', project.key, 'issues']"
-                                matTooltip="issues"
+                                matTooltip="Issues"
                                 class="w-fit flex items-center gap-1 hover:underline underline-offset-3 hover:text-blue-400"
                             >
                                 <mat-icon>layers</mat-icon> {{ project.issueCount }}
@@ -83,7 +83,7 @@
                         @if (project.memberCount !== undefined) {
                             <a
                                 [routerLink]="['../project', project.key, 'members']"
-                                matTooltip="members"
+                                matTooltip="Members"
                                 class="w-fit flex items-center gap-1 hover:underline underline-offset-3 hover:text-blue-400"
                             >
                                 <mat-icon>group</mat-icon> {{ project.memberCount }}

@@ -149,7 +149,15 @@ class Organization extends BaseModel
             'owner',
             'projects',
             'organizationMembers',
-            'updator'
+            'updator',
+            'memberCount' => function () {
+                $attr = $this->getAttribute('memberCount');
+                return $attr !== null ? (int) $attr : (int) $this->getOrganizationMemberCount();
+            },
+            'projectCount' => function () {
+                $attr = $this->getAttribute('projectCount');
+                return $attr !== null ? (int) $attr : (int) $this->getProjects()->count();
+            },
         ];
     }
 
@@ -182,6 +190,19 @@ class Organization extends BaseModel
     {
         return $this->hasMany(UserResource::class, ['id' => 'user_id'])
             ->viaTable('{{%organization_member}}', ['organization_id' => 'id']);
+    }
+
+    /**
+     * Gets the count of organization members.
+     *
+     * @return int
+     */
+    public function getOrganizationMemberCount()
+    {
+        return (new \yii\db\Query())
+            ->from('{{%organization_member}}')
+            ->where(['organization_id' => $this->id])
+            ->count();
     }
 
     /**

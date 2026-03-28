@@ -3,10 +3,10 @@
         [filterFields]="filterFields"
         (onFilterChange)="onFilterChange($event)"
     ></app-filter>
-    <app-table
-        [dataSource]="shownProjects()"
-        [displayedColumns]="displayedColumns()"
-        tableHeader="Organizations"
+    <app-list
+        [data]="filteredOrganizations()"
+        [sortableColumns]="orgSortableColumns"
+        listHeader="Organizations"
         [initialPageSize]="listState.pageSize()"
         [initialPageIndex]="listState.pageIndex()"
         [initialSortActive]="listState.sortActive()"
@@ -17,7 +17,64 @@
         (pageChange)="onPageChange($event)"
         [selectedRow]="selectedRow()"
         (selectedRowChange)="onRowChange($event)"
-    ></app-table>
+    >
+        <ng-template appListItem [appListItemOf]="filteredOrganizations()" let-org>
+            <!-- Left: Org logo + name & slug -->
+            <div class="flex items-center gap-3">
+                <div class="flex-shrink-0">
+                    @if (org.logoUrl) {
+                        <img
+                            [src]="org.logoUrl"
+                            [alt]="org.name"
+                            class="w-9 h-9 rounded-md object-cover"
+                        />
+                    } @else {
+                        <div
+                            class="w-9 h-9 rounded-md bg-gray-300 dark:bg-gray-600 flex items-center justify-center"
+                        >
+                            <mat-icon class="text-gray-500 dark:text-gray-400">business</mat-icon>
+                        </div>
+                    }
+                </div>
+
+                <div class="flex-1 min-w-0 text-left">
+                    <a
+                        [routerLink]="['/org', org.slug]"
+                        (click)="$event.stopPropagation()"
+                        class="text-md font-semibold hover:underline underline-offset-3 truncate"
+                    >
+                        {{ org.name }}
+                    </a>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 truncate">{{ org.slug }}</p>
+                </div>
+            </div>
+
+            <!-- Right: Stats + Created At -->
+            <div class="flex items-center gap-3 flex-shrink-0 flex-wrap justify-end">
+                <div class="flex flex-col text-sm text-gray-500 dark:text-gray-400">
+                    <div class="flex gap-2 justify-end">
+                        @if (org.projectCount !== undefined) {
+                            <a
+                                [routerLink]="['/org', org.slug]"
+                                matTooltip="Projects"
+                                class="w-fit flex items-center gap-1 hover:underline underline-offset-3 hover:text-blue-400"
+                            >
+                                <mat-icon>folder</mat-icon> {{ org.projectCount }}
+                            </a>
+                        }
+                        @if (org.memberCount !== undefined) {
+                            <span matTooltip="Members" class="w-fit flex items-center gap-1">
+                                <mat-icon>group</mat-icon> {{ org.memberCount }}
+                            </span>
+                        }
+                    </div>
+                    <span class="self-end" [matTooltip]="org.createdAt * 1000 | gmt">
+                        Created {{ org.createdAt * 1000 | relativeTime }}
+                    </span>
+                </div>
+            </div>
+        </ng-template>
+    </app-list>
     <div class="fixed right-6 bottom-6 z-50">
         <app-speed-dial
             #speedDial
@@ -32,7 +89,7 @@
 <ng-template #deleteConfirmTemplate>
     <div class="py-4">
         <p class="text-gray-700 dark:text-gray-300">
-            Are you sure you want to delete the project
+            Are you sure you want to delete the organization
             <strong class="font-semibold">{{ selectedOrgName() }}</strong
             >?
         </p>

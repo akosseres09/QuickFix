@@ -19,6 +19,7 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { BaseModel } from '../../shared/model/BaseModel';
 import { ListItemDirective } from './list-item.directive';
+import { MobilePaginatorComponent } from '../mobile-paginator/mobile-paginator.component';
 
 export interface SortableColumn {
     id: string;
@@ -35,6 +36,7 @@ export interface SortableColumn {
         MatButtonModule,
         MatProgressSpinner,
         MatTooltipModule,
+        MobilePaginatorComponent,
     ],
     templateUrl: './list.component.html',
     styleUrl: './list.component.css',

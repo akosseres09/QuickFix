@@ -13,6 +13,7 @@
         <div class="flex lg:justify-center">
             @if (enablePagination()) {
                 <mat-paginator
+                    class="hidden md:block"
                     [disabled]="isLoading()"
                     [pageSizeOptions]="pageSizes"
                     [pageIndex]="initialPageIndex()"
@@ -23,6 +24,14 @@
                     aria-label="Select page of periodic elements"
                 >
                 </mat-paginator>
+                <app-mobile-paginator
+                    class="md:hidden"
+                    [pageIndex]="initialPageIndex()"
+                    [pageSize]="initialPageSize()"
+                    [length]="totalCount()"
+                    [disabled]="isLoading()"
+                    (page)="onPageEvent($event)"
+                />
             }
         </div>
     </div>

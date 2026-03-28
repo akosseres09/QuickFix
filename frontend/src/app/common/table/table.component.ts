@@ -20,6 +20,7 @@ import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { BadgeComponent } from '../badge/badge.component';
+import { MobilePaginatorComponent } from '../mobile-paginator/mobile-paginator.component';
 
 @Component({
     selector: 'app-table',
@@ -33,6 +34,7 @@ import { BadgeComponent } from '../badge/badge.component';
         RouterLink,
         MatTooltipModule,
         BadgeComponent,
+        MobilePaginatorComponent,
     ],
     templateUrl: './table.component.html',
     styleUrl: './table.component.css',

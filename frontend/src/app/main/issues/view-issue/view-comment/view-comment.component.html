@@ -36,6 +36,15 @@
                             >
                                 {{ comment.createdAt * 1000 | relativeTime }}
                             </span>
+                            @if (comment.updatedAt) {
+                                <span
+                                    class="text-gray-400"
+                                    matTooltipShowDelay="500"
+                                    [matTooltip]="comment.updatedAt * 1000 | gmt"
+                                >
+                                    (edited {{ comment.updatedAt * 1000 | relativeTime }})
+                                </span>
+                            }
                         </div>
                         <div>
                             @if (canEditComment(comment) || canDeleteComment(comment)) {

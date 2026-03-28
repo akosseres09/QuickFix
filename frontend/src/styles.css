@@ -50,7 +50,7 @@
 }
 
 @theme {
-    --breakpoint-xs: var(--breakpoint-xs);
+    --breakpoint-xs: 25rem;
 
     --color-light-text: var(--color-light-text);
     --color-light-background: var(--color-light-background);
@@ -117,7 +117,7 @@ body {
 
 body {
     margin: 0;
-    font-family: Roboto, 'Helvetica Neue', sans-serif;
+    font-family: var(--font-mono), Roboto, 'Helvetica Neue', sans-serif;
 }
 
 .mat-expansion-panel {

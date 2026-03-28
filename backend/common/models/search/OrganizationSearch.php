@@ -6,7 +6,6 @@ use common\components\traits\EagerExpandTrait;
 use common\models\Organization;
 use Yii;
 use yii\data\ActiveDataProvider;
-use yii\web\BadRequestHttpException;
 
 class OrganizationSearch extends Organization implements SearchInterface
 {
@@ -27,11 +26,14 @@ class OrganizationSearch extends Organization implements SearchInterface
 
         $userId = Yii::$app->user->id;
 
-        $query = Organization::find()->alias('o')->leftJoin(
-            'organization_member om',
-            'om.organization_id = o.id AND om.user_id = :userId',
-            [':userId' => $userId]
-        )->where(['om.user_id' => $userId]);
+        $query = Organization::find()->alias('o')
+            ->select(['o.*'])
+            ->leftJoin(
+                'organization_member om',
+                'om.organization_id = o.id AND om.user_id = :userId',
+                [':userId' => $userId]
+            )->where(['om.user_id' => $userId]);
+
         $this->applyExpand($query, 'o');
 
         $dataProvider = new ActiveDataProvider([
@@ -70,5 +72,13 @@ class OrganizationSearch extends Organization implements SearchInterface
         $query->andFilterWhere(['ilike', 'slug', $this->slug]);
 
         return $dataProvider;
+    }
+
+    protected function countSubqueries(string $alias): array
+    {
+        return [
+            'memberCount' => "(SELECT COUNT(*) FROM organization_member om2 WHERE om2.organization_id = {$alias}.id)",
+            'projectCount' => "(SELECT COUNT(*) FROM project p2 WHERE p2.organization_id = {$alias}.id)",
+        ];
     }
 }
