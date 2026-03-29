@@ -18,7 +18,7 @@ import {
 } from '../../../../shared/model/Issue';
 import { CommonModule } from '@angular/common';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { RelativeTimePipe } from '../../../../shared/pipes/relative-time/relative-time.pipe';
 import { GMTPipe } from '../../../../shared/pipes/gmt/gmt.pipe';
 import { QuillModule } from 'ngx-quill';
@@ -73,8 +73,6 @@ export class ViewComponent {
     private readonly snackbarService = inject(SnackbarService);
     private readonly issueCommentService = inject(IssueCommentService);
     private readonly fb = inject(FormBuilder);
-    private readonly router = inject(Router);
-    private readonly activeRoute = inject(ActivatedRoute);
     private readonly authService = inject(AuthService);
 
     currentUser = this.authService.currentClaimsWithPermissions;
@@ -133,6 +131,7 @@ export class ViewComponent {
     PRIORITY_MAP = PRIORITY_MAP;
     TYPE_COLOR_MAP = TYPE_COLOR_MAP;
     TYPE_MAP = TYPE_MAP;
+    FixStatusNames = FixStatusNames;
 
     constructor() {
         effect(() => {
@@ -286,13 +285,13 @@ export class ViewComponent {
         const commentId = this.commentForm.get('commentId')?.value;
 
         if (commentId && commentId.trim()) {
-            this.editIssue();
+            this.editComment();
         } else {
-            this.createIssue();
+            this.createComment();
         }
     }
 
-    private editIssue() {
+    private editComment() {
         const content = this.comment.value;
         const commentId = this.commentId.value;
 
@@ -322,7 +321,7 @@ export class ViewComponent {
             });
     }
 
-    private createIssue() {
+    private createComment() {
         const newComment: Partial<IssueComment> = {
             content: this.comment.value as string,
         };
@@ -350,6 +349,7 @@ export class ViewComponent {
                         this.issue.set({
                             ...this.issue(),
                             label: OPEN_STATUS,
+                            closedAt: null,
                         });
                     }
                 },
@@ -361,7 +361,9 @@ export class ViewComponent {
 
     onCommentEdit(comment: IssueComment | null) {
         this.editingComment.set(comment);
-        this.router.navigate(['.'], { fragment: 'text-editor', relativeTo: this.activeRoute });
+        document
+            .getElementById('text-editor')
+            ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
     onCommentEditCancel() {

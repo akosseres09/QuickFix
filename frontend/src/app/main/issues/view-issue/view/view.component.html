@@ -30,7 +30,7 @@
                         <mat-icon>link</mat-icon>
                         Copy Issue Link
                     </button>
-                    @if (!issue().closedAt) {
+                    @if (!issue().closedAt && issue().label?.name !== FixStatusNames.CLOSED) {
                         @if (canUpdateIssue()) {
                             <button (click)="closeIssue()" mat-menu-item>
                                 <mat-icon>close</mat-icon>
@@ -158,6 +158,7 @@
                             }
                         </label>
                         <app-text-editor
+                            #textEditor
                             id="text-editor"
                             formControlName="content"
                         ></app-text-editor>
