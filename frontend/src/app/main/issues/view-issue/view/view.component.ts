@@ -361,9 +361,11 @@ export class ViewComponent {
 
     onCommentEdit(comment: IssueComment | null) {
         this.editingComment.set(comment);
-        document
-            .getElementById('text-editor')
-            ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+            document
+                .getElementById('text-editor')
+                ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
     }
 
     onCommentEditCancel() {
