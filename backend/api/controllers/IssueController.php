@@ -184,6 +184,7 @@ class IssueController extends BaseRestController
 
     public function actionClose($id): Issue
     {
+        /** @var Issue $issue */
         $issue = $this->findModel($id);
 
         try {

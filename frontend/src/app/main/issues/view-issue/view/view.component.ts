@@ -43,6 +43,7 @@ import {
     WorktimePermissions,
     CommentPermissions,
 } from '../../../../shared/constants/user/Permissions';
+import { FixStatusNames, OPEN_STATUS } from '../../../../shared/model/Label';
 
 @Component({
     selector: 'app-view',
@@ -342,7 +343,16 @@ export class ViewComponent {
                 })
             )
             .subscribe({
-                next: (result) => {},
+                next: (result) => {
+                    const label = this.issue().label;
+                    if (!label) return;
+                    if (label.name === FixStatusNames.CLOSED) {
+                        this.issue.set({
+                            ...this.issue(),
+                            label: OPEN_STATUS,
+                        });
+                    }
+                },
                 error: (error) => {
                     this.snackbarService.error('Failed to add comment!');
                 },
