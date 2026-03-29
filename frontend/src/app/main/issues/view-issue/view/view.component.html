@@ -146,7 +146,7 @@
             @if (canCreateComment() || editingComment()) {
                 <form
                     [formGroup]="commentForm"
-                    class="flex my-6 gap-6 flex-col items-end"
+                    class="flex my-6 gap-2 flex-col"
                     (submit)="onSubmit()"
                 >
                     <div class="flex flex-col gap-2 w-full">
@@ -161,6 +161,8 @@
                             id="text-editor"
                             formControlName="content"
                         ></app-text-editor>
+                    </div>
+                    <div class="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
                         @if (comment.invalid && (comment.touched || comment.dirty)) {
                             <mat-error class="text-[var(--mat-form-field-error-text-color)]">
                                 @if (comment.getError('required')) {
@@ -171,31 +173,33 @@
                                 }
                             </mat-error>
                         }
-                    </div>
-                    <div class="flex gap-2">
-                        <button
-                            class="!text-white"
-                            [disabled]="commentForm.invalid"
-                            mat-flat-button
-                            color="primary"
-                        >
-                            <ng-container>
+
+                        <div class="flex flex-col gap-2 sm:ml-auto sm:flex-row">
+                            <button
+                                class="!text-white"
+                                [disabled]="commentForm.invalid"
+                                mat-flat-button
+                                color="primary"
+                            >
                                 <span class="flex items-center gap-2">
-                                    @if (this.editingComment()) {
-                                        <mat-icon>edit</mat-icon>
-                                        Edit
+                                    @if (editingComment()) {
+                                        <mat-icon>edit</mat-icon> Edit
                                     } @else {
-                                        <mat-icon>add</mat-icon>
-                                        Add comment
+                                        <mat-icon>add</mat-icon> Add comment
                                     }
                                 </span>
-                            </ng-container>
-                        </button>
-                        @if (this.editingComment()) {
-                            <button mat-flat-button type="button" (click)="onCommentEditCancel()">
-                                Cancel
                             </button>
-                        }
+
+                            @if (editingComment()) {
+                                <button
+                                    mat-flat-button
+                                    type="button"
+                                    (click)="onCommentEditCancel()"
+                                >
+                                    Cancel
+                                </button>
+                            }
+                        </div>
                     </div>
                 </form>
             }
