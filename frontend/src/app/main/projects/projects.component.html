@@ -56,14 +56,14 @@
             <!-- Right: Status, Priority, Created At -->
             <div class="flex items-center gap-3 flex-shrink-0 flex-wrap justify-end">
                 <app-badge
-                    class="hidden sm:block"
+                    class="hidden xs:block"
                     [text]="projectStatusMap[project.status]"
                     [tailwindColor]="projectStatusColorMap[project.status]"
                     [fontWeight]="'semibold'"
                     [textSize]="'sm'"
                 ></app-badge>
                 <app-badge
-                    class="hidden sm:block"
+                    class="hidden xs:block"
                     [text]="projectPriorityMap[project.priority]"
                     [tailwindColor]="projectPriorityColorMap[project.priority]"
                     [fontWeight]="'semibold'"

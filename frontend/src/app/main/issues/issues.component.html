@@ -65,19 +65,12 @@
             <!-- Right: Priority, Status, Created At -->
             <div class="flex items-center gap-3 flex-shrink-0 flex-wrap justify-end">
                 <app-badge
-                    class="hidden sm:block"
+                    class="hidden xs:block"
                     [text]="priorityMap[issue.priority]"
                     [tailwindColor]="priorityColorMap[issue.priority]"
                     [fontWeight]="'semibold'"
                     [textSize]="'sm'"
                 ></app-badge>
-                @if (issue.label) {
-                    <app-badge
-                        [text]="issue.label.name"
-                        [fontWeight]="'semibold'"
-                        [color]="issue.label.color"
-                    ></app-badge>
-                }
                 <div class="flex flex-col text-sm text-gray-500 dark:text-gray-400">
                     <span class="self-end" [matTooltip]="issue.createdAt * 1000 | gmt">
                         Created {{ issue.createdAt * 1000 | relativeTime }}
