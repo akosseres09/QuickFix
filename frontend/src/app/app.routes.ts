@@ -153,9 +153,20 @@ export const routes: Routes = [
                     },
                 ],
             },
+        ],
+    },
+    {
+        path: 'invitation/:invitationId',
+        loadComponent: () =>
+            import('./layouts/main-layout/main-layout.component').then(
+                (c) => c.MainLayoutComponent
+            ),
+        canActivate: [invitationGuard, authenticatedGuard],
+        resolve: { permissions: permissionResolver },
+        runGuardsAndResolvers: 'paramsChange',
+        children: [
             {
-                path: 'invitation/:invitationId',
-                canActivate: [invitationGuard],
+                path: '',
                 loadComponent: () =>
                     import(
                         './main/organization-invitation/organization-invitation-item/organization-invitation-item.component'
