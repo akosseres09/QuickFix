@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test --watch=false --browsers=ChromeHeadless"
+    "test:services": "ng test --include='src/app/shared/services/**/*.service.spec.ts' --watch=false --browsers=ChromeHeadless",
+    "test:guards": "ng test --include='src/app/shared/guards/**/*.guard.spec.ts' --watch=false --browsers=ChromeHeadless"
   },
   "private": true,
   "dependencies": {
