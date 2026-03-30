@@ -7,7 +7,6 @@ import {
 } from '@angular/router';
 import { AuthService } from '../../services/auth/auth.service';
 import { catchError, map, of, switchMap } from 'rxjs';
-import { successResponse } from '../../model/Response';
 import { SnackbarService } from '../../services/snackbar/snackbar.service';
 
 export const authenticatedGuard: CanActivateFn = (
@@ -28,7 +27,7 @@ export const authenticatedGuard: CanActivateFn = (
     };
 
     const setUserData = (response: any) => {
-        authService.setClaimsFromResponse((response as successResponse).data);
+        authService.setClaimsFromResponse(response);
         return true;
     };
 

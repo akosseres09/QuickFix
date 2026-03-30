@@ -16,6 +16,7 @@ export class FilterService {
     constructor() {}
 
     getIssueFilters(labels: Label[]): Filter[] {
+        const safeLabels = labels ?? [];
         return [
             {
                 name: 'title',
@@ -24,7 +25,7 @@ export class FilterService {
             {
                 name: 'status',
                 type: 'select',
-                options: labels.map((label) => ({
+                options: safeLabels.map((label) => ({
                     value: label.name,
                     label: label.name,
                 })),

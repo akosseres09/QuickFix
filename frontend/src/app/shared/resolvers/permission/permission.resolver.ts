@@ -2,7 +2,6 @@ import { inject } from '@angular/core';
 import { ActivatedRouteSnapshot, ResolveFn } from '@angular/router';
 import { AuthService } from '../../services/auth/auth.service';
 import { map } from 'rxjs/internal/operators/map';
-import { successResponse } from '../../model/Response';
 import { catchError } from 'rxjs/internal/operators/catchError';
 import { EMPTY } from 'rxjs';
 
@@ -21,9 +20,8 @@ export const permissionResolver: ResolveFn<void> = (route) => {
     }
 
     return authService.fetchPermissions(orgId, projectId).pipe(
-        map((response) => {
-            const data = (response as successResponse).data;
-            authService.setPermissionsFromResponse(data);
+        map((response: any) => {
+            authService.setPermissionsFromResponse(response);
         }),
         catchError(() => {
             // Permission fetch failed — clear stale permissions so guards deny correctly

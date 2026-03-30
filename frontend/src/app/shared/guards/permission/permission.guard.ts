@@ -3,7 +3,6 @@ import { AuthService } from '../../services/auth/auth.service';
 import { inject } from '@angular/core';
 import { SnackbarService } from '../../services/snackbar/snackbar.service';
 import { catchError, map, of } from 'rxjs';
-import { successResponse } from '../../model/Response';
 
 export const permissionGuard: CanActivateFn = (route, state) => {
     const authService = inject(AuthService);
@@ -49,9 +48,8 @@ export const permissionGuard: CanActivateFn = (route, state) => {
 
     // On hard refresh, guards run before resolvers. Fetch permissions here, then re-check.
     return authService.fetchPermissions(orgId, projectId).pipe(
-        map((response) => {
-            const data = (response as successResponse).data;
-            authService.setPermissionsFromResponse(data);
+        map((response: any) => {
+            authService.setPermissionsFromResponse(response);
 
             if (hasBasePermission()) {
                 return true;
