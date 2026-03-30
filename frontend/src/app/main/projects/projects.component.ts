@@ -105,7 +105,7 @@ export class ProjectsComponent {
                 shown: !!selected && user.canDo(ProjectPermissions.UPDATE, ctx),
                 iconName: 'edit',
                 label: 'Edit Project',
-                action: () => (selected ? ['/projects', selected.key, 'edit'] : []),
+                action: () => (selected ? ['../project', selected.key, 'edit'] : []),
             },
             {
                 shown: !!selected && user.canDo(ProjectPermissions.DELETE, ctx),
