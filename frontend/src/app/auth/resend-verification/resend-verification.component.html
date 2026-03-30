@@ -22,9 +22,6 @@
                     autocomplete="current-password"
                     required
                 />
-                <mat-icon class="cursor-pointer !text-light-text dark:!text-inherit" matSuffix
-                    >lock</mat-icon
-                >
                 @if (getControl('email')?.invalid) {
                     <mat-error class="text-sm">
                         @if (getControl('email')?.hasError('required')) {

@@ -35,7 +35,13 @@
             </mat-form-field>
 
             <div>
-                <button type="submit" mat-flat-button color="primary" class="w-full !text-white">
+                <button
+                    [disabled]="isLoading() || verifyForm.invalid"
+                    type="submit"
+                    mat-flat-button
+                    color="primary"
+                    class="w-full !text-white"
+                >
                     @if (isLoading()) {
                         <ng-container>
                             <span class="flex gap-4">
