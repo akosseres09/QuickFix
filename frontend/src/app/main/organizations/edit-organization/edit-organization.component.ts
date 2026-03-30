@@ -1,4 +1,4 @@
-import { Component, inject, input, OnInit, signal } from '@angular/core';
+import { Component, inject, input, OnInit, signal, viewChild } from '@angular/core';
 import { OrganizationFormComponent } from '../../../common/form/organization-form/organization-form.component';
 import { MatIconModule } from '@angular/material/icon';
 import { Organization } from '../../../shared/model/Organization';
@@ -6,6 +6,7 @@ import { OrganizationService } from '../../../shared/services/organization/organ
 import { Router } from '@angular/router';
 import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { applyValidationErrors } from '../../../shared/utils/formErrorHandler';
 
 @Component({
     selector: 'app-edit',
@@ -17,6 +18,7 @@ export class EditOrganizationComponent implements OnInit {
     private readonly organizationService = inject(OrganizationService);
     private readonly router = inject(Router);
     private readonly snackbarService = inject(SnackbarService);
+    private readonly formComponent = viewChild(OrganizationFormComponent);
 
     organizationId = input.required<string>();
     organiation = signal<Organization | null>(null);
@@ -48,8 +50,14 @@ export class EditOrganizationComponent implements OnInit {
                 this.router.navigate(['/organizations']);
             },
             error: (err) => {
-                console.error('Error updating organization:', err);
-                this.snackbarService.error('Failed to update organization');
+                const form = this.formComponent();
+                if (form) {
+                    applyValidationErrors(form.organizationForm, err);
+                    form.isSubmitting.set(false);
+                }
+                this.snackbarService.error(
+                    err.error?.error?.message || 'Failed to update organization'
+                );
             },
         });
     }

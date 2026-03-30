@@ -17,6 +17,7 @@ import { SnackbarService } from '../../../shared/services/snackbar/snackbar.serv
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DialogService } from '../../../shared/services/dialog/dialog.service';
 import { finalize } from 'rxjs';
+import { applyValidationErrors } from '../../../shared/utils/formErrorHandler';
 
 @Component({
     selector: 'app-edit',
@@ -34,6 +35,7 @@ export class EditProjectComponent implements OnInit {
     projectId = input.required<string>();
     organizationId = input.required<string>();
     project = signal<Project | null>(null);
+    private readonly formComponent = viewChild(ProjectFormComponent);
 
     isSubmitting = signal<boolean>(false);
 
@@ -94,8 +96,11 @@ export class EditProjectComponent implements OnInit {
                     this.router.navigate(['..'], this.routerOptions);
                 },
                 error: (error) => {
-                    console.error('Error updating project:', error);
-                    this.snackbar.error('Failed to update project');
+                    const form = this.formComponent();
+                    if (form) {
+                        applyValidationErrors(form.projectForm, error);
+                    }
+                    this.snackbar.error(error.error?.error?.message || 'Failed to update project');
                 },
             });
     }

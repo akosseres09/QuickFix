@@ -1,4 +1,4 @@
-import { Component, inject, input, signal } from '@angular/core';
+import { Component, inject, input, signal, viewChild } from '@angular/core';
 import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -15,6 +15,7 @@ import { Issue } from '../../../shared/model/Issue';
 import { IssueService } from '../../../shared/services/issue/issue.service';
 import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
 import { finalize } from 'rxjs';
+import { applyValidationErrors } from '../../../shared/utils/formErrorHandler';
 
 @Component({
     selector: 'app-new',
@@ -44,6 +45,7 @@ export class NewIssueComponent {
     };
 
     isSubmitting = signal<boolean>(false);
+    private readonly formComponent = viewChild(IssueFormComponent);
 
     projectId = input.required<string>();
     organizationId = input.required<string>();
@@ -86,8 +88,12 @@ export class NewIssueComponent {
                     this.router.navigate(['..'], this.routerOptions);
                 },
                 error: (error) => {
+                    const form = this.formComponent();
+                    if (form) {
+                        applyValidationErrors(form.issueForm, error);
+                    }
                     this.snackbarService.error(
-                        error.error.message || 'Failed to create issue. Please try again.'
+                        error.error?.error?.message || 'Failed to create issue. Please try again.'
                     );
                 },
             });

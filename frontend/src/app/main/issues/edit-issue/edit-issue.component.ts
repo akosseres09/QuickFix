@@ -1,4 +1,4 @@
-import { Component, inject, input, OnInit, signal } from '@angular/core';
+import { Component, inject, input, OnInit, signal, viewChild } from '@angular/core';
 import { IssueFormComponent } from '../../../common/form/issue-form/issue-form.component';
 import { Issue } from '../../../shared/model/Issue';
 import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
@@ -6,6 +6,7 @@ import { IssueService } from '../../../shared/services/issue/issue.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
 import { finalize } from 'rxjs';
+import { applyValidationErrors } from '../../../shared/utils/formErrorHandler';
 
 @Component({
     selector: 'app-edit',
@@ -28,6 +29,7 @@ export class EditIssueComponent implements OnInit {
 
     issue = signal<Issue | null>(null);
     isSubmitting = signal<boolean>(false);
+    private readonly formComponent = viewChild(IssueFormComponent);
 
     ngOnInit() {
         const projectId = this.projectId();
@@ -100,8 +102,13 @@ export class EditIssueComponent implements OnInit {
                     this.router.navigate(['../../../'], this.routerOptions);
                 },
                 error: (err) => {
-                    console.error('Failed to update issue:', err);
-                    this.snackbarService.error('Failed to update issue. Please try again.');
+                    const form = this.formComponent();
+                    if (form) {
+                        applyValidationErrors(form.issueForm, err);
+                    }
+                    this.snackbarService.error(
+                        err.error?.error?.message || 'Failed to update issue. Please try again.'
+                    );
                 },
             });
     }

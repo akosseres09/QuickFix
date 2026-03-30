@@ -19,6 +19,14 @@
                         @if (projectForm.get('name')?.hasError('maxlength')) {
                             <span>Name must not exceed 255 characters</span>
                         }
+                        @if (projectForm.get('name')?.hasError('serverError')) {
+                            @for (
+                                error of projectForm.get('name')?.getError('serverError');
+                                track $index
+                            ) {
+                                <span>{{ error }}</span>
+                            }
+                        }
                     </mat-error>
                 }
             </mat-form-field>
@@ -46,6 +54,14 @@
                         @if (projectForm.get('key')?.hasError('maxlength')) {
                             <span>Key must not exceed 10 characters</span>
                         }
+                        @if (projectForm.get('key')?.hasError('serverError')) {
+                            @for (
+                                error of projectForm.get('key')?.getError('serverError');
+                                track $index
+                            ) {
+                                <span>{{ error }}</span>
+                            }
+                        }
                     </mat-error>
                 }
             </mat-form-field>
@@ -59,6 +75,20 @@
                 rows="4"
                 placeholder="Describe your project..."
             ></textarea>
+            @if (
+                projectForm.get('description')?.invalid && projectForm.get('description')?.touched
+            ) {
+                <mat-error>
+                    @if (projectForm.get('description')?.hasError('serverError')) {
+                        @for (
+                            error of projectForm.get('description')?.getError('serverError');
+                            track $index
+                        ) {
+                            <span>{{ error }}</span>
+                        }
+                    }
+                </mat-error>
+            }
         </mat-form-field>
 
         <div class="flex flex-col gap-4">

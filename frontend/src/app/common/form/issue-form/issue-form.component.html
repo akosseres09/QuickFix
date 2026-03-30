@@ -20,6 +20,14 @@
                         @if (issueForm.get('title')?.hasError('maxlength')) {
                             <span>Title must not exceed 255 characters</span>
                         }
+                        @if (issueForm.get('title')?.hasError('serverError')) {
+                            @for (
+                                error of issueForm.get('title')?.getError('serverError');
+                                track $index
+                            ) {
+                                <span>{{ error }}</span>
+                            }
+                        }
                     </mat-error>
                 }
             </mat-form-field>
