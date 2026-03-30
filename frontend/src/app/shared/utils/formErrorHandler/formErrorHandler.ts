@@ -1,6 +1,6 @@
 import { FormGroup } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
-import { snakeCaseToCamelCase } from './caseConverter';
+import { snakeCaseToCamelCase } from '../caseConverter/caseConverter';
 
 /**
  * Checks whether an HTTP error is a 422 validation error

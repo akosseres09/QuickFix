@@ -1,5 +1,5 @@
 import { HttpParams } from '@angular/common/http';
-import { ApiQueryParams } from '../constants/api/ApiQueryParams';
+import { ApiQueryParams } from '../../constants/api/ApiQueryParams';
 
 export class ParamsHandler {
     static convertToHttpParams(params: ApiQueryParams): HttpParams {

@@ -4,7 +4,7 @@ import { environment } from '../../../../environments/environment';
 import { PaginatedResponse } from '../../constants/api/PaginatedResponse';
 import { OrganizationMember } from '../../model/OrganizationMember';
 import { ApiQueryParams } from '../../constants/api/ApiQueryParams';
-import { ParamsHandler } from '../../utils/paramsHandler';
+import { ParamsHandler } from '../../utils/paramsHandler/paramsHandler';
 import { map } from 'rxjs';
 
 @Injectable({

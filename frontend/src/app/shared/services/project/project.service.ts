@@ -5,7 +5,7 @@ import { environment } from '../../../../environments/environment';
 import { map, Observable } from 'rxjs';
 import { ApiQueryParams } from '../../constants/api/ApiQueryParams';
 import { PaginatedResponse } from '../../constants/api/PaginatedResponse';
-import { ParamsHandler } from '../../utils/paramsHandler';
+import { ParamsHandler } from '../../utils/paramsHandler/paramsHandler';
 
 @Injectable({
     providedIn: 'root',

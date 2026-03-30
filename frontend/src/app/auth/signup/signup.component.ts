@@ -21,13 +21,13 @@ import { AuthService } from '../../shared/services/auth/auth.service';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 import { SignupData } from '../../shared/constants/user/SignupData';
 import { CustomValidators } from '../../shared/validators/CustomValidators';
-import { decodeToken } from '../../shared/utils/jwtDecoder';
+import { decodeToken } from '../../shared/utils/jwtDecoder/jwtDecoder';
 import { InvitationTokenPayload } from '../../shared/constants/token/InvitationTokenPayload';
 import { finalize } from 'rxjs';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
-import { applyValidationErrors } from '../../shared/utils/formErrorHandler';
+import { applyValidationErrors } from '../../shared/utils/formErrorHandler/formErrorHandler';
 
 @Component({
     selector: 'app-signup',

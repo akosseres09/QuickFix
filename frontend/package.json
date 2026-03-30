@@ -7,7 +7,13 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test:services": "ng test --include='src/app/shared/services/**/*.service.spec.ts' --watch=false --browsers=ChromeHeadless",
-    "test:guards": "ng test --include='src/app/shared/guards/**/*.guard.spec.ts' --watch=false --browsers=ChromeHeadless"
+    "test:guards": "ng test --include='src/app/shared/guards/**/*.guard.spec.ts' --watch=false --browsers=ChromeHeadless",
+    "test:interceptors": "ng test --include='src/app/shared/interceptor/**/*.interceptor.spec.ts' --watch=false --browsers=ChromeHeadless",
+    "test:pipes": "ng test --include='src/app/shared/pipes/**/*.pipe.spec.ts' --watch=false --browsers=ChromeHeadless",
+    "test:resolvers": "ng test --include='src/app/shared/resolvers/**/*.resolver.spec.ts' --watch=false --browsers=ChromeHeadless",
+    "test:utils": "ng test --include='src/app/shared/utils/**/*.spec.ts' --watch=false --browsers=ChromeHeadless",
+    "test:validators": "ng test --include='src/app/shared/validators/**/*.spec.ts' --watch=false --browsers=ChromeHeadless",
+    "test:shared": "ng test --include='src/app/shared/**/*.spec.ts' --watch=false --browsers=ChromeHeadless"
   },
   "private": true,
   "dependencies": {

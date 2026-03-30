@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
 import { ApiQueryParams } from '../../constants/api/ApiQueryParams';
-import { ParamsHandler } from '../../utils/paramsHandler';
+import { ParamsHandler } from '../../utils/paramsHandler/paramsHandler';
 import { PaginatedResponse } from '../../constants/api/PaginatedResponse';
 import { Worktime } from '../../model/Worktime';
 import { Observable } from 'rxjs';

@@ -1,5 +1,5 @@
 import { HttpInterceptorFn } from '@angular/common/http';
-import { toSnakeCase } from '../../utils/caseConverter';
+import { toSnakeCase } from '../../utils/caseConverter/caseConverter';
 
 export const caseInterceptor: HttpInterceptorFn = (req, next) => {
     if (!req.body || req.body instanceof FormData) {

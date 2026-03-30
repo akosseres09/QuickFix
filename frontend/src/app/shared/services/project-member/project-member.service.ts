@@ -4,7 +4,7 @@ import { PaginatedResponse } from '../../constants/api/PaginatedResponse';
 import { ProjectMember } from '../../model/ProjectMember';
 import { environment } from '../../../../environments/environment';
 import { ApiQueryParams } from '../../constants/api/ApiQueryParams';
-import { ParamsHandler } from '../../utils/paramsHandler';
+import { ParamsHandler } from '../../utils/paramsHandler/paramsHandler';
 import { map } from 'rxjs';
 
 @Injectable({

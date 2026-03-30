@@ -5,7 +5,7 @@ import { OrganizationFormComponent } from '../../../common/form/organization-for
 import { Organization } from '../../../shared/model/Organization';
 import { OrganizationService } from '../../../shared/services/organization/organization.service';
 import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
-import { applyValidationErrors } from '../../../shared/utils/formErrorHandler';
+import { applyValidationErrors } from '../../../shared/utils/formErrorHandler/formErrorHandler';
 
 @Component({
     selector: 'app-create',

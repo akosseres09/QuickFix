@@ -6,7 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { ApiQueryParams } from '../../constants/api/ApiQueryParams';
 import { map, Observable } from 'rxjs';
-import { ParamsHandler } from '../../utils/paramsHandler';
+import { ParamsHandler } from '../../utils/paramsHandler/paramsHandler';
 
 @Injectable({
     providedIn: 'root',

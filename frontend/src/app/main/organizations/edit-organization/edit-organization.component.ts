@@ -6,7 +6,7 @@ import { OrganizationService } from '../../../shared/services/organization/organ
 import { Router } from '@angular/router';
 import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { applyValidationErrors } from '../../../shared/utils/formErrorHandler';
+import { applyValidationErrors } from '../../../shared/utils/formErrorHandler/formErrorHandler';
 
 @Component({
     selector: 'app-edit',

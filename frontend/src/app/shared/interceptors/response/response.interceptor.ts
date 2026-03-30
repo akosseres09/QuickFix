@@ -18,7 +18,8 @@ export const responseInterceptor: HttpInterceptorFn = (req, next) => {
                 event instanceof HttpResponse &&
                 event.body &&
                 typeof event.body === 'object' &&
-                'success' in event.body
+                'success' in event.body &&
+                'data' in event.body
             ) {
                 const body = event.body as Record<string, any>;
 
@@ -44,7 +45,9 @@ export const responseInterceptor: HttpInterceptorFn = (req, next) => {
                     }
 
                     // Single object / custom action: { success, data: { ... } }
-                    return event.clone({ body: body['data'] });
+                    return event.clone({
+                        body: body['data'],
+                    });
                 }
             }
             return event;

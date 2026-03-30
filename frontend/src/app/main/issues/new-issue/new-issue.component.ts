@@ -15,7 +15,7 @@ import { Issue } from '../../../shared/model/Issue';
 import { IssueService } from '../../../shared/services/issue/issue.service';
 import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
 import { finalize } from 'rxjs';
-import { applyValidationErrors } from '../../../shared/utils/formErrorHandler';
+import { applyValidationErrors } from '../../../shared/utils/formErrorHandler/formErrorHandler';
 
 @Component({
     selector: 'app-new',

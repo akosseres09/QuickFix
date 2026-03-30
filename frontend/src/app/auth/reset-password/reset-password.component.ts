@@ -16,7 +16,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { finalize } from 'rxjs';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { applyValidationErrors } from '../../shared/utils/formErrorHandler';
+import { applyValidationErrors } from '../../shared/utils/formErrorHandler/formErrorHandler';
 
 @Component({
     selector: 'app-reset-password',
