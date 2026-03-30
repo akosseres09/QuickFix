@@ -1,5 +1,5 @@
 import { CommonModule, Location } from '@angular/common';
-import { Component, inject, input, model, OnInit, output, signal } from '@angular/core';
+import { Component, DestroyRef, inject, input, model, OnInit, output, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -27,10 +27,12 @@ import { ProjectMemberService } from '../../../shared/services/project-member/pr
 import { AuthService } from '../../../shared/services/auth/auth.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
-import { finalize } from 'rxjs';
+import { debounceTime, distinctUntilChanged, finalize, Subject, switchMap } from 'rxjs';
 import { LabelService } from '../../../shared/services/label.service';
 import { Label } from '../../../shared/model/Label';
 import { BadgeComponent } from '../../badge/badge.component';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'app-issue-form',
@@ -48,6 +50,7 @@ import { BadgeComponent } from '../../badge/badge.component';
         MatButtonModule,
         RouterLink,
         BadgeComponent,
+        MatAutocompleteModule,
     ],
     templateUrl: './issue-form.component.html',
     styleUrl: './issue-form.component.css',
@@ -59,6 +62,7 @@ export class IssueFormComponent implements OnInit {
     private readonly authService = inject(AuthService);
     private readonly location = inject(Location);
     private readonly labelService = inject(LabelService);
+    private readonly destroyRef = inject(DestroyRef);
 
     projectId = input.required<string>();
     organizationId = input.required<string>();
@@ -68,10 +72,13 @@ export class IssueFormComponent implements OnInit {
 
     minDate = signal<Date>(new Date());
     isUsersLoading = signal<boolean>(true);
+    isSearchingUsers = signal<boolean>(false);
     pickableUsers = signal<ProjectMember[]>([]);
-    private user = signal<Claims | null>(this.authService.currentUserClaims());
+    filteredUsers = signal<ProjectMember[]>([]);
     isLabelsLoading = signal<boolean>(true);
     labels = signal<Label[]>([]);
+    private user = signal<Claims | null>(this.authService.currentUserClaims());
+    private userSearchSubject = new Subject<string>();
 
     isSubmitting = model<boolean>(false);
     formSubmitted = output<Partial<Issue>>();
@@ -95,6 +102,7 @@ export class IssueFormComponent implements OnInit {
         this.setFormData();
         this.getLabels(organizationId, projectId);
         this.getMembers(organizationId, projectId);
+        this.setupUserSearch(organizationId, projectId);
     }
 
     onSubmit() {
@@ -199,6 +207,56 @@ export class IssueFormComponent implements OnInit {
         this.issueForm.get('statusLabel')?.disable();
     }
 
+    onUserInputChange(inputValue: string): void {
+        this.userSearchSubject.next(inputValue);
+    }
+
+    private setupUserSearch(organizationId: string, projectId: string): void {
+        this.userSearchSubject
+            .pipe(
+                debounceTime(300),
+                switchMap((searchTerm) => {
+                    const trimmedTerm = searchTerm?.trim() || '';
+
+                    if (!trimmedTerm) {
+                        this.isSearchingUsers.set(false);
+                        return this.memberService.getProjectMembers({
+                            organizationId,
+                            projectId,
+                        });
+                    }
+
+                    this.isSearchingUsers.set(true);
+                    return this.memberService.getProjectMembers(
+                        {
+                            organizationId,
+                            projectId,
+                        },
+                        {
+                            username: trimmedTerm,
+                            expand: 'user',
+                        }
+                    );
+                }),
+                finalize(() => this.isSearchingUsers.set(false)),
+                takeUntilDestroyed(this.destroyRef)
+            )
+            .subscribe({
+                next: (response) => {
+                    this.filteredUsers.set(response.items);
+                    this.isSearchingUsers.set(false);
+                },
+                error: (_) => {
+                    this.snackbarService.error('Failed to search users');
+                    this.isSearchingUsers.set(false);
+                },
+            });
+    }
+
+    onUserSelected(userId: string | null): void {
+        this.issueForm.get('assignedTo')?.setValue(userId);
+    }
+
     private getMembers(organizationId: string, projectId: string) {
         this.memberService
             .getProjectMembers({
@@ -214,10 +272,19 @@ export class IssueFormComponent implements OnInit {
             .subscribe({
                 next: (response) => {
                     this.pickableUsers.set(response.items);
+                    this.filteredUsers.set(response.items);
                 },
                 error: (_) => {
                     this.snackbarService.error('Failed to load users');
                 },
             });
     }
+
+    displayUser = (userId: string | null): string => {
+        if (!userId) {
+            return 'Unassigned';
+        }
+        const user = this.pickableUsers().find((u) => u.userId === userId);
+        return user ? user.user?.username || 'Unknown User' : 'Unknown User';
+    };
 }
