@@ -13,7 +13,8 @@
     "test:resolvers": "ng test --include='src/app/shared/resolvers/**/*.resolver.spec.ts' --watch=false --browsers=ChromeHeadless",
     "test:utils": "ng test --include='src/app/shared/utils/**/*.spec.ts' --watch=false --browsers=ChromeHeadless",
     "test:validators": "ng test --include='src/app/shared/validators/**/*.spec.ts' --watch=false --browsers=ChromeHeadless",
-    "test:shared": "ng test --include='src/app/shared/**/*.spec.ts' --watch=false --browsers=ChromeHeadless"
+    "test:shared": "ng test --include='src/app/shared/**/*.spec.ts' --watch=false --browsers=ChromeHeadless",
+    "test:components:auth": "ng test --include='src/app/auth/**/*.spec.ts' --watch=false --browsers=ChromeHeadless"
   },
   "private": true,
   "dependencies": {
