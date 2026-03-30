@@ -15,7 +15,8 @@
     "test:validators": "ng test --include='src/app/shared/validators/**/*.spec.ts' --watch=false --browsers=ChromeHeadless",
     "test:shared": "ng test --include='src/app/shared/**/*.spec.ts' --watch=false --browsers=ChromeHeadless",
     "test:components:auth": "ng test --include='src/app/auth/**/*.spec.ts' --watch=false --browsers=ChromeHeadless",
-    "test:components:layouts": "ng test --include='src/app/layouts/**/*.spec.ts' --watch=false --browsers=ChromeHeadless"
+    "test:components:layouts": "ng test --include='src/app/layouts/**/*.spec.ts' --watch=false --browsers=ChromeHeadless",
+    "test:components:common": "ng test --include='src/app/common/**/*.spec.ts' --watch=false --browsers=ChromeHeadless"
   },
   "private": true,
   "dependencies": {
