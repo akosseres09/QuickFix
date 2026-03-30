@@ -8,6 +8,7 @@ import { ProjectService } from '../../../shared/services/project/project.service
 import { Project } from '../../../shared/model/Project';
 import { finalize } from 'rxjs';
 import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
+import { applyValidationErrors } from '../../../shared/utils/formErrorHandler';
 
 @Component({
     selector: 'app-new',
@@ -24,6 +25,7 @@ export class NewProjectComponent {
 
     organizationId = input.required<string>();
     infoDialogRef: Signal<TemplateRef<any> | undefined> = viewChild('infoDialog');
+    private readonly formComponent = viewChild(ProjectFormComponent);
     isSubmitting = signal<boolean>(false);
 
     readonly routerOptions: NavigationExtras = {
@@ -55,8 +57,13 @@ export class NewProjectComponent {
                     this.router.navigate(['../../', 'project', project.key], this.routerOptions);
                 },
                 error: (error) => {
-                    console.error('Error creating project:', error);
-                    this.snackbarService.error('Failed to create project');
+                    const form = this.formComponent();
+                    if (form) {
+                        applyValidationErrors(form.projectForm, error);
+                    }
+                    this.snackbarService.error(
+                        error.error?.error?.message || 'Failed to create project'
+                    );
                 },
             });
     }

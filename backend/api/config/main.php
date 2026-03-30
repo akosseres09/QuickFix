@@ -1,6 +1,7 @@
 <?php
 
 use api\components\CloudinaryService;
+use api\components\ResponseFormatter;
 use yii\rest\UrlRule;
 
 $params = array_merge(
@@ -29,6 +30,7 @@ return [
         'response' => [
             'format' => yii\web\Response::FORMAT_JSON,
             'charset' => 'UTF-8',
+            'on beforeSend' => [ResponseFormatter::class, 'handle'],
         ],
         'user' => [
             'identityClass' => 'common\models\User',

@@ -9,8 +9,6 @@ use Lcobucci\JWT\UnencryptedToken;
 use Symfony\Component\Uid\Uuid;
 use Throwable;
 use Yii;
-use yii\behaviors\TimestampBehavior;
-use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
 
 enum UserRole: int
@@ -60,17 +58,17 @@ enum UserStatus: int
  * @property OrganizationMember[] $organizationMemberships
  * @property ProjectMember[] $projectMemberships
  */
-class User extends ActiveRecord implements IdentityInterface
+class User extends BaseModel implements IdentityInterface
 {
     const STATUS_LIST = [
-        UserStatus::ACTIVE->value => 'Active',
-        UserStatus::INACTIVE->value => 'Inactive',
-        UserStatus::DELETED->value => 'Deleted',
+        UserStatus::ACTIVE->value,
+        UserStatus::INACTIVE->value,
+        UserStatus::DELETED->value,
     ];
 
     const ROLE_LIST = [
-        UserRole::USER->value => 'User',
-        UserRole::ADMIN->value => 'Admin',
+        UserRole::USER->value,
+        UserRole::ADMIN->value
     ];
 
     const LOGIN_SCENARIO = 'login';
@@ -136,13 +134,13 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public function behaviors(): array
     {
-        return [
-            TimestampBehavior::class,
-            [
-                'class' => InvalidateCacheBehavior::class,
-                'cacheKeys' => [$this->getUsernameToIdCache($this->username)],
-            ],
+        $behaviors = parent::behaviors();
+        unset($behaviors['blameable']);
+        $behaviors['invalidateCache'] = [
+            'class' => InvalidateCacheBehavior::class,
+            'cacheKeys' => [$this->getUsernameToIdCache($this->username)],
         ];
+        return $behaviors;
     }
 
     /**

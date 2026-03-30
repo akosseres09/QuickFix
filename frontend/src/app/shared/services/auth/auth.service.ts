@@ -1,6 +1,5 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { errorResponse, successResponse } from '../../model/Response';
 import { BehaviorSubject, Observable, shareReplay, tap } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { Claims, UserClaims } from '../../constants/user/Claims';
@@ -28,7 +27,7 @@ export class AuthService {
     private pendingPermissions$: Observable<any> | null = null;
     private pendingPermissionsKey: string | null = null;
 
-    signup(data: SignupData): Observable<errorResponse | successResponse> {
+    signup(data: SignupData): Observable<any> {
         const fixed = {
             ...data,
             first_name: data.firstName,
@@ -37,13 +36,13 @@ export class AuthService {
             phone_number: data.phoneNumber,
         };
 
-        return this.http.post<errorResponse | successResponse>(this.url + '/auth/signup', fixed, {
+        return this.http.post<any>(this.url + '/auth/signup', fixed, {
             headers: this.headers,
         });
     }
 
-    verify(token: string): Observable<errorResponse | successResponse> {
-        return this.http.post<errorResponse | successResponse>(
+    verify(token: string): Observable<any> {
+        return this.http.post<any>(
             this.url + '/auth/verify',
             {
                 token: token,
@@ -54,11 +53,8 @@ export class AuthService {
         );
     }
 
-    resendEmail(
-        email: string,
-        link: string = '/auth/resend-verification-email'
-    ): Observable<errorResponse | successResponse> {
-        return this.http.post<errorResponse | successResponse>(
+    resendEmail(email: string, link: string = '/auth/resend-verification-email'): Observable<any> {
+        return this.http.post<any>(
             this.url + link,
             {
                 email: email,
@@ -69,8 +65,8 @@ export class AuthService {
         );
     }
 
-    resetPassword(token: string, password: string): Observable<errorResponse | successResponse> {
-        return this.http.post<errorResponse | successResponse>(
+    resetPassword(token: string, password: string): Observable<any> {
+        return this.http.post<any>(
             this.url + '/auth/reset-password',
             {
                 token: token,
@@ -82,9 +78,9 @@ export class AuthService {
         );
     }
 
-    login(email: string, password: string): Observable<errorResponse | successResponse> {
+    login(email: string, password: string): Observable<any> {
         return this.http
-            .post<errorResponse | successResponse>(
+            .post<any>(
                 this.url + '/auth/login',
                 {
                     email: email,
@@ -95,36 +91,34 @@ export class AuthService {
                 }
             )
             .pipe(
-                tap((response) => {
-                    if (response.success) {
-                        const data = (response as successResponse).data;
-                        localStorage.setItem(this.tokenKey, data['access_token']);
-                        const user = decodeToken<Claims>(data['access_token']);
+                tap((response: any) => {
+                    if (response?.access_token) {
+                        localStorage.setItem(this.tokenKey, response.access_token);
+                        const user = decodeToken<Claims>(response.access_token);
                         this.currentUserClaims.set(user);
                     }
                 })
             );
     }
 
-    refresh(): Observable<errorResponse | successResponse> {
+    refresh(): Observable<any> {
         return this.http
-            .get<errorResponse | successResponse>(this.url + '/auth/refresh', {
+            .get<any>(this.url + '/auth/refresh', {
                 headers: this.headers,
                 withCredentials: true,
             })
             .pipe(
-                tap((response) => {
-                    if (response.success) {
-                        const resp = response as successResponse;
-                        localStorage.setItem('access_token', resp.data['access_token']);
+                tap((response: any) => {
+                    if (response?.access_token) {
+                        localStorage.setItem('access_token', response.access_token);
                     }
                 })
             );
     }
 
-    logout(): Observable<errorResponse | successResponse> {
+    logout(): Observable<any> {
         return this.http
-            .post<errorResponse | successResponse>(
+            .post<any>(
                 this.url + '/auth/logout',
                 {},
                 {
@@ -133,24 +127,19 @@ export class AuthService {
                 }
             )
             .pipe(
-                tap((response) => {
-                    if (response.success) {
-                        localStorage.removeItem('access_token');
-                        this.setClaimsFromResponse(null);
-                    }
+                tap(() => {
+                    localStorage.removeItem('access_token');
+                    this.setClaimsFromResponse(null);
                 })
             );
     }
 
-    me(
-        organizationId?: string | null,
-        projectId?: string | null
-    ): Observable<errorResponse | successResponse> {
+    me(organizationId?: string | null, projectId?: string | null): Observable<any> {
         const params: any = {};
         if (organizationId) params.organizationId = organizationId;
         if (projectId) params.projectId = projectId;
 
-        return this.http.get<errorResponse | successResponse>(this.url + '/auth/me', {
+        return this.http.get<any>(this.url + '/auth/me', {
             headers: this.headers,
             params: params,
         });
@@ -161,7 +150,7 @@ export class AuthService {
         if (orgId) params['organizationId'] = orgId;
         if (projectId) params['projectId'] = projectId;
 
-        return this.http.get<successResponse | errorResponse>(this.url + '/auth/permissions', {
+        return this.http.get<any>(this.url + '/auth/permissions', {
             headers: this.headers,
             withCredentials: true,
             params,

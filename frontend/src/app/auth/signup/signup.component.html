@@ -1,6 +1,6 @@
 <div class="flex flex-1 items-center justify-center w-full">
     <div
-        class="w-full max-w-lg md:max-w-2xl p-6 sm:p-8 space-y-6 bg-white rounded-xl shadow-lg dark:bg-slate-800"
+        class="w-full max-w-lg md:max-w-2xl p-6 sm:p-8 space-y-6 bg-white rounded-xl shadow-lg dark:bg-dark-background-hover"
     >
         <div class="text-center">
             <h1 class="text-3xl font-bold text-slate-900 dark:text-white">Create Account</h1>
@@ -201,7 +201,14 @@
             <mat-form-field class="w-full" appearance="outline">
                 <mat-label>Date of Birth</mat-label>
                 <mat-icon matPrefix class="text-light-text dark:text-inherit">cake</mat-icon>
-                <input formControlName="dateOfBirth" matInput type="date" autocomplete="bday" />
+                <input
+                    formControlName="dateOfBirth"
+                    [max]="maxDate()"
+                    matInput
+                    [matDatepicker]="picker"
+                />
+                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
                 @if (getControl('dateOfBirth')?.invalid) {
                     <mat-error class="text-sm">
                         @if (getControl('dateOfBirth')?.hasError('invalidDate')) {
@@ -259,12 +266,23 @@
             <div>
                 <button
                     type="submit"
-                    [disabled]="signupForm.invalid"
+                    [disabled]="signupForm.invalid || isLoading()"
                     mat-flat-button
                     color="primary"
                     class="w-full !text-white"
                 >
-                    Sign Up
+                    @if (isLoading()) {
+                        <span class="flex gap-4">
+                            <mat-progress-spinner
+                                color="primary"
+                                diameter="24"
+                                mode="indeterminate"
+                            ></mat-progress-spinner>
+                            Signing Up...
+                        </span>
+                    } @else {
+                        Sign Up
+                    }
                 </button>
             </div>
         </form>

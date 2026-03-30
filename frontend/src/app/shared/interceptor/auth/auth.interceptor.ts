@@ -68,8 +68,8 @@ const handle401Error = (req: HttpRequest<any>, next: HttpHandlerFn, authService:
             switchMap((response: any) => {
                 authService.isRefreshing = false;
 
-                if (response.success && response.data['access_token']) {
-                    const newToken = response.data['access_token'];
+                if (response?.access_token) {
+                    const newToken = response.access_token;
                     authService.refreshTokenSubject.next(newToken);
                     return next(addToken(req, newToken));
                 }

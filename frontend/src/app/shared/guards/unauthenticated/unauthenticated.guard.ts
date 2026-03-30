@@ -17,12 +17,9 @@ export const unauthenticatedGuard: CanActivateFn = (route, state) => {
     // Access token exists — verify it's still valid
     return authService.me().pipe(
         take(1),
-        map((response) => {
-            if (response.success) {
-                router.navigate(['/organizations']);
-                return false;
-            }
-            return true;
+        map(() => {
+            router.navigate(['/organizations']);
+            return false;
         }),
         catchError(() => {
             authService.removeAccessToken();

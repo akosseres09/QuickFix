@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\components\traits\EagerExpandTrait;
 use common\models\Comment;
 use common\models\Project;
 use Yii;
@@ -10,6 +11,8 @@ use yii\web\BadRequestHttpException;
 
 class CommentSearch extends Comment implements SearchInterface
 {
+    use EagerExpandTrait;
+
     public function search($params): ActiveDataProvider
     {
         $page = isset($params['page']) ? (int) $params['page'] : 1;
@@ -38,7 +41,9 @@ class CommentSearch extends Comment implements SearchInterface
             throw new BadRequestHttpException('Project not found in the specified organization!');
         }
 
+
         $query = Comment::find()->byProjectId($projectId)->byIssueId($issueId);
+        $this->applyExpand($query, 'comment');
 
         if ($cursor) {
             $query->andWhere(['>', 'comment.id', $cursor]);

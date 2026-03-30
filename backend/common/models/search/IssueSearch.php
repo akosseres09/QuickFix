@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\components\traits\EagerExpandTrait;
 use common\models\Issue;
 use common\models\Project;
 use yii\data\ActiveDataProvider;
@@ -9,6 +10,7 @@ use yii\web\BadRequestHttpException;
 
 class IssueSearch extends Issue implements SearchInterface
 {
+    use EagerExpandTrait;
     public $status;
 
     public function rules(): array
@@ -60,6 +62,7 @@ class IssueSearch extends Issue implements SearchInterface
         }
 
         $query = Issue::find()->byProjectId($projectId);
+        $this->applyExpand($query);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

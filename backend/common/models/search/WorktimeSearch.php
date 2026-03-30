@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\components\traits\EagerExpandTrait;
 use common\models\Project;
 use common\models\search\SearchInterface;
 use common\models\Worktime;
@@ -9,6 +10,7 @@ use Yii;
 use yii\data\ActiveDataProvider;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
+
 /**
  * 
  * @property string $start_date
@@ -16,6 +18,8 @@ use yii\web\NotFoundHttpException;
  */
 class WorktimeSearch extends Worktime implements SearchInterface
 {
+    use EagerExpandTrait;
+
     public string $start_date = '';
     public string $end_date = '';
 
@@ -83,6 +87,7 @@ class WorktimeSearch extends Worktime implements SearchInterface
                 ->byCreatedBy(Yii::$app->user->id);
         }
 
+        $this->applyExpand($query);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

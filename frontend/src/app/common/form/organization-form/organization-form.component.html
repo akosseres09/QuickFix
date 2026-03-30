@@ -11,6 +11,11 @@
                     @if (name.errors?.['maxlength']) {
                         <span>Name must be at most 255 characters long</span>
                     }
+                    @if (name.errors?.['serverError']) {
+                        @for (error of name.getError('serverError'); track $index) {
+                            <span>{{ error }}</span>
+                        }
+                    }
                 </mat-error>
             }
         </mat-form-field>
@@ -26,6 +31,11 @@
                     @if (slug.errors?.['maxlength']) {
                         <span>Slug must be at most 16 characters long</span>
                     }
+                    @if (slug.errors?.['serverError']) {
+                        @for (error of slug.getError('serverError'); track $index) {
+                            <span>{{ error }}</span>
+                        }
+                    }
                 </mat-error>
             }
         </mat-form-field>
@@ -34,6 +44,15 @@
     <mat-form-field appearance="fill">
         <mat-label>Description</mat-label>
         <textarea matInput formControlName="description"></textarea>
+        @if (description.invalid && (description.dirty || description.touched)) {
+            <mat-error>
+                @if (description.errors?.['serverError']) {
+                    @for (error of description.getError('serverError'); track $index) {
+                        <span>{{ error }}</span>
+                    }
+                }
+            </mat-error>
+        }
     </mat-form-field>
 
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-4">

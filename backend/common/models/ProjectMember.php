@@ -2,12 +2,12 @@
 
 namespace common\models;
 
+use api\components\permissions\RoleManager;
 use common\models\query\ProjectMemberQuery;
 use common\models\resource\UserResource;
 use Symfony\Component\Uid\Uuid;
 use Yii;
 use yii\behaviors\TimestampBehavior;
-use yii\db\ActiveRecord;
 
 /**
  * ProjectMember model
@@ -17,45 +17,23 @@ use yii\db\ActiveRecord;
  * @property string $user_id
  * @property string $role
  * @property integer $created_at
- * 
+ * @property string $created_by
+ * @property string|null $updated_by
+ * @property integer $updated_at
+ *  
  * @property Project $project
  * @property UserResource $user
+ * @property UserResource $updator
+ * @property UserResource $creator
  */
-class ProjectMember extends ActiveRecord
+class ProjectMember extends BaseModel
 {
-    // Role constants
-    const ROLE_GUEST = 'guest';
-    const ROLE_MEMBER = 'member';
-    const ROLE_ADMIN = 'admin';
-    const ROLE_OWNER = 'owner';
-
-    const ROLE_LIST = [
-        self::ROLE_GUEST,
-        self::ROLE_MEMBER,
-        self::ROLE_ADMIN,
-        self::ROLE_OWNER
-    ];
-
-
     /**
      * {@inheritdoc}
      */
     public static function tableName(): string
     {
         return '{{%project_member}}';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function behaviors(): array
-    {
-        return [
-            [
-                'class' => TimestampBehavior::class,
-                'updatedAtAttribute' => false,
-            ],
-        ];
     }
 
     /**
@@ -68,8 +46,8 @@ class ProjectMember extends ActiveRecord
             [['project_id', 'user_id'], 'string', 'max' => 36],
             [['created_at'], 'integer'],
             ['role', 'string', 'max' => 16],
-            [['role'], 'default', 'value' => self::ROLE_MEMBER],
-            [['role'], 'in', 'range' => self::ROLE_LIST],
+            [['role'], 'default', 'value' => RoleManager::ROLE_MEMBER],
+            [['role'], 'in', 'range' => RoleManager::ROLE_LIST],
             [['project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['project_id' => 'id']],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => UserResource::class, 'targetAttribute' => ['user_id' => 'id']],
             [['project_id', 'user_id'], 'unique', 'targetAttribute' => ['project_id', 'user_id'], 'message' => 'This user is already a member of this project.'],
@@ -87,6 +65,9 @@ class ProjectMember extends ActiveRecord
             'user_id' => 'User ID',
             'role' => 'Role',
             'created_at' => 'Created At',
+            'created_by' => 'Created By',
+            'updated_at' => 'Updated At',
+            'updated_by' => 'Updated By',
         ];
     }
 
@@ -97,13 +78,16 @@ class ProjectMember extends ActiveRecord
             'projectId' => 'project_id',
             'userId' => 'user_id',
             'role',
-            'createdAt' => 'created_at'
+            'createdAt' => 'created_at',
+            'updatedAt' => 'updated_at',
+            'updatedBy' => 'updated_by',
+            'createdBy' => 'created_by',
         ];
     }
 
     public function extraFields()
     {
-        return ['project', 'user'];
+        return ['project', 'user', 'updator', 'creator'];
     }
 
     /**
@@ -167,6 +151,26 @@ class ProjectMember extends ActiveRecord
     }
 
     /**
+     * Gets query for [[Creator]].
+     * 
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCreator()
+    {
+        return $this->hasOne(UserResource::class, ['id' => 'created_by']);
+    }
+
+    /**
+     * Gets query for [[Updator]].
+     * 
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUpdator()
+    {
+        return $this->hasOne(UserResource::class, ['id' => 'updated_by']);
+    }
+
+    /**
      * {@inheritdoc}
      * @return ProjectMemberQuery the active query used by this AR class.
      */
@@ -182,10 +186,10 @@ class ProjectMember extends ActiveRecord
     public static function getRoles(): array
     {
         return [
-            self::ROLE_GUEST => 'Guest',
-            self::ROLE_MEMBER => 'Member',
-            self::ROLE_ADMIN => 'Admin',
-            self::ROLE_OWNER => 'Owner',
+            RoleManager::ROLE_GUEST => 'Guest',
+            RoleManager::ROLE_MEMBER => 'Member',
+            RoleManager::ROLE_ADMIN => 'Admin',
+            RoleManager::ROLE_OWNER => 'Owner',
         ];
     }
 
@@ -195,7 +199,7 @@ class ProjectMember extends ActiveRecord
      */
     public function isAdmin(): bool
     {
-        return $this->role === self::ROLE_ADMIN;
+        return $this->role === RoleManager::ROLE_ADMIN;
     }
 
     /**
@@ -204,6 +208,6 @@ class ProjectMember extends ActiveRecord
      */
     public function isMember(): bool
     {
-        return $this->role === self::ROLE_MEMBER;
+        return $this->role === RoleManager::ROLE_MEMBER;
     }
 }

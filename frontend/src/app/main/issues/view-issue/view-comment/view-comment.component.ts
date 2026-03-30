@@ -120,7 +120,7 @@ export class ViewCommentComponent implements OnInit {
                 organizationId: this.organizationId(),
                 projectId: this.projectId(),
                 issueId: this.issueId(),
-                expand: 'creator,updator',
+                expand: 'creator',
                 cursor,
             })
             .pipe(

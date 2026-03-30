@@ -1,10 +1,11 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, viewChild } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { Router, RouterLink } from '@angular/router';
 import { OrganizationFormComponent } from '../../../common/form/organization-form/organization-form.component';
 import { Organization } from '../../../shared/model/Organization';
 import { OrganizationService } from '../../../shared/services/organization/organization.service';
 import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
+import { applyValidationErrors } from '../../../shared/utils/formErrorHandler';
 
 @Component({
     selector: 'app-create',
@@ -16,6 +17,7 @@ export class CreateOrganizationComponent {
     private readonly organizationService = inject(OrganizationService);
     private readonly router = inject(Router);
     private readonly snackbarService = inject(SnackbarService);
+    private readonly formComponent = viewChild(OrganizationFormComponent);
 
     createOrganization(organization: Partial<Organization>) {
         this.organizationService.createOrganization(organization).subscribe({
@@ -24,8 +26,14 @@ export class CreateOrganizationComponent {
                 this.router.navigate(['/organizations']);
             },
             error: (err) => {
-                this.snackbarService.error('Failed to create organization');
-                console.error('Error creating organization:', err);
+                const form = this.formComponent();
+                if (form) {
+                    applyValidationErrors(form.organizationForm, err);
+                    form.isSubmitting.set(false);
+                }
+                this.snackbarService.error(
+                    err.error?.error?.message || 'Failed to create organization'
+                );
             },
         });
     }

@@ -7,7 +7,6 @@ use common\models\query\LabelQuery;
 use Exception;
 use Symfony\Component\Uid\Uuid;
 use Yii;
-use yii\db\ActiveRecord;
 use yii\web\ConflictHttpException;
 
 /**
@@ -22,7 +21,7 @@ use yii\web\ConflictHttpException;
  * @property Project $project
  * @property Issue[] $issues
  */
-class Label extends ActiveRecord
+class Label extends BaseModel
 {
     const STATUS_OPEN = 'Open';
     const STATUS_CLOSED = 'Closed';
@@ -44,15 +43,17 @@ class Label extends ActiveRecord
 
     public function behaviors()
     {
-        return [
-            [
-                'class' => InvalidateCacheBehavior::class,
-                'cacheKeys' => [
-                    self::getLabelCacheKey('open'),
-                    self::getLabelCacheKey('closed')
-                ]
+        $behaviors = parent::behaviors();
+        unset($behaviors['timestamp']);
+        unset($behaviors['blameable']);
+        $behaviors['invalidateCache'] = [
+            'class' => InvalidateCacheBehavior::class,
+            'cacheKeys' => [
+                self::getLabelCacheKey('open'),
+                self::getLabelCacheKey('closed')
             ]
         ];
+        return $behaviors;
     }
 
     public function rules(): array

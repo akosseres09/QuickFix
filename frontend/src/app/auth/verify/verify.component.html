@@ -1,6 +1,6 @@
 <div class="flex flex-1 items-center justify-center w-full">
     <div
-        class="w-full max-w-md p-6 sm:p-8 space-y-6 bg-white rounded-xl shadow-lg dark:bg-slate-800"
+        class="w-full max-w-md p-6 sm:p-8 space-y-6 bg-white rounded-xl shadow-lg dark:bg-dark-background-hover"
     >
         <div class="text-center">
             <h1 class="text-3xl font-bold text-slate-900 dark:text-white">Verify Account</h1>
@@ -30,13 +30,40 @@
                         @if (getControl('token')?.hasError('required')) {
                             <span>Token is required.</span>
                         }
+                        @if (getControl('token')?.hasError('serverError')) {
+                            @for (
+                                error of getControl('token')?.getError('serverError');
+                                track $index
+                            ) {
+                                <span>{{ error }}</span>
+                            }
+                        }
                     </mat-error>
                 }
             </mat-form-field>
 
             <div>
-                <button type="submit" mat-flat-button color="primary" class="w-full !text-white">
-                    Verify Account
+                <button
+                    [disabled]="isLoading() || verifyForm.invalid"
+                    type="submit"
+                    mat-flat-button
+                    color="primary"
+                    class="w-full !text-white"
+                >
+                    @if (isLoading()) {
+                        <ng-container>
+                            <span class="flex gap-4">
+                                <mat-progress-spinner
+                                    color="primary"
+                                    diameter="20"
+                                    mode="indeterminate"
+                                ></mat-progress-spinner>
+                                Verifying...
+                            </span>
+                        </ng-container>
+                    } @else {
+                        Verify Account
+                    }
                 </button>
             </div>
         </form>

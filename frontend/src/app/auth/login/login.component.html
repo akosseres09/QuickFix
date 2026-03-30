@@ -1,6 +1,6 @@
 <div class="flex flex-1 items-center justify-center w-full">
     <div
-        class="w-full max-w-md p-6 sm:p-8 space-y-6 bg-white rounded-xl shadow-lg dark:bg-slate-800"
+        class="w-full max-w-md p-6 sm:p-8 space-y-6 bg-white rounded-md shadow-lg dark:bg-dark-background-hover"
     >
         <div class="text-center">
             <h1 class="text-3xl font-bold text-slate-900 dark:text-white">Welcome Back</h1>
@@ -28,6 +28,14 @@
                         }
                         @if (getControl('email')?.hasError('email')) {
                             <span>Provide a valid email address.</span>
+                        }
+                        @if (getControl('email')?.hasError('serverError')) {
+                            @for (
+                                error of getControl('email')?.getError('serverError');
+                                track $index
+                            ) {
+                                <span>{{ error }}</span>
+                            }
                         }
                     </mat-error>
                 }
@@ -59,13 +67,40 @@
                         @if (getControl('password')?.hasError('minlength')) {
                             <span>Password must be at least 6 characters.</span>
                         }
+                        @if (getControl('password')?.hasError('serverError')) {
+                            @for (
+                                error of getControl('password')?.getError('serverError');
+                                track $index
+                            ) {
+                                <span>{{ error }}</span>
+                            }
+                        }
                     </mat-error>
                 }
             </mat-form-field>
 
             <div>
-                <button type="submit" mat-flat-button color="primary" class="w-full !text-white">
-                    Sign In
+                <button
+                    type="submit"
+                    [disabled]="isLoading() || loginForm.invalid"
+                    mat-flat-button
+                    color="primary"
+                    class="w-full !text-white"
+                >
+                    @if (isLoading()) {
+                        <ng-container>
+                            <span class="flex gap-4">
+                                <mat-progress-spinner
+                                    color="primary"
+                                    diameter="24"
+                                    mode="indeterminate"
+                                ></mat-progress-spinner>
+                                Signing In...
+                            </span>
+                        </ng-container>
+                    } @else {
+                        Sign In
+                    }
                 </button>
             </div>
         </form>

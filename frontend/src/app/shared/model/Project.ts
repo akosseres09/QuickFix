@@ -1,4 +1,5 @@
 import { BaseModel } from './BaseModel';
+import { Issue } from './Issue';
 import { Label } from './Label';
 import { Organization } from './Organization';
 import { User } from './User';
@@ -77,15 +78,20 @@ export interface Project extends BaseModel {
     description: string;
     status: ProjectStatus;
     ownerId: string;
+    updatedBy: string | null;
     visibility: ProjectVisibility;
     priority: ProjectPriority;
     createdAt: number;
     updatedAt: number;
-    archivedat: number;
+    archivedAt: number;
     isArchived: boolean;
     organization?: Organization;
     owner?: User;
     projectMembers?: Array<User>;
     members?: Array<User>;
     labels?: Array<Label>;
+    issues?: Issue[];
+    issueCount?: number;
+    memberCount?: number;
+    updator?: User;
 }

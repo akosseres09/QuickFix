@@ -1,6 +1,6 @@
 <div class="flex flex-1 items-center justify-center w-full">
     <div
-        class="w-full max-w-md p-6 sm:p-8 space-y-6 bg-white rounded-xl shadow-lg dark:bg-slate-800"
+        class="w-full max-w-md p-6 sm:p-8 space-y-6 bg-white rounded-xl shadow-lg dark:bg-dark-background-hover"
     >
         <div class="text-center">
             <h1 class="text-3xl font-bold text-slate-900 dark:text-white">
@@ -11,7 +11,64 @@
             </p>
         </div>
 
-        <app-email-form (sendForm)="resend($event)"></app-email-form>
+        <form class="space-y-4" [formGroup]="form" (ngSubmit)="resend()">
+            <mat-form-field class="w-full" appearance="outline">
+                <mat-label>Email</mat-label>
+                <mat-icon matPrefix class="!text-light-text dark:!text-inherit">email</mat-icon>
+                <input
+                    formControlName="email"
+                    matInput
+                    type="email"
+                    autocomplete="current-password"
+                    required
+                />
+                @if (getControl('email')?.invalid) {
+                    <mat-error class="text-sm">
+                        @if (getControl('email')?.hasError('required')) {
+                            <span>Email is required.</span>
+                        }
+
+                        @if (getControl('email')?.hasError('email')) {
+                            <span>Provide a valid email.</span>
+                        }
+
+                        @if (getControl('email')?.hasError('serverError')) {
+                            @for (
+                                error of getControl('email')?.getError('serverError');
+                                track $index
+                            ) {
+                                <span>{{ error }}</span>
+                            }
+                        }
+                    </mat-error>
+                }
+            </mat-form-field>
+
+            <div>
+                <button
+                    [disabled]="isLoading() || form.invalid"
+                    type="submit"
+                    mat-flat-button
+                    color="primary"
+                    class="w-full !text-white"
+                >
+                    @if (isLoading()) {
+                        <ng-container>
+                            <span class="flex gap-4">
+                                <mat-progress-spinner
+                                    color="primary"
+                                    diameter="20"
+                                    mode="indeterminate"
+                                ></mat-progress-spinner>
+                                <span>Sending...</span>
+                            </span>
+                        </ng-container>
+                    } @else {
+                        Send Email
+                    }
+                </button>
+            </div>
+        </form>
 
         <div class="flex flex-col gap-2 text-center text-sm">
             <div>

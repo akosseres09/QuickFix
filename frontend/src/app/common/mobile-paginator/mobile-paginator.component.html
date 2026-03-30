@@ -1,0 +1,41 @@
+<div class="flex items-center gap-1">
+    <button
+        mat-icon-button
+        (click)="goToFirst()"
+        [disabled]="disabled() || isFirstPage()"
+        aria-label="First page"
+    >
+        <mat-icon class="!text-[1.125rem]">first_page</mat-icon>
+    </button>
+
+    <button
+        mat-icon-button
+        (click)="goToPrevious()"
+        [disabled]="disabled() || isFirstPage()"
+        aria-label="Previous page"
+    >
+        <mat-icon class="!text-[1.125rem]">chevron_left</mat-icon>
+    </button>
+
+    <span class="text-sm px-1 whitespace-nowrap select-none">
+        {{ currentPage() }} / {{ totalPages() }}
+    </span>
+
+    <button
+        mat-icon-button
+        (click)="goToNext()"
+        [disabled]="disabled() || isLastPage()"
+        aria-label="Next page"
+    >
+        <mat-icon class="!text-[1.125rem]">chevron_right</mat-icon>
+    </button>
+
+    <button
+        mat-icon-button
+        (click)="goToLast()"
+        [disabled]="disabled() || isLastPage()"
+        aria-label="Last page"
+    >
+        <mat-icon class="!text-[1.125rem]">last_page</mat-icon>
+    </button>
+</div>

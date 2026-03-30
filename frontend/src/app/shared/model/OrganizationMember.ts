@@ -9,6 +9,11 @@ export interface OrganizationMember extends BaseModel {
     userId: string;
     role: MemberRole;
     createdAt: number;
+    createdBy: string;
+    updatedAt: number | null;
+    updatedBy: string | null;
     organization?: Organization;
     user?: User;
+    creator?: User;
+    updator?: User;
 }

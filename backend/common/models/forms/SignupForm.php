@@ -86,7 +86,15 @@ class SignupForm extends Model
         $user->generateEmailVerificationToken();
         $user->email_verification_token_expires_at = time() + 3600;
 
-        return $user->save() && $this->sendVerificationEmail($user);
+        if (!$user->save()) {
+            throw new Exception('Failed to save user: ' . json_encode($user->errors));
+        }
+
+        if (!$this->sendVerificationEmail($user)) {
+            throw new Exception('Failed to send verification email to user: ' . $user->email);
+        }
+
+        return true;
     }
 
     /**

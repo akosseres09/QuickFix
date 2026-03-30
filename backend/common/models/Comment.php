@@ -6,9 +6,6 @@ use common\models\query\CommentQuery;
 use common\models\resource\UserResource;
 use Symfony\Component\Uid\Uuid;
 use Yii;
-use yii\behaviors\BlameableBehavior;
-use yii\behaviors\TimestampBehavior;
-use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "{{%comment}}".
@@ -25,7 +22,7 @@ use yii\db\ActiveRecord;
  * @property UserResource $creator
  * @property UserResource $updator
  */
-class Comment extends ActiveRecord
+class Comment extends BaseModel
 {
     public static function tableName()
     {
@@ -40,14 +37,6 @@ class Comment extends ActiveRecord
             [['created_at', 'updated_at'], 'integer'],
             [['content'], 'safe'],
             [['issue_id'], 'exist', 'skipOnError' => true, 'targetClass' => Issue::class, 'targetAttribute' => ['issue_id' => 'id']],
-        ];
-    }
-
-    public function behaviors()
-    {
-        return [
-            TimestampBehavior::class,
-            BlameableBehavior::class
         ];
     }
 

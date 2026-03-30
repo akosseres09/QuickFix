@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\components\traits\EagerExpandTrait;
 use common\models\OrganizationMember;
 use Yii;
 use yii\data\ActiveDataProvider;
@@ -9,6 +10,7 @@ use yii\web\BadRequestHttpException;
 
 class OrganizationMemberSearch extends OrganizationMember implements SearchInterface
 {
+    use EagerExpandTrait;
 
     public function search($params): ActiveDataProvider
     {
@@ -25,6 +27,7 @@ class OrganizationMemberSearch extends OrganizationMember implements SearchInter
         $search = $params['search'] ?? null;
 
         $query = OrganizationMember::find()->byOrganization($organizationId);
+        $this->applyExpand($query);
 
         if ($search) {
             $query->joinWith('user')

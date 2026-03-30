@@ -2,6 +2,7 @@
 
 namespace common\models\query;
 
+use api\components\permissions\RoleManager;
 use common\models\ProjectMember;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -70,7 +71,7 @@ class ProjectMemberQuery extends ActiveQuery
      */
     public function admins(): ProjectMemberQuery
     {
-        return $this->andWhere(['role' => ProjectMember::ROLE_ADMIN]);
+        return $this->andWhere(['role' => RoleManager::ROLE_ADMIN]);
     }
 
     /**
@@ -79,7 +80,7 @@ class ProjectMemberQuery extends ActiveQuery
      */
     public function members(): ProjectMemberQuery
     {
-        return $this->andWhere(['role' => ProjectMember::ROLE_MEMBER]);
+        return $this->andWhere(['role' => RoleManager::ROLE_MEMBER]);
     }
 
     /**

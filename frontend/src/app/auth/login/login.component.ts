@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import {
@@ -13,9 +13,11 @@ import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../shared/services/auth/auth.service';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 import { OrganizationInvitationService } from '../../shared/services/organization-invitation/organization-invitation.service';
+import { finalize } from 'rxjs';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { applyValidationErrors } from '../../shared/utils/formErrorHandler';
 
 @Component({
     selector: 'app-login',
@@ -31,6 +33,7 @@ import { OrganizationInvitationService } from '../../shared/services/organizatio
         RouterLink,
         ReactiveFormsModule,
         CommonModule,
+        MatProgressSpinner,
     ],
     templateUrl: './login.component.html',
     styleUrl: './login.component.css',
@@ -39,7 +42,6 @@ import { OrganizationInvitationService } from '../../shared/services/organizatio
 export class LoginComponent {
     private readonly fb = inject(FormBuilder);
     private readonly router = inject(Router);
-    private readonly destroyRef = inject(DestroyRef);
     private readonly authService = inject(AuthService);
     private readonly snackbarService = inject(SnackbarService);
     private readonly invitationService = inject(OrganizationInvitationService);
@@ -50,6 +52,7 @@ export class LoginComponent {
         email: ['', [Validators.required, Validators.email]],
         password: ['', [Validators.required, Validators.minLength(6)]],
     });
+    isLoading = signal(false);
 
     togglePwVisibility(event: MouseEvent): void {
         const input = (event.target as HTMLElement)
@@ -76,9 +79,11 @@ export class LoginComponent {
 
         if (!email || !password) return;
 
+        this.isLoading.set(true);
+
         this.authService
             .login(email, password)
-            .pipe(takeUntilDestroyed(this.destroyRef))
+            .pipe(finalize(() => this.isLoading.set(false)))
             .subscribe({
                 next: (result) => {
                     sessionStorage.removeItem('redirectUrl');
@@ -86,9 +91,11 @@ export class LoginComponent {
                     this.router.navigate([this.redirectUrl || '/organizations']);
                 },
                 error: (error) => {
-                    console.error('Login error:', error.error?.message);
+                    applyValidationErrors(this.loginForm, error);
                     this.snackbarService.error(
-                        error.error?.message || 'Login failed. Please try again.'
+                        error.error?.error?.message ||
+                            error.error?.message ||
+                            'Login failed. Please try again.'
                     );
                 },
             });

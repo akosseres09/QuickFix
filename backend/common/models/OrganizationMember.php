@@ -2,13 +2,12 @@
 
 namespace common\models;
 
+use api\components\permissions\RoleManager;
 use common\models\query\OrganizationMemberQuery;
 use common\models\resource\UserResource;
 use Symfony\Component\Uid\Uuid;
 use Yii;
-use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
-use yii\db\ActiveRecord;
 
 /**
  * OrganizationMember model
@@ -17,43 +16,20 @@ use yii\db\ActiveRecord;
  * @property string $organization_id
  * @property string $user_id
  * @property string $role
+ * @property string $created_by
  * @property integer $created_at
+ * @property string|null $updated_by
+ * @property integer|null $updated_at
  *
  * @property Organization $organization
  * @property User $user
  */
-class OrganizationMember extends ActiveRecord
+class OrganizationMember extends BaseModel
 {
-
-    const ROLE_GUEST = 'guest';
-    const ROLE_MEMBER = 'member';
-    const ROLE_ADMIN = 'admin';
-    const ROLE_OWNER = 'owner';
-
-    const ROLE_LIST = [
-        self::ROLE_GUEST,
-        self::ROLE_MEMBER,
-        self::ROLE_ADMIN,
-        self::ROLE_OWNER
-    ];
 
     public static function tableName()
     {
         return '{{%organization_member}}';
-    }
-
-
-    /**
-     * {@inheritdoc}
-     */
-    public function behaviors()
-    {
-        return [
-            [
-                'class' => TimestampBehavior::class,
-                'updatedAtAttribute' => false
-            ]
-        ];
     }
 
     public function rules(): array
@@ -61,8 +37,8 @@ class OrganizationMember extends ActiveRecord
         return [
             ['user_id', 'required'],
             ['role', 'string', 'max' => 16],
-            ['role', 'in', 'range' => self::ROLE_LIST],
-            ['role', 'default', 'value' => self::ROLE_MEMBER],
+            ['role', 'in', 'range' => RoleManager::ROLE_LIST],
+            ['role', 'default', 'value' => RoleManager::ROLE_MEMBER],
             [['organization_id', 'user_id'], 'unique', 'targetAttribute' => ['organization_id', 'user_id'], 'message' => 'This user is already a member of this organization.'],
             ['organization_id', 'exist', 'skipOnError' => true, 'targetClass' => Organization::class, 'targetAttribute' => ['organization_id' => 'id']],
             ['user_id', 'exist', 'skipOnError' => true, 'targetClass' => UserResource::class, 'targetAttribute' => ['user_id' => 'id']],
@@ -112,6 +88,9 @@ class OrganizationMember extends ActiveRecord
             'userId' => 'user_id',
             'role',
             'createdAt' => 'created_at',
+            'createdBy' => 'created_by',
+            'updatedAt' => 'updated_at',
+            'updatedBy' => 'updated_by',
         ];
     }
 
@@ -120,6 +99,8 @@ class OrganizationMember extends ActiveRecord
         return [
             'organization',
             'user',
+            'creator',
+            'updator',
         ];
     }
 
@@ -131,6 +112,16 @@ class OrganizationMember extends ActiveRecord
     public function getOrganization(): ActiveQuery
     {
         return $this->hasOne(Organization::class, ['id' => 'organization_id']);
+    }
+
+    public function getCreator(): ActiveQuery
+    {
+        return $this->hasOne(UserResource::class, ['id' => 'created_by']);
+    }
+
+    public function getUpdator(): ActiveQuery
+    {
+        return $this->hasOne(UserResource::class, ['id' => 'updated_by']);
     }
 
     public static function find(): OrganizationMemberQuery

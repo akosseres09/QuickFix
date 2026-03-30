@@ -1,17 +1,15 @@
 import { Component, computed, inject, signal, TemplateRef, viewChild } from '@angular/core';
 import { FilterComponent } from '../../common/filter/filter.component';
-import { TableComponent } from '../../common/table/table.component';
+import { ListComponent, SortableColumn } from '../../common/list/list.component';
+import { ListItemDirective } from '../../common/list/list-item.directive';
 import { SpeedDialComponent } from '../../common/speed-dial/speed-dial.component';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 import { FilterService } from '../../shared/services/filter/filter.service';
-import { DisplayedColumnService } from '../../shared/services/displayed-column/displayed-column.service';
 import { ListStateService } from '../../shared/services/list-state/list-state.service';
 import { DialogService } from '../../shared/services/dialog/dialog.service';
 import { ListState } from '../../shared/constants/table/ListState';
 import { Organization } from '../../shared/model/Organization';
-import { MatTableDataSource } from '@angular/material/table';
-import { DisplayedColumn } from '../../shared/constants/table/DisplayedColumn';
 import { SpeedDialButton } from '../../shared/constants/speed-dial/SpeedDialButton';
 import { Filter } from '../../shared/constants/Filter';
 import { ApiQueryParams } from '../../shared/constants/api/ApiQueryParams';
@@ -21,10 +19,24 @@ import { OrganizationService } from '../../shared/services/organization/organiza
 import { finalize } from 'rxjs';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { OrganizationPermissions } from '../../shared/constants/user/Permissions';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { RelativeTimePipe } from '../../shared/pipes/relative-time/relative-time.pipe';
+import { GMTPipe } from '../../shared/pipes/gmt/gmt.pipe';
 
 @Component({
     selector: 'app-organizations',
-    imports: [FilterComponent, TableComponent, SpeedDialComponent],
+    imports: [
+        FilterComponent,
+        ListComponent,
+        ListItemDirective,
+        SpeedDialComponent,
+        RouterLink,
+        MatIconModule,
+        MatTooltipModule,
+        RelativeTimePipe,
+        GMTPipe,
+    ],
     templateUrl: './organizations.component.html',
     styleUrl: './organizations.component.css',
 })
@@ -33,7 +45,6 @@ export class OrganizationsComponent {
     private readonly activeRoute = inject(ActivatedRoute);
     private readonly snackbarService = inject(SnackbarService);
     private readonly filterService = inject(FilterService);
-    private readonly displayedColumnService = inject(DisplayedColumnService);
     private readonly listStateService = inject(ListStateService);
     private readonly dialogService = inject(DialogService);
     private readonly authService = inject(AuthService);
@@ -43,17 +54,17 @@ export class OrganizationsComponent {
     // List state (pagination, sorting, filtering)
     readonly listState: ListState = this.listStateService.create(this.activeRoute, {
         defaultPageSize: 20,
-        expand: 'owner',
+        expand: 'owner,memberCount,projectCount',
     });
 
     selectedRow = signal<Organization | null>(null);
     filteredOrganizations = signal<Organization[]>([]);
-    shownProjects = computed(
-        () => new MatTableDataSource<Organization>(this.filteredOrganizations())
-    );
-    displayedColumns = signal<DisplayedColumn<Organization>[]>(
-        this.displayedColumnService.getOrganizationColumns()
-    );
+
+    readonly orgSortableColumns: SortableColumn[] = [
+        { id: 'name', label: 'Name' },
+        { id: 'slug', label: 'Slug' },
+        { id: 'createdAt', label: 'Created At' },
+    ];
 
     speedDialButtons = computed<SpeedDialButton[]>(() => {
         const selected = this.selectedRow();
@@ -121,40 +132,27 @@ export class OrganizationsComponent {
             });
     }
 
-    /**
-     * Handles sort change events from the table, updates the URL and fetches new data.
-     */
     onSortChange(event: Sort) {
         this.listState.onSortChange(event, () => this.getOrganizations());
     }
 
-    /**
-     * Handles page change events from the paginator, updates the URL and fetches new data.
-     */
     onPageChange(event: PageEvent) {
         this.listState.onPageChange(event, () => this.getOrganizations());
     }
 
-    /**
-     * Handles row selection changes from the custom table.
-     * @param project The currently selected project. If null, it means the selection was cleared.
-     */
-    onRowChange(project: Organization | null) {
-        if (!project) {
+    onRowChange(org: Organization | null) {
+        if (!org) {
             this.selectedRow.set(null);
             this.speedDial()?.close();
             return;
         }
 
-        this.selectedRow.set(project);
-        if (project.slug && this.speedDial()?.isOpen()) return;
+        this.selectedRow.set(org);
+        if (org.slug && this.speedDial()?.isOpen()) return;
 
         this.speedDial()?.onTogglerClick();
     }
 
-    /**
-     * Handles filter changes emitted from the ProjectFilterComponent.
-     */
     onFilterChange(filterParams: ApiQueryParams) {
         this.listState.onFilterChange(filterParams, () => this.getOrganizations());
     }

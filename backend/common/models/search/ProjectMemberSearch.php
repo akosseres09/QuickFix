@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\components\traits\EagerExpandTrait;
 use common\models\Project;
 use common\models\ProjectMember;
 use Yii;
@@ -11,10 +12,13 @@ use yii\web\BadRequestHttpException;
 
 class ProjectMemberSearch extends ProjectMember implements SearchInterface
 {
+    use EagerExpandTrait;
+    public $username;
     public function rules(): array
     {
         return [
             [['id', 'project_id', 'user_id'], 'string', 'max' => 36],
+            ['username', 'string'],
             [['role'], 'integer'],
         ];
     }
@@ -58,6 +62,7 @@ class ProjectMemberSearch extends ProjectMember implements SearchInterface
                 ])
                 ->rightJoin('{{%organization_member}} om', 'om.user_id = pm.user_id AND pm.project_id = :projectId', [':projectId' => $projectId])
                 ->andWhere(['om.organization_id' => $organizationId]);
+            $query->leftJoin('{{%user}}', '{{%user}}.id = om.user_id');
 
             if ($cursor) {
                 $query->andWhere(new Expression('COALESCE(pm.id, om.id) > :cursor', [':cursor' => $cursor]));
@@ -66,6 +71,7 @@ class ProjectMemberSearch extends ProjectMember implements SearchInterface
             $query->orderBy(new Expression('COALESCE(pm.id, om.id) ASC'));
         } else {
             $query = ProjectMember::find()->byProjectId($projectId);
+            $query->leftJoin('{{%user}}', '{{%user}}.id = {{%project_member}}.user_id');
             if ($cursor) {
                 $query->byCursor($cursor);
             }
@@ -73,6 +79,7 @@ class ProjectMemberSearch extends ProjectMember implements SearchInterface
             $query->orderBy(['{{%project_member}}.id' => SORT_ASC]);
         }
 
+        $this->applyExpand($query);
         $query->limit($pageSize + 1);
 
         $dataprovider = new ActiveDataProvider([
@@ -80,6 +87,13 @@ class ProjectMemberSearch extends ProjectMember implements SearchInterface
             'sort' => false,
             'pagination' => false,
         ]);
+
+        $this->load($params, '');
+        if (!$this->validate()) {
+            return $dataprovider;
+        }
+
+        $query->andFilterWhere(['like', '{{%user}}.username', $this->username]);
 
         $models = $query->all();
         $hasMore = 'false';

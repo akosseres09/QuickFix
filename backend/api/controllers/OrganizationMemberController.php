@@ -46,7 +46,7 @@ class OrganizationMemberController extends BaseRestController
         $query = OrganizationMember::find()->byOrganization($orgId);
 
         if (Uuid::isValid($id)) {
-            $query->byUserId($id);
+            $query->byId($id);
         } else {
             $query->byUsername($id);
         }

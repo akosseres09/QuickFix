@@ -221,9 +221,7 @@ class AuthController extends Controller
             ]);
         }
 
-        return ResponseMaker::asError('Failed to create User', 405, [
-            'error' => $form->getErrors()
-        ]);
+        return ResponseMaker::asValidationError($form->getErrors());
     }
 
     /**

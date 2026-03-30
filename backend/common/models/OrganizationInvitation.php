@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use api\components\permissions\RoleManager;
 use common\components\traits\EmailSenderTrait;
 use common\models\query\OrganizationInvitationQuery;
 use common\models\resource\UserResource;
@@ -9,10 +10,7 @@ use DateTimeImmutable;
 use Lcobucci\JWT\Configuration;
 use Symfony\Component\Uid\Uuid;
 use Yii;
-use yii\behaviors\BlameableBehavior;
-use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
-use yii\db\ActiveRecord;
 
 /**
  * @property string $id
@@ -29,12 +27,15 @@ use yii\db\ActiveRecord;
  * @property Organization $organization
  * 
  */
-class OrganizationInvitation extends ActiveRecord
+class OrganizationInvitation extends BaseModel
 {
+    use EmailSenderTrait;
+
     public string $token = '';
+    protected string|bool $blameableCreatedByAttribute = 'inviter_id';
+    protected string|bool $blameableUpdatedByAttribute = false;
     private Configuration $jwtConfig;
 
-    use EmailSenderTrait;
 
     const STATUS_PENDING = 'pending';
     const STATUS_ACCEPTED = 'accepted';
@@ -59,18 +60,6 @@ class OrganizationInvitation extends ActiveRecord
     public static function tableName()
     {
         return '{{%organization_invitation}}';
-    }
-
-    public function behaviors(): array
-    {
-        return [
-            TimestampBehavior::class,
-            [
-                'class' => BlameableBehavior::class,
-                'updatedByAttribute' => false,
-                'createdByAttribute' => 'inviter_id'
-            ]
-        ];
     }
 
     public function rules(): array
@@ -98,8 +87,8 @@ class OrganizationInvitation extends ActiveRecord
             ['status', 'in', 'range' => self::STATUSES],
             ['status', 'default', 'value' => self::STATUS_PENDING],
             ['role', 'string', 'max' => 16],
-            ['role', 'default', 'value' => OrganizationMember::ROLE_VIEWER],
-            ['role', 'in', 'range' => OrganizationMember::ROLE_LIST],
+            ['role', 'default', 'value' => RoleManager::ROLE_GUEST],
+            ['role', 'in', 'range' => RoleManager::ROLE_LIST],
             [
                 ['email', 'organization_id'],
                 'unique',
@@ -312,7 +301,7 @@ class OrganizationInvitation extends ActiveRecord
                 Uuid::v7()->toString(),
                 $projectId,
                 $userId,
-                ProjectMember::ROLE_MEMBER,
+                RoleManager::ROLE_MEMBER,
                 $time,
             ];
         }

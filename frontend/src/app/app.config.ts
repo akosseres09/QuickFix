@@ -11,10 +11,13 @@ import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { authInterceptor } from './shared/interceptor/auth/auth.interceptor';
 import { caseInterceptor } from './shared/interceptor/case/case.interceptor';
+import { responseInterceptor } from './shared/interceptor/response/response.interceptor';
 
 export const appConfig: ApplicationConfig = {
     providers: [
-        provideHttpClient(withInterceptors([authInterceptor, caseInterceptor])),
+        provideHttpClient(
+            withInterceptors([responseInterceptor, authInterceptor, caseInterceptor])
+        ),
         provideZoneChangeDetection({ eventCoalescing: true }),
         provideRouter(
             routes,

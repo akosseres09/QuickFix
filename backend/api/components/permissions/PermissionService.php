@@ -276,7 +276,7 @@ class PermissionService
             Permissions::ORG_MEMBERS_VIEW->value,
         ];
 
-        if (in_array($role, [OrganizationMember::ROLE_MEMBER, OrganizationMember::ROLE_ADMIN, OrganizationMember::ROLE_OWNER])) {
+        if (in_array($role, [RoleManager::ROLE_MEMBER, RoleManager::ROLE_ADMIN, RoleManager::ROLE_OWNER])) {
             $permissions = array_merge(
                 $permissions,
                 [
@@ -286,7 +286,7 @@ class PermissionService
             );
         }
 
-        if (in_array($role, [OrganizationMember::ROLE_ADMIN, OrganizationMember::ROLE_OWNER])) {
+        if (in_array($role, [RoleManager::ROLE_ADMIN, RoleManager::ROLE_OWNER])) {
             $permissions = array_merge($permissions, [
                 Permissions::ORG_UPDATE->value,
                 Permissions::ORG_MEMBERS_MANAGE->value,
@@ -295,7 +295,7 @@ class PermissionService
             ]);
         }
 
-        if ($role === OrganizationMember::ROLE_OWNER) {
+        if ($role === RoleManager::ROLE_OWNER) {
             $permissions[] = Permissions::ORG_DELETE->value;
         }
 
@@ -313,7 +313,7 @@ class PermissionService
         ];
 
         // Contributor-level
-        if (in_array($role, [ProjectMember::ROLE_MEMBER, ProjectMember::ROLE_ADMIN, ProjectMember::ROLE_OWNER])) {
+        if (in_array($role, [RoleManager::ROLE_MEMBER, RoleManager::ROLE_ADMIN, RoleManager::ROLE_OWNER])) {
             $permissions = array_merge($permissions, [
                 Permissions::ISSUE_CREATE->value,
                 Permissions::ISSUE_UPDATE->value,
@@ -324,7 +324,7 @@ class PermissionService
         }
 
         // Moderator-level
-        if (in_array($role, [ProjectMember::ROLE_ADMIN, ProjectMember::ROLE_OWNER])) {
+        if (in_array($role, [RoleManager::ROLE_ADMIN, RoleManager::ROLE_OWNER])) {
             $permissions = array_merge($permissions, [
                 Permissions::PROJECT_UPDATE->value,
                 Permissions::PROJECT_MEMBERS_MANAGE->value,
@@ -339,7 +339,7 @@ class PermissionService
         }
 
         // Owner-only
-        if ($role === ProjectMember::ROLE_OWNER) {
+        if ($role === RoleManager::ROLE_OWNER) {
             $permissions[] = Permissions::PROJECT_DELETE->value;
         }
 

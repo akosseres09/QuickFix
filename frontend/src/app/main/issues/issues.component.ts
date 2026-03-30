@@ -1,12 +1,17 @@
 import { Component, computed, inject, input, OnInit, signal, viewChild } from '@angular/core';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { Issue } from '../../shared/model/Issue';
+import { PageEvent } from '@angular/material/paginator';
+import {
+    Issue,
+    PRIORITY_MAP,
+    PRIORITY_COLOR_MAP,
+    TYPE_MAP,
+    TYPE_COLOR_MAP,
+} from '../../shared/model/Issue';
 import { IssueService } from '../../shared/services/issue/issue.service';
 import { CommonModule } from '@angular/common';
-import { DisplayedColumn } from '../../shared/constants/table/DisplayedColumn';
-import { TableComponent } from '../../common/table/table.component';
-import { ActivatedRoute } from '@angular/router';
+import { ListComponent, SortableColumn } from '../../common/list/list.component';
+import { ListItemDirective } from '../../common/list/list-item.directive';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 import { SpeedDialComponent } from '../../common/speed-dial/speed-dial.component';
 import { SpeedDialButton } from '../../shared/constants/speed-dial/SpeedDialButton';
@@ -16,7 +21,6 @@ import { Filter } from '../../shared/constants/Filter';
 import { FilterComponent } from '../../common/filter/filter.component';
 import { DialogService } from '../../shared/services/dialog/dialog.service';
 import { finalize } from 'rxjs';
-import { DisplayedColumnService } from '../../shared/services/displayed-column/displayed-column.service';
 import { FilterService } from '../../shared/services/filter/filter.service';
 import { ListState } from '../../shared/constants/table/ListState';
 import { ListStateService } from '../../shared/services/list-state/list-state.service';
@@ -24,16 +28,26 @@ import { Label } from '../../shared/model/Label';
 import { LabelService } from '../../shared/services/label.service';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { IssuePermissions } from '../../shared/constants/user/Permissions';
+import { BadgeComponent } from '../../common/badge/badge.component';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { RelativeTimePipe } from '../../shared/pipes/relative-time/relative-time.pipe';
+import { GMTPipe } from '../../shared/pipes/gmt/gmt.pipe';
 
 @Component({
     selector: 'app-issues',
     imports: [
-        MatTableModule,
-        MatPaginatorModule,
         CommonModule,
-        TableComponent,
+        ListComponent,
+        ListItemDirective,
         SpeedDialComponent,
         FilterComponent,
+        BadgeComponent,
+        RouterLink,
+        MatIconModule,
+        MatTooltipModule,
+        RelativeTimePipe,
+        GMTPipe,
     ],
     templateUrl: './issues.component.html',
     styleUrl: './issues.component.css',
@@ -42,7 +56,6 @@ export class IssuesComponent implements OnInit {
     private readonly snackbarService = inject(SnackbarService);
     private readonly issueService = inject(IssueService);
     private readonly activeRoute = inject(ActivatedRoute);
-    private readonly displayedColumService = inject(DisplayedColumnService);
     private readonly filterService = inject(FilterService);
     private readonly listStateService = inject(ListStateService);
     private readonly dialogService = inject(DialogService);
@@ -64,9 +77,19 @@ export class IssuesComponent implements OnInit {
 
     filteredIssues = signal<Issue[]>([]);
     labels = signal<Label[]>([]);
-    shownIssues = computed(() => new MatTableDataSource<Issue>(this.filteredIssues()));
-    displayedColumns: Array<DisplayedColumn<Issue>> =
-        this.displayedColumService.getIssueDisplayColumns();
+
+    // Expose maps for the template
+    readonly priorityMap = PRIORITY_MAP;
+    readonly priorityColorMap = PRIORITY_COLOR_MAP;
+    readonly typeMap = TYPE_MAP;
+    readonly typeColorMap = TYPE_COLOR_MAP;
+
+    readonly issueSortableColumns: SortableColumn[] = [
+        { id: 'title', label: 'Title' },
+        { id: 'type', label: 'Type' },
+        { id: 'priority', label: 'Priority' },
+        { id: 'createdAt', label: 'Created At' },
+    ];
 
     // Transform the signal into a computed signal
     speedDialButtons = computed<SpeedDialButton[]>(() => {

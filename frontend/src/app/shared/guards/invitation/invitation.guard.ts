@@ -30,8 +30,6 @@ export const invitationGuard: CanActivateFn = (route, state: RouterStateSnapshot
 
     // If the user isn't authenticated yet, check if the email exists and save the token
     if (!authService.getAccessToken()) {
-        console.log(payload, invitationToken);
-
         if (payload && invitationToken) {
             invitationService.setInvitationToken(invitationToken);
         }

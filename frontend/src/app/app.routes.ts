@@ -42,6 +42,14 @@ export const routes: Routes = [
                 title: 'QuickFix - Reset Password',
             },
             {
+                path: 'request-password-reset',
+                loadComponent: () =>
+                    import(
+                        './auth/request-password-reset-email/request-password-reset-email.component'
+                    ).then((c) => c.RequestPasswordResetEmailComponent),
+                title: 'QuickFix - Request Password Reset',
+            },
+            {
                 path: 'verify',
                 loadComponent: () =>
                     import('./auth/verify/verify.component').then((c) => c.VerifyComponent),
@@ -153,9 +161,20 @@ export const routes: Routes = [
                     },
                 ],
             },
+        ],
+    },
+    {
+        path: 'invitation/:invitationId',
+        loadComponent: () =>
+            import('./layouts/main-layout/main-layout.component').then(
+                (c) => c.MainLayoutComponent
+            ),
+        canActivate: [invitationGuard, authenticatedGuard],
+        resolve: { permissions: permissionResolver },
+        runGuardsAndResolvers: 'paramsChange',
+        children: [
             {
-                path: 'invitation/:invitationId',
-                canActivate: [invitationGuard],
+                path: '',
                 loadComponent: () =>
                     import(
                         './main/organization-invitation/organization-invitation-item/organization-invitation-item.component'

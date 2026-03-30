@@ -185,17 +185,6 @@ export class DisplayedColumnService {
                 value: (e: Organization) => e.name,
             },
             {
-                id: 'owner',
-                label: 'Owner',
-                sortable: false,
-                routerLink: (e: Organization) =>
-                    e.owner?.username ? ['../org', e.slug, 'member', e.owner.username] : [],
-                photoUrl: (element: Organization) =>
-                    element.owner ? element.owner.profilePictureUrl : null,
-                photoOnly: (e: Organization) => !!e.owner,
-                value: (e: Organization) => e.owner?.fullName ?? 'Unknown',
-            },
-            {
                 id: 'created_at',
                 label: 'Created At',
                 sortable: true,

@@ -12,8 +12,12 @@ export interface Organization extends BaseModel {
     ownerId: string;
     createdAt: number;
     updatedAt: number;
+    updatedBy: string | null;
     deletedAt: number | null;
     owner?: User;
+    updator?: User;
     projects?: Project[];
     organizationMembers?: OrganizationMember[];
+    memberCount?: number;
+    projectCount?: number;
 }

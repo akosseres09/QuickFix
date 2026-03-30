@@ -2,12 +2,14 @@
 
 namespace common\models\search;
 
+use common\components\traits\EagerExpandTrait;
 use common\models\Project;
 use yii\data\ActiveDataProvider;
 use Yii;
 
 class ProjectSearch extends Project implements SearchInterface
 {
+    use EagerExpandTrait;
     public function rules(): array
     {
         return [
@@ -33,12 +35,11 @@ class ProjectSearch extends Project implements SearchInterface
         $userId = Yii::$app->user->id;
         $organizationId = Yii::$app->request->get('organization_id');
 
-        // Define a subquery to count ALL members for a project
-        // This allows us to sort by 'total members' without breaking the main query
         $memberCountSql = '(SELECT COUNT(*) FROM project_member pm2 WHERE pm2.project_id = p.id)';
 
         $query = Project::find()
             ->alias('p')
+            ->select(['p.*'])
             ->leftJoin('project_member pm', 'pm.project_id = p.id AND pm.user_id = :userId', [':userId' => $userId])
             ->where([
                 'or',
@@ -50,6 +51,9 @@ class ProjectSearch extends Project implements SearchInterface
                     ['is not', 'pm.id', null]
                 ]
             ])->andWhere(['p.organization_id' => $organizationId]);
+
+        // Dynamically eager-load relations and add count subqueries based on expand param
+        $this->applyExpand($query, 'p');
 
         // Extract pagination params from request
         $page = isset($params['page']) ? (int) $params['page'] : 1;
@@ -113,5 +117,13 @@ class ProjectSearch extends Project implements SearchInterface
         $query->andFilterWhere(['ilike', 'p.name', $this->name]);
 
         return $dataProvider;
+    }
+
+    protected function countSubqueries(string $alias): array
+    {
+        return [
+            'issueCount' => "(SELECT COUNT(*) FROM issue i WHERE i.project_id = {$alias}.id)",
+            'memberCount' => "(SELECT COUNT(*) FROM project_member pm2 WHERE pm2.project_id = {$alias}.id)",
+        ];
     }
 }
