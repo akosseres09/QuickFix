@@ -1,57 +1,69 @@
-import { Component, DestroyRef, inject, signal } from '@angular/core';
-import { EmailFormComponent } from './email-form/email-form.component';
-import { ReactiveFormsModule } from '@angular/forms';
+import { Component, inject, signal } from '@angular/core';
+import {
+    AbstractControlOptions,
+    FormBuilder,
+    ReactiveFormsModule,
+    Validators,
+} from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
-import { ActivatedRoute, Router } from '@angular/router';
-import { ResetFormComponent } from './reset-form/reset-form.component';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../shared/services/auth/auth.service';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { CustomValidators } from '../../shared/validators/CustomValidators';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { finalize } from 'rxjs';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
     selector: 'app-reset-password',
-    imports: [EmailFormComponent, ReactiveFormsModule, CommonModule, ResetFormComponent],
+    imports: [
+        ReactiveFormsModule,
+        CommonModule,
+        RouterLink,
+        MatFormFieldModule,
+        MatInputModule,
+        MatIconModule,
+        MatButtonModule,
+        MatProgressSpinnerModule,
+    ],
     templateUrl: './reset-password.component.html',
     styleUrl: './reset-password.component.css',
 })
 export class ResetPasswordComponent {
     private readonly currentRoute = inject(ActivatedRoute);
     private readonly snackBar = inject(SnackbarService);
-    private readonly destroyRef = inject(DestroyRef);
     private readonly authService = inject(AuthService);
     private readonly router = inject(Router);
+    private readonly fb = inject(FormBuilder);
 
     token = signal<string>(this.currentRoute.snapshot.queryParamMap.get('token') ?? '');
-    emailSent = signal(false);
+    form = this.fb.group(
+        {
+            token: [this.token(), [Validators.required]],
+            password: ['', [Validators.required, Validators.minLength(6)]],
+            rePassword: ['', [Validators.required, Validators.minLength(6)]],
+        },
+        {
+            validators: CustomValidators.passwordMatchValidator('password', 'rePassword'),
+        } as AbstractControlOptions
+    );
+    isLoading = signal(false);
 
-    constructor() {
-        if (this.token()) {
-            this.emailSent.set(true);
-        }
+    getControl(name: string) {
+        return this.form.get(name);
     }
 
-    resend(email: string): void {
-        if (!email) return;
+    reset(): void {
+        const { token, password } = this.form.value;
+        if (!token || !password || this.form.invalid) return;
 
+        this.isLoading.set(true);
         this.authService
-            .resendEmail(email, '/auth/reset-password')
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe({
-                next: (response) => {
-                    this.snackBar.success('Email sent successfully!');
-                    this.emailSent.set(true);
-                },
-                error: (error) => {
-                    this.snackBar.error('Error sending email. Please try again later.');
-                    console.error('Error in resend email:', error.error?.message || error);
-                },
-            });
-    }
-
-    reset(event: { token: string; password: string }): void {
-        this.authService
-            .resetPassword(event.token, event.password)
-            .pipe(takeUntilDestroyed(this.destroyRef))
+            .resetPassword(token, password)
+            .pipe(finalize(() => this.isLoading.set(false)))
             .subscribe({
                 next: (response) => {
                     this.snackBar.success('Password reset successfully!');
@@ -64,9 +76,5 @@ export class ResetPasswordComponent {
                     console.error('Error in reset password:', message);
                 },
             });
-    }
-
-    togglePage(): void {
-        this.emailSent.set(!this.emailSent());
     }
 }

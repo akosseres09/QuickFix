@@ -1,37 +1,33 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '../../shared/services/auth/auth.service';
-import { Router, RouterLink } from '@angular/router';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
-import { CommonModule } from '@angular/common';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
 import { finalize } from 'rxjs';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
-    selector: 'app-resend-verification',
+    selector: 'app-request-password-reset-email',
     imports: [
         RouterLink,
-        ReactiveFormsModule,
-        CommonModule,
-        MatFormFieldModule,
-        MatProgressSpinnerModule,
-        MatInputModule,
         MatButtonModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatProgressSpinnerModule,
         ReactiveFormsModule,
         MatIconModule,
     ],
-    templateUrl: './resend-verification.component.html',
-    styleUrl: './resend-verification.component.css',
+    templateUrl: './request-password-reset-email.component.html',
+    styleUrl: './request-password-reset-email.component.css',
 })
-export class ResendVerificationComponent {
-    private readonly authService = inject(AuthService);
-    private readonly router = inject(Router);
-    private readonly snackbar = inject(SnackbarService);
+export class RequestPasswordResetEmailComponent {
     private readonly fb = inject(FormBuilder);
+    private readonly authService = inject(AuthService);
+    private readonly snackBar = inject(SnackbarService);
 
     protected form = this.fb.group({
         email: ['', [Validators.required, Validators.email]],
@@ -43,27 +39,24 @@ export class ResendVerificationComponent {
         return this.form.get(name);
     }
 
-    resend() {
+    onSubmit() {
         if (!this.form.valid) return;
+    }
 
-        const email = this.form.get('email')?.value;
+    resend(email: string): void {
         if (!email) return;
 
         this.isLoading.set(true);
         this.authService
-            .resendEmail(email)
+            .resendEmail(email, '/auth/reset-password')
             .pipe(finalize(() => this.isLoading.set(false)))
             .subscribe({
                 next: (_) => {
-                    this.snackbar.success('Verification email sent successfully!');
-                    this.router.navigateByUrl('/auth/verify');
+                    this.snackBar.success('Email sent successfully!');
                 },
                 error: (error) => {
-                    const message =
-                        error.error.message ||
-                        'An error occurred while sending the verification email.';
-
-                    this.snackbar.error(message);
+                    this.snackBar.error('Error sending email. Please try again later.');
+                    console.error('Error in resend email:', error.error?.message || error);
                 },
             });
     }

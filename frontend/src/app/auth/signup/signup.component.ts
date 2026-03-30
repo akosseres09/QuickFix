@@ -1,4 +1,4 @@
-import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import {
     AbstractControlOptions,
     FormBuilder,
@@ -16,15 +16,18 @@ import {
     MatSuffix,
 } from '@angular/material/input';
 import { Router, RouterLink } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule, formatDate } from '@angular/common';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 import { errorResponse } from '../../shared/model/Response';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SignupData } from '../../shared/constants/user/SignupData';
 import { CustomValidators } from '../../shared/validators/CustomValidators';
 import { decodeToken } from '../../shared/utils/jwtDecoder';
 import { InvitationTokenPayload } from '../../shared/constants/token/InvitationTokenPayload';
+import { finalize } from 'rxjs';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { provideNativeDateAdapter } from '@angular/material/core';
 
 @Component({
     selector: 'app-signup',
@@ -40,7 +43,10 @@ import { InvitationTokenPayload } from '../../shared/constants/token/InvitationT
         RouterLink,
         ReactiveFormsModule,
         CommonModule,
+        MatProgressSpinnerModule,
+        MatDatepickerModule,
     ],
+    providers: [provideNativeDateAdapter()],
     templateUrl: './signup.component.html',
     styleUrl: './signup.component.css',
     standalone: true,
@@ -50,7 +56,6 @@ export class SignupComponent implements OnInit {
     private readonly fb = inject(FormBuilder);
     private readonly authService = inject(AuthService);
     private readonly snackbar = inject(SnackbarService);
-    private readonly destroyRef = inject(DestroyRef);
 
     private readonly token = signal<string>(sessionStorage.getItem('invitationToken') || '');
     private readonly payload = computed<InvitationTokenPayload | null>(() => {
@@ -58,24 +63,44 @@ export class SignupComponent implements OnInit {
         return tokenValue ? decodeToken<InvitationTokenPayload>(tokenValue) : null;
     });
 
+    maxDate = signal<Date>(this.getMaxDate());
     pwVisible = signal(false);
     rePwVisible = signal(false);
     signupErrors = signal<Array<string>>([]);
     signupForm = this.fb.group(
         {
-            firstName: ['', [Validators.required]],
-            lastName: ['', [Validators.required]],
-            username: ['', [Validators.required, Validators.minLength(5)]],
-            email: [this.payload()?.email || '', [Validators.required, Validators.email]],
-            password: ['', [Validators.required, Validators.minLength(6)]],
-            confirmPassword: ['', [Validators.required, Validators.minLength(6)]],
-            dateOfBirth: [null as Date | null, [CustomValidators.minAgeValidator(13)]],
-            phoneNumber: ['', [CustomValidators.phoneValidator()]],
+            firstName: this.fb.control('', {
+                nonNullable: true,
+                validators: [Validators.required],
+            }),
+            lastName: this.fb.control('', { nonNullable: true, validators: [Validators.required] }),
+            username: this.fb.control('', {
+                nonNullable: true,
+                validators: [Validators.required, Validators.minLength(5)],
+            }),
+            email: this.fb.control(this.payload()?.email || '', {
+                nonNullable: true,
+                validators: [Validators.required, Validators.email],
+            }),
+            password: this.fb.control('', {
+                nonNullable: true,
+                validators: [Validators.required, Validators.minLength(6)],
+            }),
+            confirmPassword: this.fb.control('', {
+                nonNullable: true,
+                validators: [Validators.required, Validators.minLength(6)],
+            }),
+            dateOfBirth: this.fb.control(null as Date | null, {
+                validators: [CustomValidators.minAgeValidator(13)],
+            }),
+            phoneNumber: this.fb.control('', { validators: [CustomValidators.phoneValidator()] }),
         },
         {
             validators: CustomValidators.passwordMatchValidator('password', 'confirmPassword'),
         } as AbstractControlOptions
     );
+
+    isLoading = signal(false);
 
     ngOnInit(): void {
         const payload = this.payload();
@@ -117,13 +142,52 @@ export class SignupComponent implements OnInit {
     }
 
     onSubmit(): void {
-        if (!this.signupForm.valid) return;
+        if (this.signupForm.invalid) return;
+
+        this.isLoading.set(true);
+
+        const payload = this.payload();
+        if (payload && payload.email !== this.signupForm.get('email')?.value) {
+            this.signupForm.get('email')?.setValue(payload.email);
+        }
+
+        const formValues = this.signupForm.getRawValue();
+        const isRequiredFieldsEmpty = Object.entries(formValues)
+            .filter(([key]) =>
+                [
+                    'firstName',
+                    'lastName',
+                    'username',
+                    'email',
+                    'password',
+                    'confirmPassword',
+                ].includes(key)
+            )
+            .some(([_, value]) => !value);
+
+        if (isRequiredFieldsEmpty) {
+            this.snackbar.error('Please fill in all required fields.');
+            this.isLoading.set(false);
+            return;
+        }
+
+        const dob = this.signupForm.get('dateOfBirth')?.value;
+        const data: SignupData = {
+            firstName: formValues.firstName,
+            lastName: formValues.lastName,
+            username: formValues.username,
+            email: formValues.email,
+            password: formValues.password,
+            confirmPassword: formValues.confirmPassword,
+            dateOfBirth: dob ? formatDate(dob, 'yyyy-MM-dd', 'en-US') : undefined,
+            phoneNumber: formValues.phoneNumber ?? undefined,
+        };
 
         this.authService
-            .signup(this.signupForm.getRawValue() as SignupData)
-            .pipe(takeUntilDestroyed(this.destroyRef))
+            .signup(data)
+            .pipe(finalize(() => this.isLoading.set(false)))
             .subscribe({
-                next: (result) => {
+                next: (_) => {
                     this.snackbar.success(
                         'Account created successfully! Please verify your email.'
                     );
@@ -142,5 +206,9 @@ export class SignupComponent implements OnInit {
                     );
                 },
             });
+    }
+
+    private getMaxDate(): Date {
+        return new Date(new Date().setFullYear(new Date().getFullYear() - 16));
     }
 }

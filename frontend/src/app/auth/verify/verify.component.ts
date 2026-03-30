@@ -1,14 +1,14 @@
-import { Component, DestroyRef, inject, OnDestroy, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { Subscription } from 'rxjs';
 import { MatError, MatFormField, MatInput, MatLabel, MatPrefix } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { finalize } from 'rxjs';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
     selector: 'app-verify',
@@ -23,17 +23,17 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
         MatIcon,
         CommonModule,
         RouterLink,
+        MatProgressSpinnerModule,
     ],
     templateUrl: './verify.component.html',
     styleUrl: './verify.component.css',
     standalone: true,
 })
-export class VerifyComponent implements OnDestroy {
+export class VerifyComponent {
     private readonly authService = inject(AuthService);
     private readonly router = inject(Router);
     private readonly fb = inject(FormBuilder);
     private readonly snackbar = inject(SnackbarService);
-    private readonly destroyRef = inject(DestroyRef);
     private readonly currentRoute = inject(ActivatedRoute);
 
     token = signal(this.currentRoute.snapshot.queryParamMap.get('token') ?? '');
@@ -41,25 +41,21 @@ export class VerifyComponent implements OnDestroy {
     verifyForm = this.fb.group({
         token: [this.token(), [Validators.required, Validators.maxLength(255)]],
     });
-    verifySub: Subscription | null = null;
-
-    ngOnDestroy() {
-        this.verifySub?.unsubscribe();
-    }
+    isLoading = signal(false);
 
     onSubmit() {
         if (this.verifyForm.invalid) return;
 
         const token = this.getControl('token')?.value;
+        if (!token) {
+            this.verifyForm.markAllAsTouched();
+            return;
+        }
 
-        if (!token) return;
-
-        this.snackbar.open('Account Verified!');
-        this.router.navigateByUrl('/auth/login');
-
+        this.isLoading.set(true);
         this.authService
             .verify(token as string)
-            .pipe(takeUntilDestroyed(this.destroyRef))
+            .pipe(finalize(() => this.isLoading.set(false)))
             .subscribe({
                 next: (response) => {
                     this.snackbar.success('Account Verified!');
@@ -72,13 +68,7 @@ export class VerifyComponent implements OnDestroy {
             });
     }
 
-    resendVerificationEmail() {}
-
     getControl(name: string) {
         return this.verifyForm.get(name);
-    }
-
-    togglePage() {
-        this.verifyPage.set(!this.verifyPage());
     }
 }
