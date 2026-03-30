@@ -29,6 +29,14 @@
                         @if (getControl('email')?.hasError('email')) {
                             <span>Provide a valid email address.</span>
                         }
+                        @if (getControl('email')?.hasError('serverError')) {
+                            @for (
+                                error of getControl('email')?.getError('serverError');
+                                track $index
+                            ) {
+                                <span>{{ error }}</span>
+                            }
+                        }
                     </mat-error>
                 }
             </mat-form-field>
@@ -58,6 +66,14 @@
                         }
                         @if (getControl('password')?.hasError('minlength')) {
                             <span>Password must be at least 6 characters.</span>
+                        }
+                        @if (getControl('password')?.hasError('serverError')) {
+                            @for (
+                                error of getControl('password')?.getError('serverError');
+                                track $index
+                            ) {
+                                <span>{{ error }}</span>
+                            }
                         }
                     </mat-error>
                 }

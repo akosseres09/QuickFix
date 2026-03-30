@@ -10,6 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { finalize } from 'rxjs';
 import { MatIconModule } from '@angular/material/icon';
+import { applyValidationErrors } from '../../shared/utils/formErrorHandler';
 
 @Component({
     selector: 'app-resend-verification',
@@ -59,8 +60,10 @@ export class ResendVerificationComponent {
                     this.router.navigateByUrl('/auth/verify');
                 },
                 error: (error) => {
+                    applyValidationErrors(this.form, error);
                     const message =
-                        error.error.message ||
+                        error.error?.error?.message ||
+                        error.error?.message ||
                         'An error occurred while sending the verification email.';
 
                     this.snackbar.error(message);

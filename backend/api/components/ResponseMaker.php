@@ -32,4 +32,13 @@ class ResponseMaker
             'error' => $errorPayload,
         ];
     }
+
+    /**
+     * Returns a standardized 422 validation error response.
+     * The details array maps field names to their validation error messages.
+     */
+    public static function asValidationError(array $errors, string $message = 'Validation failed.'): array
+    {
+        return self::asError($message, 422, $errors);
+    }
 }

@@ -9,6 +9,7 @@ import { CommonModule } from '@angular/common';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
 import { finalize } from 'rxjs';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { applyValidationErrors } from '../../shared/utils/formErrorHandler';
 
 @Component({
     selector: 'app-verify',
@@ -62,8 +63,12 @@ export class VerifyComponent {
                     this.router.navigateByUrl('/auth/login');
                 },
                 error: (error) => {
-                    console.error(error);
-                    this.snackbar.error('Failed to verify account!');
+                    applyValidationErrors(this.verifyForm, error);
+                    this.snackbar.error(
+                        error.error?.error?.message ||
+                            error.error?.message ||
+                            'Failed to verify account!'
+                    );
                 },
             });
     }

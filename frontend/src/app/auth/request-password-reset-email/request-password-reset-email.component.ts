@@ -9,6 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
+import { applyValidationErrors } from '../../shared/utils/formErrorHandler';
 
 @Component({
     selector: 'app-request-password-reset-email',
@@ -55,8 +56,12 @@ export class RequestPasswordResetEmailComponent {
                     this.snackBar.success('Email sent successfully!');
                 },
                 error: (error) => {
-                    this.snackBar.error('Error sending email. Please try again later.');
-                    console.error('Error in resend email:', error.error?.message || error);
+                    applyValidationErrors(this.form, error);
+                    this.snackBar.error(
+                        error.error?.error?.message ||
+                            error.error?.message ||
+                            'Error sending email. Please try again later.'
+                    );
                 },
             });
     }

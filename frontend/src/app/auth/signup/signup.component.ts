@@ -19,7 +19,6 @@ import { Router, RouterLink } from '@angular/router';
 import { CommonModule, formatDate } from '@angular/common';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { SnackbarService } from '../../shared/services/snackbar/snackbar.service';
-import { errorResponse } from '../../shared/model/Response';
 import { SignupData } from '../../shared/constants/user/SignupData';
 import { CustomValidators } from '../../shared/validators/CustomValidators';
 import { decodeToken } from '../../shared/utils/jwtDecoder';
@@ -28,6 +27,7 @@ import { finalize } from 'rxjs';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
+import { applyValidationErrors } from '../../shared/utils/formErrorHandler';
 
 @Component({
     selector: 'app-signup',
@@ -132,15 +132,6 @@ export class SignupComponent implements OnInit {
         return this.signupForm.get(name);
     }
 
-    setServerValidationErrors(errorObj: Record<string, Array<string>>): void {
-        Object.keys(errorObj).forEach((key) => {
-            const control = this.getControl(key);
-            if (control) {
-                control.setErrors({ serverError: errorObj[key] });
-            }
-        });
-    }
-
     onSubmit(): void {
         if (this.signupForm.invalid) return;
 
@@ -195,14 +186,9 @@ export class SignupComponent implements OnInit {
                     this.router.navigateByUrl('/auth/verify');
                 },
                 error: (error) => {
-                    const errorObj = error.error.error.details.error as Record<
-                        string,
-                        Array<string>
-                    >;
-                    this.setServerValidationErrors(errorObj);
+                    applyValidationErrors(this.signupForm, error);
                     this.snackbar.error(
-                        (error.error as errorResponse).error.message ||
-                            'Signup failed. Please try again.'
+                        error.error?.error?.message || 'Signup failed. Please try again.'
                     );
                 },
             });

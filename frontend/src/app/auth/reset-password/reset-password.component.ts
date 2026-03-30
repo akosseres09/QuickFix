@@ -16,6 +16,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { finalize } from 'rxjs';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { applyValidationErrors } from '../../shared/utils/formErrorHandler';
 
 @Component({
     selector: 'app-reset-password',
@@ -70,10 +71,12 @@ export class ResetPasswordComponent {
                     this.router.navigateByUrl('/auth/login');
                 },
                 error: (error) => {
+                    applyValidationErrors(this.form, error);
                     const message =
-                        error.error?.message || 'Error resetting password. Please try again later.';
+                        error.error?.error?.message ||
+                        error.error?.message ||
+                        'Error resetting password. Please try again later.';
                     this.snackBar.error(message);
-                    console.error('Error in reset password:', message);
                 },
             });
     }
