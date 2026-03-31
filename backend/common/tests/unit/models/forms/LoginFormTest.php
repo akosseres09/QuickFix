@@ -1,15 +1,16 @@
 <?php
 
-namespace common\tests\unit\models;
+namespace common\tests\unit\models\forms;
 
+use Codeception\Test\Unit;
 use Yii;
-use common\models\LoginForm;
 use common\fixtures\UserFixture;
+use common\models\forms\LoginForm;
 
 /**
  * Login form test
  */
-class LoginFormTest extends \Codeception\Test\Unit
+class LoginFormTest extends Unit
 {
     /**
      * @var \common\tests\UnitTester
@@ -49,7 +50,8 @@ class LoginFormTest extends \Codeception\Test\Unit
         ]);
 
         verify($model->login())->false();
-        verify( $model->errors)->arrayHasKey('password');
+        verify($model->errors)->arrayHasKey('password');
+        verify($model->getErrors('password'))->arrayContains('Incorrect username or password.');
         verify(Yii::$app->user->isGuest)->true();
     }
 

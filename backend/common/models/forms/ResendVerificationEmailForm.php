@@ -58,6 +58,17 @@ class ResendVerificationEmailForm extends Model
         $user->generateEmailVerificationToken();
         $user->setEmailTokenExpireDate();
 
-        return $user->save() && $this->sendEmail($user);
+        $saved = $user->save();
+        if (!$saved) {
+            return false;
+        }
+
+        $this->queueEmail(
+            $this->email,
+            'Account registration at ' . Yii::$app->name,
+            'emailVerificationToken',
+            ['user' => $user]
+        );
+        return true;
     }
 }

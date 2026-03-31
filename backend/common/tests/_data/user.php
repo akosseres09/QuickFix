@@ -10,6 +10,7 @@ return [
         // password_0
         'password_hash'         => '$2y$13$EjaPFBnZOQsHdGuHI.xvhuDp1fHpo8hKRSk6yshqa9c5EG8s3C3lO',
         'password_reset_token'  => 'ExzkCOaYc1L8IOBs4wdTGGbgNiG3Wz1I_1402312317',
+        'verification_token'    => null,
         'email'        => 'nicole.paucek@schultz.info',
         'status'       => 10,  // UserStatus::ACTIVE
         'is_admin'     => 0,   // UserRole::USER
@@ -22,11 +23,12 @@ return [
         'first_name'   => 'Jane',
         'last_name'    => 'Doe',
         'auth_key'     => 'testAuthKey222222222222222222222',
+        'verification_token'    => 'testVerificationToken22222222222222222222',
         // password_0
         'password_hash'         => '$2y$13$EjaPFBnZOQsHdGuHI.xvhuDp1fHpo8hKRSk6yshqa9c5EG8s3C3lO',
-        'password_reset_token'  => null,
+        'password_reset_token'  => 'ExzkCOaYc1L8IOBs4wdTGGbgNiG3Wz1I_1402312318',
         'email'        => 'jane.doe@example.com',
-        'status'       => 10,
+        'status'       => 9,  // UserStatus::INACTIVE
         'is_admin'     => 0,
         'created_at'   => 1402312317,
         'updated_at'   => 1402312317,
