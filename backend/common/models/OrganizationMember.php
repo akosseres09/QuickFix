@@ -37,8 +37,8 @@ class OrganizationMember extends BaseModel
         return [
             ['user_id', 'required'],
             ['role', 'string', 'max' => 16],
-            ['role', 'in', 'range' => RoleManager::ROLE_LIST],
             ['role', 'default', 'value' => RoleManager::ROLE_MEMBER],
+            ['role', 'in', 'range' => RoleManager::ROLE_LIST],
             [['organization_id', 'user_id'], 'unique', 'targetAttribute' => ['organization_id', 'user_id'], 'message' => 'This user is already a member of this organization.'],
             ['organization_id', 'exist', 'skipOnError' => true, 'targetClass' => Organization::class, 'targetAttribute' => ['organization_id' => 'id']],
             ['user_id', 'exist', 'skipOnError' => true, 'targetClass' => UserResource::class, 'targetAttribute' => ['user_id' => 'id']],

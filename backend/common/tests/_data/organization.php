@@ -15,4 +15,16 @@ return [
         'updated_by'  => null,
         'deleted_at'  => null,
     ],
+    [
+        'id'          => '01900000-0000-0001-0000-000000000002',
+        'name'        => 'Second Organization',
+        'slug'        => 'second-org',
+        'description' => 'A second org for isolation tests.',
+        'owner_id'    => '01900000-0000-0000-0000-000000000003',
+        'logo_url'    => null,
+        'created_at'  => 1402312317,
+        'updated_at'  => 1402312317,
+        'updated_by'  => null,
+        'deleted_at'  => null,
+    ],
 ];
