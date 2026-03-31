@@ -1,5 +1,8 @@
 <?php
 
+use common\models\UserRole;
+use common\models\UserStatus;
+
 return [
     [
         'id'           => '01900000-0000-0000-0000-000000000001',
@@ -12,8 +15,8 @@ return [
         'password_reset_token'  => 'ExzkCOaYc1L8IOBs4wdTGGbgNiG3Wz1I_1402312317',
         'verification_token'    => null,
         'email'        => 'nicole.paucek@schultz.info',
-        'status'       => 10,  // UserStatus::ACTIVE
-        'is_admin'     => 0,   // UserRole::USER
+        'status'       => UserStatus::ACTIVE->value,
+        'is_admin'     => UserRole::USER->value,
         'created_at'   => 1402312317,
         'updated_at'   => 1402312317,
     ],
@@ -28,9 +31,40 @@ return [
         'password_hash'         => '$2y$13$EjaPFBnZOQsHdGuHI.xvhuDp1fHpo8hKRSk6yshqa9c5EG8s3C3lO',
         'password_reset_token'  => 'ExzkCOaYc1L8IOBs4wdTGGbgNiG3Wz1I_1402312318',
         'email'        => 'jane.doe@example.com',
-        'status'       => 9,  // UserStatus::INACTIVE
-        'is_admin'     => 0,
+        'status'       => UserStatus::INACTIVE->value,
+        'is_admin'     => UserRole::USER->value,
         'created_at'   => 1402312317,
         'updated_at'   => 1402312317,
+    ],
+    [
+        'id'           => '01900000-0000-0000-0000-000000000003',
+        'username'     => 'admin.user',
+        'first_name'   => 'Admin',
+        'last_name'    => 'Super',
+        'auth_key'     => 'adminAuthKey33333333333333333333',
+        'password_hash'         => '$2y$13$EjaPFBnZOQsHdGuHI.xvhuDp1fHpo8hKRSk6yshqa9c5EG8s3C3lO',
+        'password_reset_token'  => null,
+        'verification_token'    => null,
+        'email'        => 'admin@example.com',
+        'status'       => UserStatus::ACTIVE->value,
+        'is_admin'     => UserRole::ADMIN->value,
+        'created_at'   => 1402312317,
+        'updated_at'   => 1402312317,
+    ],
+    [
+        'id'           => '01900000-0000-0000-0000-000000000004',
+        'username'     => 'deleted.user',
+        'first_name'   => 'Deleted',
+        'last_name'    => 'User',
+        'auth_key'     => 'deletedAuthKey44444444444444444',
+        'password_hash'         => '$2y$13$EjaPFBnZOQsHdGuHI.xvhuDp1fHpo8hKRSk6yshqa9c5EG8s3C3lO',
+        'password_reset_token'  => null,
+        'verification_token'    => null,
+        'email'        => 'deleted@example.com',
+        'status'       => UserStatus::DELETED->value,
+        'is_admin'     => UserRole::USER->value,
+        'created_at'   => 1402312317,
+        'updated_at'   => 1402312317,
+        'deleted_at'   => 1402312400,
     ],
 ];
