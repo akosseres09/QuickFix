@@ -381,4 +381,83 @@ class OrganizationInvitationTest extends Unit
         verify(OrganizationInvitation::STATUSES)->arrayContains(OrganizationInvitation::STATUS_REJECTED);
         verify(OrganizationInvitation::STATUSES)->arrayContains(OrganizationInvitation::STATUS_REVOKED);
     }
+
+    // -------------------------------------------------------------------------
+    // fields / extraFields / transactions
+    // -------------------------------------------------------------------------
+
+    public function testFields(): void
+    {
+        $invitation = OrganizationInvitation::find()
+            ->where(['id' => '01900000-0000-0009-0000-000000000001'])
+            ->one();
+
+        $fields = $invitation->fields();
+
+        verify($fields)->arrayContains('id');
+        verify($fields)->arrayHasKey('organizationId');
+        verify($fields)->arrayContains('organization_id');
+
+        verify($fields)->arrayHasKey('inviterId');
+        verify($fields)->arrayContains('inviter_id');
+
+        verify($fields)->arrayContains('email');
+        verify($fields)->arrayContains('role');
+        verify($fields)->arrayContains('status');
+
+        verify($fields)->arrayContains('token');
+        verify($fields)->arrayHasKey('expiresAt');
+        verify($fields)->arrayContains('expires_at');
+
+        verify($fields)->arrayHasKey('createdAt');
+        verify($fields)->arrayContains('created_at');
+
+        verify($fields)->arrayHasKey('updatedAt');
+        verify($fields)->arrayContains('updated_at');
+    }
+
+    public function testExtraFields(): void
+    {
+        $invitation = OrganizationInvitation::find()
+            ->where(['id' => '01900000-0000-0009-0000-000000000001'])
+            ->one();
+
+        $extra = $invitation->extraFields();
+
+        verify($extra)->arrayContains('inviter');
+        verify($extra)->arrayContains('organization');
+    }
+
+    public function testTransactions(): void
+    {
+        $invitation = new OrganizationInvitation();
+        $transactions = $invitation->transactions();
+
+        verify($transactions)->arrayHasKey(\yii\db\ActiveRecord::SCENARIO_DEFAULT);
+    }
+
+    // -------------------------------------------------------------------------
+    // beforeSave — sets id and expires_at on insert
+    // -------------------------------------------------------------------------
+
+    public function testSaveSetUuidAndExpiresAt(): void
+    {
+        $this->loginFixtureUser();
+        $org = $this->tester->grabFixture('organization', 0);
+
+        $timeBefore = time();
+        $invitation = new OrganizationInvitation([
+            'email'           => 'newmember@example.com',
+            'role'            => RoleManager::ROLE_MEMBER,
+            'organization_id' => $org['id'],
+        ]);
+
+        $saved = $invitation->save();
+        verify($saved)->true();
+        verify($invitation->id)->notEmpty();
+        verify($invitation->id)->stringMatchesRegExp(
+            '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/'
+        );
+        verify($invitation->expires_at)->greaterThanOrEqual($timeBefore + OrganizationInvitation::EXPIRATION_LENGTH - 2);
+    }
 }

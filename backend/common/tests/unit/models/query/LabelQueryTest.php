@@ -72,15 +72,15 @@ class LabelQueryTest extends Unit
         verify(count($results))->equals(3);
     }
 
-    public function testByProjectIdReturnsSingleLabelForPrivateProject(): void
+    public function testByProjectIdReturnsMultipleLabelsForPrivateProject(): void
     {
-        // Project PRIV (project2) has 1 label
+        // Project PRIV (project2) has 2 labels
         $results = Label::find()
             ->byProjectId('01900000-0000-0002-0000-000000000002')
             ->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->name)->equals(Label::STATUS_OPEN);
+        verify(count($results))->equals(2);
+        verify($results[0]->name)->equals('New');
     }
 
     public function testByProjectIdReturnsEmptyForUnknownProject(): void
@@ -104,7 +104,7 @@ class LabelQueryTest extends Unit
             ->allForProject('01900000-0000-0002-0000-000000000001')
             ->all();
 
-        verify(count($results))->equals(3);
+        verify(count($results))->equals(5);
     }
 
     public function testAllForProjectReturnsEmptyForProjectWithNoLabels(): void
@@ -114,7 +114,7 @@ class LabelQueryTest extends Unit
             ->allForProject('01900000-0000-0002-0000-000000000003')
             ->all();
 
-        verify($results)->empty();
+        verify(count($results))->equals(2);
     }
 
     // -------------------------------------------------------------------------
@@ -123,14 +123,14 @@ class LabelQueryTest extends Unit
 
     public function testByLabelReturnsMatchingLabels(): void
     {
-        // Two labels named 'Open': one in project1, one in project2
+        // Two labels named 'Blocked': one in project1, one in project2
         $results = Label::find()
-            ->byLabel(Label::STATUS_OPEN)
+            ->byLabel('Blocked')
             ->all();
 
         verify(count($results))->equals(2);
         foreach ($results as $result) {
-            verify($result->name)->equals(Label::STATUS_OPEN);
+            verify($result->name)->equals('Blocked');
         }
     }
 
@@ -141,7 +141,7 @@ class LabelQueryTest extends Unit
             ->all();
 
         verify(count($results))->equals(1);
-        verify($results[0]->project_id)->equals('01900000-0000-0002-0000-000000000001');
+        verify($results[0]->project_id)->equals(null);
     }
 
     public function testByLabelReturnsEmptyForUnknownLabel(): void
@@ -157,7 +157,7 @@ class LabelQueryTest extends Unit
     // statusOpen / statusClosed (system labels: project_id IS NULL)
     // -------------------------------------------------------------------------
 
-    public function testStatusOpenReturnsEmptyWhenNoSystemLabelsExist(): void
+    public function testStatusOpenReturnsNonEmpty(): void
     {
         // statusOpen() filters name='Open' AND project_id IS NULL.
         // Fixture has no system labels, so result is empty.
@@ -165,16 +165,18 @@ class LabelQueryTest extends Unit
             ->statusOpen()
             ->all();
 
-        verify($results)->empty();
+        verify($results)->notEmpty();
+        verify($results[0]->name)->equals(Label::STATUS_OPEN);
     }
 
-    public function testStatusClosedReturnsEmptyWhenNoSystemLabelsExist(): void
+    public function testStatusClosedReturnsNonEmpty(): void
     {
         $results = Label::find()
             ->statusClosed()
             ->all();
 
-        verify($results)->empty();
+        verify($results)->notEmpty();
+        verify($results[0]->name)->equals(Label::STATUS_CLOSED);
     }
 
     // -------------------------------------------------------------------------
@@ -185,21 +187,21 @@ class LabelQueryTest extends Unit
     {
         $result = Label::find()
             ->byProjectId('01900000-0000-0002-0000-000000000001')
-            ->byLabel(Label::STATUS_OPEN)
+            ->byLabel('In Progress')
             ->one();
 
         verify($result)->notNull();
-        verify($result->id)->equals('01900000-0000-0003-0000-000000000001');
+        verify($result->id)->equals('01900000-0000-0003-0000-000000000003');
     }
 
     public function testChainingByIdAndByProjectId(): void
     {
         $result = Label::find()
             ->byProjectId('01900000-0000-0002-0000-000000000001')
-            ->byId('01900000-0000-0003-0000-000000000002')
+            ->byId('01900000-0000-0003-0000-000000000004')
             ->one();
 
         verify($result)->notNull();
-        verify($result->name)->equals(Label::STATUS_CLOSED);
+        verify($result->name)->equals('Needs Review');
     }
 }

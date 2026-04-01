@@ -209,4 +209,87 @@ class CommentTest extends Unit
         $comment = new Comment();
         verify($comment->canAccess('01900000-0000-0000-0000-000000000001'))->false();
     }
+
+    public function testCanAccessReturnsFalseWithNoProject(): void
+    {
+        $comment = Comment::findOne('01900000-0000-0005-0000-000000000001');
+        // Detach the issue relation to simulate missing project reference
+        $comment->populateRelation('issue', null);
+        verify($comment->canAccess('01900000-0000-0000-0000-000000000001'))->false();
+    }
+
+    // -------------------------------------------------------------------------
+    // fields / extraFields / transactions
+    // -------------------------------------------------------------------------
+
+    public function testFields(): void
+    {
+        $comment = Comment::findOne('01900000-0000-0005-0000-000000000001');
+        $fields = $comment->fields();
+
+        verify($fields)->arrayContains('id');
+        verify($fields)->arrayHasKey('issueId');
+        verify($fields)->arrayContains('issue_id');
+        verify($fields)->arrayContains('content');
+        verify($fields)->arrayHasKey('createdAt');
+        verify($fields)->arrayContains('created_at');
+        verify($fields)->arrayHasKey('updatedAt');
+        verify($fields)->arrayContains('updated_at');
+        verify($fields)->arrayHasKey('createdBy');
+        verify($fields)->arrayContains('created_by');
+        verify($fields)->arrayHasKey('updatedBy');
+        verify($fields)->arrayContains('updated_by');
+    }
+
+    public function testExtraFields(): void
+    {
+        $comment = Comment::findOne('01900000-0000-0005-0000-000000000001');
+        $extra = $comment->extraFields();
+
+        verify($extra)->arrayContains('issue');
+        verify($extra)->arrayContains('creator');
+        verify($extra)->arrayContains('updator');
+    }
+
+    public function testTransactions(): void
+    {
+        $comment = new Comment();
+        $transactions = $comment->transactions();
+
+        verify($transactions)->arrayHasKey(\yii\db\ActiveRecord::SCENARIO_DEFAULT);
+        verify($transactions[\yii\db\ActiveRecord::SCENARIO_DEFAULT])->equals(\yii\db\ActiveRecord::OP_ALL);
+    }
+
+    // -------------------------------------------------------------------------
+    // beforeValidate — missing project_id
+    // -------------------------------------------------------------------------
+
+    public function testBeforeValidateFailsWhenProjectIdMissing(): void
+    {
+        unset($_GET['project_id']);
+        $comment = new Comment([
+            'content' => 'Some content',
+        ]);
+
+        verify($comment->validate())->false();
+        verify($comment->getErrors('project_id'))->arrayContains('Project ID is required.');
+    }
+
+    // -------------------------------------------------------------------------
+    // beforeSave — update path (no new UUID generated)
+    // -------------------------------------------------------------------------
+
+    public function testUpdateDoesNotChangeId(): void
+    {
+        $this->loginFixtureUser();
+
+        $comment = Comment::findOne('01900000-0000-0005-0000-000000000001');
+        $originalId = $comment->id;
+
+        $comment->content = 'Updated content.';
+        $saved = $comment->save();
+
+        verify($saved)->true();
+        verify($comment->id)->equals($originalId);
+    }
 }

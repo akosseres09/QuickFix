@@ -176,4 +176,49 @@ class SignupFormTest extends Unit
         verify($form->validate())->true();
         verify($form->errors)->empty();
     }
+
+    // -------------------------------------------------------------------------
+    // fields()
+    // -------------------------------------------------------------------------
+
+    public function testFields(): void
+    {
+        $form = new SignupForm([
+            'username'   => 'testuser',
+            'email'      => 'test@example.com',
+            'first_name' => 'Test',
+            'last_name'  => 'User',
+        ]);
+
+        $fields = $form->fields();
+        verify($fields)->arrayContains('username');
+        verify($fields)->arrayContains('email');
+        verify($fields)->arrayHasKey('firstName');
+        verify($fields)->arrayHasKey('lastName');
+    }
+
+    // -------------------------------------------------------------------------
+    // signup()
+    // -------------------------------------------------------------------------
+
+    public function testSignupReturnsNullWhenInvalid(): void
+    {
+        $form = new SignupForm(); // empty — fails validation
+        verify($form->signup())->null();
+    }
+
+    public function testSignupSuccess(): void
+    {
+        $form = new SignupForm([
+            'username'         => 'new.signup.user',
+            'email'            => 'newsignup@example.com',
+            'first_name'       => 'New',
+            'last_name'        => 'Signup',
+            'password'         => 'password123',
+            'confirm_password' => 'password123',
+        ]);
+
+        $result = $form->signup();
+        verify($result)->true();
+    }
 }

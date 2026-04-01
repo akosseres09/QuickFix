@@ -521,6 +521,86 @@ class UserTest extends Unit
         verify($issues)->notEmpty();
     }
 
+    public function testFieldsDefaultScenario(): void
+    {
+        $user = User::findOne(['username' => 'bayer.hudson']);
+        $fields = $user->fields();
+
+        verify($fields)->arrayContains('id');
+        verify($fields)->arrayContains('username');
+        verify($fields)->arrayContains('email');
+        verify($fields)->arrayContains('status');
+
+        verify($fields)->arrayHasKey('isAdmin');
+        verify($fields)->arrayContains('is_admin');
+
+        verify($fields)->arrayHasKey('createdAt');
+        verify($fields)->arrayContains('created_at');
+
+        verify($fields)->arrayHasKey('updatedAt');
+        verify($fields)->arrayContains('updated_at');
+
+        verify($fields)->arrayHasKey('firstName');
+        verify($fields)->arrayContains('first_name');
+
+        verify($fields)->arrayHasKey('lastName');
+        verify($fields)->arrayContains('last_name');
+
+        verify($fields)->arrayHasKey('phoneNumber');
+        verify($fields)->arrayContains('phone_number');
+
+        verify($fields)->arrayHasKey('dateOfBirth');
+        verify($fields)->arrayContains('date_of_birth');
+
+        verify($fields)->arrayHasKey('profilePictureUrl');
+        verify($fields)->arrayContains('profile_picture_url');
+
+        verify($fields)->arrayHasKey('fullName');
+        verify($fields['fullName'])->isCallable();
+    }
+
+    public function testFieldsNotDefaultScenario(): void
+    {
+        $user = User::findOne(['username' => 'bayer.hudson']);
+        $user->scenario = 'update';
+        $fields = $user->fields();
+
+        verify($fields)->arrayContains('id');
+        verify($fields)->arrayContains('username');
+        verify($fields)->arrayContains('email');
+        verify($fields)->arrayContains('status');
+
+        verify($fields)->arrayHasKey('isAdmin');
+        verify($fields)->arrayContains('is_admin');
+
+        verify($fields)->arrayHasKey('createdAt');
+        verify($fields)->arrayContains('created_at');
+
+        verify($fields)->arrayHasKey('updatedAt');
+        verify($fields)->arrayContains('updated_at');
+
+        verify($fields)->arrayHasKey('firstName');
+        verify($fields)->arrayContains('first_name');
+
+        verify($fields)->arrayHasKey('lastName');
+        verify($fields)->arrayContains('last_name');
+
+        verify($fields)->arrayHasKey('phoneNumber');
+        verify($fields)->arrayContains('phone_number');
+
+        verify($fields)->arrayHasKey('dateOfBirth');
+        verify($fields)->arrayContains('date_of_birth');
+
+        verify($fields)->arrayHasKey('profilePictureUrl');
+        verify($fields)->arrayContains('profile_picture_url');
+
+        verify($fields)->arrayHasKey('fullName');
+        verify($fields['fullName'])->isCallable();
+
+        verify($fields)->arrayHasKey('passwordHash');
+        verify($fields)->arrayContains('password_hash');
+    }
+
     // -------------------------------------------------------------------------
     // DB round-trip
     // -------------------------------------------------------------------------
@@ -537,5 +617,46 @@ class UserTest extends Unit
         verify($admin)->notNull();
         verify($admin->is_admin)->equals(UserRole::ADMIN->value);
         verify($admin->status)->equals(UserStatus::ACTIVE->value);
+    }
+
+    // -------------------------------------------------------------------------
+    // Identity / cache helpers
+    // -------------------------------------------------------------------------
+
+    public function testGetId(): void
+    {
+        $user = User::findOne(['username' => 'bayer.hudson']);
+        verify($user->getId())->equals('01900000-0000-0000-0000-000000000001');
+    }
+
+    public function testGetEmailToken(): void
+    {
+        $user = User::findOne(['username' => 'jane.doe']);
+        verify($user->getEmailToken())->equals('testVerificationToken22222222222222222222');
+    }
+
+    public function testGetRefreshTokens(): void
+    {
+        $user = User::findOne(['username' => 'bayer.hudson']);
+        verify($user->refreshTokens)->isArray();
+    }
+
+    public function testGetUsernameToIdCache(): void
+    {
+        $key = User::getUsernameToIdCache('bayer.hudson');
+        verify($key)->equals('username_to_id_bayer.hudson');
+    }
+
+    public function testSetProfilePictureUrl(): void
+    {
+        $user = new User(['first_name' => 'Test', 'last_name' => 'User']);
+        $user->setProfilePictureUrl();
+        verify($user->profile_picture_url)->stringContainsString('ui-avatars.com');
+    }
+
+    public function testFindIdentityByAccessTokenWithInvalidToken(): void
+    {
+        $user = User::findIdentityByAccessToken('this-is-not-a-valid-jwt-token');
+        verify($user)->null();
     }
 }

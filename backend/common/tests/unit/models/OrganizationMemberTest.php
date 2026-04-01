@@ -203,4 +203,75 @@ class OrganizationMemberTest extends Unit
         $member = OrganizationMember::findOne('01900000-0000-0007-0000-000000000001');
         verify($member->updator)->null(); // No updated_by in fixture
     }
+
+    // -------------------------------------------------------------------------
+    // fields / extraFields
+    // -------------------------------------------------------------------------
+
+    public function testFields(): void
+    {
+        $member = OrganizationMember::findOne('01900000-0000-0007-0000-000000000001');
+        $fields = $member->fields();
+
+        verify($fields)->arrayContains('id');
+        verify($fields)->arrayHasKey('organizationId');
+        verify($fields)->arrayContains('organization_id');
+
+        verify($fields)->arrayHasKey('userId');
+        verify($fields)->arrayContains('user_id');
+
+        verify($fields)->arrayContains('role');
+
+        verify($fields)->arrayHasKey('createdAt');
+        verify($fields)->arrayContains('created_at');
+
+        verify($fields)->arrayHasKey('createdBy');
+        verify($fields)->arrayContains('created_by');
+
+        verify($fields)->arrayHasKey('updatedAt');
+        verify($fields)->arrayContains('updated_at');
+
+        verify($fields)->arrayHasKey('updatedBy');
+        verify($fields)->arrayContains('updated_by');
+    }
+
+    public function testExtraFields(): void
+    {
+        $member = OrganizationMember::findOne('01900000-0000-0007-0000-000000000001');
+        $extra = $member->extraFields();
+
+        verify($extra)->arrayContains('organization');
+        verify($extra)->arrayContains('user');
+        verify($extra)->arrayContains('creator');
+        verify($extra)->arrayContains('updator');
+    }
+
+    // -------------------------------------------------------------------------
+    // beforeValidate — organization_id from request
+    // -------------------------------------------------------------------------
+
+    public function testBeforeValidateReadsOrganizationIdFromRequest(): void
+    {
+        $_GET['organization_id'] = '01900000-0000-0001-0000-000000000001';
+
+        $member = new OrganizationMember([
+            'user_id' => '01900000-0000-0000-0000-000000000002',
+        ]);
+
+        // Should validate by reading organization_id from GET
+        verify($member->validate())->false(); // user already in org → unique constraint fails
+        verify($member->getErrors('user_id'))->arrayContains('This user is already a member of this organization.');
+
+        unset($_GET['organization_id']);
+    }
+
+    public function testBeforeValidateFailsWhenOrganizationIdMissingFromRequest(): void
+    {
+        $member = new OrganizationMember([
+            'user_id' => '01900000-0000-0000-0000-000000000001',
+        ]);
+
+        verify($member->validate())->false();
+        verify($member->getErrors('organization_id'))->arrayContains('Organization ID is required!');
+    }
 }

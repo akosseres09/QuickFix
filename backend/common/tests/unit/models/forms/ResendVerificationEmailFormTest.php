@@ -4,6 +4,7 @@ namespace backend\common\tests\unit\models\forms;
 
 use Codeception\Test\Unit;
 use common\models\forms\ResendVerificationEmailForm;
+use common\models\User;
 use common\tests\UnitTester;
 
 class ResendVerificationEmailFormTest extends Unit
@@ -74,5 +75,15 @@ class ResendVerificationEmailFormTest extends Unit
 
         verify($form->validate())->false();
         verify($form->errors)->arrayHasKey('email');
+    }
+
+    public function testSendWithUserPassedDirectly(): void
+    {
+        // jane.doe is INACTIVE and has a verification token
+        $user = User::findOne(['username' => 'jane.doe']);
+        $form = new ResendVerificationEmailForm(['email' => 'jane.doe@example.com']);
+
+        $result = $form->send($user);
+        verify($result)->true();
     }
 }

@@ -163,9 +163,10 @@ class LabelTest extends Unit
 
     public function testDuplicateNameInSameProjectFails(): void
     {
-        $_GET['project_id'] = '01900000-0000-0002-0000-000000000001';
+        $label = $this->tester->grabFixture('label', 3); // "In Progress" label in TEST project
+        $_GET['project_id'] = $label['project_id'];
         $label = new Label([
-            'name'        => Label::STATUS_OPEN, // already exists in project
+            'name'        => $label['name'], // already exists in project
             'description' => 'Duplicate test',
             'color'       => '#fff',
         ]);
@@ -254,9 +255,17 @@ class LabelTest extends Unit
     // Relations
     // -------------------------------------------------------------------------
 
-    public function testGetProject(): void
+    public function testGetProjectIsNull(): void
     {
-        $label = Label::findOne('01900000-0000-0003-0000-000000000001');
+        $fixture = $this->tester->grabFixture('label', 0); // Open label with null project_id
+        $label = Label::findOne($fixture['id']);
+        verify($label->project)->null();
+    }
+
+    public function testGetProjectNotNull(): void
+    {
+        $fixture = $this->tester->grabFixture('label', 2); // In Progress label linked to TEST project
+        $label = Label::findOne($fixture['id']);
         verify($label->project)->notNull();
         verify($label->project->key)->equals('TEST');
     }
@@ -278,7 +287,8 @@ class LabelTest extends Unit
 
     public function testCanAccessViaProject(): void
     {
-        $label = Label::findOne('01900000-0000-0003-0000-000000000001');
+        $fixture = $this->tester->grabFixture('label', 2); // In Progress label linked to TEST project
+        $label = Label::findOne($fixture['id']);
         // Public project - org members can access
         verify($label->canAccess('01900000-0000-0000-0000-000000000001'))->true();
         verify($label->canAccess('01900000-0000-0000-0000-000000000002'))->true();
@@ -346,5 +356,87 @@ class LabelTest extends Unit
 
         $this->expectException(\yii\web\ConflictHttpException::class);
         $open->delete();
+    }
+
+    // -------------------------------------------------------------------------
+    // getLabelCacheKey
+    // -------------------------------------------------------------------------
+
+    public function testGetLabelCacheKeyWithoutProjectId(): void
+    {
+        $key = Label::getLabelCacheKey('open');
+        verify($key)->equals('issue_label_open');
+    }
+
+    public function testGetLabelCacheKeyWithProjectId(): void
+    {
+        $key = Label::getLabelCacheKey('closed', '01900000-0000-0002-0000-000000000001');
+        verify($key)->stringContainsString('closed');
+        verify($key)->stringContainsString('01900000-0000-0002-0000-000000000001');
+    }
+
+    // -------------------------------------------------------------------------
+    // fields / extraFields
+    // -------------------------------------------------------------------------
+
+    public function testFields(): void
+    {
+        $label = Label::findOne('01900000-0000-0003-0000-000000000001');
+        $fields = $label->fields();
+
+        verify($fields)->arrayContains('id');
+
+        verify($fields)->arrayContains('name');
+        verify($fields)->arrayContains('color');
+        verify($fields)->arrayContains('description');
+        verify($fields)->arrayHasKey('projectId');
+        verify($fields)->arrayContains('project_id');
+    }
+
+    public function testExtraFields(): void
+    {
+        $label = Label::findOne('01900000-0000-0003-0000-000000000001');
+        $extra = $label->extraFields();
+
+        verify($extra)->arrayContains('project');
+    }
+
+    // -------------------------------------------------------------------------
+    // Reorder — move-down path
+    // -------------------------------------------------------------------------
+
+    public function testReorderLabelMoveDown(): void
+    {
+        // Open=1, Closed=2, InProgress=3; move Closed (index 2) to index 1
+        $closed = Label::findOne('01900000-0000-0003-0000-000000000002');
+        verify($closed->index)->equals(2);
+
+        $result = $closed->reorder(1);
+        verify($result)->true();
+
+        $closed->refresh();
+        verify($closed->index)->equals(1);
+
+        // Open should have shifted from 1 to 2
+        $open = Label::findOne('01900000-0000-0003-0000-000000000001');
+        $open->refresh();
+        verify($open->index)->equals(2);
+    }
+
+    // -------------------------------------------------------------------------
+    // beforeValidate — missing project_id
+    // -------------------------------------------------------------------------
+
+    public function testBeforeValidateFailsWhenProjectIdMissing(): void
+    {
+        unset($_GET['project_id']);
+        $label = new Label([
+            'name'        => 'NoProject',
+            'description' => 'Missing project ID.',
+            'color'       => '#abc',
+        ]);
+
+        verify($label->validate())->false();
+        verify($label->getErrors('project_id'))->arrayContains('Project ID is required.');
     }
 }

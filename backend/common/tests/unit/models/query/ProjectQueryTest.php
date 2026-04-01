@@ -293,4 +293,28 @@ class ProjectQueryTest extends Unit
 
         verify(count($results))->equals(1);
     }
+
+    // -------------------------------------------------------------------------
+    // latest / orderByName
+    // -------------------------------------------------------------------------
+
+    public function testLatestOrdersNewestFirst(): void
+    {
+        $query = Project::find()->latest();
+        verify($query)->instanceOf(\common\models\query\ProjectQuery::class);
+
+        $results = $query->all();
+        verify(count($results))->equals(3);
+    }
+
+    public function testOrderByNameOrdersAlphabetically(): void
+    {
+        $query = Project::find()->orderByName();
+        verify($query)->instanceOf(\common\models\query\ProjectQuery::class);
+
+        $results = $query->all();
+        verify(count($results))->equals(3);
+        // Private Project < Team Project < Test Project alphabetically
+        verify($results[0]->name)->equals('Private Project');
+    }
 }

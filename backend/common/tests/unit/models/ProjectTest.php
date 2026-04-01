@@ -46,6 +46,10 @@ class ProjectTest extends Unit
                 'class' => LabelFixture::class,
                 'dataFile' => codecept_data_dir() . 'label.php',
             ],
+            'issue' => [
+                'class' => \common\fixtures\IssueFixture::class,
+                'dataFile' => codecept_data_dir() . 'issue.php',
+            ],
         ];
     }
 
@@ -355,5 +359,256 @@ class ProjectTest extends Unit
         verify(Project::PRIORITY_MEDIUM)->equals(1);
         verify(Project::PRIORITY_HIGH)->equals(2);
         verify(Project::PRIORITY_CRITICAL)->equals(3);
+    }
+
+    // -------------------------------------------------------------------------
+    // Static helpers
+    // -------------------------------------------------------------------------
+
+    public function testGetKeyToIdCacheKey(): void
+    {
+        $key = Project::getKeyToIdCacheKey('01900000-0000-0001-0000-000000000001', 'TEST');
+        verify($key)->equals('project_key_to_id_01900000-0000-0001-0000-000000000001_TEST');
+    }
+
+    public function testGetVisibilities(): void
+    {
+        $visibilities = Project::getVisibilities();
+        verify($visibilities)->arrayHasKey(Project::VISIBILITY_PUBLIC);
+        verify($visibilities)->arrayHasKey(Project::VISIBILITY_PRIVATE);
+        verify($visibilities)->arrayHasKey(Project::VISIBILITY_TEAM);
+        verify(count($visibilities))->equals(3);
+    }
+
+    public function testGetPriorities(): void
+    {
+        $priorities = Project::getPriorities();
+        verify($priorities)->arrayHasKey(Project::PRIORITY_LOW);
+        verify($priorities)->arrayHasKey(Project::PRIORITY_MEDIUM);
+        verify($priorities)->arrayHasKey(Project::PRIORITY_HIGH);
+        verify($priorities)->arrayHasKey(Project::PRIORITY_CRITICAL);
+        verify(count($priorities))->equals(4);
+    }
+
+    // -------------------------------------------------------------------------
+    // Fields / attributeLabels
+    // -------------------------------------------------------------------------
+
+    public function testAttributeLabels(): void
+    {
+        $project = new Project();
+        $labels = $project->attributeLabels();
+        verify($labels)->arrayHasKey('id');
+        verify($labels['name'])->equals('Name');
+        verify($labels['key'])->equals('Key');
+        verify($labels['visibility'])->equals('Visibility');
+    }
+
+    public function testFields(): void
+    {
+        $project = Project::findOne(['key' => 'TEST']);
+        $fields = $project->fields();
+        verify($fields)->arrayContains('id');
+        verify($fields)->arrayContains('name');
+        verify($fields)->arrayContains('key');
+        verify($fields)->arrayContains('description');
+        verify($fields)->arrayContains('status');
+
+        verify($fields)->arrayHasKey('ownerId');
+        verify($fields)->arrayContains('owner_id');
+
+        verify($fields)->arrayContains('visibility');
+        verify($fields)->arrayContains('priority');
+
+        verify($fields)->arrayHasKey('isArchived');
+        verify($fields)->arrayContains('is_archived');
+
+        verify($fields)->arrayHasKey('createdAt');
+        verify($fields)->arrayContains('created_at');
+
+        verify($fields)->arrayHasKey('updatedAt');
+        verify($fields)->arrayContains('updated_at');
+
+        verify($fields)->arrayHasKey('archivedAt');
+        verify($fields)->arrayContains('archived_at');
+
+        verify($fields)->arrayHasKey('updatedBy');
+        verify($fields)->arrayContains('updated_by');
+    }
+
+    public function testExtraFields(): void
+    {
+        $project = Project::findOne(['key' => 'TEST']);
+        $extra = $project->extraFields();
+        verify($extra)->arrayHasKey('members');
+        verify($extra)->arrayHasKey('projectMembers');
+        verify($extra)->arrayHasKey('issueCount');
+        verify($extra)->arrayHasKey('memberCount');
+        verify($extra)->arrayContains('owner');
+    }
+
+    // -------------------------------------------------------------------------
+    // Additional relations
+    // -------------------------------------------------------------------------
+
+    public function testGetIssues(): void
+    {
+        $project = Project::findOne(['key' => 'TEST']);
+        verify($project->issues)->notEmpty();
+    }
+
+    public function testGetMembers(): void
+    {
+        $project = Project::findOne(['key' => 'TEST']);
+        verify($project->members)->notEmpty();
+    }
+
+    public function testGetUpdator(): void
+    {
+        $project = Project::findOne(['key' => 'TEST']);
+        verify($project->updator)->null(); // updated_by is null in fixture
+    }
+
+    public function testGetEffectiveProjectMembersForPublicProject(): void
+    {
+        $project = Project::findOne(['key' => 'TEST']); // PUBLIC
+        $members = $project->getEffectiveProjectMembers();
+        verify($members)->notEmpty();
+    }
+
+    public function testGetEffectiveProjectMembersForTeamProject(): void
+    {
+        $project = Project::findOne(['key' => 'TEAM']); // TEAM — returns stored members
+        $members = $project->getEffectiveProjectMembers();
+        verify($members)->notEmpty();
+    }
+
+    public function testGetEffectiveMembersForPublicProject(): void
+    {
+        $project = Project::findOne(['key' => 'TEST']); // PUBLIC
+        $members = $project->getEffectiveMembers();
+        verify($members)->notEmpty();
+    }
+
+    public function testGetEffectiveMembersForTeamProject(): void
+    {
+        $project = Project::findOne(['key' => 'TEAM']); // TEAM — returns stored members
+        $members = $project->getEffectiveMembers();
+        verify($members)->notEmpty();
+    }
+
+    // -------------------------------------------------------------------------
+    // Status / visibility helpers
+    // -------------------------------------------------------------------------
+
+    public function testIsActive(): void
+    {
+        $active = Project::findOne(['key' => 'TEST']);
+        verify($active->isActive())->true();
+
+        $onHold = Project::findOne(['key' => 'PRIV']);
+        verify($onHold->isActive())->false();
+    }
+
+    public function testIsTeamProject(): void
+    {
+        $team = Project::findOne(['key' => 'TEAM']);
+        verify($team->isTeamProject())->true();
+
+        $pub = Project::findOne(['key' => 'TEST']);
+        verify($pub->isTeamProject())->false();
+    }
+
+    public function testIsPrivateProject(): void
+    {
+        $priv = Project::findOne(['key' => 'PRIV']);
+        verify($priv->isPrivateProject())->true();
+
+        $pub = Project::findOne(['key' => 'TEST']);
+        verify($pub->isPrivateProject())->false();
+    }
+
+    public function testIsPublicProject(): void
+    {
+        $pub = Project::findOne(['key' => 'TEST']);
+        verify($pub->isPublicProject())->true();
+
+        $priv = Project::findOne(['key' => 'PRIV']);
+        verify($priv->isPublicProject())->false();
+    }
+
+    // -------------------------------------------------------------------------
+    // Membership checks
+    // -------------------------------------------------------------------------
+
+    public function testIsMemberForPublicProject(): void
+    {
+        $project = Project::findOne(['key' => 'TEST']); // PUBLIC
+
+        // bayer.hudson is org owner → org member → project member
+        verify($project->isMember('01900000-0000-0000-0000-000000000001'))->true();
+        // jane.doe is org member
+        verify($project->isMember('01900000-0000-0000-0000-000000000002'))->true();
+        // random unknown user is not
+        verify($project->isMember('00000000-0000-0000-0000-000000000099'))->false();
+    }
+
+    public function testIsMemberForTeamProject(): void
+    {
+        $project = Project::findOne(['key' => 'TEAM']); // TEAM
+
+        // bayer.hudson is a stored project member
+        verify($project->isMember('01900000-0000-0000-0000-000000000001'))->true();
+        // jane.doe is a stored project member
+        verify($project->isMember('01900000-0000-0000-0000-000000000002'))->true();
+        // admin.user is NOT a stored project member of TEAM
+        verify($project->isMember('01900000-0000-0000-0000-000000000003'))->false();
+    }
+
+    public function testIsMemberAdminForPublicProject(): void
+    {
+        $project = Project::findOne(['key' => 'TEST']); // PUBLIC
+
+        // admin.user has ADMIN role in test-org → org-level admin
+        verify($project->isMemberAdmin('01900000-0000-0000-0000-000000000003'))->true();
+        // jane.doe has MEMBER role → not admin
+        verify($project->isMemberAdmin('01900000-0000-0000-0000-000000000002'))->false();
+    }
+
+    // -------------------------------------------------------------------------
+    // beforeValidate & beforeSave hooks
+    // -------------------------------------------------------------------------
+
+    public function testBeforeValidateMissingOrganizationId(): void
+    {
+        unset($_GET['organization_id']);
+
+        $project = new Project([
+            'name'     => 'No Org ID',
+            'key'      => 'NOORGID',
+            'owner_id' => '01900000-0000-0000-0000-000000000001',
+        ]);
+
+        verify($project->validate())->false();
+        verify($project->errors)->arrayHasKey('organization_id');
+    }
+
+    public function testArchivingUpdatesArchivedAt(): void
+    {
+        $this->loginFixtureUser();
+
+        $project = Project::findOne(['key' => 'TEST']); // not archived
+        verify($project->archived_at)->null();
+
+        $project->is_archived = true;
+        $project->save(false);
+
+        verify($project->archived_at)->notNull();
+
+        // Unarchiving clears archived_at
+        $project->is_archived = false;
+        $project->save(false);
+
+        verify($project->archived_at)->null();
     }
 }

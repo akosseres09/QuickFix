@@ -247,4 +247,40 @@ class ProjectMemberTest extends Unit
         $member = ProjectMember::findOne('01900000-0000-0008-0000-000000000001');
         verify($member->updator)->null(); // No updated_by in fixture
     }
+
+    // -------------------------------------------------------------------------
+    // attributeLabels / fields / extraFields
+    // -------------------------------------------------------------------------
+
+    public function testAttributeLabels(): void
+    {
+        $member = new ProjectMember();
+        $labels = $member->attributeLabels();
+        verify($labels['id'])->equals('ID');
+        verify($labels['project_id'])->equals('Project ID');
+        verify($labels['user_id'])->equals('User ID');
+        verify($labels['role'])->equals('Role');
+    }
+
+    public function testFields(): void
+    {
+        $member = ProjectMember::findOne('01900000-0000-0008-0000-000000000001');
+        $fields = $member->fields();
+        verify($fields)->arrayContains('id');
+        verify($fields)->arrayContains('role');
+        verify($fields)->arrayHasKey('projectId');
+        verify($fields)->arrayContains('project_id');
+        verify($fields)->arrayHasKey('userId');
+        verify($fields)->arrayContains('user_id');
+    }
+
+    public function testExtraFields(): void
+    {
+        $member = ProjectMember::findOne('01900000-0000-0008-0000-000000000001');
+        $extra = $member->extraFields();
+        verify($extra)->arrayContains('project');
+        verify($extra)->arrayContains('user');
+        verify($extra)->arrayContains('updator');
+        verify($extra)->arrayContains('creator');
+    }
 }

@@ -243,4 +243,47 @@ class WorktimeTest extends Unit
         verify($wt2->updator)->notNull();
         verify($wt2->updator->username)->equals('jane.doe');
     }
+
+    // -------------------------------------------------------------------------
+    // fields / extraFields
+    // -------------------------------------------------------------------------
+
+    public function testFields(): void
+    {
+        $worktime = Worktime::findOne('01900000-0000-0006-0000-000000000001');
+        $fields = $worktime->fields();
+        verify($fields)->arrayContains('id');
+
+        verify($fields)->arrayHasKey('issueId');
+        verify($fields)->arrayContains('issue_id');
+
+        verify($fields)->arrayHasKey('minutesSpent');
+        verify($fields)->arrayContains('minutes_spent');
+
+        verify($fields)->arrayContains('description');
+
+        verify($fields)->arrayHasKey('loggedAt');
+        verify($fields)->arrayContains('logged_at');
+
+        verify($fields)->arrayHasKey('createdAt');
+        verify($fields)->arrayContains('created_at');
+
+        verify($fields)->arrayHasKey('updatedAt');
+        verify($fields)->arrayContains('updated_at');
+
+        verify($fields)->arrayHasKey('updatedBy');
+        verify($fields)->arrayContains('updated_by');
+
+        verify($fields)->arrayHasKey('createdBy');
+        verify($fields)->arrayContains('created_by');
+    }
+
+    public function testExtraFields(): void
+    {
+        $worktime = Worktime::findOne('01900000-0000-0006-0000-000000000001');
+        $extra = $worktime->extraFields();
+        verify($extra)->arrayContains('issue');
+        verify($extra)->arrayContains('creator');
+        verify($extra)->arrayContains('updator');
+    }
 }

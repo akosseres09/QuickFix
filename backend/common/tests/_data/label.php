@@ -8,7 +8,7 @@ use common\models\Label;
 return [
     [
         'id'          => '01900000-0000-0003-0000-000000000001',
-        'project_id'  => '01900000-0000-0002-0000-000000000001',
+        'project_id'  => null,
         'name'        => Label::STATUS_OPEN,
         'description' => 'Issue is open and active.',
         'index'       => 1,
@@ -16,7 +16,7 @@ return [
     ],
     [
         'id'          => '01900000-0000-0003-0000-000000000002',
-        'project_id'  => '01900000-0000-0002-0000-000000000001',
+        'project_id'  => null,
         'name'        => Label::STATUS_CLOSED,
         'description' => 'Issue has been resolved.',
         'index'       => 2,
@@ -32,10 +32,35 @@ return [
     ],
     [
         'id'          => '01900000-0000-0003-0000-000000000004',
+        'project_id'  => '01900000-0000-0002-0000-000000000001',
+        'name'        => 'Needs Review',
+        'description' => 'Issue is ready for review.',
+        'index'       => 4,
+        'color'       => '#3b82f6',
+    ],
+    [
+        'id'          => '01900000-0000-0003-0000-000000000005',
+        'project_id'  => '01900000-0000-0002-0000-000000000001',
+        'name'        => 'Blocked',
+        'description' => 'Issue is blocked and cannot proceed.',
+        'index'       => 5,
+        'color'       => '#f59e0b',
+    ],
+    [
+        'id'          => '01900000-0000-0003-0000-000000000006',
         'project_id'  => '01900000-0000-0002-0000-000000000002',
-        'name'        => Label::STATUS_OPEN,
-        'description' => 'Open label for private project.',
+        'name'        => 'New',
+        'description' => 'Issue is new and has not been started.',
         'index'       => 1,
         'color'       => '#22c55e',
     ],
+    [
+        'id'          => '01900000-0000-0003-0000-000000000007',
+        'project_id'  => '01900000-0000-0002-0000-000000000002',
+        'name'        => 'Blocked',
+        'description' => 'Issue is blocked and cannot proceed.',
+        'index'       => 2,
+        'color'       => '#ef4444',
+    ],
+
 ];

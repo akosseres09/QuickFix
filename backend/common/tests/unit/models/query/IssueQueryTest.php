@@ -225,4 +225,14 @@ class IssueQueryTest extends Unit
 
         verify(count($results))->equals(3);
     }
+
+    // -------------------------------------------------------------------------
+    // byStatus
+    // -------------------------------------------------------------------------
+
+    public function testByStatusReturnsQueryObject(): void
+    {
+        $query = Issue::find()->byStatus(0);
+        verify($query)->instanceOf(\common\models\query\IssueQuery::class);
+    }
 }

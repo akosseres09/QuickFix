@@ -454,6 +454,11 @@ class User extends BaseModel implements IdentityInterface
         $this->password_reset_token_expires_at = null;
     }
 
+    public function setEmailTokenExpireDate(): void
+    {
+        $this->email_verification_token_expires_at = time() + self::TOKEN_EXPIRE;
+    }
+
     public function setProfilePictureUrl(): void
     {
         $url = $this->generateProfilePictureUrl();

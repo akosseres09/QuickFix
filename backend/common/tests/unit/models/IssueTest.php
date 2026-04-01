@@ -315,4 +315,151 @@ class IssueTest extends Unit
         $key = $issue->generateIssueKey();
         verify($key)->null();
     }
+
+    // -------------------------------------------------------------------------
+    // fields / extraFields
+    // -------------------------------------------------------------------------
+
+    public function testFields(): void
+    {
+        $issue = Issue::findOne(['issue_key' => 'TEST-1']);
+        $fields = $issue->fields();
+
+        verify($fields)->arrayContains('id');
+
+        verify($fields)->arrayHasKey('projectId');
+        verify($fields)->arrayContains('project_id');
+
+        verify($fields)->arrayHasKey('issueKey');
+        verify($fields)->arrayContains('issue_key');
+
+        verify($fields)->arrayContains('title');
+        verify($fields)->arrayContains('description');
+        verify($fields)->arrayContains('type');
+
+        verify($fields)->arrayHasKey('statusLabel');
+        verify($fields)->arrayContains('status_label');
+
+        verify($fields)->arrayContains('priority');
+
+        verify($fields)->arrayHasKey('createdBy');
+        verify($fields)->arrayContains('created_by');
+
+        verify($fields)->arrayHasKey('assignedTo');
+        verify($fields)->arrayContains('assigned_to');
+
+        verify($fields)->arrayHasKey('createdAt');
+        verify($fields)->arrayContains('created_at');
+
+        verify($fields)->arrayHasKey('updatedAt');
+        verify($fields)->arrayContains('updated_at');
+
+        verify($fields)->arrayHasKey('closedAt');
+        verify($fields)->arrayContains('closed_at');
+
+        verify($fields)->arrayHasKey('dueDate');
+        verify($fields)->arrayContains('due_date');
+
+        verify($fields)->arrayHasKey('isArchived');
+        verify($fields)->arrayContains('is_archived');
+
+        verify($fields)->arrayHasKey('isDraft');
+        verify($fields)->arrayContains('is_draft');
+    }
+
+    public function testExtraFields(): void
+    {
+        $issue = Issue::findOne(['issue_key' => 'TEST-1']);
+        $extra = $issue->extraFields();
+
+        verify($extra)->arrayContains('project');
+        verify($extra)->arrayContains('creator');
+        verify($extra)->arrayContains('assignee');
+        verify($extra)->arrayContains('label');
+    }
+
+    // -------------------------------------------------------------------------
+    // getUpdator relation
+    // -------------------------------------------------------------------------
+
+    public function testGetUpdator(): void
+    {
+        $issue = Issue::findOne(['issue_key' => 'TEST-1']);
+        verify($issue->updator)->notNull();
+        verify($issue->updator->username)->equals('bayer.hudson');
+
+        $issue3 = Issue::findOne(['issue_key' => 'TEST-3']);
+        verify($issue3->updator)->null();
+    }
+
+    // -------------------------------------------------------------------------
+    // openIssue / closeIssue
+    // -------------------------------------------------------------------------
+
+    public function testOpenAndCloseIssue(): void
+    {
+        $this->loginFixtureUser();
+
+        // TEST-1 is open, close it
+        $issue = Issue::findOne(['issue_key' => 'TEST-1']);
+        verify($issue->label->name)->equals(Label::STATUS_OPEN);
+
+        $issue->closeIssue();
+        verify($issue->status_label)->notEmpty();
+        verify($issue->closed_at)->notNull();
+        verify($issue->closed_at)->lessThanOrEqual(time() + 2);
+
+        // Reopen it  
+        $issue->openIssue();
+        verify($issue->closed_at)->null();
+        // status_label is now the open label ID
+        verify($issue->status_label)->notEmpty();
+    }
+
+    // -------------------------------------------------------------------------
+    // canAccess — null project
+    // -------------------------------------------------------------------------
+
+    public function testCanAccessReturnsFalseWithNoProject(): void
+    {
+        $issue = Issue::findOne(['issue_key' => 'TEST-1']);
+        $issue->populateRelation('project', null);
+
+        verify($issue->canAccess('01900000-0000-0000-0000-000000000001'))->false();
+    }
+
+    // -------------------------------------------------------------------------
+    // beforeValidate — missing project_id
+    // -------------------------------------------------------------------------
+
+    public function testBeforeValidateFailsWhenProjectIdMissing(): void
+    {
+        unset($_GET['project_id']);
+
+        $issue = new Issue([
+            'title'        => 'No Project',
+            'status_label' => '01900000-0000-0003-0000-000000000001',
+        ]);
+
+        verify($issue->validate())->false();
+        verify($issue->getErrors('project_id'))->arrayContains('Project ID is required.');
+    }
+
+    // -------------------------------------------------------------------------
+    // beforeSave — update path
+    // -------------------------------------------------------------------------
+
+    public function testUpdateDoesNotRegenerateUuid(): void
+    {
+        $this->loginFixtureUser();
+
+        $issue = Issue::findOne(['issue_key' => 'TEST-1']);
+        $originalId = $issue->id;
+
+        $issue->title = 'Updated title';
+        $saved = $issue->save();
+
+        verify($saved)->true();
+        verify($issue->id)->equals($originalId);
+    }
 }

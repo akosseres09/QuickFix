@@ -45,6 +45,10 @@ class OrganizationTest extends Unit
             'organization_member' => [
                 'class' => OrganizationMemberFixture::class,
             ],
+            'project' => [
+                'class' => \common\fixtures\ProjectFixture::class,
+                'dataFile' => codecept_data_dir() . 'project.php',
+            ],
         ];
     }
 
@@ -168,5 +172,111 @@ class OrganizationTest extends Unit
 
         // Soft-delete check: the fixture row has no deleted_at, so it should be found.
         verify($org->deleted_at)->null();
+    }
+
+    // -------------------------------------------------------------------------
+    // Static helpers
+    // -------------------------------------------------------------------------
+
+    public function testGetSlugToIdCache(): void
+    {
+        $key = Organization::getSlugToIdCache('test-org');
+        verify($key)->equals('organization_slug_to_id_test-org');
+    }
+
+    // -------------------------------------------------------------------------
+    // fields / extraFields
+    // -------------------------------------------------------------------------
+
+    public function testFields(): void
+    {
+        $org = Organization::findOne(['slug' => 'test-org']);
+        $fields = $org->fields();
+
+        verify($fields)->arrayContains('id');
+        verify($fields)->arrayContains('name');
+        verify($fields)->arrayContains('slug');
+
+        verify($fields)->arrayHasKey('ownerId');
+        verify($fields)->arrayContains('owner_id');
+
+        verify($fields)->arrayHasKey('logoUrl');
+        verify($fields)->arrayContains('logo_url');
+
+        verify($fields)->arrayHasKey('createdAt');
+        verify($fields)->arrayContains('created_at');
+
+        verify($fields)->arrayHasKey('updatedAt');
+        verify($fields)->arrayContains('updated_at');
+
+        verify($fields)->arrayHasKey('updatedBy');
+        verify($fields)->arrayContains('updated_by');
+
+        verify($fields)->arrayHasKey('deletedAt');
+        verify($fields)->arrayContains('deleted_at');
+    }
+
+    public function testExtraFieldsMemberCount(): void
+    {
+        $org = Organization::findOne(['slug' => 'test-org']);
+        $extra = $org->extraFields();
+
+        // memberCount and projectCount should be callable extra fields
+        verify($extra)->arrayHasKey('memberCount');
+        verify($extra)->arrayHasKey('projectCount');
+        verify($extra)->arrayContains('owner');
+        verify($extra)->arrayContains('projects');
+        verify($extra)->arrayContains('organizationMembers');
+    }
+
+    // -------------------------------------------------------------------------
+    // Relations
+    // -------------------------------------------------------------------------
+
+    public function testGetOwner(): void
+    {
+        $org = Organization::findOne(['slug' => 'test-org']);
+        verify($org->owner)->notNull();
+        verify($org->owner->username)->equals('bayer.hudson');
+    }
+
+    public function testGetProjects(): void
+    {
+        $org = Organization::findOne(['slug' => 'test-org']);
+        verify($org->projects)->notEmpty();
+    }
+
+    public function testGetOrganizationMembers(): void
+    {
+        $org = Organization::findOne(['slug' => 'test-org']);
+        verify($org->organizationMembers)->notEmpty();
+    }
+
+    public function testGetOrganizationMemberCount(): void
+    {
+        $org = Organization::findOne(['slug' => 'test-org']);
+        $count = $org->getOrganizationMemberCount();
+        // 3 members: owner + 1 member + 1 admin in fixtures
+        verify($count)->greaterThanOrEqual(2);
+    }
+
+    public function testGetUpdator(): void
+    {
+        $org = Organization::findOne(['slug' => 'test-org']);
+        // updated_by is null in fixture
+        verify($org->updator)->null();
+    }
+
+    // -------------------------------------------------------------------------
+    // memberCount / projectCount via extraFields closure
+    // -------------------------------------------------------------------------
+
+    public function testMemberCountExtraField(): void
+    {
+        $org = Organization::findOne(['slug' => 'test-org']);
+        $extra = $org->extraFields();
+
+        $memberCount = $extra['memberCount']($org);
+        verify($memberCount)->greaterThanOrEqual(2);
     }
 }
