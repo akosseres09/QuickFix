@@ -9,9 +9,12 @@ use common\fixtures\OrganizationInvitationFixture;
 use common\fixtures\OrganizationMemberFixture;
 use common\fixtures\UserFixture;
 use common\models\OrganizationInvitation;
+use common\models\OrganizationMember;
 use common\models\User;
 use common\tests\UnitTester;
+use ReflectionClass;
 use Yii;
+use yii\base\Event;
 use yii\db\ActiveRecord;
 
 /**
@@ -519,5 +522,70 @@ class OrganizationInvitationTest extends Unit
         // 3. Assert that the IDs and expiration dates remained untouched
         verify($invitation->id)->equals($originalId);
         verify($invitation->expires_at)->equals($originalExpiresAt);
+    }
+
+    public function testUserNotFoundInAfterSave(): void
+    {
+        $orgInv = OrganizationInvitation::findOne(['id' => '01900000-0000-0009-0000-000000000001']);
+
+        $orgInv->status = OrganizationInvitation::STATUS_ACCEPTED;
+
+        $this->expectException(\yii\web\ServerErrorHttpException::class);
+        $this->expectExceptionMessage('Cannot accept invitation: User does not exist.');
+
+        $orgInv->save();
+    }
+
+    public function testCreateOrganizationMemberCalledOnAccept(): void
+    {
+
+        $orgInv = OrganizationInvitation::findOne(['id' => '01900000-0000-0009-0000-000000000005']);
+        $originalStatus = $orgInv->status;
+        $orgInv->status = OrganizationInvitation::STATUS_ACCEPTED;
+
+        // We expect this to succeed without exception, which means createOrganizationMember was called and found the user
+        verify($orgInv->save())->true();
+
+        $updatedInv = OrganizationInvitation::findOne(['id' => '01900000-0000-0009-0000-000000000005']);
+        verify($updatedInv->status)->notEquals($originalStatus); // Status should have been updated to accepted);
+        verify($updatedInv->status)->equals(OrganizationInvitation::STATUS_ACCEPTED);
+
+        $userId = User::find()->select('id')->where(['email' => $updatedInv->email])->scalar();
+        $orgMember = OrganizationMember::findOne([
+            'organization_id' => $updatedInv->organization_id,
+            'user_id' => $userId,
+            'role' => $updatedInv->role,
+        ]);
+
+        verify($orgMember)->notNull();
+    }
+
+    public function testCreateOrganizationMemberTransactionFailsWhenOwnerCanNotBeSaved(): void
+    {
+        $orgInv = OrganizationInvitation::findOne(['id' => '01900000-0000-0009-0000-000000000005']);
+
+        $orgInv->status = OrganizationInvitation::STATUS_ACCEPTED;
+
+        // Intercept the event and force it to fail right before the organization member save
+        Event::on(OrganizationMember::class, ActiveRecord::EVENT_BEFORE_INSERT, function ($event) {
+            $event->isValid = false;
+        });
+
+        // We expect this to throw an exception due to the failed transaction
+        $this->expectException(\yii\db\Exception::class);
+        $this->expectExceptionMessageMatches('/Transaction aborted: Could not save Organization Member. /');
+
+        $orgInv->save();
+    }
+
+    public function testSendInvitationEmailCalledWithNoOrganizationInvitation(): void
+    {
+        $invitation = new OrganizationInvitation();
+        $invitation->id = '00000000-0000-0000-0000-000000000000'; // non-existent
+
+        $method = (new ReflectionClass($invitation))->getMethod('sendInvitationEmail');
+
+        $method->invoke($invitation);
+        verify($invitation->id)->equals('00000000-0000-0000-0000-000000000000');
     }
 }
