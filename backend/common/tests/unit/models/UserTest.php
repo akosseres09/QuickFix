@@ -2,6 +2,7 @@
 
 namespace common\tests\unit\models;
 
+use api\components\traits\AccessTokenHandler;
 use Codeception\Test\Unit;
 use common\fixtures\OrganizationFixture;
 use common\fixtures\OrganizationMemberFixture;
@@ -14,10 +15,13 @@ use common\models\User;
 use common\models\UserRole;
 use common\models\UserStatus;
 use common\tests\UnitTester;
+use Yii;
 
 class UserTest extends Unit
 {
+    use AccessTokenHandler;
     protected UnitTester $tester;
+    private $jwtConfig;
 
     public function _fixtures(): array
     {
@@ -45,6 +49,11 @@ class UserTest extends Unit
                 'class' => IssueFixture::class,
             ],
         ];
+    }
+
+    private function setupJwtConfig(): void
+    {
+        $this->jwtConfig = Yii::$app->get('jwt');
     }
 
     // -------------------------------------------------------------------------
@@ -461,13 +470,22 @@ class UserTest extends Unit
         verify($deletedUser->isActive())->false();
     }
 
-    public function testGenerateProfilePictureUrl(): void
+    public function testGenerateProfilePictureUrlWithFullName(): void
     {
         $user = User::findOne(['username' => 'bayer.hudson']);
         $url = $user->generateProfilePictureUrl();
 
         verify($url)->stringContainsString('ui-avatars.com');
         verify($url)->stringContainsString(urlencode($user->getFullName()));
+    }
+
+    public function testGenerateProfilePictureUrlWithNoName(): void
+    {
+        $user = new User(['username' => 'nonameuser']);
+        $url = $user->generateProfilePictureUrl();
+
+        verify($url)->stringContainsString('ui-avatars.com');
+        verify($url)->stringContainsString(urlencode('nonameuser'));
     }
 
     // -------------------------------------------------------------------------
@@ -557,7 +575,9 @@ class UserTest extends Unit
         verify($fields)->arrayContains('profile_picture_url');
 
         verify($fields)->arrayHasKey('fullName');
-        verify($fields['fullName'])->isCallable();
+        $fullName = $fields['fullName'];
+        verify($fullName)->isCallable();
+        verify($fullName($user))->equals('Bayer Hudson');
     }
 
     public function testFieldsNotDefaultScenario(): void
@@ -600,6 +620,20 @@ class UserTest extends Unit
 
         verify($fields)->arrayHasKey('passwordHash');
         verify($fields)->arrayContains('password_hash');
+    }
+
+    public function testExtraFields(): void
+    {
+        $user = User::findOne(['username' => 'bayer.hudson']);
+        $extraFields = $user->extraFields();
+
+        verify($extraFields)->arrayContains('refreshTokens');
+        verify($extraFields)->arrayContains('organizations');
+        verify($extraFields)->arrayContains('organizationMemberships');
+        verify($extraFields)->arrayContains('projects');
+        verify($extraFields)->arrayContains('projectMemberships');
+        verify($extraFields)->arrayContains('createdIssues');
+        verify($extraFields)->arrayContains('assignedIssues');
     }
 
     // -------------------------------------------------------------------------
@@ -659,5 +693,19 @@ class UserTest extends Unit
     {
         $user = User::findIdentityByAccessToken('this-is-not-a-valid-jwt-token');
         verify($user)->null();
+    }
+
+    public function testFindIdentityByAccessTokenWithValidToken(): void
+    {
+        $this->setupJwtConfig();
+
+        $user = User::findOne(['username' => 'bayer.hudson']);
+        $jwt = $this->createAccessToken($user->id, $user->getRole(), 3600);
+
+        $foundUser = User::findIdentityByAccessToken($jwt->toString());
+
+        verify($foundUser)->notNull();
+        verify($foundUser->id)->equals($user->id);
+        verify($foundUser->username)->equals($user->username);
     }
 }

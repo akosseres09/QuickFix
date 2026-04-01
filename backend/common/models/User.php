@@ -3,11 +3,10 @@
 namespace common\models;
 
 use api\models\UserRefreshToken;
+use common\components\services\JwtValidationService;
 use common\components\behaviors\InvalidateCacheBehavior;
 use common\models\query\UserQuery;
-use Lcobucci\JWT\UnencryptedToken;
 use Symfony\Component\Uid\Uuid;
-use Throwable;
 use Yii;
 use yii\web\IdentityInterface;
 
@@ -206,25 +205,16 @@ class User extends BaseModel implements IdentityInterface
      */
     public static function findIdentityByAccessToken($token, $type = null)
     {
-        try {
-            $config = Yii::$app->get('jwt');
+        // Resolve the service and pass in the global dependency once
+        $jwtConfig = Yii::$app->get('jwt');
+        $service = new JwtValidationService($jwtConfig);
 
-            $parsedToken = $config->parser()->parse($token);
-            assert($parsedToken instanceof UnencryptedToken);
-
-            $constraints = $config->validationConstraints();
-
-            if (!$config->validator()->validate($parsedToken, ...$constraints)) {
-                return null;
-            }
-
-            $userId = $parsedToken->claims()->get('uid');
-
-            return static::findIdentity($userId);
-        } catch (Throwable $e) {
-            Yii::error('Error parsing access token: ' . $e->getMessage(), __METHOD__);
+        $userId = $service->getUserIdFromToken($token);
+        if ($userId === null) {
             return null;
         }
+
+        return static::findIdentity($userId);
     }
 
     /**
@@ -467,7 +457,7 @@ class User extends BaseModel implements IdentityInterface
 
     public function generateProfilePictureUrl(): string
     {
-        $fullName = $this->getFullName();
+        $fullName = trim($this->getFullName());
         if ($fullName) {
             return 'https://ui-avatars.com/api/?name=' . urlencode($fullName) . '&background=random&size=256';
         }

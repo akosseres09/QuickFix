@@ -14,6 +14,7 @@ use common\models\ProjectMember;
 use common\models\User;
 use common\tests\UnitTester;
 use Yii;
+use yii\db\ActiveRecord;
 
 class ProjectMemberTest extends Unit
 {
@@ -148,6 +149,34 @@ class ProjectMemberTest extends Unit
 
         verify($member->validate())->true();
     }
+
+    // -------------------------------------------------------------------------
+    // beforeValidate
+    // -------------------------------------------------------------------------
+
+    public function testBeforeValidateFailsWhenParentBeforeValidateFails(): void
+    {
+        $member = new ProjectMember([
+            'project_id' => '00000000-0000-0000-0000-000000000099', // non-existent project
+            'user_id'    => '01900000-0000-0000-0000-000000000003',
+            'role'       => RoleManager::ROLE_ADMIN,
+        ]);
+
+        $member->on(ActiveRecord::EVENT_BEFORE_VALIDATE, function ($event) {
+            $event->isValid = false;
+        });
+
+        verify($member->validate())->false();
+    }
+
+    public function testBeforeValidateReturnsEarlyWhenMemberExists(): void
+    {
+        unset($_GET['project_id']);
+
+        $member = ProjectMember::findOne('01900000-0000-0008-0000-000000000001');
+        verify($member->validate())->true();
+    }
+
 
     // -------------------------------------------------------------------------
     // beforeSave & UUID generation
