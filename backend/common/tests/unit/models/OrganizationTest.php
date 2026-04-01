@@ -10,6 +10,7 @@ use common\models\Organization;
 use common\models\OrganizationMember;
 use common\models\User;
 use Codeception\Test\Unit;
+use common\tests\UnitTester;
 use Yii;
 
 /**
@@ -28,8 +29,7 @@ use Yii;
  */
 class OrganizationTest extends Unit
 {
-    /** @var \common\tests\UnitTester */
-    protected $tester;
+    protected UnitTester $tester;
 
     public function _fixtures(): array
     {

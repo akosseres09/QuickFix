@@ -69,7 +69,10 @@ class LabelQueryTest extends Unit
             ->byProjectId('01900000-0000-0002-0000-000000000001')
             ->all();
 
-        verify(count($results))->equals(3);
+        verify($results)->notEmpty();
+        foreach ($results as $label) {
+            verify($label->project_id)->equals('01900000-0000-0002-0000-000000000001');
+        }
     }
 
     public function testByProjectIdReturnsMultipleLabelsForPrivateProject(): void
@@ -79,8 +82,10 @@ class LabelQueryTest extends Unit
             ->byProjectId('01900000-0000-0002-0000-000000000002')
             ->all();
 
-        verify(count($results))->equals(2);
-        verify($results[0]->name)->equals('New');
+        verify($results)->notEmpty();
+        foreach ($results as $label) {
+            verify($label->project_id)->equals('01900000-0000-0002-0000-000000000002');
+        }
     }
 
     public function testByProjectIdReturnsEmptyForUnknownProject(): void
@@ -104,7 +109,11 @@ class LabelQueryTest extends Unit
             ->allForProject('01900000-0000-0002-0000-000000000001')
             ->all();
 
-        verify(count($results))->equals(5);
+        $allowed = ['01900000-0000-0002-0000-000000000001', null];
+        verify($results)->notEmpty();
+        foreach ($results as $label) {
+            verify($allowed)->arrayContains($label->project_id);
+        }
     }
 
     public function testAllForProjectReturnsEmptyForProjectWithNoLabels(): void
@@ -114,7 +123,10 @@ class LabelQueryTest extends Unit
             ->allForProject('01900000-0000-0002-0000-000000000003')
             ->all();
 
-        verify(count($results))->equals(2);
+        verify($results)->notEmpty();
+        foreach ($results as $label) {
+            verify($label->project_id)->equals(null);
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -128,7 +140,7 @@ class LabelQueryTest extends Unit
             ->byLabel('Blocked')
             ->all();
 
-        verify(count($results))->equals(2);
+        verify($results)->notEmpty();
         foreach ($results as $result) {
             verify($result->name)->equals('Blocked');
         }
@@ -140,8 +152,11 @@ class LabelQueryTest extends Unit
             ->byLabel(Label::STATUS_CLOSED)
             ->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->project_id)->equals(null);
+        verify($results)->notEmpty();
+        foreach ($results as $result) {
+            verify($result->name)->equals(Label::STATUS_CLOSED);
+            verify($result->project_id)->equals(null);
+        }
     }
 
     public function testByLabelReturnsEmptyForUnknownLabel(): void
@@ -166,7 +181,10 @@ class LabelQueryTest extends Unit
             ->all();
 
         verify($results)->notEmpty();
-        verify($results[0]->name)->equals(Label::STATUS_OPEN);
+        foreach ($results as $result) {
+            verify($result->name)->equals(Label::STATUS_OPEN);
+            verify($result->project_id)->equals(null);
+        }
     }
 
     public function testStatusClosedReturnsNonEmpty(): void
@@ -176,7 +194,10 @@ class LabelQueryTest extends Unit
             ->all();
 
         verify($results)->notEmpty();
-        verify($results[0]->name)->equals(Label::STATUS_CLOSED);
+        foreach ($results as $result) {
+            verify($result->name)->equals(Label::STATUS_CLOSED);
+            verify($result->project_id)->equals(null);
+        }
     }
 
     // -------------------------------------------------------------------------

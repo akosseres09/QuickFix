@@ -78,7 +78,7 @@ class PasswordResetRequestFormTest extends Unit
         verify($model->errors)->arrayHasNotKey('email');
     }
 
-    public function testSendEmail()
+    public function testSendEmailWhenTokenNotExpired()
     {
         $user = $this->tester->grabFixture('user', 0);
 
@@ -88,6 +88,25 @@ class PasswordResetRequestFormTest extends Unit
 
         $resetTokenBefore = $user['password_reset_token'];
 
+        verify($model->validate())->true();
+        verify($model->sendEmail())->true();
+
+        $newResetToken = Yii::$app->db->createCommand('SELECT password_reset_token FROM {{%user}} WHERE id = :id')
+            ->bindValue(':id', $user['id'])
+            ->queryScalar();
+
+        verify($newResetToken)->notEmpty();
+        verify($newResetToken)->equals($resetTokenBefore);
+    }
+
+    public function testSendEmailWhenTokenIsExpired()
+    {
+        $user = $this->tester->grabFixture('user', 5);
+        $model = new PasswordResetRequestForm([
+            'email' => $user['email']
+        ]);
+
+        $resetTokenBefore = $user['password_reset_token'];
         verify($model->validate())->true();
         verify($model->sendEmail())->true();
 

@@ -13,11 +13,12 @@ use common\fixtures\UserFixture;
 use common\fixtures\WorktimeFixture;
 use common\models\User;
 use common\models\Worktime;
+use common\tests\UnitTester;
 use Yii;
 
 class WorktimeTest extends Unit
 {
-    protected $tester;
+    protected UnitTester $tester;
 
     public function _fixtures(): array
     {

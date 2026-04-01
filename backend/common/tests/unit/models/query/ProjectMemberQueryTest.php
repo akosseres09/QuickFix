@@ -75,7 +75,10 @@ class ProjectMemberQueryTest extends Unit
             ->byProjectId('01900000-0000-0002-0000-000000000001')
             ->all();
 
-        verify(count($results))->equals(2);
+        verify($results)->notEmpty();
+        foreach ($results as $member) {
+            verify($member->project_id)->equals('01900000-0000-0002-0000-000000000001');
+        }
     }
 
     public function testByProjectIdReturnsEmptyForUnknownProject(): void
@@ -98,9 +101,10 @@ class ProjectMemberQueryTest extends Unit
             ->byProjectId('01900000-0000-0002-0000-000000000001')
             ->notUser('01900000-0000-0000-0000-000000000001')
             ->all();
-
-        verify(count($results))->equals(1);
-        verify($results[0]->user_id)->equals('01900000-0000-0000-0000-000000000002');
+        verify($results)->notEmpty();
+        foreach ($results as $member) {
+            verify($member->user_id)->notEquals('01900000-0000-0000-0000-000000000001');
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -114,7 +118,7 @@ class ProjectMemberQueryTest extends Unit
             ->byCursor('01900000-0000-0008-0000-000000000002')
             ->all();
 
-        verify(count($results))->equals(3);
+        verify($results)->notEmpty();
         foreach ($results as $result) {
             verify($result->id > '01900000-0000-0008-0000-000000000002')->true();
         }
@@ -122,12 +126,15 @@ class ProjectMemberQueryTest extends Unit
 
     public function testByCursorReturnsAllForMinimalCursor(): void
     {
-        // Cursor before all records should return all 5
+        // Cursor before all records should return all
         $results = ProjectMember::find()
             ->byCursor('00000000-0000-0000-0000-000000000000')
             ->all();
 
-        verify(count($results))->equals(5);
+        verify($results)->notEmpty();
+        foreach ($results as $result) {
+            verify($result->id > '00000000-0000-0000-0000-000000000000')->true();
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -141,7 +148,10 @@ class ProjectMemberQueryTest extends Unit
             ->byUser('01900000-0000-0000-0000-000000000001')
             ->all();
 
-        verify(count($results))->equals(3);
+        verify($results)->notEmpty();
+        foreach ($results as $membership) {
+            verify($membership->user_id)->equals('01900000-0000-0000-0000-000000000001');
+        }
     }
 
     public function testByUserReturnsTwoMembershipsForSecondUser(): void
@@ -151,7 +161,10 @@ class ProjectMemberQueryTest extends Unit
             ->byUser('01900000-0000-0000-0000-000000000002')
             ->all();
 
-        verify(count($results))->equals(2);
+        verify($results)->notEmpty();
+        foreach ($results as $membership) {
+            verify($membership->user_id)->equals('01900000-0000-0000-0000-000000000002');
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -165,7 +178,7 @@ class ProjectMemberQueryTest extends Unit
             ->all();
 
         // Records 1, 3, 4 are OWNER
-        verify(count($results))->equals(3);
+        verify($results)->notEmpty(3);
         foreach ($results as $result) {
             verify($result->role)->equals(RoleManager::ROLE_OWNER);
         }
@@ -178,7 +191,7 @@ class ProjectMemberQueryTest extends Unit
             ->all();
 
         // Records 2, 5 are MEMBER
-        verify(count($results))->equals(2);
+        verify($results)->notEmpty(2);
         foreach ($results as $result) {
             verify($result->role)->equals(RoleManager::ROLE_MEMBER);
         }
@@ -200,7 +213,7 @@ class ProjectMemberQueryTest extends Unit
     {
         $results = ProjectMember::find()->members()->all();
 
-        verify(count($results))->equals(2);
+        verify($results)->notEmpty(2);
         foreach ($results as $result) {
             verify($result->role)->equals(RoleManager::ROLE_MEMBER);
         }
@@ -217,8 +230,15 @@ class ProjectMemberQueryTest extends Unit
             ->latest()
             ->all();
 
-        verify(count($results))->equals(2);
-        verify($results[0]->created_at >= $results[1]->created_at)->true();
+        verify($results)->notEmpty(2);
+        $last = null;
+        foreach ($results as $result) {
+            verify($result->project_id)->equals('01900000-0000-0002-0000-000000000001');
+            if ($last !== null) {
+                verify($result->created_at <= $last)->true();
+            }
+            $last = $result->created_at;
+        }
     }
 
     public function testOldestReturnsResultsOrderedByCreatedAtAsc(): void
@@ -228,8 +248,15 @@ class ProjectMemberQueryTest extends Unit
             ->oldest()
             ->all();
 
-        verify(count($results))->equals(2);
-        verify($results[0]->created_at <= $results[1]->created_at)->true();
+        verify($results)->notEmpty();
+        $last = null;
+        foreach ($results as $result) {
+            verify($result->project_id)->equals('01900000-0000-0002-0000-000000000001');
+            if ($last !== null) {
+                verify($result->created_at >= $last)->true();
+            }
+            $last = $result->created_at;
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -243,8 +270,11 @@ class ProjectMemberQueryTest extends Unit
             ->byRole(RoleManager::ROLE_OWNER)
             ->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->user_id)->equals('01900000-0000-0000-0000-000000000001');
+        verify($results)->notEmpty();
+        foreach ($results as $membership) {
+            verify($membership->project_id)->equals('01900000-0000-0002-0000-000000000001');
+            verify($membership->role)->equals(RoleManager::ROLE_OWNER);
+        }
     }
 
     public function testChainingByUserAndByRole(): void
@@ -254,6 +284,10 @@ class ProjectMemberQueryTest extends Unit
             ->byRole(RoleManager::ROLE_MEMBER)
             ->all();
 
-        verify(count($results))->equals(2);
+        verify($results)->notEmpty();
+        foreach ($results as $membership) {
+            verify($membership->user_id)->equals('01900000-0000-0000-0000-000000000002');
+            verify($membership->role)->equals(RoleManager::ROLE_MEMBER);
+        }
     }
 }

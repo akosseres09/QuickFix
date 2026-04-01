@@ -19,6 +19,7 @@ return [
         'is_admin'     => UserRole::USER->value,
         'created_at'   => 1402312317,
         'updated_at'   => 1402312317,
+        'password_reset_token_expires_at' => 1802312317
     ],
     [
         'id'           => '01900000-0000-0000-0000-000000000002',
@@ -67,4 +68,37 @@ return [
         'updated_at'   => 1402312317,
         'deleted_at'   => 1402312400,
     ],
+    [
+        'id'           => '01900000-0000-0000-0000-000000000005',
+        'username'     => 'not-part-of-any-organization',
+        'first_name'   => 'Not',
+        'last_name'    => 'PartOfAnyOrganization',
+        'auth_key'     => 'HP187Mvq7Mmm3CTU80dLkGmni_FUH_lR',
+        // password_0
+        'password_hash'         => '$2y$13$EjaPFBnZOQsHdGuHI.xvhuDp1fHpo8hKRSk6yshqa9c5EG8s3C3lO',
+        'password_reset_token'  => null,
+        'verification_token'    => null,
+        'email'        => 'not.part.of.any.organization@example.com',
+        'status'       => UserStatus::ACTIVE->value,
+        'is_admin'     => UserRole::USER->value,
+        'created_at'   => 1402312317,
+        'updated_at'   => 1402312317,
+    ],
+    [
+        'id'           => '01900000-0000-0000-0000-000000000006',
+        'username'     => 'expired.password.token',
+        'first_name'   => 'Expired',
+        'last_name'    => 'Token',
+        'auth_key'     => 'HP187Mvq7Mmm3CTU80dLkGmni_FUH_lL',
+        // password_0
+        'password_hash'         => '$2y$13$EjaPFBnZOQsHdGuHI.xvhuDp1fHpo8hKRSk6yshqa9c5EG8s3C3lO',
+        'password_reset_token'  => 'expiredToken1234567890',
+        'password_reset_token_expires_at' => time() - 3600, // Set token to expired
+        'verification_token'    => null,
+        'email'        => 'expired.password.token@example.com',
+        'status'       => UserStatus::ACTIVE->value,
+        'is_admin'     => UserRole::USER->value,
+        'created_at'   => 1402312317,
+        'updated_at'   => 1402312317,
+    ]
 ];

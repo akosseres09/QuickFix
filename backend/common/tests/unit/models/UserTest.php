@@ -13,10 +13,11 @@ use common\fixtures\UserFixture;
 use common\models\User;
 use common\models\UserRole;
 use common\models\UserStatus;
+use common\tests\UnitTester;
 
 class UserTest extends Unit
 {
-    protected $tester;
+    protected UnitTester $tester;
 
     public function _fixtures(): array
     {

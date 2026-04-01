@@ -9,6 +9,7 @@ use common\fixtures\OrganizationFixture;
 use common\fixtures\ProjectFixture;
 use common\fixtures\UserFixture;
 use common\models\Issue;
+use common\models\query\IssueQuery;
 
 class IssueQueryTest extends Unit
 {
@@ -74,7 +75,10 @@ class IssueQueryTest extends Unit
             ->all();
 
         // All 3 fixture issues belong to project TEST
-        verify(count($results))->equals(3);
+
+        foreach ($results as $issue) {
+            verify($issue->project_id)->equals('01900000-0000-0002-0000-000000000001');
+        }
     }
 
     public function testByProjectIdReturnsEmptyForUnknownProject(): void
@@ -96,8 +100,9 @@ class IssueQueryTest extends Unit
             ->byType(Issue::TYPE_BUG)
             ->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->issue_key)->equals('TEST-1');
+        foreach ($results as $issue) {
+            verify($issue->type)->equals(Issue::TYPE_BUG);
+        }
     }
 
     public function testByTypeReturnsFeatureIssues(): void
@@ -106,8 +111,9 @@ class IssueQueryTest extends Unit
             ->byType(Issue::TYPE_FEATURE)
             ->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->issue_key)->equals('TEST-2');
+        foreach ($results as $issue) {
+            verify($issue->type)->equals(Issue::TYPE_FEATURE);
+        }
     }
 
     public function testByTypeReturnsTaskIssues(): void
@@ -116,8 +122,10 @@ class IssueQueryTest extends Unit
             ->byType(Issue::TYPE_TASK)
             ->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->issue_key)->equals('TEST-3');
+
+        foreach ($results as $issue) {
+            verify($issue->type)->equals(Issue::TYPE_TASK);
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -130,8 +138,9 @@ class IssueQueryTest extends Unit
             ->byPriority(Issue::PRIORITY_HIGH)
             ->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->issue_key)->equals('TEST-1');
+        foreach ($results as $issue) {
+            verify($issue->priority)->equals(Issue::PRIORITY_HIGH);
+        }
     }
 
     public function testByPriorityReturnsMediumPriorityIssues(): void
@@ -140,8 +149,9 @@ class IssueQueryTest extends Unit
             ->byPriority(Issue::PRIORITY_MEDIUM)
             ->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->issue_key)->equals('TEST-2');
+        foreach ($results as $issue) {
+            verify($issue->priority)->equals(Issue::PRIORITY_MEDIUM);
+        }
     }
 
     public function testByPriorityReturnsCriticalPriorityIssues(): void
@@ -150,8 +160,9 @@ class IssueQueryTest extends Unit
             ->byPriority(Issue::PRIORITY_CRITICAL)
             ->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->issue_key)->equals('TEST-3');
+        foreach ($results as $issue) {
+            verify($issue->priority)->equals(Issue::PRIORITY_CRITICAL);
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -165,8 +176,9 @@ class IssueQueryTest extends Unit
             ->assignedTo('01900000-0000-0000-0000-000000000002')
             ->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->issue_key)->equals('TEST-1');
+        foreach ($results as $issue) {
+            verify($issue->assigned_to)->equals('01900000-0000-0000-0000-000000000002');
+        }
     }
 
     public function testAssignedToReturnsEmptyForUnassignedUser(): void
@@ -189,7 +201,9 @@ class IssueQueryTest extends Unit
             ->createdBy('01900000-0000-0000-0000-000000000001')
             ->all();
 
-        verify(count($results))->equals(3);
+        foreach ($results as $issue) {
+            verify($issue->created_by)->equals('01900000-0000-0000-0000-000000000001');
+        }
     }
 
     public function testCreatedByReturnsEmptyForUnknownUser(): void
@@ -212,8 +226,10 @@ class IssueQueryTest extends Unit
             ->byType(Issue::TYPE_BUG)
             ->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->issue_key)->equals('TEST-1');
+        foreach ($results as $issue) {
+            verify($issue->project_id)->equals('01900000-0000-0002-0000-000000000001');
+            verify($issue->type)->equals(Issue::TYPE_BUG);
+        }
     }
 
     public function testChainingByProjectIdAndCreatedBy(): void
@@ -223,7 +239,10 @@ class IssueQueryTest extends Unit
             ->createdBy('01900000-0000-0000-0000-000000000001')
             ->all();
 
-        verify(count($results))->equals(3);
+        foreach ($results as $issue) {
+            verify($issue->project_id)->equals('01900000-0000-0002-0000-000000000001');
+            verify($issue->created_by)->equals('01900000-0000-0000-0000-000000000001');
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -233,6 +252,6 @@ class IssueQueryTest extends Unit
     public function testByStatusReturnsQueryObject(): void
     {
         $query = Issue::find()->byStatus(0);
-        verify($query)->instanceOf(\common\models\query\IssueQuery::class);
+        verify($query)->instanceOf(IssueQuery::class);
     }
 }

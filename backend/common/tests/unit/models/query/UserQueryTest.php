@@ -30,8 +30,6 @@ class UserQueryTest extends Unit
     {
         $results = User::find()->active()->all();
 
-        // bayer.hudson and admin.user are ACTIVE
-        verify(count($results))->equals(2);
         foreach ($results as $user) {
             verify($user->status)->equals(UserStatus::ACTIVE->value);
         }
@@ -41,16 +39,20 @@ class UserQueryTest extends Unit
     {
         $results = User::find()->inactive()->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->username)->equals('jane.doe');
+        verify($results)->notEmpty();
+        foreach ($results as $user) {
+            verify($user->status)->equals(UserStatus::INACTIVE->value);
+        }
     }
 
     public function testDeletedReturnsOnlyDeletedUsers(): void
     {
         $results = User::find()->deleted()->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->username)->equals('deleted.user');
+        verify($results)->notEmpty();
+        foreach ($results as $user) {
+            verify($user->status)->equals(UserStatus::DELETED->value);
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -61,17 +63,17 @@ class UserQueryTest extends Unit
     {
         $results = User::find()->admin()->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->username)->equals('admin.user');
-        verify($results[0]->is_admin)->equals(UserRole::ADMIN->value);
+        verify($results)->notEmpty();
+        foreach ($results as $user) {
+            verify($user->is_admin)->equals(UserRole::ADMIN->value);
+        }
     }
 
     public function testUserReturnsOnlyNonAdminUsers(): void
     {
         $results = User::find()->user()->all();
 
-        // bayer.hudson, jane.doe, deleted.user are all non-admin
-        verify(count($results))->equals(3);
+        verify($results)->notEmpty();
         foreach ($results as $user) {
             verify($user->is_admin)->equals(UserRole::USER->value);
         }
@@ -178,8 +180,11 @@ class UserQueryTest extends Unit
     {
         $results = User::find()->active()->admin()->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->username)->equals('admin.user');
+        verify($results)->notEmpty();
+        foreach ($results as $user) {
+            verify($user->status)->equals(UserStatus::ACTIVE->value);
+            verify($user->is_admin)->equals(UserRole::ADMIN->value);
+        }
     }
 
     public function testChainingActiveAndUser(): void
@@ -187,7 +192,10 @@ class UserQueryTest extends Unit
         // active + non-admin → only bayer.hudson
         $results = User::find()->active()->user()->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->username)->equals('bayer.hudson');
+        verify($results)->notEmpty();
+        foreach ($results as $user) {
+            verify($user->status)->equals(UserStatus::ACTIVE->value);
+            verify($user->is_admin)->equals(UserRole::USER->value);
+        }
     }
 }

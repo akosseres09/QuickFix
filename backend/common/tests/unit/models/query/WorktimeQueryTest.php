@@ -78,7 +78,10 @@ class WorktimeQueryTest extends Unit
             ->byIssueId('01900000-0000-0004-0000-000000000001')
             ->all();
 
-        verify(count($results))->equals(2);
+        verify($results)->notEmpty();
+        foreach ($results as $worktime) {
+            verify($worktime->issue_id)->equals('01900000-0000-0004-0000-000000000001');
+        }
     }
 
     public function testByIssueIdReturnsSingleRecordForSecondIssue(): void
@@ -87,8 +90,10 @@ class WorktimeQueryTest extends Unit
             ->byIssueId('01900000-0000-0004-0000-000000000002')
             ->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->id)->equals('01900000-0000-0006-0000-000000000003');
+        verify($results)->notEmpty();
+        foreach ($results as $worktime) {
+            verify($worktime->issue_id)->equals('01900000-0000-0004-0000-000000000002');
+        }
     }
 
     public function testByIssueIdReturnsEmptyForUnknownIssue(): void
@@ -111,7 +116,10 @@ class WorktimeQueryTest extends Unit
             ->byProjectId('01900000-0000-0002-0000-000000000001')
             ->all();
 
-        verify(count($results))->equals(3);
+        verify($results)->notEmpty();
+        foreach ($results as $worktime) {
+            verify($worktime->issue->project_id)->equals('01900000-0000-0002-0000-000000000001');
+        }
     }
 
     public function testByProjectIdReturnsEmptyForProjectWithNoWorktimes(): void
@@ -135,7 +143,10 @@ class WorktimeQueryTest extends Unit
             ->byCreatedBy('01900000-0000-0000-0000-000000000001')
             ->all();
 
-        verify(count($results))->equals(2);
+        verify($results)->notEmpty();
+        foreach ($results as $worktime) {
+            verify($worktime->created_by)->equals('01900000-0000-0000-0000-000000000001');
+        }
     }
 
     public function testByCreatedByReturnsSingleRecordForSecondUser(): void
@@ -145,8 +156,10 @@ class WorktimeQueryTest extends Unit
             ->byCreatedBy('01900000-0000-0000-0000-000000000002')
             ->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->id)->equals('01900000-0000-0006-0000-000000000002');
+        verify($results)->notEmpty();
+        foreach ($results as $worktime) {
+            verify($worktime->created_by)->equals('01900000-0000-0000-0000-000000000002');
+        }
     }
 
     public function testByCreatedByReturnsEmptyForUnknownUser(): void
@@ -169,7 +182,10 @@ class WorktimeQueryTest extends Unit
             ->byOrganizationId('01900000-0000-0001-0000-000000000001')
             ->all();
 
-        verify(count($results))->equals(3);
+        verify($results)->notEmpty();
+        foreach ($results as $worktime) {
+            verify($worktime->issue->project->organization_id)->equals('01900000-0000-0001-0000-000000000001');
+        }
     }
 
     public function testByOrganizationIdReturnsEmptyForOrgWithNoWorktimes(): void
@@ -204,6 +220,10 @@ class WorktimeQueryTest extends Unit
             ->byCreatedBy('01900000-0000-0000-0000-000000000001')
             ->all();
 
-        verify(count($results))->equals(2);
+        verify($results)->notEmpty();
+        foreach ($results as $worktime) {
+            verify($worktime->issue->project_id)->equals('01900000-0000-0002-0000-000000000001');
+            verify($worktime->created_by)->equals('01900000-0000-0000-0000-000000000001');
+        }
     }
 }

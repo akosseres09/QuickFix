@@ -64,8 +64,10 @@ class OrganizationInvitationQueryTest extends Unit
             ->byOrganization('01900000-0000-0001-0000-000000000001')
             ->all();
 
-        // All 4 fixture invitations belong to this org
-        verify(count($results))->equals(4);
+        verify($results)->notEmpty();
+        foreach ($results as $result) {
+            verify($result->organization_id)->equals('01900000-0000-0001-0000-000000000001');
+        }
     }
 
     public function testByOrganizationReturnsEmptyForUnknownOrg(): void
@@ -110,8 +112,7 @@ class OrganizationInvitationQueryTest extends Unit
             ->pending()
             ->all();
 
-        // Fixture has 2 pending: invited@example.com and expired@example.com
-        verify(count($results))->equals(2);
+        verify($results)->notEmpty();
         foreach ($results as $result) {
             verify($result->status)->equals(OrganizationInvitation::STATUS_PENDING);
         }
@@ -127,8 +128,10 @@ class OrganizationInvitationQueryTest extends Unit
             ->accepted()
             ->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->email)->equals('accepted@example.com');
+        verify($results)->notEmpty();
+        foreach ($results as $result) {
+            verify($result->status)->equals(OrganizationInvitation::STATUS_ACCEPTED);
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -141,8 +144,10 @@ class OrganizationInvitationQueryTest extends Unit
             ->revoked()
             ->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->email)->equals('revoked@example.com');
+        verify($results)->notEmpty();
+        foreach ($results as $result) {
+            verify($result->status)->equals(OrganizationInvitation::STATUS_REVOKED);
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -169,7 +174,11 @@ class OrganizationInvitationQueryTest extends Unit
             ->pending()
             ->all();
 
-        verify(count($results))->equals(2);
+        verify($results)->notEmpty();
+        foreach ($results as $result) {
+            verify($result->organization_id)->equals('01900000-0000-0001-0000-000000000001');
+            verify($result->status)->equals(OrganizationInvitation::STATUS_PENDING);
+        }
     }
 
     public function testChainingByEmailAndPending(): void

@@ -13,11 +13,12 @@ use common\fixtures\ProjectMemberFixture;
 use common\fixtures\UserFixture;
 use common\models\Comment;
 use common\models\User;
+use common\tests\UnitTester;
 use Yii;
 
 class CommentTest extends Unit
 {
-    protected $tester;
+    protected UnitTester $tester;
 
     public function _fixtures(): array
     {

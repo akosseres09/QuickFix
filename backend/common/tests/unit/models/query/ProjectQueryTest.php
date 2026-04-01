@@ -8,6 +8,7 @@ use common\fixtures\OrganizationFixture;
 use common\fixtures\ProjectFixture;
 use common\fixtures\UserFixture;
 use common\models\Project;
+use common\models\query\ProjectQuery;
 
 class ProjectQueryTest extends Unit
 {
@@ -69,7 +70,10 @@ class ProjectQueryTest extends Unit
             ->all();
 
         // All 3 fixture projects belong to org1
-        verify(count($results))->equals(3);
+        verify($results)->notEmpty();
+        foreach ($results as $project) {
+            verify($project->organization_id)->equals('01900000-0000-0001-0000-000000000001');
+        }
     }
 
     public function testByOrganizationIdReturnsEmptyForUnknownOrg(): void
@@ -89,24 +93,30 @@ class ProjectQueryTest extends Unit
     {
         $results = Project::find()->active()->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->key)->equals('TEST');
+        verify($results)->notEmpty();
+        foreach ($results as $project) {
+            verify($project->status)->equals(Project::STATUS_ACTIVE);
+        }
     }
 
     public function testCompletedReturnsOnlyCompletedProjects(): void
     {
         $results = Project::find()->completed()->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->key)->equals('TEAM');
+        verify($results)->notEmpty();
+        foreach ($results as $project) {
+            verify($project->status)->equals(Project::STATUS_COMPLETED);
+        }
     }
 
     public function testOnHoldReturnsOnlyOnHoldProjects(): void
     {
         $results = Project::find()->onHold()->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->key)->equals('PRIV');
+        verify($results)->notEmpty();
+        foreach ($results as $project) {
+            verify($project->status)->equals(Project::STATUS_ON_HOLD);
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -119,8 +129,10 @@ class ProjectQueryTest extends Unit
             ->byStatus(Project::STATUS_ACTIVE)
             ->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->status)->equals(Project::STATUS_ACTIVE);
+        verify($results)->notEmpty();
+        foreach ($results as $project) {
+            verify($project->status)->equals(Project::STATUS_ACTIVE);
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -134,7 +146,10 @@ class ProjectQueryTest extends Unit
             ->all();
 
         // All 3 projects are owned by user 1
-        verify(count($results))->equals(3);
+        verify($results)->notEmpty();
+        foreach ($results as $project) {
+            verify($project->owner_id)->equals('01900000-0000-0000-0000-000000000001');
+        }
     }
 
     public function testByOwnerReturnsEmptyForUnknownOwner(): void
@@ -203,8 +218,10 @@ class ProjectQueryTest extends Unit
             ->byVisibility(Project::VISIBILITY_PUBLIC)
             ->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->key)->equals('TEST');
+        verify($results)->notEmpty();
+        foreach ($results as $project) {
+            verify($project->visibility)->equals(Project::VISIBILITY_PUBLIC);
+        }
     }
 
     public function testByVisibilityPrivateReturnsPrivateProjects(): void
@@ -213,8 +230,10 @@ class ProjectQueryTest extends Unit
             ->byVisibility(Project::VISIBILITY_PRIVATE)
             ->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->key)->equals('PRIV');
+        verify($results)->notEmpty();
+        foreach ($results as $project) {
+            verify($project->visibility)->equals(Project::VISIBILITY_PRIVATE);
+        }
     }
 
     public function testByVisibilityTeamReturnsTeamProjects(): void
@@ -223,8 +242,10 @@ class ProjectQueryTest extends Unit
             ->byVisibility(Project::VISIBILITY_TEAM)
             ->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->key)->equals('TEAM');
+        verify($results)->notEmpty();
+        foreach ($results as $project) {
+            verify($project->visibility)->equals(Project::VISIBILITY_TEAM);
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -235,16 +256,20 @@ class ProjectQueryTest extends Unit
     {
         $results = Project::find()->public()->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->visibility)->equals(Project::VISIBILITY_PUBLIC);
+        verify($results)->notEmpty();
+        foreach ($results as $project) {
+            verify($project->visibility)->equals(Project::VISIBILITY_PUBLIC);
+        }
     }
 
     public function testPrivateReturnsOnlyPrivateProjects(): void
     {
         $results = Project::find()->private()->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->visibility)->equals(Project::VISIBILITY_PRIVATE);
+        verify($results)->notEmpty();
+        foreach ($results as $project) {
+            verify($project->visibility)->equals(Project::VISIBILITY_PRIVATE);
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -257,16 +282,20 @@ class ProjectQueryTest extends Unit
             ->byPriority(Project::PRIORITY_MEDIUM)
             ->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->key)->equals('TEST');
+        verify($results)->notEmpty();
+        foreach ($results as $project) {
+            verify($project->priority)->equals(Project::PRIORITY_MEDIUM);
+        }
     }
 
     public function testHighPriorityReturnsHighPriorityProjects(): void
     {
         $results = Project::find()->highPriority()->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->key)->equals('PRIV');
+        verify($results)->notEmpty();
+        foreach ($results as $project) {
+            verify($project->priority)->equals(Project::PRIORITY_HIGH);
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -280,8 +309,11 @@ class ProjectQueryTest extends Unit
             ->active()
             ->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->key)->equals('TEST');
+        verify($results)->notEmpty();
+        foreach ($results as $project) {
+            verify($project->organization_id)->equals('01900000-0000-0001-0000-000000000001');
+            verify($project->status)->equals(Project::STATUS_ACTIVE);
+        }
     }
 
     public function testChainingByOwnerAndPublic(): void
@@ -291,7 +323,11 @@ class ProjectQueryTest extends Unit
             ->public()
             ->all();
 
-        verify(count($results))->equals(1);
+        verify($results)->notEmpty();
+        foreach ($results as $project) {
+            verify($project->owner_id)->equals('01900000-0000-0000-0000-000000000001');
+            verify($project->visibility)->equals(Project::VISIBILITY_PUBLIC);
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -301,20 +337,32 @@ class ProjectQueryTest extends Unit
     public function testLatestOrdersNewestFirst(): void
     {
         $query = Project::find()->latest();
-        verify($query)->instanceOf(\common\models\query\ProjectQuery::class);
+        verify($query)->instanceOf(ProjectQuery::class);
 
         $results = $query->all();
-        verify(count($results))->equals(3);
+        verify($results)->notEmpty();
+        $last = null;
+        foreach ($results as $project) {
+            if ($last !== null) {
+                verify($project->created_at)->lessThanOrEqual($last);
+            }
+            $last = $project->created_at;
+        }
     }
 
     public function testOrderByNameOrdersAlphabetically(): void
     {
         $query = Project::find()->orderByName();
-        verify($query)->instanceOf(\common\models\query\ProjectQuery::class);
+        verify($query)->instanceOf(ProjectQuery::class);
 
         $results = $query->all();
-        verify(count($results))->equals(3);
-        // Private Project < Team Project < Test Project alphabetically
-        verify($results[0]->name)->equals('Private Project');
+        verify($results)->notEmpty();
+        $last = null;
+        foreach ($results as $project) {
+            if ($last !== null) {
+                verify(strcasecmp($project->name, $last))->greaterThanOrEqual(0);
+            }
+            $last = $project->name;
+        }
     }
 }

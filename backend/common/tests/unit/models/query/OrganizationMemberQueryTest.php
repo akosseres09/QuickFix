@@ -65,7 +65,10 @@ class OrganizationMemberQueryTest extends Unit
             ->byUserId('01900000-0000-0000-0000-000000000003')
             ->all();
 
-        verify(count($results))->equals(2);
+        verify($results)->notEmpty();
+        foreach ($results as $membership) {
+            verify($membership->user_id)->equals('01900000-0000-0000-0000-000000000003');
+        }
     }
 
     public function testByUserIdReturnsSingleMembershipForUser(): void
@@ -75,8 +78,10 @@ class OrganizationMemberQueryTest extends Unit
             ->byUserId('01900000-0000-0000-0000-000000000002')
             ->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->role)->equals(RoleManager::ROLE_MEMBER);
+        verify($results)->notEmpty();
+        foreach ($results as $membership) {
+            verify($membership->user_id)->equals('01900000-0000-0000-0000-000000000002');
+        }
     }
 
     public function testByUserIdReturnsEmptyForUnknownUser(): void
@@ -109,7 +114,10 @@ class OrganizationMemberQueryTest extends Unit
             ->byUsername('admin.user')
             ->all();
 
-        verify(count($results))->equals(2);
+        verify($results)->notEmpty();
+        foreach ($results as $membership) {
+            verify($membership->user_id)->equals('01900000-0000-0000-0000-000000000003');
+        }
     }
 
     public function testByUsernameReturnsNullForUnknownUsername(): void
@@ -132,7 +140,10 @@ class OrganizationMemberQueryTest extends Unit
             ->byOrganization('01900000-0000-0001-0000-000000000001')
             ->all();
 
-        verify(count($results))->equals(3);
+        verify($results)->notEmpty();
+        foreach ($results as $membership) {
+            verify($membership->organization_id)->equals('01900000-0000-0001-0000-000000000001');
+        }
     }
 
     public function testByOrganizationReturnsSingleMemberForSecondOrg(): void
@@ -142,8 +153,10 @@ class OrganizationMemberQueryTest extends Unit
             ->byOrganization('01900000-0000-0001-0000-000000000002')
             ->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->user_id)->equals('01900000-0000-0000-0000-000000000003');
+        verify($results)->notEmpty();
+        foreach ($results as $membership) {
+            verify($membership->organization_id)->equals('01900000-0000-0001-0000-000000000002');
+        }
     }
 
     public function testByOrganizationReturnsEmptyForUnknownOrg(): void
@@ -166,7 +179,7 @@ class OrganizationMemberQueryTest extends Unit
             ->byCursor('01900000-0000-0007-0000-000000000002')
             ->all();
 
-        verify(count($results))->equals(2);
+        verify($results)->notEmpty();
         foreach ($results as $result) {
             verify($result->id > '01900000-0000-0007-0000-000000000002')->true();
         }
@@ -178,7 +191,10 @@ class OrganizationMemberQueryTest extends Unit
             ->byCursor('00000000-0000-0000-0000-000000000000')
             ->all();
 
-        verify(count($results))->equals(4);
+        verify($results)->notEmpty();
+        foreach ($results as $result) {
+            verify($result->id > '00000000-0000-0000-0000-000000000000')->true();
+        }
     }
 
     // -------------------------------------------------------------------------

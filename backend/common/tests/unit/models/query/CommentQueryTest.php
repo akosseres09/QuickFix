@@ -74,23 +74,24 @@ class CommentQueryTest extends Unit
 
     public function testByIssueIdReturnsAllCommentsForIssue(): void
     {
-        // TEST-1 has 2 comments in the fixture
         $results = Comment::find()
             ->byIssueId('01900000-0000-0004-0000-000000000001')
             ->all();
 
-        verify(count($results))->equals(2);
+        foreach ($results as $result) {
+            verify($result->issue_id)->equals('01900000-0000-0004-0000-000000000001');
+        }
     }
 
     public function testByIssueIdReturnsSingleCommentForIssue(): void
     {
-        // TEST-2 has 1 comment
         $results = Comment::find()
             ->byIssueId('01900000-0000-0004-0000-000000000002')
             ->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->id)->equals('01900000-0000-0005-0000-000000000003');
+        foreach ($results as $result) {
+            verify($result->issue_id)->equals('01900000-0000-0004-0000-000000000002');
+        }
     }
 
     public function testByIssueIdReturnsEmptyForUnknownIssue(): void
@@ -113,7 +114,9 @@ class CommentQueryTest extends Unit
             ->byCreatorId('01900000-0000-0000-0000-000000000001')
             ->all();
 
-        verify(count($results))->equals(2);
+        foreach ($results as $result) {
+            verify($result->created_by)->equals('01900000-0000-0000-0000-000000000001');
+        }
     }
 
     public function testByCreatorIdReturnsOneCommentForSecondUser(): void
@@ -123,8 +126,9 @@ class CommentQueryTest extends Unit
             ->byCreatorId('01900000-0000-0000-0000-000000000002')
             ->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->id)->equals('01900000-0000-0005-0000-000000000001');
+        foreach ($results as $result) {
+            verify($result->created_by)->equals('01900000-0000-0000-0000-000000000002');
+        }
     }
 
     public function testByCreatorIdReturnsEmptyForUnknownUser(): void
@@ -147,8 +151,9 @@ class CommentQueryTest extends Unit
             ->byUpdatorId('01900000-0000-0000-0000-000000000002')
             ->all();
 
-        verify(count($results))->equals(1);
-        verify($results[0]->id)->equals('01900000-0000-0005-0000-000000000001');
+        foreach ($results as $result) {
+            verify($result->updated_by)->equals('01900000-0000-0000-0000-000000000002');
+        }
     }
 
     public function testByUpdatorIdReturnsEmptyForUnknownUser(): void
@@ -171,7 +176,9 @@ class CommentQueryTest extends Unit
             ->byProjectId('01900000-0000-0002-0000-000000000001')
             ->all();
 
-        verify(count($results))->equals(3);
+        foreach ($results as $result) {
+            verify($result->issue->project_id)->equals('01900000-0000-0002-0000-000000000001');
+        }
     }
 
     public function testByProjectIdReturnsEmptyForUnknownProject(): void

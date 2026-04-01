@@ -13,11 +13,12 @@ use common\fixtures\UserFixture;
 use common\models\Project;
 use common\models\ProjectMember;
 use common\models\User;
+use common\tests\UnitTester;
 use Yii;
 
 class ProjectTest extends Unit
 {
-    protected $tester;
+    protected UnitTester $tester;
 
     public function _fixtures(): array
     {

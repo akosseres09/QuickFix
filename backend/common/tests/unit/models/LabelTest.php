@@ -11,11 +11,12 @@ use common\fixtures\ProjectFixture;
 use common\fixtures\ProjectMemberFixture;
 use common\fixtures\UserFixture;
 use common\models\Label;
+use common\tests\UnitTester;
 use Yii;
 
 class LabelTest extends Unit
 {
-    protected $tester;
+    protected UnitTester $tester;
 
     public function _fixtures(): array
     {

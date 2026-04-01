@@ -10,7 +10,9 @@ use common\fixtures\OrganizationMemberFixture;
 use common\fixtures\UserFixture;
 use common\models\OrganizationInvitation;
 use common\models\User;
+use common\tests\UnitTester;
 use Yii;
+use yii\db\ActiveRecord;
 
 /**
  * Tests for OrganizationInvitation model.
@@ -22,7 +24,8 @@ use Yii;
  */
 class OrganizationInvitationTest extends Unit
 {
-    protected $tester;
+    protected UnitTester $tester;
+    protected User | null $user;
 
     public function _fixtures(): array
     {
@@ -41,6 +44,18 @@ class OrganizationInvitationTest extends Unit
                 'class' => OrganizationInvitationFixture::class,
             ],
         ];
+    }
+
+    protected function _before()
+    {
+        $this->user = $this->loginFixtureUser();
+        return parent::_before();
+    }
+
+    protected function _after()
+    {
+        $this->user = null;
+        return parent::_after();
     }
 
     private function loginFixtureUser(): User
@@ -68,7 +83,6 @@ class OrganizationInvitationTest extends Unit
 
     public function testExistingOrganization(): void
     {
-        $this->loginFixtureUser();
         $org = $this->tester->grabFixture('organization', 0);
         $invitation = new OrganizationInvitation([
             'email'           => 'test@example.com',
@@ -82,7 +96,6 @@ class OrganizationInvitationTest extends Unit
 
     public function testNonExistingOrganization(): void
     {
-        $this->loginFixtureUser();
         $invitation = new OrganizationInvitation([
             'email'           => 'nonexistent@example.com',
             'role'            => RoleManager::ROLE_MEMBER,
@@ -96,7 +109,6 @@ class OrganizationInvitationTest extends Unit
 
     public function testValidInviterId(): void
     {
-        $this->loginFixtureUser();
         $org = $this->tester->grabFixture('organization', 0);
         $invitation = new OrganizationInvitation([
             'email'           => 'asd@asd.com',
@@ -110,7 +122,6 @@ class OrganizationInvitationTest extends Unit
 
     public function testInvalidInviterId(): void
     {
-        $this->loginFixtureUser();
         $org = $this->tester->grabFixture('organization', 0);
         $invitation = new OrganizationInvitation([
             'email'           => 'test@example.com',
@@ -126,7 +137,6 @@ class OrganizationInvitationTest extends Unit
 
     public function testInvalidEmailFormat(): void
     {
-        $this->loginFixtureUser();
         $org = $this->tester->grabFixture('organization', 0);
         $invitation = new OrganizationInvitation([
             'email'           => 'not-a-valid-email',
@@ -139,12 +149,28 @@ class OrganizationInvitationTest extends Unit
         verify($invitation->getErrors('email'))->arrayContains('Email is not a valid email address.');
     }
 
+    public function testEmailNotNewRecord(): void
+    {
+        $orginv = $this->tester->grabFixture('organization_invitation', 0);
+        $invitation = new OrganizationInvitation([
+            'email'           => $orginv['email'],
+            'role'            => $orginv['role'],
+            'organization_id' => $orginv['organization_id'],
+            'status'          => $orginv['status'],
+            'inviter_id'      => $orginv['inviter_id'],
+        ]);
+
+        $invitation->setIsNewRecord(false); // Simulate loading an existing record with an email
+
+        verify($invitation->validate('email'))->true();
+        verify($invitation->hasErrors('email'))->false();
+    }
+
     public function testSelfInvite(): void
     {
-        $user = $this->loginFixtureUser();
         $org = $this->tester->grabFixture('organization', 0);
         $invitation = new OrganizationInvitation([
-            'email'           => $user->email,
+            'email'           => $this->user->email,
             'role'            => RoleManager::ROLE_MEMBER,
             'organization_id' => $org['id'],
         ]);
@@ -156,7 +182,6 @@ class OrganizationInvitationTest extends Unit
 
     public function testInvalidRole(): void
     {
-        $this->loginFixtureUser();
         $org = $this->tester->grabFixture('organization', 0);
         $invitation = new OrganizationInvitation([
             'email'           => 'test@example.com',
@@ -172,7 +197,6 @@ class OrganizationInvitationTest extends Unit
 
     public function testStatusDefaultsToPending(): void
     {
-        $this->loginFixtureUser();
         $org = $this->tester->grabFixture('organization', 0);
         $invitation = new OrganizationInvitation([
             'email'           => 'test@example.com',
@@ -186,7 +210,6 @@ class OrganizationInvitationTest extends Unit
 
     public function testInvalidStatus(): void
     {
-        $this->loginFixtureUser();
         $org = $this->tester->grabFixture('organization', 0);
         $invitation = new OrganizationInvitation([
             'email'           => 'test@example.com',
@@ -202,7 +225,6 @@ class OrganizationInvitationTest extends Unit
 
     public function testDuplicatePendingInvitation(): void
     {
-        $this->loginFixtureUser();
         // 'invited@example.com' already has a pending invitation in the fixture
         $invitation = new OrganizationInvitation([
             'email'           => 'invited@example.com',
@@ -217,7 +239,6 @@ class OrganizationInvitationTest extends Unit
 
     public function testDuplicateAcceptedInvitation(): void
     {
-        $this->loginFixtureUser();
         // 'accepted@example.com' already has an accepted invitation in the fixture
         $invitation = new OrganizationInvitation([
             'email'           => 'accepted@example.com',
@@ -232,7 +253,6 @@ class OrganizationInvitationTest extends Unit
 
     public function testRevokedInvitationDoesNotBlockNewInvitation(): void
     {
-        $this->loginFixtureUser();
         // 'revoked@example.com' has a revoked invitation — uniqueness check excludes revoked
         $invitation = new OrganizationInvitation([
             'email'           => 'revoked@example.com',
@@ -442,7 +462,6 @@ class OrganizationInvitationTest extends Unit
 
     public function testSaveSetUuidAndExpiresAt(): void
     {
-        $this->loginFixtureUser();
         $org = $this->tester->grabFixture('organization', 0);
 
         $timeBefore = time();
@@ -459,5 +478,46 @@ class OrganizationInvitationTest extends Unit
             '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/'
         );
         verify($invitation->expires_at)->greaterThanOrEqual($timeBefore + OrganizationInvitation::EXPIRATION_LENGTH - 2);
+    }
+
+
+    public function testParentSaveBeforeIsFalseInSaveBefore(): void
+    {
+        $invitation = new OrganizationInvitation([
+            'email' => 'fail@example.com',
+            'organization_id' => '01900000-0000-0001-0000-000000000001',
+            'role' => RoleManager::ROLE_MEMBER,
+        ]);
+
+        // Intercept the event and force it to fail right before your method gets called
+        $invitation->on(ActiveRecord::EVENT_BEFORE_INSERT, function ($event) {
+            $event->isValid = false;
+        });
+
+        // The save should return false entirely because parent::beforeSave failed
+        verify($invitation->save())->false();
+
+        // Assert that because it failed early, it never reached the Uuid generation code
+        verify($invitation->id)->null();
+        verify($invitation->expires_at)->null();
+    }
+
+    public function testNotInsertForBeforeSave(): void
+    {
+        $invitation = OrganizationInvitation::findOne('01900000-0000-0009-0000-000000000005');
+        verify($invitation)->notNull();
+
+        $originalId = $invitation->id;
+        $originalExpiresAt = $invitation->expires_at;
+
+        // 2. Perform an update
+        $invitation->status = OrganizationInvitation::STATUS_ACCEPTED;
+
+        // Ensure the update was successful
+        verify($invitation->save())->true();
+
+        // 3. Assert that the IDs and expiration dates remained untouched
+        verify($invitation->id)->equals($originalId);
+        verify($invitation->expires_at)->equals($originalExpiresAt);
     }
 }
