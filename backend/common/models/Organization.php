@@ -26,6 +26,8 @@ use Yii;
  * @property UserResource $owner
  * @property OrganizationMember[] $organizationMembers
  * @property Project[] $projects
+ * @property int $projectCount
+ * @property int $memberCount
  */
 class Organization extends BaseModel
 {

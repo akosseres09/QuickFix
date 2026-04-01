@@ -12,6 +12,8 @@ use common\models\User;
 use Codeception\Test\Unit;
 use common\tests\UnitTester;
 use Yii;
+use yii\base\Event;
+use yii\db\ActiveRecord;
 
 /**
  * Reference test for an ActiveRecord model.
@@ -30,6 +32,7 @@ use Yii;
 class OrganizationTest extends Unit
 {
     protected UnitTester $tester;
+    protected User | null $user;
 
     public function _fixtures(): array
     {
@@ -50,6 +53,18 @@ class OrganizationTest extends Unit
                 'dataFile' => codecept_data_dir() . 'project.php',
             ],
         ];
+    }
+
+    protected function _before()
+    {
+        $this->user = $this->loginFixtureUser();
+        return parent::_before();
+    }
+
+    protected function _after()
+    {
+        $this->user = null;
+        return parent::_after();
     }
 
     // -------------------------------------------------------------------------
@@ -124,9 +139,6 @@ class OrganizationTest extends Unit
 
     public function testSaveGeneratesUuid(): void
     {
-        // BlameableBehavior sets owner_id from the current Yii user on insert.
-        $this->loginFixtureUser();
-
         $org = new Organization([
             'name' => 'Save Test Org',
             'slug' => 'save-test',
@@ -144,8 +156,6 @@ class OrganizationTest extends Unit
 
     public function testSaveCreatesOwnerMembership(): void
     {
-        $user = $this->loginFixtureUser();
-
         $org = new Organization([
             'name' => 'Membership Test Org',
             'slug' => 'membership-test',
@@ -155,11 +165,51 @@ class OrganizationTest extends Unit
         // Organization::afterSave creates an OrganizationMember for the owner.
         $member = OrganizationMember::findOne([
             'organization_id' => $org->id,
-            'user_id'         => $user->id,
+            'user_id'         => $this->user->id,
         ]);
 
         verify($member)->notNull();
         verify($member->role)->equals(RoleManager::ROLE_OWNER);
+    }
+
+    public function testAfterSaveThrowsErrorWhenOwnerIsNotCreated(): void
+    {
+        $org = new Organization([
+            'name' => 'Membership Test Org',
+            'slug' => 'membership-test',
+        ]);
+
+        Event::on(OrganizationMember::class, ActiveRecord::EVENT_BEFORE_INSERT, function (Event $event) {
+            $event->isValid = false;
+        });
+
+        $this->expectException(\yii\db\Exception::class);
+        $this->expectExceptionMessageMatches('/Transaction aborted: /');
+
+        $org->save();
+        $exists = Organization::find()->bySlug('membership-test')->exists();
+        verify($exists)->false();
+    }
+
+    public function testBeforeSaveFailsWhenParentBeforeSaveFails(): void
+    {
+        $org = new Organization([
+            'name' => 'Membership Test Org',
+            'slug' => 'membership-test',
+        ]);
+
+        $org->on(ActiveRecord::EVENT_BEFORE_INSERT, function ($event) {
+            $event->isValid = false;
+        });
+
+        verify($org->save())->false();
+    }
+
+    public function testBeforeSaveReturnsEarlyForExistingOrg(): void
+    {
+        $org = Organization::findOne(['id' => '01900000-0000-0001-0000-000000000001']);
+
+        verify($org->save())->true();
     }
 
     public function testFindAndDeleteOrganization(): void
@@ -216,7 +266,7 @@ class OrganizationTest extends Unit
         verify($fields)->arrayContains('deleted_at');
     }
 
-    public function testExtraFieldsMemberCount(): void
+    public function testExtraFields(): void
     {
         $org = Organization::findOne(['slug' => 'test-org']);
         $extra = $org->extraFields();
@@ -224,9 +274,19 @@ class OrganizationTest extends Unit
         // memberCount and projectCount should be callable extra fields
         verify($extra)->arrayHasKey('memberCount');
         verify($extra)->arrayHasKey('projectCount');
+        verify($extra['projectCount'])->isCallable();
         verify($extra)->arrayContains('owner');
         verify($extra)->arrayContains('projects');
         verify($extra)->arrayContains('organizationMembers');
+    }
+
+    public function testExtraFieldsProjectCount(): void
+    {
+        $org = Organization::findOne(['slug' => 'test-org']);
+        $projectCount = $org->extraFields()['projectCount'];
+        verify($projectCount)->isCallable();
+
+        verify($projectCount($org))->greaterThanOrEqual(0);
     }
 
     // -------------------------------------------------------------------------
