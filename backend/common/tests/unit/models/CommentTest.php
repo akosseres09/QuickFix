@@ -12,9 +12,12 @@ use common\fixtures\ProjectFixture;
 use common\fixtures\ProjectMemberFixture;
 use common\fixtures\UserFixture;
 use common\models\Comment;
+use common\models\Issue;
+use common\models\Label;
 use common\models\User;
 use common\tests\UnitTester;
 use Yii;
+use yii\base\Event;
 
 class CommentTest extends Unit
 {
@@ -214,8 +217,8 @@ class CommentTest extends Unit
     public function testCanAccessReturnsFalseWithNoProject(): void
     {
         $comment = Comment::findOne('01900000-0000-0005-0000-000000000001');
-        // Detach the issue relation to simulate missing project reference
-        $comment->populateRelation('issue', null);
+        // Detach the project relation to simulate missing project reference
+        $comment->issue->populateRelation('project', null);
         verify($comment->canAccess('01900000-0000-0000-0000-000000000001'))->false();
     }
 
@@ -276,6 +279,19 @@ class CommentTest extends Unit
         verify($comment->getErrors('project_id'))->arrayContains('Project ID is required.');
     }
 
+    public function testBeforeValidateFailsWhenParentBeforeValidateFails(): void
+    {
+        $comment = new Comment([
+            'content' => 'Some content',
+        ]);
+
+        $comment->on(\yii\db\ActiveRecord::EVENT_BEFORE_VALIDATE, function ($event) {
+            $event->isValid = false;
+        });
+
+        verify($comment->validate())->false();
+    }
+
     // -------------------------------------------------------------------------
     // beforeSave — update path (no new UUID generated)
     // -------------------------------------------------------------------------
@@ -292,5 +308,52 @@ class CommentTest extends Unit
 
         verify($saved)->true();
         verify($comment->id)->equals($originalId);
+    }
+
+    public function testBeforeSaveFailsWhenParentBeforeSaveFails(): void
+    {
+        $comment = Comment::findOne('01900000-0000-0005-0000-000000000001');
+
+        $comment->on(\yii\db\ActiveRecord::EVENT_BEFORE_UPDATE, function ($event) {
+            $event->isValid = false;
+        });
+
+        $comment->content = 'Attempted update with failing beforeSave.';
+        verify($comment->save())->false();
+
+        $comment->off(\yii\db\ActiveRecord::EVENT_BEFORE_UPDATE);
+    }
+
+    public function testBeforeSaveSucceedsWhenCommentIsInAClosedIssue(): void
+    {
+        $issue = $this->tester->grabFixture('issue', 1); // closed issue
+        $comment = new Comment([
+            'content' => 'Commenting on a closed issue.',
+        ]);
+        verify($issue->label->name)->equals(Label::STATUS_CLOSED);
+
+        verify($comment->save())->true();
+        verify($comment->issue->label->name)->equals(Label::STATUS_OPEN);
+    }
+
+    public function testBeforeSaveFailsWhenIssueStatusUpdateFails(): void
+    {
+        $issue = $this->tester->grabFixture('issue', 1); // closed issue
+        $_GET['issue_id'] = $issue['id'];
+        $comment = new Comment([
+            'content' => 'Commenting on a closed issue.',
+        ]);
+
+        // The Trap: Block the issue save that happens in Comment::afterSave when reopening a closed issue.
+        Event::on(Issue::class, Issue::EVENT_BEFORE_UPDATE, function ($event) {
+            $event->isValid = false;
+        });
+
+        $this->expectException(\yii\db\Exception::class);
+        $this->expectExceptionMessage('Failed to update issue status after adding comment.');
+
+        $comment->save();
+        // Cleanup: Remove the trap so other tests don't break!
+        Event::off(Issue::class, Issue::EVENT_BEFORE_UPDATE);
     }
 }

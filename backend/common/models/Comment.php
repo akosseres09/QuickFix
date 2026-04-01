@@ -110,7 +110,7 @@ class Comment extends BaseModel
             $this->issue->openIssue();
             if (!$this->issue->save()) {
                 Yii::error('Failed to update issue status after adding comment: ' . json_encode($this->issue->errors));
-                throw new yii\db\Exception('Failed to update issue status after adding comment.');
+                throw new \yii\db\Exception('Failed to update issue status after adding comment.');
             }
         }
     }
