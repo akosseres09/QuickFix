@@ -105,7 +105,7 @@ class SignupForm extends Model
     protected function sendVerificationEmail(User $user): bool
     {
 
-        $this->queueEmail(
+        $job = $this->queueEmail(
             $user->email,
             'Verify your email address',
             'emailVerify',
@@ -114,6 +114,6 @@ class SignupForm extends Model
                 'verificationToken' => $user->verification_token
             ]
         );
-        return true;
+        return $job !== null && $job !== false;
     }
 }

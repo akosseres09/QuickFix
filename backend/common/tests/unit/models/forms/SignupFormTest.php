@@ -5,6 +5,9 @@ namespace common\tests\unit\models\forms;
 use common\fixtures\UserFixture;
 use common\models\forms\SignupForm;
 use Codeception\Test\Unit;
+use common\models\User;
+use Yii;
+use yii\base\Event;
 
 /**
  * Reference test for a Form model (yii\base\Model subclass).
@@ -220,5 +223,56 @@ class SignupFormTest extends Unit
 
         $result = $form->signup();
         verify($result)->true();
+    }
+
+    public function testSignupFailsWhenUserSaveFails(): void
+    {
+        $form = new SignupForm([
+            'username'         => 'new.signup.user',
+            'email'            => 'newsignup@example.com',
+            'first_name'       => 'New',
+            'last_name'        => 'Signup',
+            'password'         => 'password123',
+            'confirm_password' => 'password123',
+        ]);
+
+        Event::on(User::class, User::EVENT_BEFORE_INSERT, function (Event $event) {
+            $event->isValid = false; // simulate save failure
+        });
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessageMatches('/Failed to save user: /');
+        $form->signup();
+    }
+
+    public function testSignupFailsWhenEmailSendFails(): void
+    {
+        $originalQueue = Yii::$app->get('queue');
+
+        $fakeQueue = new class extends \yii\base\Component {
+            public function push($job)
+            {
+                return null;
+            }
+        };
+
+        // Inject our fake queue into the Yii2 application
+        Yii::$app->set('queue', $fakeQueue);
+
+        $form = new SignupForm([
+            'username'         => 'new.signup.user',
+            'email'            => 'newsignup@example.com',
+            'first_name'       => 'New',
+            'last_name'        => 'Signup',
+            'password'         => 'password123',
+            'confirm_password' => 'password123',
+        ]);
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessageMatches('/Failed to send verification email to user: /');
+
+        $form->signup();
+
+        Yii::$app->set('queue', $originalQueue);
     }
 }
