@@ -18,6 +18,7 @@ coverage:
   enabled: true
   include:
     - "models/*"
+    - "components/*"
 exclude:
   - "tests/*"
   - ../vendor/*
