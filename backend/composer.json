@@ -39,6 +39,7 @@
     "autoload-dev": {
         "psr-4": {
             "common\\tests\\": ["common/tests/", "common/tests/_support"],
+            "api\\tests\\": ["api/tests/", "api/tests/_support"],
             "backend\\tests\\": ["backend/tests/", "backend/tests/_support"],
             "frontend\\tests\\": ["frontend/tests/", "frontend/tests/_support"]
         }
@@ -59,8 +60,20 @@
         }
     ],
     "scripts": {
-        "test:unit": "vendor/bin/codecept run unit -c common/codeception.yml",
-        "test:unit:coverage": "XDEBUG_MODE=coverage vendor/bin/codecept run -c common/codeception.yml --coverage-html"
+        "test:common": "vendor/bin/codecept run unit -c common/codeception.yml",
+        "test:common:coverage": "XDEBUG_MODE=coverage vendor/bin/codecept run unit -c common/codeception.yml --coverage-html",
+        "test:api": "vendor/bin/codecept run unit -c api/codeception.yml",
+        "test:api:coverage": "XDEBUG_MODE=coverage vendor/bin/codecept run unit -c api/codeception.yml --coverage-html",
+        "test:all": [
+            "@test:common",
+            "@test:api"
+        ],
+        "test:all:coverage": [
+            "XDEBUG_MODE=coverage vendor/bin/codecept run unit -c common/codeception.yml --coverage-html",
+            "XDEBUG_MODE=coverage vendor/bin/codecept run unit -c api/codeception.yml --coverage-html"
+        ],
+        "test:unit": "@test:common",
+        "test:unit:coverage": "@test:common:coverage"
     }
 
 }

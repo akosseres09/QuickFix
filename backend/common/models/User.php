@@ -6,23 +6,11 @@ use api\models\UserRefreshToken;
 use common\components\services\JwtValidationService;
 use common\components\behaviors\InvalidateCacheBehavior;
 use common\models\query\UserQuery;
+use common\models\UserRole;
+use common\models\UserStatus;
 use Symfony\Component\Uid\Uuid;
 use Yii;
 use yii\web\IdentityInterface;
-
-enum UserRole: int
-{
-    case ADMIN = 1;
-    case USER = 0;
-};
-
-enum UserStatus: int
-{
-    case DELETED = 0;
-    case INACTIVE = 9;
-    case ACTIVE = 10;
-};
-
 
 /**
  * User model

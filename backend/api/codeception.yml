@@ -1,4 +1,4 @@
-namespace: common\tests
+namespace: api\tests
 actor_suffix: Tester
 paths:
   tests: tests
@@ -12,14 +12,14 @@ settings:
 modules:
   config:
     Yii2:
-      configFile: "config/codeception-local.php"
+      configFile: "config/test.php"
 
 coverage:
   enabled: true
   include:
-    - "models/*"
     - "components/*"
-    - "jobs/*"
+    - "models/*"
+    - "controllers/*"
 exclude:
   - "tests/*"
   - ../vendor/*
