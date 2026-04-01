@@ -12,6 +12,7 @@ use common\fixtures\ProjectMemberFixture;
 use common\fixtures\UserFixture;
 use common\models\Label;
 use common\tests\UnitTester;
+use Exception;
 use Yii;
 
 class LabelTest extends Unit
@@ -224,9 +225,24 @@ class LabelTest extends Unit
         );
         // Index should be max(index) + 1 for the project
         verify($label->index)->greaterThan(0);
-
-        unset($_GET['project_id']);
     }
+
+    public function testSaveBeforeFailsWhenParentBeforeSaveFails(): void
+    {
+        $label = new Label([
+            'project_id'  => '01900000-0000-0002-0000-000000000001',
+            'name'        => 'FailSave',
+            'description' => 'This should fail to save.',
+            'color'       => '#8b5cf6',
+        ]);
+
+        $label->on(Label::EVENT_BEFORE_INSERT, function ($event) {
+            $event->isValid = false; // Simulate parent beforeSave failure
+        });
+
+        verify($label->save())->false();
+    }
+
 
     // -------------------------------------------------------------------------
     // Fixture data lookups
@@ -336,6 +352,18 @@ class LabelTest extends Unit
         verify($open->index)->equals($originalIndex);
     }
 
+    public function testReorderExceptionWhenInvalidIndex(): void
+    {
+        $label = Label::findOne('01900000-0000-0003-0000-000000000003');
+
+        $label->on(Label::EVENT_BEFORE_UPDATE, function ($event) {
+            throw new Exception('Simulated failure in beforeUpdate');
+            $event->isValid = false;
+        });
+        $this->expectException(Exception::class);
+        $label->reorder(0);
+    }
+
     // -------------------------------------------------------------------------
     // Constants
     // -------------------------------------------------------------------------
@@ -439,5 +467,26 @@ class LabelTest extends Unit
 
         verify($label->validate())->false();
         verify($label->getErrors('project_id'))->arrayContains('Project ID is required.');
+    }
+
+    public function testBeforeValidateFailsWhenParentBeforeValidateFails(): void
+    {
+        $label = new Label([]);
+
+        $label->on(Label::EVENT_BEFORE_VALIDATE, function ($event) {
+            $event->isValid = false; // Simulate parent beforeValidate failure
+        });
+
+        verify($label->validate())->false();
+    }
+
+    public function testBeforeValidatePassesWhenNotNewProject(): void
+    {
+        $label = Label::findOne('01900000-0000-0003-0000-000000000003'); // Existing label
+
+        $_GET['project_id'] = $label->project_id;
+        $label->name = 'Updated Name';
+
+        verify($label->save())->true();
     }
 }
