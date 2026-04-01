@@ -57,5 +57,10 @@
             "type": "composer",
             "url": "https://asset-packagist.org"
         }
-    ]
+    ],
+    "scripts": {
+        "test:unit": "vendor/bin/codecept run unit -c common/codeception.yml",
+        "test:unit:coverage": "XDEBUG_MODE=coverage vendor/bin/codecept run -c common/codeception.yml --coverage-html"
+    }
+
 }
