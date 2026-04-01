@@ -15,6 +15,7 @@ use common\models\Label;
 use common\models\User;
 use common\tests\UnitTester;
 use Yii;
+use yii\db\ActiveRecord;
 
 class IssueTest extends Unit
 {
@@ -185,6 +186,7 @@ class IssueTest extends Unit
             'status_label' => '01900000-0000-0003-0000-000000000001',
             'type'         => Issue::TYPE_FEATURE,
             'priority'     => Issue::PRIORITY_LOW,
+            'issue_key'      => 'SHOULD-BE-IGNORED',
         ]);
 
         $saved = $issue->save();
@@ -417,6 +419,54 @@ class IssueTest extends Unit
         verify($issue->status_label)->notEmpty();
     }
 
+    public function testOpenIssueThrowsExceptionWhenLabelIsMissing(): void
+    {
+        // Clear the cache first
+        Yii::$app->cache->delete(Label::getLabelCacheKey('open'));
+
+        // find the label
+        $openLabel = Label::findOne(['name' => Label::STATUS_OPEN]);
+
+        if ($openLabel) {
+            // Delete all issues using this label to satisfy the Foreign Key constraint
+            Issue::deleteAll(['status_label' => $openLabel->id]);
+
+            $openLabel->delete();
+        }
+
+        $issue = Issue::find()->one();
+
+        verify($issue)->notNull();
+
+        $this->expectException(\yii\web\NotFoundHttpException::class);
+        $this->expectExceptionMessage('Open status label not found!');
+        $issue->openIssue();
+    }
+
+    public function testCloseIssueThrowsExceptionWhenLabelIsMissing(): void
+    {
+        // Clear the cache first
+        Yii::$app->cache->delete(Label::getLabelCacheKey('closed'));
+
+        // find the label
+        $closedLabel = Label::findOne(['name' => Label::STATUS_CLOSED]);
+
+        if ($closedLabel) {
+            // Delete all issues using this label to satisfy the Foreign Key constraint
+            Issue::deleteAll(['status_label' => $closedLabel->id]);
+
+            $closedLabel->delete();
+        }
+
+        $issue = Issue::find()->one();
+
+        verify($issue)->notNull();
+
+        $this->expectException(\yii\web\NotFoundHttpException::class);
+        $this->expectExceptionMessage('Closed status label not found!');
+        $issue->closeIssue();
+    }
+
     // -------------------------------------------------------------------------
     // canAccess — null project
     // -------------------------------------------------------------------------
@@ -444,6 +494,20 @@ class IssueTest extends Unit
 
         verify($issue->validate())->false();
         verify($issue->getErrors('project_id'))->arrayContains('Project ID is required.');
+    }
+
+    public function testBeforeValidateFailsWhenParentBeforeValidateFails(): void
+    {
+        $issue = new Issue([
+            'title'        => 'Invalid Parent',
+            'status_label' => '01900000-0000-0003-0000-000000000001',
+        ]);
+
+        $issue->on(ActiveRecord::EVENT_BEFORE_VALIDATE, function ($event) {
+            $event->isValid = false;
+        });
+
+        verify($issue->validate())->false();
     }
 
     // -------------------------------------------------------------------------
