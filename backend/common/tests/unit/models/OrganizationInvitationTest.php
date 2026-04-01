@@ -474,8 +474,7 @@ class OrganizationInvitationTest extends Unit
             'organization_id' => $org['id'],
         ]);
 
-        $saved = $invitation->save();
-        verify($saved)->true();
+        verify($invitation->save())->true();
         verify($invitation->id)->notEmpty();
         verify($invitation->id)->stringMatchesRegExp(
             '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/'
@@ -513,13 +512,11 @@ class OrganizationInvitationTest extends Unit
         $originalId = $invitation->id;
         $originalExpiresAt = $invitation->expires_at;
 
-        // 2. Perform an update
         $invitation->status = OrganizationInvitation::STATUS_ACCEPTED;
 
         // Ensure the update was successful
         verify($invitation->save())->true();
 
-        // 3. Assert that the IDs and expiration dates remained untouched
         verify($invitation->id)->equals($originalId);
         verify($invitation->expires_at)->equals($originalExpiresAt);
     }

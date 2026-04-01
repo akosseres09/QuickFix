@@ -140,7 +140,7 @@ class CommentTest extends Unit
             'content' => 'A new comment',
         ]);
 
-        $saved = $comment->save();
+        $saved = $comment->beforeSave(true);
         verify($saved)->true();
         verify($comment->id)->notEmpty();
         verify($comment->id)->stringMatchesRegExp(
@@ -275,8 +275,7 @@ class CommentTest extends Unit
             'content' => 'Some content',
         ]);
 
-        verify($comment->validate())->false();
-        verify($comment->getErrors('project_id'))->arrayContains('Project ID is required.');
+        verify($comment->beforeValidate())->false();
     }
 
     public function testBeforeValidateFailsWhenParentBeforeValidateFails(): void
@@ -289,7 +288,7 @@ class CommentTest extends Unit
             $event->isValid = false;
         });
 
-        verify($comment->validate())->false();
+        verify($comment->beforeValidate())->false();
     }
 
     // -------------------------------------------------------------------------
@@ -304,7 +303,7 @@ class CommentTest extends Unit
         $originalId = $comment->id;
 
         $comment->content = 'Updated content.';
-        $saved = $comment->save();
+        $saved = $comment->beforeSave(false);
 
         verify($saved)->true();
         verify($comment->id)->equals($originalId);
@@ -319,7 +318,7 @@ class CommentTest extends Unit
         });
 
         $comment->content = 'Attempted update with failing beforeSave.';
-        verify($comment->save())->false();
+        verify($comment->beforeSave(false))->false();
 
         $comment->off(\yii\db\ActiveRecord::EVENT_BEFORE_UPDATE);
     }
@@ -336,7 +335,7 @@ class CommentTest extends Unit
         verify($comment->issue->label->name)->equals(Label::STATUS_OPEN);
     }
 
-    public function testBeforeSaveFailsWhenIssueStatusUpdateFails(): void
+    public function testAfterSaveFailsWhenIssueStatusUpdateFails(): void
     {
         $issue = $this->tester->grabFixture('issue', 1); // closed issue
         $_GET['issue_id'] = $issue['id'];

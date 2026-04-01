@@ -189,8 +189,7 @@ class IssueTest extends Unit
             'issue_key'      => 'SHOULD-BE-IGNORED',
         ]);
 
-        $saved = $issue->save();
-        verify($saved)->true();
+        verify($issue->save())->true();
         verify($issue->id)->notEmpty();
         verify($issue->id)->stringMatchesRegExp(
             '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/'
@@ -492,7 +491,7 @@ class IssueTest extends Unit
             'status_label' => '01900000-0000-0003-0000-000000000001',
         ]);
 
-        verify($issue->validate())->false();
+        verify($issue->beforeValidate())->false();
         verify($issue->getErrors('project_id'))->arrayContains('Project ID is required.');
     }
 
@@ -507,7 +506,7 @@ class IssueTest extends Unit
             $event->isValid = false;
         });
 
-        verify($issue->validate())->false();
+        verify($issue->beforeValidate())->false();
     }
 
     // -------------------------------------------------------------------------

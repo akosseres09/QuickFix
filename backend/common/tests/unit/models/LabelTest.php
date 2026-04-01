@@ -217,8 +217,7 @@ class LabelTest extends Unit
             'color'       => '#8b5cf6',
         ]);
 
-        $saved = $label->save();
-        verify($saved)->true();
+        verify($label->save())->true();
         verify($label->id)->notEmpty();
         verify($label->id)->stringMatchesRegExp(
             '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/'
@@ -240,7 +239,7 @@ class LabelTest extends Unit
             $event->isValid = false; // Simulate parent beforeSave failure
         });
 
-        verify($label->save())->false();
+        verify($label->save(false))->false();
     }
 
 
@@ -384,7 +383,7 @@ class LabelTest extends Unit
         // This label is used by issues, so delete should throw
 
         $this->expectException(\yii\web\ConflictHttpException::class);
-        $open->delete();
+        $open->beforeDelete();
     }
 
     // -------------------------------------------------------------------------

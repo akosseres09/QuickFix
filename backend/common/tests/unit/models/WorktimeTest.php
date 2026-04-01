@@ -194,6 +194,29 @@ class WorktimeTest extends Unit
         );
     }
 
+    public function testBeforeSaveFailsWhenParentBeforeSaveFails(): void
+    {
+        $worktime = new Worktime([
+            'issue_id'      => '00000000-0000-0000-0000-000000000099', // non-existent issue
+            'minutes_spent' => 30,
+            'logged_at'     => '2024-01-15',
+        ]);
+
+        $worktime->on(Worktime::EVENT_BEFORE_INSERT, function ($event) {
+            $event->isValid = false; // Simulate parent beforeSave failure
+        });
+
+        verify($worktime->beforeSave(true))->false();
+    }
+
+    public function testBeforeSaveReturnsEarlyWhenItExists(): void
+    {
+        $worktime = Worktime::findOne('01900000-0000-0006-0000-000000000001');
+
+        $worktime->minutes_spent = 100; // change something to trigger update
+        verify($worktime->beforeSave(false))->true();
+    }
+
     // -------------------------------------------------------------------------
     // Fixture data lookups
     // -------------------------------------------------------------------------
