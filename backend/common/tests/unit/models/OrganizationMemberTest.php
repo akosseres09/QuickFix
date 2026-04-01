@@ -154,6 +154,19 @@ class OrganizationMemberTest extends Unit
         unset($_GET['organization_id']);
     }
 
+    public function testBeforeSaveDoesNotChangeIdOnUpdate(): void
+    {
+        $this->loginFixtureUser();
+
+        $member = OrganizationMember::findOne('01900000-0000-0007-0000-000000000002');
+        $originalId = $member->id;
+
+        $member->role = RoleManager::ROLE_ADMIN;
+        $saved = $member->save();
+        verify($saved)->true();
+        verify($member->id)->equals($originalId);
+    }
+
     // -------------------------------------------------------------------------
     // Fixture data lookups
     // -------------------------------------------------------------------------

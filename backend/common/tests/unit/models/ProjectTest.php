@@ -15,6 +15,7 @@ use common\models\ProjectMember;
 use common\models\User;
 use common\tests\UnitTester;
 use Yii;
+use yii\base\Event;
 
 class ProjectTest extends Unit
 {
@@ -306,6 +307,17 @@ class ProjectTest extends Unit
         verify($project->canAccess('01900000-0000-0000-0000-000000000002'))->true();
     }
 
+    public function testCannotAccessProject(): void
+    {
+        $project = new Project([
+            'name' => 'No Access Project',
+            'key'  => 'NOACC',
+            'owner_id' => '01900000-0000-0000-0000-000000000002',
+            'visibility' => 'None', // invalid visibility to ensure no access
+        ]);
+
+        verify($project->canAccess('01900000-0000-0000-0000-000000000001'))->false();
+    }
     // -------------------------------------------------------------------------
     // Relations
     // -------------------------------------------------------------------------
@@ -441,11 +453,26 @@ class ProjectTest extends Unit
     {
         $project = Project::findOne(['key' => 'TEST']);
         $extra = $project->extraFields();
+        $members = $extra['members'];
+        $projectMembers = $extra['projectMembers'];
+        $issueCount = $extra['issueCount'];
+        $memberCount = $extra['memberCount'];
+
         verify($extra)->arrayHasKey('members');
+        verify($members)->isCallable();
         verify($extra)->arrayHasKey('projectMembers');
+        verify($projectMembers)->isCallable();
         verify($extra)->arrayHasKey('issueCount');
+        verify($issueCount)->isCallable();
         verify($extra)->arrayHasKey('memberCount');
+        verify($memberCount)->isCallable();
         verify($extra)->arrayContains('owner');
+
+        // Test that the callables return expected data
+        verify($members())->notEmpty();
+        verify($projectMembers())->notEmpty();
+        verify($issueCount())->greaterThanOrEqual(0);
+        verify($memberCount())->greaterThanOrEqual(0);
     }
 
     // -------------------------------------------------------------------------
@@ -576,6 +603,32 @@ class ProjectTest extends Unit
         verify($project->isMemberAdmin('01900000-0000-0000-0000-000000000002'))->false();
     }
 
+    public function testIsMemberAdminForNonExistentProject(): void
+    {
+        $project = new Project([
+            'name' => 'Nonexistent Project',
+            'key'  => 'NONEXIST',
+            'owner_id' => '01900000-0000-0000-0000-000000000001',
+            'visibility' => Project::VISIBILITY_TEAM,
+        ]);
+
+        verify($project->isMemberAdmin('01900000-0000-0000-0000-000000000003'))->false();
+    }
+
+    public function testIsMemberAdminWhenProjectAdmin(): void
+    {
+        $projectMember = ProjectMember::findOne([
+            'project_id' => '01900000-0000-0002-0000-000000000001', // TEST project
+            'user_id'    => '01900000-0000-0000-0000-000000000002', // jane.doe
+        ]);
+
+        $projectMember->role = RoleManager::ROLE_ADMIN;
+        $projectMember->save(false);
+
+        $project = Project::findOne(['id' => '01900000-0000-0002-0000-000000000001']); // TEST project
+        verify($project->isMemberAdmin('01900000-0000-0000-0000-000000000002'))->true();
+    }
+
     // -------------------------------------------------------------------------
     // beforeValidate & beforeSave hooks
     // -------------------------------------------------------------------------
@@ -594,7 +647,7 @@ class ProjectTest extends Unit
         verify($project->errors)->arrayHasKey('organization_id');
     }
 
-    public function testArchivingUpdatesArchivedAt(): void
+    public function testAfterSaveSetsArchivedAtValue(): void
     {
         $this->loginFixtureUser();
 
@@ -611,5 +664,88 @@ class ProjectTest extends Unit
         $project->save(false);
 
         verify($project->archived_at)->null();
+    }
+
+    public function testBeforeSaveFailsWhenParentBeforeSaveFails(): void
+    {
+        $project = new Project([
+            'name'     => 'Invalid BeforeSave',
+            'key'      => 'BADSAVE',
+            'owner_id' => '01900000-0000-0000-0000-000000000001',
+        ]);
+
+        $project->on(Project::EVENT_BEFORE_INSERT, function ($event) {
+            $event->isValid = false;
+        });
+
+        verify($project->save())->false();
+    }
+
+    public function testAfterSaveCreatesOwnerMembershipOnNewProject(): void
+    {
+        $user = $this->loginFixtureUser();
+
+        $project = new Project([
+            'name' => 'AfterSave Membership',
+            'key'  => 'AFTERM',
+            'owner_id' => $user->id,
+        ]);
+
+        verify($project->save())->true();
+
+        $member = ProjectMember::findOne([
+            'project_id' => $project->id,
+            'user_id'    => $user->id,
+        ]);
+
+        verify($member)->notNull();
+        verify($member->role)->equals(RoleManager::ROLE_OWNER);
+    }
+
+    public function testAfterSaveDoesNotCreateOwnerMembershipOnNewProject(): void
+    {
+        $this->loginFixtureUser();
+        $project = new Project([
+            'name' => 'No Membership',
+            'key'  => 'NOMEM',
+            'owner_id' => '01900000-0000-0000-0000-000000000001',
+        ]);
+
+        Event::on(ProjectMember::class, ProjectMember::EVENT_BEFORE_INSERT, function ($event) {
+            $event->isValid = false; // prevent any new memberships from being created
+        });
+        // Trigger afterSave by saving the project
+        $this->expectException(\yii\db\Exception::class);
+        $this->expectExceptionMessage('Failed to add project owner as member.');
+        $project->save();
+
+        $projectExists = Project::find()->byKey($project->key)->exists();
+        $projectMemberExists = ProjectMember::find()->byProjectId($project->id)->andWhere(['user_id' => $project->owner_id])->exists();
+        verify($projectExists)->false(); // project should not be saved due to membership creation failure
+
+        Event::off(ProjectMember::class, ProjectMember::EVENT_BEFORE_INSERT);
+    }
+
+    public function testBeforeValidateFailsWhenParentBeforeValidateFails(): void
+    {
+        $project = new Project([
+            'name'     => 'Invalid Owner',
+            'key'      => 'INVOWN',
+            'owner_id' => '00000000-0000-0000-0000-000000000099', // non-existent
+        ]);
+
+        $project->on(Project::EVENT_BEFORE_VALIDATE, function ($event) {
+            $event->isValid = false;
+        });
+
+        verify($project->validate())->false();
+    }
+
+    public function testBeforeValidateReturnsTrueWhenParentBeforeValidateReturnsTrue(): void
+    {
+        $project = Project::findOne(['key' => 'TEST']);
+
+        verify($project->validate())->true();
+        verify($project->errors)->empty();
     }
 }
