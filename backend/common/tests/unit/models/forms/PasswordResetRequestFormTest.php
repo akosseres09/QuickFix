@@ -5,8 +5,10 @@ namespace common\tests\unit\models\forms;
 use Codeception\Test\Unit;
 use common\fixtures\UserFixture;
 use common\models\forms\PasswordResetRequestForm;
+use common\models\User;
 use common\tests\UnitTester;
 use Yii;
+use yii\base\Event;
 
 class PasswordResetRequestFormTest extends Unit
 {
@@ -116,5 +118,29 @@ class PasswordResetRequestFormTest extends Unit
 
         verify($newResetToken)->notEmpty();
         verify($newResetToken)->notEquals($resetTokenBefore);
+    }
+
+    public function testSendEmailReturnsFalseForNonexistentEmail()
+    {
+        $model = new PasswordResetRequestForm([
+            'email' => 'asd@asd.com'
+        ]);
+
+        verify($model->sendEmail())->false();
+    }
+
+    public function testSendEmailReturnsFalseWhenUserIsNotSaved()
+    {
+        $user = $this->tester->grabFixture('user', 5);
+        $model = new PasswordResetRequestForm([
+            'email' => $user['email']
+        ]);
+
+        Event::on(User::class, User::EVENT_BEFORE_UPDATE, function (Event $event) {
+            $event->isValid = false;
+        });
+        verify($model->sendEmail())->false();
+
+        Event::off(User::class, User::EVENT_BEFORE_UPDATE);
     }
 }

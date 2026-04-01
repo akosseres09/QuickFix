@@ -6,6 +6,7 @@ use Codeception\Test\Unit;
 use common\models\forms\ResendVerificationEmailForm;
 use common\models\User;
 use common\tests\UnitTester;
+use yii\base\Event;
 
 class ResendVerificationEmailFormTest extends Unit
 {
@@ -85,5 +86,48 @@ class ResendVerificationEmailFormTest extends Unit
 
         $result = $form->send($user);
         verify($result)->true();
+    }
+
+    public function testSendEmailFailsWhenUserNotFound(): void
+    {
+        $form = new ResendVerificationEmailForm(['email' => 'nonexistent@example.com']);
+        $result = $form->send();
+        verify($result)->false();
+    }
+
+    public function testSendSucceedsWhenUserIsNullButFoundInDb(): void
+    {
+        $form = new ResendVerificationEmailForm([
+            'email' => 'jane.doe@example.com' // inactive user
+        ]);
+
+        // 1. Method runs.
+        // 2. $user === null is true, queries DB.
+        // 3. findOne() succeeds.
+        // 4. if (!$user) is skipped.
+        // 5. User saves and email queues successfully.
+        verify($form->send())->true();
+    }
+
+    public function testSendFailsWhenUserCannotBeSaved(): void
+    {
+        $form = new ResendVerificationEmailForm([
+            'email' => 'jane.doe@example.com' // inactive user
+        ]);
+
+        // The Trap: Block the save!
+        Event::on(User::class, User::EVENT_BEFORE_UPDATE, function ($event) {
+            $event->isValid = false;
+        });
+
+        // 1. $user === null is true, DB queried.
+        // 2. findOne() succeeds.
+        // 3. Tokens are generated.
+        // 4. $user->save() is called, but our trap returns false.
+        // 5. if (!$saved) triggers and returns false.
+        verify($form->send())->false();
+
+        // Cleanup: Remove the trap so other tests don't break!
+        Event::off(User::class, User::EVENT_BEFORE_UPDATE);
     }
 }

@@ -44,4 +44,11 @@ class VerifyEmailFormTest extends Unit
         $this->expectExceptionMessage('Wrong verify email token.');
         $form = new VerifyEmailForm('invalid-token');
     }
+
+    public function testEmptyOrNonStringToken()
+    {
+        $this->expectException(\yii\base\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Verify email token cannot be blank.');
+        new VerifyEmailForm('');
+    }
 }
