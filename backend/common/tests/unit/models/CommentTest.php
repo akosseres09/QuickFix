@@ -140,7 +140,7 @@ class CommentTest extends Unit
             'content' => 'A new comment',
         ]);
 
-        $saved = $comment->beforeSave(true);
+        $saved = $comment->save();
         verify($saved)->true();
         verify($comment->id)->notEmpty();
         verify($comment->id)->stringMatchesRegExp(
@@ -275,7 +275,7 @@ class CommentTest extends Unit
             'content' => 'Some content',
         ]);
 
-        verify($comment->beforeValidate())->false();
+        verify($comment->validate())->false();
     }
 
     public function testBeforeValidateFailsWhenParentBeforeValidateFails(): void
@@ -288,7 +288,7 @@ class CommentTest extends Unit
             $event->isValid = false;
         });
 
-        verify($comment->beforeValidate())->false();
+        verify($comment->validate())->false();
     }
 
     // -------------------------------------------------------------------------
@@ -303,7 +303,7 @@ class CommentTest extends Unit
         $originalId = $comment->id;
 
         $comment->content = 'Updated content.';
-        $saved = $comment->beforeSave(false);
+        $saved = $comment->save();
 
         verify($saved)->true();
         verify($comment->id)->equals($originalId);
@@ -318,7 +318,7 @@ class CommentTest extends Unit
         });
 
         $comment->content = 'Attempted update with failing beforeSave.';
-        verify($comment->beforeSave(false))->false();
+        verify($comment->save())->false();
 
         $comment->off(\yii\db\ActiveRecord::EVENT_BEFORE_UPDATE);
     }

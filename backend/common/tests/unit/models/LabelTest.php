@@ -383,7 +383,7 @@ class LabelTest extends Unit
         // This label is used by issues, so delete should throw
 
         $this->expectException(\yii\web\ConflictHttpException::class);
-        $open->beforeDelete();
+        $open->delete();
     }
 
     // -------------------------------------------------------------------------

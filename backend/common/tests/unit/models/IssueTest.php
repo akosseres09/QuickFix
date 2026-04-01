@@ -491,7 +491,7 @@ class IssueTest extends Unit
             'status_label' => '01900000-0000-0003-0000-000000000001',
         ]);
 
-        verify($issue->beforeValidate())->false();
+        verify($issue->validate())->false();
         verify($issue->getErrors('project_id'))->arrayContains('Project ID is required.');
     }
 
@@ -506,7 +506,7 @@ class IssueTest extends Unit
             $event->isValid = false;
         });
 
-        verify($issue->beforeValidate())->false();
+        verify($issue->validate())->false();
     }
 
     // -------------------------------------------------------------------------
