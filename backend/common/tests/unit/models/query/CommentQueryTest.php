@@ -52,7 +52,7 @@ class CommentQueryTest extends Unit
     public function testByIdReturnsMatchingComment(): void
     {
         $result = Comment::find()
-            ->byId('01900000-0000-0005-0000-000000000001')
+            ->byId('01900000-0000-7005-8000-000000000001')
             ->one();
 
         verify($result)->notNull();
@@ -75,22 +75,22 @@ class CommentQueryTest extends Unit
     public function testByIssueIdReturnsAllCommentsForIssue(): void
     {
         $results = Comment::find()
-            ->byIssueId('01900000-0000-0004-0000-000000000001')
+            ->byIssueId('01900000-0000-7004-8000-000000000001')
             ->all();
 
         foreach ($results as $result) {
-            verify($result->issue_id)->equals('01900000-0000-0004-0000-000000000001');
+            verify($result->issue_id)->equals('01900000-0000-7004-8000-000000000001');
         }
     }
 
     public function testByIssueIdReturnsSingleCommentForIssue(): void
     {
         $results = Comment::find()
-            ->byIssueId('01900000-0000-0004-0000-000000000002')
+            ->byIssueId('01900000-0000-7004-8000-000000000002')
             ->all();
 
         foreach ($results as $result) {
-            verify($result->issue_id)->equals('01900000-0000-0004-0000-000000000002');
+            verify($result->issue_id)->equals('01900000-0000-7004-8000-000000000002');
         }
     }
 
@@ -111,11 +111,11 @@ class CommentQueryTest extends Unit
     {
         // user 1 created comments 2 and 3
         $results = Comment::find()
-            ->byCreatorId('01900000-0000-0000-0000-000000000001')
+            ->byCreatorId('01900000-0000-7000-8000-000000000001')
             ->all();
 
         foreach ($results as $result) {
-            verify($result->created_by)->equals('01900000-0000-0000-0000-000000000001');
+            verify($result->created_by)->equals('01900000-0000-7000-8000-000000000001');
         }
     }
 
@@ -123,11 +123,11 @@ class CommentQueryTest extends Unit
     {
         // user 2 created comment 1
         $results = Comment::find()
-            ->byCreatorId('01900000-0000-0000-0000-000000000002')
+            ->byCreatorId('01900000-0000-7000-8000-000000000002')
             ->all();
 
         foreach ($results as $result) {
-            verify($result->created_by)->equals('01900000-0000-0000-0000-000000000002');
+            verify($result->created_by)->equals('01900000-0000-7000-8000-000000000002');
         }
     }
 
@@ -148,11 +148,11 @@ class CommentQueryTest extends Unit
     {
         // user 2 updated comment 1; user 1 updated comment 3
         $results = Comment::find()
-            ->byUpdatorId('01900000-0000-0000-0000-000000000002')
+            ->byUpdatorId('01900000-0000-7000-8000-000000000002')
             ->all();
 
         foreach ($results as $result) {
-            verify($result->updated_by)->equals('01900000-0000-0000-0000-000000000002');
+            verify($result->updated_by)->equals('01900000-0000-7000-8000-000000000002');
         }
     }
 
@@ -173,11 +173,11 @@ class CommentQueryTest extends Unit
     {
         // All 3 fixture comments belong to issues in project TEST
         $results = Comment::find()
-            ->byProjectId('01900000-0000-0002-0000-000000000001')
+            ->byProjectId('01900000-0000-7002-8000-000000000001')
             ->all();
 
         foreach ($results as $result) {
-            verify($result->issue->project_id)->equals('01900000-0000-0002-0000-000000000001');
+            verify($result->issue->project_id)->equals('01900000-0000-7002-8000-000000000001');
         }
     }
 
@@ -198,11 +198,11 @@ class CommentQueryTest extends Unit
     {
         // In issue TEST-1, comment by user 1 is comment 2
         $result = Comment::find()
-            ->byIssueId('01900000-0000-0004-0000-000000000001')
-            ->byCreatorId('01900000-0000-0000-0000-000000000001')
+            ->byIssueId('01900000-0000-7004-8000-000000000001')
+            ->byCreatorId('01900000-0000-7000-8000-000000000001')
             ->one();
 
         verify($result)->notNull();
-        verify($result->id)->equals('01900000-0000-0005-0000-000000000002');
+        verify($result->id)->equals('01900000-0000-7005-8000-000000000002');
     }
 }

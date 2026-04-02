@@ -48,7 +48,7 @@ class IssueQueryTest extends Unit
     public function testByIdReturnsMatchingIssue(): void
     {
         $result = Issue::find()
-            ->byId('01900000-0000-0004-0000-000000000001')
+            ->byId('01900000-0000-7004-8000-000000000001')
             ->one();
 
         verify($result)->notNull();
@@ -71,13 +71,13 @@ class IssueQueryTest extends Unit
     public function testByProjectIdReturnsAllIssuesInProject(): void
     {
         $results = Issue::find()
-            ->byProjectId('01900000-0000-0002-0000-000000000001')
+            ->byProjectId('01900000-0000-7002-8000-000000000001')
             ->all();
 
         // All 3 fixture issues belong to project TEST
 
         foreach ($results as $issue) {
-            verify($issue->project_id)->equals('01900000-0000-0002-0000-000000000001');
+            verify($issue->project_id)->equals('01900000-0000-7002-8000-000000000001');
         }
     }
 
@@ -173,11 +173,11 @@ class IssueQueryTest extends Unit
     {
         // TEST-1 is assigned to user 2 (jane.doe)
         $results = Issue::find()
-            ->assignedTo('01900000-0000-0000-0000-000000000002')
+            ->assignedTo('01900000-0000-7000-8000-000000000002')
             ->all();
 
         foreach ($results as $issue) {
-            verify($issue->assigned_to)->equals('01900000-0000-0000-0000-000000000002');
+            verify($issue->assigned_to)->equals('01900000-0000-7000-8000-000000000002');
         }
     }
 
@@ -198,11 +198,11 @@ class IssueQueryTest extends Unit
     {
         // All 3 fixture issues are created by user 1 (bayer.hudson)
         $results = Issue::find()
-            ->createdBy('01900000-0000-0000-0000-000000000001')
+            ->createdBy('01900000-0000-7000-8000-000000000001')
             ->all();
 
         foreach ($results as $issue) {
-            verify($issue->created_by)->equals('01900000-0000-0000-0000-000000000001');
+            verify($issue->created_by)->equals('01900000-0000-7000-8000-000000000001');
         }
     }
 
@@ -222,12 +222,12 @@ class IssueQueryTest extends Unit
     public function testChainingByProjectIdAndByType(): void
     {
         $results = Issue::find()
-            ->byProjectId('01900000-0000-0002-0000-000000000001')
+            ->byProjectId('01900000-0000-7002-8000-000000000001')
             ->byType(Issue::TYPE_BUG)
             ->all();
 
         foreach ($results as $issue) {
-            verify($issue->project_id)->equals('01900000-0000-0002-0000-000000000001');
+            verify($issue->project_id)->equals('01900000-0000-7002-8000-000000000001');
             verify($issue->type)->equals(Issue::TYPE_BUG);
         }
     }
@@ -235,13 +235,13 @@ class IssueQueryTest extends Unit
     public function testChainingByProjectIdAndCreatedBy(): void
     {
         $results = Issue::find()
-            ->byProjectId('01900000-0000-0002-0000-000000000001')
-            ->createdBy('01900000-0000-0000-0000-000000000001')
+            ->byProjectId('01900000-0000-7002-8000-000000000001')
+            ->createdBy('01900000-0000-7000-8000-000000000001')
             ->all();
 
         foreach ($results as $issue) {
-            verify($issue->project_id)->equals('01900000-0000-0002-0000-000000000001');
-            verify($issue->created_by)->equals('01900000-0000-0000-0000-000000000001');
+            verify($issue->project_id)->equals('01900000-0000-7002-8000-000000000001');
+            verify($issue->created_by)->equals('01900000-0000-7000-8000-000000000001');
         }
     }
 
