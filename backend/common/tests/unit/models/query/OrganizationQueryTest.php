@@ -32,7 +32,7 @@ class OrganizationQueryTest extends Unit
     public function testByIdReturnsMatchingRecord(): void
     {
         $result = Organization::find()
-            ->byId('01900000-0000-0001-0000-000000000001')
+            ->byId('01900000-0000-7001-8000-000000000001')
             ->one();
 
         verify($result)->notNull();
@@ -59,7 +59,7 @@ class OrganizationQueryTest extends Unit
             ->one();
 
         verify($result)->notNull();
-        verify($result->id)->equals('01900000-0000-0001-0000-000000000001');
+        verify($result->id)->equals('01900000-0000-7001-8000-000000000001');
         verify($result->name)->equals('Test Organization');
     }
 
@@ -70,7 +70,7 @@ class OrganizationQueryTest extends Unit
             ->one();
 
         verify($result)->notNull();
-        verify($result->id)->equals('01900000-0000-0001-0000-000000000002');
+        verify($result->id)->equals('01900000-0000-7001-8000-000000000002');
     }
 
     public function testBySlugReturnsNullForUnknownSlug(): void
@@ -89,7 +89,7 @@ class OrganizationQueryTest extends Unit
     public function testChainingByIdAndBySlug(): void
     {
         $result = Organization::find()
-            ->byId('01900000-0000-0001-0000-000000000001')
+            ->byId('01900000-0000-7001-8000-000000000001')
             ->bySlug('test-org')
             ->one();
 
@@ -99,7 +99,7 @@ class OrganizationQueryTest extends Unit
     public function testChainingByIdAndWrongSlugReturnsNull(): void
     {
         $result = Organization::find()
-            ->byId('01900000-0000-0001-0000-000000000001')
+            ->byId('01900000-0000-7001-8000-000000000001')
             ->bySlug('second-org')
             ->one();
 
