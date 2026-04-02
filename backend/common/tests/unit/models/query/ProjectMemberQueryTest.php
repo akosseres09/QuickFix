@@ -48,11 +48,11 @@ class ProjectMemberQueryTest extends Unit
     public function testByIdReturnsMatchingMember(): void
     {
         $result = ProjectMember::find()
-            ->byId('01900000-0000-0008-0000-000000000001')
+            ->byId('01900000-0000-7008-8000-000000000001')
             ->one();
 
         verify($result)->notNull();
-        verify($result->user_id)->equals('01900000-0000-0000-0000-000000000001');
+        verify($result->user_id)->equals('01900000-0000-7000-8000-000000000001');
     }
 
     public function testByIdReturnsNullForUnknownId(): void
@@ -72,12 +72,12 @@ class ProjectMemberQueryTest extends Unit
     {
         // Project TEST has 2 members: user1 (OWNER) and user2 (MEMBER)
         $results = ProjectMember::find()
-            ->byProjectId('01900000-0000-0002-0000-000000000001')
+            ->byProjectId('01900000-0000-7002-8000-000000000001')
             ->all();
 
         verify($results)->notEmpty();
         foreach ($results as $member) {
-            verify($member->project_id)->equals('01900000-0000-0002-0000-000000000001');
+            verify($member->project_id)->equals('01900000-0000-7002-8000-000000000001');
         }
     }
 
@@ -98,12 +98,12 @@ class ProjectMemberQueryTest extends Unit
     {
         // In project TEST, user1 and user2 are members. Excluding user1 leaves 1.
         $results = ProjectMember::find()
-            ->byProjectId('01900000-0000-0002-0000-000000000001')
-            ->notUser('01900000-0000-0000-0000-000000000001')
+            ->byProjectId('01900000-0000-7002-8000-000000000001')
+            ->notUser('01900000-0000-7000-8000-000000000001')
             ->all();
         verify($results)->notEmpty();
         foreach ($results as $member) {
-            verify($member->user_id)->notEquals('01900000-0000-0000-0000-000000000001');
+            verify($member->user_id)->notEquals('01900000-0000-7000-8000-000000000001');
         }
     }
 
@@ -115,12 +115,12 @@ class ProjectMemberQueryTest extends Unit
     {
         // Cursor at record 2 should return records 3, 4, 5
         $results = ProjectMember::find()
-            ->byCursor('01900000-0000-0008-0000-000000000002')
+            ->byCursor('01900000-0000-7008-8000-000000000002')
             ->all();
 
         verify($results)->notEmpty();
         foreach ($results as $result) {
-            verify($result->id > '01900000-0000-0008-0000-000000000002')->true();
+            verify($result->id > '01900000-0000-7008-8000-000000000002')->true();
         }
     }
 
@@ -145,12 +145,12 @@ class ProjectMemberQueryTest extends Unit
     {
         // User1 is a member of 3 projects (TEST, PRIV, TEAM)
         $results = ProjectMember::find()
-            ->byUser('01900000-0000-0000-0000-000000000001')
+            ->byUser('01900000-0000-7000-8000-000000000001')
             ->all();
 
         verify($results)->notEmpty();
         foreach ($results as $membership) {
-            verify($membership->user_id)->equals('01900000-0000-0000-0000-000000000001');
+            verify($membership->user_id)->equals('01900000-0000-7000-8000-000000000001');
         }
     }
 
@@ -158,12 +158,12 @@ class ProjectMemberQueryTest extends Unit
     {
         // User2 is a member of 2 projects (TEST, TEAM)
         $results = ProjectMember::find()
-            ->byUser('01900000-0000-0000-0000-000000000002')
+            ->byUser('01900000-0000-7000-8000-000000000002')
             ->all();
 
         verify($results)->notEmpty();
         foreach ($results as $membership) {
-            verify($membership->user_id)->equals('01900000-0000-0000-0000-000000000002');
+            verify($membership->user_id)->equals('01900000-0000-7000-8000-000000000002');
         }
     }
 
@@ -226,14 +226,14 @@ class ProjectMemberQueryTest extends Unit
     public function testLatestReturnsResultsOrderedByCreatedAtDesc(): void
     {
         $results = ProjectMember::find()
-            ->byProjectId('01900000-0000-0002-0000-000000000001')
+            ->byProjectId('01900000-0000-7002-8000-000000000001')
             ->latest()
             ->all();
 
         verify($results)->notEmpty(2);
         $last = null;
         foreach ($results as $result) {
-            verify($result->project_id)->equals('01900000-0000-0002-0000-000000000001');
+            verify($result->project_id)->equals('01900000-0000-7002-8000-000000000001');
             if ($last !== null) {
                 verify($result->created_at <= $last)->true();
             }
@@ -244,14 +244,14 @@ class ProjectMemberQueryTest extends Unit
     public function testOldestReturnsResultsOrderedByCreatedAtAsc(): void
     {
         $results = ProjectMember::find()
-            ->byProjectId('01900000-0000-0002-0000-000000000001')
+            ->byProjectId('01900000-0000-7002-8000-000000000001')
             ->oldest()
             ->all();
 
         verify($results)->notEmpty();
         $last = null;
         foreach ($results as $result) {
-            verify($result->project_id)->equals('01900000-0000-0002-0000-000000000001');
+            verify($result->project_id)->equals('01900000-0000-7002-8000-000000000001');
             if ($last !== null) {
                 verify($result->created_at >= $last)->true();
             }
@@ -266,13 +266,13 @@ class ProjectMemberQueryTest extends Unit
     public function testChainingByProjectIdAndByRole(): void
     {
         $results = ProjectMember::find()
-            ->byProjectId('01900000-0000-0002-0000-000000000001')
+            ->byProjectId('01900000-0000-7002-8000-000000000001')
             ->byRole(RoleManager::ROLE_OWNER)
             ->all();
 
         verify($results)->notEmpty();
         foreach ($results as $membership) {
-            verify($membership->project_id)->equals('01900000-0000-0002-0000-000000000001');
+            verify($membership->project_id)->equals('01900000-0000-7002-8000-000000000001');
             verify($membership->role)->equals(RoleManager::ROLE_OWNER);
         }
     }
@@ -280,13 +280,13 @@ class ProjectMemberQueryTest extends Unit
     public function testChainingByUserAndByRole(): void
     {
         $results = ProjectMember::find()
-            ->byUser('01900000-0000-0000-0000-000000000002')
+            ->byUser('01900000-0000-7000-8000-000000000002')
             ->byRole(RoleManager::ROLE_MEMBER)
             ->all();
 
         verify($results)->notEmpty();
         foreach ($results as $membership) {
-            verify($membership->user_id)->equals('01900000-0000-0000-0000-000000000002');
+            verify($membership->user_id)->equals('01900000-0000-7000-8000-000000000002');
             verify($membership->role)->equals(RoleManager::ROLE_MEMBER);
         }
     }
