@@ -38,11 +38,11 @@ class OrganizationMemberQueryTest extends Unit
     public function testByIdReturnsMatchingMember(): void
     {
         $result = OrganizationMember::find()
-            ->byId('01900000-0000-0007-0000-000000000001')
+            ->byId('01900000-0000-7007-8000-000000000001')
             ->one();
 
         verify($result)->notNull();
-        verify($result->user_id)->equals('01900000-0000-0000-0000-000000000001');
+        verify($result->user_id)->equals('01900000-0000-7000-8000-000000000001');
     }
 
     public function testByIdReturnsNullForUnknownId(): void
@@ -62,12 +62,12 @@ class OrganizationMemberQueryTest extends Unit
     {
         // user3 (admin.user) is a member of org1 (ADMIN) and org2 (OWNER)
         $results = OrganizationMember::find()
-            ->byUserId('01900000-0000-0000-0000-000000000003')
+            ->byUserId('01900000-0000-7000-8000-000000000003')
             ->all();
 
         verify($results)->notEmpty();
         foreach ($results as $membership) {
-            verify($membership->user_id)->equals('01900000-0000-0000-0000-000000000003');
+            verify($membership->user_id)->equals('01900000-0000-7000-8000-000000000003');
         }
     }
 
@@ -75,12 +75,12 @@ class OrganizationMemberQueryTest extends Unit
     {
         // user2 (jane.doe) is only a member of org1
         $results = OrganizationMember::find()
-            ->byUserId('01900000-0000-0000-0000-000000000002')
+            ->byUserId('01900000-0000-7000-8000-000000000002')
             ->all();
 
         verify($results)->notEmpty();
         foreach ($results as $membership) {
-            verify($membership->user_id)->equals('01900000-0000-0000-0000-000000000002');
+            verify($membership->user_id)->equals('01900000-0000-7000-8000-000000000002');
         }
     }
 
@@ -104,7 +104,7 @@ class OrganizationMemberQueryTest extends Unit
             ->one();
 
         verify($result)->notNull();
-        verify($result->user_id)->equals('01900000-0000-0000-0000-000000000001');
+        verify($result->user_id)->equals('01900000-0000-7000-8000-000000000001');
     }
 
     public function testByUsernameReturnsAllMembershipsForUser(): void
@@ -116,7 +116,7 @@ class OrganizationMemberQueryTest extends Unit
 
         verify($results)->notEmpty();
         foreach ($results as $membership) {
-            verify($membership->user_id)->equals('01900000-0000-0000-0000-000000000003');
+            verify($membership->user_id)->equals('01900000-0000-7000-8000-000000000003');
         }
     }
 
@@ -137,12 +137,12 @@ class OrganizationMemberQueryTest extends Unit
     {
         // org1 has 3 members: user1 (OWNER), user2 (MEMBER), user3 (ADMIN)
         $results = OrganizationMember::find()
-            ->byOrganization('01900000-0000-0001-0000-000000000001')
+            ->byOrganization('01900000-0000-7001-8000-000000000001')
             ->all();
 
         verify($results)->notEmpty();
         foreach ($results as $membership) {
-            verify($membership->organization_id)->equals('01900000-0000-0001-0000-000000000001');
+            verify($membership->organization_id)->equals('01900000-0000-7001-8000-000000000001');
         }
     }
 
@@ -150,12 +150,12 @@ class OrganizationMemberQueryTest extends Unit
     {
         // org2 has 1 member: user3 (OWNER)
         $results = OrganizationMember::find()
-            ->byOrganization('01900000-0000-0001-0000-000000000002')
+            ->byOrganization('01900000-0000-7001-8000-000000000002')
             ->all();
 
         verify($results)->notEmpty();
         foreach ($results as $membership) {
-            verify($membership->organization_id)->equals('01900000-0000-0001-0000-000000000002');
+            verify($membership->organization_id)->equals('01900000-0000-7001-8000-000000000002');
         }
     }
 
@@ -176,12 +176,12 @@ class OrganizationMemberQueryTest extends Unit
     {
         // Cursor at record 2 should return records 3 and 4
         $results = OrganizationMember::find()
-            ->byCursor('01900000-0000-0007-0000-000000000002')
+            ->byCursor('01900000-0000-7000-8000-000000000002')
             ->all();
 
         verify($results)->notEmpty();
         foreach ($results as $result) {
-            verify($result->id > '01900000-0000-0007-0000-000000000002')->true();
+            verify($result->id > '01900000-0000-7000-8000-000000000002')->true();
         }
     }
 
@@ -204,8 +204,8 @@ class OrganizationMemberQueryTest extends Unit
     public function testChainingByOrganizationAndByUserId(): void
     {
         $result = OrganizationMember::find()
-            ->byOrganization('01900000-0000-0001-0000-000000000001')
-            ->byUserId('01900000-0000-0000-0000-000000000001')
+            ->byOrganization('01900000-0000-7001-8000-000000000001')
+            ->byUserId('01900000-0000-7000-8000-000000000001')
             ->one();
 
         verify($result)->notNull();
@@ -215,7 +215,7 @@ class OrganizationMemberQueryTest extends Unit
     public function testChainingByOrganizationAndByUsername(): void
     {
         $result = OrganizationMember::find()
-            ->byOrganization('01900000-0000-0001-0000-000000000001')
+            ->byOrganization('01900000-0000-7001-8000-000000000001')
             ->byUsername('jane.doe')
             ->one();
 
