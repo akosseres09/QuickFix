@@ -38,7 +38,7 @@ class OrganizationInvitationQueryTest extends Unit
     public function testByIdReturnsMatchingRecord(): void
     {
         $result = OrganizationInvitation::find()
-            ->byId('01900000-0000-0009-0000-000000000001')
+            ->byId('01900000-0000-7009-8000-000000000001')
             ->one();
 
         verify($result)->notNull();
@@ -61,12 +61,12 @@ class OrganizationInvitationQueryTest extends Unit
     public function testByOrganizationReturnsAllInvitationsForOrg(): void
     {
         $results = OrganizationInvitation::find()
-            ->byOrganization('01900000-0000-0001-0000-000000000001')
+            ->byOrganization('01900000-0000-7001-8000-000000000001')
             ->all();
 
         verify($results)->notEmpty();
         foreach ($results as $result) {
-            verify($result->organization_id)->equals('01900000-0000-0001-0000-000000000001');
+            verify($result->organization_id)->equals('01900000-0000-7001-8000-000000000001');
         }
     }
 
@@ -170,13 +170,13 @@ class OrganizationInvitationQueryTest extends Unit
     public function testChainingByOrganizationAndPending(): void
     {
         $results = OrganizationInvitation::find()
-            ->byOrganization('01900000-0000-0001-0000-000000000001')
+            ->byOrganization('01900000-0000-7001-8000-000000000001')
             ->pending()
             ->all();
 
         verify($results)->notEmpty();
         foreach ($results as $result) {
-            verify($result->organization_id)->equals('01900000-0000-0001-0000-000000000001');
+            verify($result->organization_id)->equals('01900000-0000-7001-8000-000000000001');
             verify($result->status)->equals(OrganizationInvitation::STATUS_PENDING);
         }
     }
