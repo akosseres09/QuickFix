@@ -3,11 +3,15 @@
 namespace api\tests\functional\controllers;
 
 use api\components\traits\AccessTokenHandler;
+use api\components\CloudinaryService;
 use Codeception\Test\Unit;
 use api\tests\FunctionalTester;
 use common\fixtures\UserFixture;
+use common\models\User;
 use common\models\UserRole;
 use Yii;
+use yii\base\Event;
+use yii\web\UploadedFile;
 
 class UserControllerTest extends Unit
 {
@@ -202,6 +206,137 @@ class UserControllerTest extends Unit
         $this->tester->sendAjaxPostRequest('/user/' . self::MEMBER_ID . '/upload-profile-picture', []);
 
         $this->tester->seeResponseCodeIs(403);
+    }
+
+    public function testUploadProfilePictureReturns400WhenFileTooLarge(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+        $fake = $this->getFakeFilePayload('image/jpeg', 6 * 1024 * 1024 + 1);
+
+        $this->tester->haveHttpHeader('X-Requested-With', 'XMLHttpRequest');
+
+        $this->tester->sendPost(
+            '/user/' . self::OWNER_ID . '/upload-profile-picture',
+            [], // params
+            ['profile_picture' => $fake] // files
+        );
+
+        $json = $this->grabJson();
+        $this->tester->seeResponseCodeIs(400);
+        $this->assertStringContainsString('5MB', $json['error']['message']);
+    }
+
+    public function testUploadProfilePictureReturns400WhenInvalidMimeType(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+        $fake = $this->getFakeFilePayload('application/pdf', 1024);
+
+        $this->tester->haveHttpHeader('X-Requested-With', 'XMLHttpRequest');
+
+        $this->tester->sendPost(
+            '/user/' . self::OWNER_ID . '/upload-profile-picture',
+            [], // params
+            ['profile_picture' => $fake] // files
+        );
+
+        $this->tester->seeResponseCodeIs(400);
+        $json = $this->grabJson();
+        $this->assertStringContainsString('Invalid file type', $json['error']['message']);
+    }
+
+    public function testUploadProfilePictureReturns500WhenCloudinaryFails(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+        $fake = $this->getFakeFilePayload('image/jpeg', 1024);
+
+        $mock = $this->createMock(CloudinaryService::class);
+        $mock->method('uploadProfilePicture')
+            ->willThrowException(new \RuntimeException('Service unavailable'));
+        Yii::$app->set('cloudinary', $mock);
+
+        $this->tester->haveHttpHeader('X-Requested-With', 'XMLHttpRequest');
+
+        $this->tester->sendPost(
+            '/user/' . self::OWNER_ID . '/upload-profile-picture',
+            [], // params
+            ['profile_picture' => $fake] // files
+        );
+
+        $this->tester->seeResponseCodeIs(500);
+    }
+
+    public function testUploadProfilePictureSucceeds(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+        $fake = $this->getFakeFilePayload('image/jpeg', 1024);
+        $expectedUrl = 'https://res.cloudinary.com/test/image/upload/quickfix/profile-pictures/owner.jpg';
+
+        $mock = $this->createMock(CloudinaryService::class);
+        $mock->method('uploadProfilePicture')->willReturn($expectedUrl);
+        Yii::$app->set('cloudinary', $mock);
+
+        $this->tester->haveHttpHeader('X-Requested-With', 'XMLHttpRequest');
+
+        $this->tester->sendPost(
+            '/user/' . self::OWNER_ID . '/upload-profile-picture',
+            [],
+            ['profile_picture' => $fake] // files
+        );
+
+        $this->tester->seeResponseCodeIs(200);
+        $json = $this->grabJson();
+        $this->assertTrue($json['success']);
+        $this->assertEquals($expectedUrl, $json['data']['profilePictureUrl']);
+    }
+
+    public function testUploadProfilePictureSaveFails(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+        $fake = $this->getFakeFilePayload('image/jpeg', 1024);
+        $expectedUrl = 'https://res.cloudinary.com/test/image/upload/quickfix/profile-pictures/owner.jpg';
+
+        $mock = $this->createMock(CloudinaryService::class);
+        $mock->method('uploadProfilePicture')->willReturn($expectedUrl);
+        Yii::$app->set('cloudinary', $mock);
+
+        $this->tester->haveHttpHeader('X-Requested-With', 'XMLHttpRequest');
+
+        Event::on(User::class, User::EVENT_BEFORE_UPDATE, function (Event $event) {
+            $event->isValid = false; // Prevents the save operation from succeeding
+        });
+
+        try {
+            $this->tester->sendPost(
+                '/user/' . self::OWNER_ID . '/upload-profile-picture',
+                [],
+                ['profile_picture' => $fake] // files
+            );
+
+            $json = $this->grabJson();
+            $this->tester->seeResponseCodeIs(500);
+            $this->assertFalse($json['success']);
+            $this->assertStringContainsString('Failed to save profile picture URL.', $json['error']['message']);
+        } finally {
+            Event::off(User::class, User::EVENT_BEFORE_UPDATE);
+        }
+    }
+
+    // ── Upload helpers ────────────────────────────────────────────────────────
+
+    /**
+     * Returns an array formatted for Codeception's $files parameter.
+     * We point tmp_name to __FILE__ so Yii doesn't throw a "file not found" error,
+     * but we fake the size and mime type entirely.
+     */
+    private function getFakeFilePayload(string $type, int $size): array
+    {
+        return [
+            'name'     => 'test_upload.ext',
+            'type'     => $type,
+            'size'     => $size,
+            'tmp_name' => __FILE__, // Reuses the current test file as a dummy physical file
+            'error'    => UPLOAD_ERR_OK,
+        ];
     }
 
     // =========================================================================
