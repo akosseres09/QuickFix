@@ -30,4 +30,24 @@ return [
         'expires_at' => 1000000000, // past
         'revoked_at' => null,
     ],
+    'revoked_token' => [
+        'id'         => '00000000-0000-0000-0000-000000000003',
+        'user_id'    => '01900000-0000-0000-0000-000000000001',
+        'token'      => 'revoked-refresh-token-000000000002',
+        'ip'         => '127.0.0.2',
+        'user_agent' => 'TestAgent/1.0',
+        'created_at' => 1700000000,
+        'expires_at' => 1800000000, // far future
+        'revoked_at' => 1700000000, // revoked
+    ],
+    'revoked_expired_token' => [
+        'id'         => '00000000-0000-0000-0000-000000000004',
+        'user_id'    => '01900000-0000-0000-0000-000000000002',
+        'token'      => 'revoked-expired-refresh-token-000000000003',
+        'ip'         => '127.0.0.3',
+        'user_agent' => 'TestAgent/1.0',
+        'created_at' => 1700000000,
+        'expires_at' => 1700000000, // past
+        'revoked_at' => 1700000000, // revoked
+    ],
 ];
