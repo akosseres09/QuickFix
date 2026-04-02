@@ -24,7 +24,7 @@ export class OrganizationMemberService {
             .pipe(
                 map((response) => ({
                     items: response.body?.items ?? [],
-                    nextCursor: response.headers.get('X-Cursor'),
+                    nextCursor: response.headers.get('X-Next-Cursor'),
                     hasMore: response.headers.get('X-Has-More') === 'true',
                 }))
             );
