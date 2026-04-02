@@ -15,6 +15,8 @@ use common\fixtures\ProjectMemberFixture;
 use common\fixtures\UserFixture;
 use common\models\UserRole;
 use Yii;
+use yii\base\Application;
+use yii\base\Event;
 
 class CommentControllerTest extends Unit
 {
@@ -260,5 +262,93 @@ class CommentControllerTest extends Unit
 
         // strict parsing should result in 404 (no matching route)
         $this->tester->seeResponseCodeIs(404);
+    }
+
+    public function testFindModelReturns404WhenOrganizationIdMissing(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+        // Attempt to access comment with missing org slug in URL
+        Event::on(Application::class, Application::EVENT_BEFORE_ACTION, function () {
+            $request = Yii::$app->request;
+
+            $params = $request->getQueryParams();
+            unset($params['organization_id']);
+            $request->setQueryParams($params);
+        });
+
+        try {
+            $this->tester->sendAjaxGetRequest($this->commentUrl('/' . self::COMMENT_ID_1));
+            $json = $this->grabJson();
+            $this->tester->seeResponseCodeIs(400);
+            $this->tester->assertStringContainsString('Organization ID is required to access comments.', $json['error']['message']);
+        } finally {
+            Event::off(Application::class, Application::EVENT_BEFORE_ACTION);
+        }
+    }
+
+    public function testFindModelReturns404WhenProjectIdMissing(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+        // Attempt to access comment with missing project slug in URL
+        Event::on(Application::class, Application::EVENT_BEFORE_ACTION, function () {
+            $request = Yii::$app->request;
+
+            $params = $request->getQueryParams();
+            unset($params['project_id']);
+            $request->setQueryParams($params);
+        });
+
+        try {
+            $this->tester->sendAjaxGetRequest($this->commentUrl('/' . self::COMMENT_ID_1));
+            $json = $this->grabJson();
+            $this->tester->seeResponseCodeIs(400);
+            $this->tester->assertStringContainsString('Project ID is required to access comments.', $json['error']['message']);
+        } finally {
+            Event::off(Application::class, Application::EVENT_BEFORE_ACTION);
+        }
+    }
+
+    public function testFindModelReturns404WhenIssueIdMissing(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+        // Attempt to access comment with missing issue slug in URL
+        Event::on(Application::class, Application::EVENT_BEFORE_ACTION, function () {
+            $request = Yii::$app->request;
+
+            $params = $request->getQueryParams();
+            unset($params['issue_id']);
+            $request->setQueryParams($params);
+        });
+
+        try {
+            $this->tester->sendAjaxGetRequest($this->commentUrl('/' . self::COMMENT_ID_1));
+            $json = $this->grabJson();
+            $this->tester->seeResponseCodeIs(400);
+            $this->tester->assertStringContainsString('Issue ID is required to access comments.', $json['error']['message']);
+        } finally {
+            Event::off(Application::class, Application::EVENT_BEFORE_ACTION);
+        }
+    }
+
+    public function testFindModelReturns404WhenCommentIsNotFound(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+        // Attempt to access comment with missing issue slug in URL
+        Event::on(Application::class, Application::EVENT_BEFORE_ACTION, function () {
+            $request = Yii::$app->request;
+
+            $params = $request->getQueryParams();
+            $params['project_id'] = '01900000-0000-7001-8000-000000000099'; // Invalid project ID in the organization
+            $request->setQueryParams($params);
+        });
+
+        try {
+            $this->tester->sendAjaxGetRequest($this->commentUrl('/' . self::COMMENT_ID_1));
+            $json = $this->grabJson();
+            $this->tester->seeResponseCodeIs(404);
+            $this->tester->assertStringContainsString('The requested project does not exist!', $json['error']['message']);
+        } finally {
+            Event::off(Application::class, Application::EVENT_BEFORE_ACTION);
+        }
     }
 }

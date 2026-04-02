@@ -15,6 +15,9 @@ use common\fixtures\UserFixture;
 use common\fixtures\WorktimeFixture;
 use common\models\UserRole;
 use Yii;
+use yii\base\Application;
+use yii\base\Event;
+use yii\web\Request;
 
 class WorktimeControllerTest extends Unit
 {
@@ -164,6 +167,32 @@ class WorktimeControllerTest extends Unit
         $this->tester->seeResponseCodeIs(404);
     }
 
+    public function testUpdateFindModelReturns400WhenOrganizationIdMissing(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+
+        Event::on(Application::class, Application::EVENT_BEFORE_ACTION, function () {
+            $request = Yii::$app->request;
+
+            // Grab the parsed body params, remove organization_id, and put them back
+            $params = $request->getQueryParams();
+            unset($params['organization_id']);
+            $request->setQueryParams($params);
+        });
+
+        try {
+            $this->tester->sendAjaxRequest('PUT', $this->worktimeUrl('/' . self::WORKTIME_ID_1), [
+                'minutes_spent' => 30,
+            ]);
+
+            $this->tester->seeResponseCodeIs(400);
+            $json = $this->grabJson();
+            $this->assertStringContainsString('Organization ID is required to find a worktime entry.', $json['error']['message']);
+        } finally {
+            Event::off(Application::class, Application::EVENT_BEFORE_ACTION);
+        }
+    }
+
     // =========================================================================
     // DELETE  DELETE /<org>/worktime/<id>
     // =========================================================================
@@ -229,15 +258,58 @@ class WorktimeControllerTest extends Unit
         $this->tester->sendAjaxGetRequest($this->worktimeUrl('/stats') . '?start_date=not-a-date');
 
         $this->tester->seeResponseCodeIs(400);
+
+        $this->tester->sendAjaxGetRequest($this->worktimeUrl('/stats') . '?end_date=also-not-a-date');
+        $this->tester->seeResponseCodeIs(400);
     }
 
     public function testStatsReturns404ForNonExistentProject(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
-        $this->tester->sendAjaxGetRequest($this->worktimeUrl('/stats') . '?project_id=01900000-0000-0002-0000-999999999999');
 
-        $this->tester->seeResponseCodeIs(404);
+        Event::on(Application::class, Application::EVENT_BEFORE_ACTION, function () {
+            $request = Yii::$app->request;
+
+            $params = $request->getQueryParams();
+            $params['project_id'] = '01900000-0000-7002-8000-990000000001';
+            $request->setQueryParams($params);
+        });
+
+        try {
+            $this->tester->sendAjaxGetRequest($this->worktimeUrl('/stats'), ['project_id' => '01900000-0000-7002-8000-000000000001']);
+            $this->tester->seeResponseCodeIs(404);
+            $json = $this->grabJson();
+            $this->tester->assertStringContainsString('Project not found for the given organization.', $json['error']['message']);
+        } finally {
+            Event::off(Application::class, Application::EVENT_BEFORE_ACTION);
+        }
     }
+
+    public function testStatsReturns404ForMissingOrganizationId(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+
+        Event::on(Application::class, Application::EVENT_BEFORE_ACTION, function () {
+            $request = Yii::$app->request;
+
+            // Grab the parsed query params, remove organization_id, and put them back
+            $params = $request->getQueryParams();
+            unset($params['organization_id']);
+            $request->setQueryParams($params);
+        });
+        try {
+            $this->tester->sendAjaxGetRequest($this->worktimeUrl('/stats'), ['project_id' => '01900000-0000-0002-0000-999999999999']);
+
+            $this->tester->seeResponseCodeIs(400);
+            $json = $this->grabJson();
+
+            // Assert you hit the exact BadRequestHttpException in the controller
+            $this->assertStringContainsString('Organization ID is required.', $json['error']['message']);
+        } finally {
+            Event::off(Application::class, Application::EVENT_BEFORE_ACTION);
+        }
+    }
+
 
     // =========================================================================
     // Org slug translator works for worktime
