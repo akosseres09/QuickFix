@@ -217,7 +217,7 @@ class PermissionService
         $permissions = self::getProjectPermissions($projectId, $userId);
 
         return self::projectCan($permissions, $projectId, Permissions::COMMENT_DELETE_ANY)
-            || $comment->user_id === $userId;
+            || $comment->created_by === $userId;
     }
 
     public static function canUpdateComment(Comment $comment, string $userId): bool
@@ -226,7 +226,7 @@ class PermissionService
         $permissions = self::getProjectPermissions($projectId, $userId);
 
         return self::projectCan($permissions, $projectId, Permissions::COMMENT_UPDATE_ANY)
-            || $comment->user_id === $userId;
+            || $comment->created_by === $userId;
     }
 
     /**
