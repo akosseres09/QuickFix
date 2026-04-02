@@ -5,7 +5,7 @@ use common\models\UserStatus;
 
 return [
     [
-        'id'           => '01900000-0000-0000-0000-000000000001',
+        'id'           => '01900000-0000-7000-8000-000000000001',
         'username'     => 'bayer.hudson',
         'first_name'   => 'Hudson',
         'last_name'    => 'Bayer',
@@ -22,12 +22,13 @@ return [
         'password_reset_token_expires_at' => 1802312317
     ],
     [
-        'id'           => '01900000-0000-0000-0000-000000000002',
+        'id'           => '01900000-0000-7000-8000-000000000002',
         'username'     => 'jane.doe',
         'first_name'   => 'Jane',
         'last_name'    => 'Doe',
         'auth_key'     => 'testAuthKey222222222222222222222',
         'verification_token'    => 'testVerificationToken22222222222222222222',
+        'email_verification_token_expires_at' => 1893456000, // far-future (year 2029)
         // password_0
         'password_hash'         => '$2y$13$EjaPFBnZOQsHdGuHI.xvhuDp1fHpo8hKRSk6yshqa9c5EG8s3C3lO',
         'password_reset_token'  => 'ExzkCOaYc1L8IOBs4wdTGGbgNiG3Wz1I_1402312318',
@@ -38,7 +39,7 @@ return [
         'updated_at'   => 1402312317,
     ],
     [
-        'id'           => '01900000-0000-0000-0000-000000000003',
+        'id'           => '01900000-0000-7000-8000-000000000003',
         'username'     => 'admin.user',
         'first_name'   => 'Admin',
         'last_name'    => 'Super',
@@ -53,7 +54,7 @@ return [
         'updated_at'   => 1402312317,
     ],
     [
-        'id'           => '01900000-0000-0000-0000-000000000004',
+        'id'           => '01900000-0000-7000-8000-000000000004',
         'username'     => 'deleted.user',
         'first_name'   => 'Deleted',
         'last_name'    => 'User',
@@ -69,11 +70,11 @@ return [
         'deleted_at'   => 1402312400,
     ],
     [
-        'id'           => '01900000-0000-0000-0000-000000000005',
+        'id'           => '01900000-0000-7000-8000-000000000005',
         'username'     => 'not-part-of-any-organization',
         'first_name'   => 'Not',
         'last_name'    => 'PartOfAnyOrganization',
-        'auth_key'     => 'HP187Mvq7Mmm3CTU80dLkGmni_FUH_lR',
+        'auth_key'     => 'HP187Mvq7Mmm3CTU80dLkGmni_FUH_lF',
         // password_0
         'password_hash'         => '$2y$13$EjaPFBnZOQsHdGuHI.xvhuDp1fHpo8hKRSk6yshqa9c5EG8s3C3lO',
         'password_reset_token'  => null,
@@ -85,7 +86,7 @@ return [
         'updated_at'   => 1402312317,
     ],
     [
-        'id'           => '01900000-0000-0000-0000-000000000006',
+        'id'           => '01900000-0000-7000-8000-000000000006',
         'username'     => 'expired.password.token',
         'first_name'   => 'Expired',
         'last_name'    => 'Token',
