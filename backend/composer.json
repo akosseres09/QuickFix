@@ -60,20 +60,18 @@
         }
     ],
     "scripts": {
-        "test:common": "vendor/bin/codecept run unit -c common/codeception.yml",
-        "test:common:coverage": "XDEBUG_MODE=coverage vendor/bin/codecept run unit -c common/codeception.yml --coverage-html",
-        "test:api": "vendor/bin/codecept run unit -c api/codeception.yml",
-        "test:api:coverage": "XDEBUG_MODE=coverage vendor/bin/codecept run unit -c api/codeception.yml --coverage-html",
-        "test:all": [
-            "@test:common",
-            "@test:api"
-        ],
-        "test:all:coverage": [
-            "XDEBUG_MODE=coverage vendor/bin/codecept run unit -c common/codeception.yml --coverage-html",
-            "XDEBUG_MODE=coverage vendor/bin/codecept run unit -c api/codeception.yml --coverage-html"
-        ],
-        "test:unit": "@test:common",
-        "test:unit:coverage": "@test:common:coverage"
-    }
+    "test:functional": "XDEBUG_MODE=coverage vendor/bin/codecept run functional -c api/codeception.yml",
+    "test:common": "vendor/bin/codecept run unit -c common/codeception.yml",    
+    "test:api": "vendor/bin/codecept run unit,functional -c api/codeception.yml",
+    "test:api:coverage": "XDEBUG_MODE=coverage vendor/bin/codecept run unit,functional -c api/codeception.yml --coverage-html",    
+    "test:all": [
+        "@test:common",
+        "@test:api"
+    ],
+    "test:all:coverage": [
+        "XDEBUG_MODE=coverage vendor/bin/codecept run unit -c common/codeception.yml --coverage-html",
+        "XDEBUG_MODE=coverage vendor/bin/codecept run unit,functional -c api/codeception.yml --coverage-html"
+    ]
+}
 
 }

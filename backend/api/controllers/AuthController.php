@@ -133,13 +133,17 @@ class AuthController extends Controller
         }
 
         if (!$refreshToken->isValid()) {
-            $refreshToken = $this->createRefreshToken($refreshToken);
+            Yii::$app->response->cookies->remove('refresh-token');
+            throw new UnauthorizedHttpException('Session expired. Please log in again.');
         }
 
         $user = $refreshToken->user;
-        if (!$user) {
-            throw new BadRequestHttpException('Invalid user.');
+        if (!$user || $user->status !== UserStatus::ACTIVE->value) {
+            Yii::$app->response->cookies->remove('refresh-token');
+            throw new UnauthorizedHttpException('Account inactive or disabled.');
         }
+
+        $this->addToCookie($refreshToken->token);
 
         $role = UserRole::tryFrom((int)$user->is_admin);
         $token = $this->createAccessToken($user->id, $role, $user->email);
