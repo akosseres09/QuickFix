@@ -63,8 +63,8 @@ class CommentTest extends Unit
 
     protected function _before()
     {
-        $_GET['project_id'] = '01900000-0000-0002-0000-000000000001';
-        $_GET['issue_id'] = '01900000-0000-0004-0000-000000000001';
+        $_GET['project_id'] = '01900000-0000-7002-8000-000000000001';
+        $_GET['issue_id'] = '01900000-0000-7004-8000-000000000001';
         return parent::_before();
     }
 
@@ -154,18 +154,18 @@ class CommentTest extends Unit
 
     public function testFindFixtureComments(): void
     {
-        $comment1 = Comment::findOne('01900000-0000-0005-0000-000000000001');
+        $comment1 = Comment::findOne('01900000-0000-7005-8000-000000000001');
         verify($comment1)->notNull();
         verify($comment1->content)->equals('This is a test comment on the issue.');
-        verify($comment1->issue_id)->equals('01900000-0000-0004-0000-000000000001');
+        verify($comment1->issue_id)->equals('01900000-0000-7004-8000-000000000001');
 
-        $comment2 = Comment::findOne('01900000-0000-0005-0000-000000000002');
+        $comment2 = Comment::findOne('01900000-0000-7005-8000-000000000002');
         verify($comment2)->notNull();
         verify($comment2->content)->stringContainsString('HTML');
 
-        $comment3 = Comment::findOne('01900000-0000-0005-0000-000000000003');
+        $comment3 = Comment::findOne('01900000-0000-7005-8000-000000000003');
         verify($comment3)->notNull();
-        verify($comment3->issue_id)->equals('01900000-0000-0004-0000-000000000002');
+        verify($comment3->issue_id)->equals('01900000-0000-7004-8000-000000000002');
     }
 
     // -------------------------------------------------------------------------
@@ -174,24 +174,24 @@ class CommentTest extends Unit
 
     public function testGetIssue(): void
     {
-        $comment = Comment::findOne('01900000-0000-0005-0000-000000000001');
+        $comment = Comment::findOne('01900000-0000-7005-8000-000000000001');
         verify($comment->issue)->notNull();
         verify($comment->issue->issue_key)->equals('TEST-1');
     }
 
     public function testGetCreator(): void
     {
-        $comment = Comment::findOne('01900000-0000-0005-0000-000000000001');
+        $comment = Comment::findOne('01900000-0000-7005-8000-000000000001');
         verify($comment->creator)->notNull();
         verify($comment->creator->username)->equals('jane.doe');
     }
 
     public function testGetUpdator(): void
     {
-        $comment = Comment::findOne('01900000-0000-0005-0000-000000000001');
+        $comment = Comment::findOne('01900000-0000-7005-8000-000000000001');
         verify($comment->updator)->notNull();
 
-        $comment2 = Comment::findOne('01900000-0000-0005-0000-000000000002');
+        $comment2 = Comment::findOne('01900000-0000-7005-8000-000000000002');
         verify($comment2->updator)->null();
     }
 
@@ -201,25 +201,25 @@ class CommentTest extends Unit
 
     public function testCanAccessViaIssueAndProject(): void
     {
-        $comment = Comment::findOne('01900000-0000-0005-0000-000000000001');
+        $comment = Comment::findOne('01900000-0000-7005-8000-000000000001');
 
         // Public project - org members can access
-        verify($comment->canAccess('01900000-0000-0000-0000-000000000001'))->true();
-        verify($comment->canAccess('01900000-0000-0000-0000-000000000002'))->true();
+        verify($comment->canAccess('01900000-0000-7000-8000-000000000001'))->true();
+        verify($comment->canAccess('01900000-0000-7000-8000-000000000002'))->true();
     }
 
     public function testCanAccessReturnsFalseWithNoIssue(): void
     {
         $comment = new Comment();
-        verify($comment->canAccess('01900000-0000-0000-0000-000000000001'))->false();
+        verify($comment->canAccess('01900000-0000-7001-8000-000000000001'))->false();
     }
 
     public function testCanAccessReturnsFalseWithNoProject(): void
     {
-        $comment = Comment::findOne('01900000-0000-0005-0000-000000000001');
+        $comment = Comment::findOne('01900000-0000-7005-8000-000000000001');
         // Detach the project relation to simulate missing project reference
         $comment->issue->populateRelation('project', null);
-        verify($comment->canAccess('01900000-0000-0000-0000-000000000001'))->false();
+        verify($comment->canAccess('01900000-0000-7001-8000-000000000001'))->false();
     }
 
     // -------------------------------------------------------------------------
@@ -228,7 +228,7 @@ class CommentTest extends Unit
 
     public function testFields(): void
     {
-        $comment = Comment::findOne('01900000-0000-0005-0000-000000000001');
+        $comment = Comment::findOne('01900000-0000-7005-8000-000000000001');
         $fields = $comment->fields();
 
         verify($fields)->arrayContains('id');
@@ -247,7 +247,7 @@ class CommentTest extends Unit
 
     public function testExtraFields(): void
     {
-        $comment = Comment::findOne('01900000-0000-0005-0000-000000000001');
+        $comment = Comment::findOne('01900000-0000-7005-8000-000000000001');
         $extra = $comment->extraFields();
 
         verify($extra)->arrayContains('issue');
@@ -299,7 +299,7 @@ class CommentTest extends Unit
     {
         $this->loginFixtureUser();
 
-        $comment = Comment::findOne('01900000-0000-0005-0000-000000000001');
+        $comment = Comment::findOne('01900000-0000-7005-8000-000000000001');
         $originalId = $comment->id;
 
         $comment->content = 'Updated content.';
@@ -311,7 +311,7 @@ class CommentTest extends Unit
 
     public function testBeforeSaveFailsWhenParentBeforeSaveFails(): void
     {
-        $comment = Comment::findOne('01900000-0000-0005-0000-000000000001');
+        $comment = Comment::findOne('01900000-0000-7005-8000-000000000001');
 
         $comment->on(\yii\db\ActiveRecord::EVENT_BEFORE_UPDATE, function ($event) {
             $event->isValid = false;

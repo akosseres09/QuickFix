@@ -369,20 +369,20 @@ class UserTest extends Unit
 
     public function testFindIdentityReturnsActiveUser(): void
     {
-        $user = User::findIdentity('01900000-0000-0000-0000-000000000001');
+        $user = User::findIdentity('01900000-0000-7000-8000-000000000001');
         verify($user)->notNull();
         verify($user->username)->equals('bayer.hudson');
     }
 
     public function testFindIdentityReturnsNullForInactiveUser(): void
     {
-        $user = User::findIdentity('01900000-0000-0000-0000-000000000002');
+        $user = User::findIdentity('01900000-0000-7000-8000-000000000002');
         verify($user)->null();
     }
 
     public function testFindIdentityReturnsNullForDeletedUser(): void
     {
-        $user = User::findIdentity('01900000-0000-0000-0000-000000000004');
+        $user = User::findIdentity('01900000-0000-7000-8000-000000000004');
         verify($user)->null();
     }
 
@@ -661,7 +661,7 @@ class UserTest extends Unit
     public function testGetId(): void
     {
         $user = User::findOne(['username' => 'bayer.hudson']);
-        verify($user->getId())->equals('01900000-0000-0000-0000-000000000001');
+        verify($user->getId())->equals('01900000-0000-7000-8000-000000000001');
     }
 
     public function testGetEmailToken(): void

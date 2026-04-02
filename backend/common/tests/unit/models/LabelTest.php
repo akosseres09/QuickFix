@@ -49,7 +49,7 @@ class LabelTest extends Unit
 
     protected function _before()
     {
-        $_GET['project_id'] = '01900000-0000-0002-0000-000000000001';
+        $_GET['project_id'] = '01900000-0000-7002-8000-000000000001';
         parent::_before();
     }
 
@@ -66,7 +66,7 @@ class LabelTest extends Unit
     public function testRequiredFieldsAreEnforced(): void
     {
         $label = new Label();
-        $label->project_id = '01900000-0000-0002-0000-000000000001';
+        $label->project_id = '01900000-0000-7002-8000-000000000001';
 
         verify($label->validate())->false();
         verify($label->errors)->arrayHasKey('name');
@@ -77,7 +77,7 @@ class LabelTest extends Unit
     public function testNameMaxLength(): void
     {
         $label = new Label([
-            'project_id'  => '01900000-0000-0002-0000-000000000001',
+            'project_id'  => '01900000-0000-7002-8000-000000000001',
             'name'        => str_repeat('x', 25), // max 24
             'description' => 'Too long name test',
             'color'       => '#fff',
@@ -90,7 +90,7 @@ class LabelTest extends Unit
     public function testDescriptionMaxLength(): void
     {
         $label = new Label([
-            'project_id'  => '01900000-0000-0002-0000-000000000001',
+            'project_id'  => '01900000-0000-7002-8000-000000000001',
             'name'        => 'Test',
             'description' => str_repeat('x', 65), // max 64
             'color'       => '#fff',
@@ -103,7 +103,7 @@ class LabelTest extends Unit
     public function testColorMaxLength(): void
     {
         $label = new Label([
-            'project_id'  => '01900000-0000-0002-0000-000000000001',
+            'project_id'  => '01900000-0000-7002-8000-000000000001',
             'name'        => 'ColorTest',
             'description' => 'Test',
             'color'       => '#1234567', // max 7 chars
@@ -116,7 +116,7 @@ class LabelTest extends Unit
     public function testColorMustBeValidHex(): void
     {
         $label = new Label([
-            'project_id'  => '01900000-0000-0002-0000-000000000001',
+            'project_id'  => '01900000-0000-7002-8000-000000000001',
             'name'        => 'HexTest',
             'description' => 'Test',
             'color'       => 'red',
@@ -129,7 +129,7 @@ class LabelTest extends Unit
     public function testColorAcceptsShortHex(): void
     {
         $label = new Label([
-            'project_id'  => '01900000-0000-0002-0000-000000000001',
+            'project_id'  => '01900000-0000-7002-8000-000000000001',
             'name'        => 'ShortHex',
             'description' => 'Test short hex color.',
             'color'       => '#abc',
@@ -141,7 +141,7 @@ class LabelTest extends Unit
     public function testColorAcceptsFullHex(): void
     {
         $label = new Label([
-            'project_id'  => '01900000-0000-0002-0000-000000000001',
+            'project_id'  => '01900000-0000-7002-8000-000000000001',
             'name'        => 'FullHex',
             'description' => 'Test full hex color.',
             'color'       => '#aabbcc',
@@ -180,7 +180,7 @@ class LabelTest extends Unit
 
     public function testSameNameInDifferentProjectPasses(): void
     {
-        $_GET['project_id'] = '01900000-0000-0002-0000-000000000002';
+        $_GET['project_id'] = '01900000-0000-7002-8000-000000000002';
         // PRIV project doesn't have "In Progress" label yet
         $label = new Label([
             'name'        => 'In Progress',
@@ -194,7 +194,7 @@ class LabelTest extends Unit
     public function testValidDataPassesValidation(): void
     {
         $label = new Label([
-            'project_id'  => '01900000-0000-0002-0000-000000000001',
+            'project_id'  => '01900000-0000-7002-8000-000000000001',
             'name'        => 'Review',
             'description' => 'Needs review.',
             'color'       => '#3b82f6',
@@ -209,7 +209,7 @@ class LabelTest extends Unit
 
     public function testSaveGeneratesUuidAndIndex(): void
     {
-        $_GET['project_id'] = '01900000-0000-0002-0000-000000000001';
+        $_GET['project_id'] = '01900000-0000-7002-8000-000000000001';
 
         $label = new Label([
             'name'        => 'NewLabel',
@@ -229,7 +229,7 @@ class LabelTest extends Unit
     public function testSaveBeforeFailsWhenParentBeforeSaveFails(): void
     {
         $label = new Label([
-            'project_id'  => '01900000-0000-0002-0000-000000000001',
+            'project_id'  => '01900000-0000-7002-8000-000000000001',
             'name'        => 'FailSave',
             'description' => 'This should fail to save.',
             'color'       => '#8b5cf6',
@@ -249,19 +249,19 @@ class LabelTest extends Unit
 
     public function testFindFixtureLabels(): void
     {
-        $open = Label::findOne('01900000-0000-0003-0000-000000000001');
+        $open = Label::findOne('01900000-0000-7003-8000-000000000001');
         verify($open)->notNull();
         verify($open->name)->equals(Label::STATUS_OPEN);
         verify($open->color)->equals('#22c55e');
         verify($open->index)->equals(1);
 
-        $closed = Label::findOne('01900000-0000-0003-0000-000000000002');
+        $closed = Label::findOne('01900000-0000-7003-8000-000000000002');
         verify($closed)->notNull();
         verify($closed->name)->equals(Label::STATUS_CLOSED);
         verify($closed->color)->equals('#ef4444');
         verify($closed->index)->equals(2);
 
-        $inProgress = Label::findOne('01900000-0000-0003-0000-000000000003');
+        $inProgress = Label::findOne('01900000-0000-7003-8000-000000000003');
         verify($inProgress)->notNull();
         verify($inProgress->name)->equals('In Progress');
         verify($inProgress->index)->equals(3);
@@ -289,11 +289,11 @@ class LabelTest extends Unit
     public function testGetIssues(): void
     {
         // Open label has issues linked to it
-        $open = Label::findOne('01900000-0000-0003-0000-000000000001');
+        $open = Label::findOne('01900000-0000-7003-8000-000000000001');
         verify($open->issues)->notEmpty();
 
         // In Progress label has issues linked
-        $inProgress = Label::findOne('01900000-0000-0003-0000-000000000003');
+        $inProgress = Label::findOne('01900000-0000-7003-8000-000000000003');
         verify($inProgress->issues)->notEmpty();
     }
 
@@ -306,14 +306,14 @@ class LabelTest extends Unit
         $fixture = $this->tester->grabFixture('label', 2); // In Progress label linked to TEST project
         $label = Label::findOne($fixture['id']);
         // Public project - org members can access
-        verify($label->canAccess('01900000-0000-0000-0000-000000000001'))->true();
-        verify($label->canAccess('01900000-0000-0000-0000-000000000002'))->true();
+        verify($label->canAccess('01900000-0000-7000-8000-000000000001'))->true();
+        verify($label->canAccess('01900000-0000-7000-8000-000000000002'))->true();
     }
 
     public function testCanAccessReturnsFalseWithNoProject(): void
     {
         $label = new Label();
-        verify($label->canAccess('01900000-0000-0000-0000-000000000001'))->false();
+        verify($label->canAccess('01900000-0000-7000-8000-000000000001'))->false();
     }
 
     // -------------------------------------------------------------------------
@@ -323,7 +323,7 @@ class LabelTest extends Unit
     public function testReorderLabel(): void
     {
         // Open label is index 1, Closed is 2, In Progress is 3
-        $open = Label::findOne('01900000-0000-0003-0000-000000000001');
+        $open = Label::findOne('01900000-0000-7003-8000-000000000001');
         verify($open->index)->equals(1);
 
         $result = $open->reorder(3);
@@ -334,14 +334,14 @@ class LabelTest extends Unit
         verify($open->index)->equals(3);
 
         // Closed should have shifted from 2 to 1
-        $closed = Label::findOne('01900000-0000-0003-0000-000000000002');
+        $closed = Label::findOne('01900000-0000-7003-8000-000000000002');
         $closed->refresh();
         verify($closed->index)->equals(1);
     }
 
     public function testReorderSameIndexIsNoop(): void
     {
-        $open = Label::findOne('01900000-0000-0003-0000-000000000001');
+        $open = Label::findOne('01900000-0000-7003-8000-000000000001');
         $originalIndex = $open->index;
 
         $result = $open->reorder($originalIndex);
@@ -353,7 +353,7 @@ class LabelTest extends Unit
 
     public function testReorderExceptionWhenInvalidIndex(): void
     {
-        $label = Label::findOne('01900000-0000-0003-0000-000000000003');
+        $label = Label::findOne('01900000-0000-7003-8000-000000000003');
 
         $label->on(Label::EVENT_BEFORE_UPDATE, function ($event) {
             throw new Exception('Simulated failure in beforeUpdate');
@@ -379,7 +379,7 @@ class LabelTest extends Unit
 
     public function testCannotDeleteLabelInUse(): void
     {
-        $open = Label::findOne('01900000-0000-0003-0000-000000000001');
+        $open = Label::findOne('01900000-0000-7003-8000-000000000001');
         // This label is used by issues, so delete should throw
 
         $this->expectException(\yii\web\ConflictHttpException::class);
@@ -398,9 +398,9 @@ class LabelTest extends Unit
 
     public function testGetLabelCacheKeyWithProjectId(): void
     {
-        $key = Label::getLabelCacheKey('closed', '01900000-0000-0002-0000-000000000001');
+        $key = Label::getLabelCacheKey('closed', '01900000-0000-7002-8000-000000000001');
         verify($key)->stringContainsString('closed');
-        verify($key)->stringContainsString('01900000-0000-0002-0000-000000000001');
+        verify($key)->stringContainsString('01900000-0000-7002-8000-000000000001');
     }
 
     // -------------------------------------------------------------------------
@@ -409,7 +409,7 @@ class LabelTest extends Unit
 
     public function testFields(): void
     {
-        $label = Label::findOne('01900000-0000-0003-0000-000000000001');
+        $label = Label::findOne('01900000-0000-7003-8000-000000000001');
         $fields = $label->fields();
 
         verify($fields)->arrayContains('id');
@@ -423,7 +423,7 @@ class LabelTest extends Unit
 
     public function testExtraFields(): void
     {
-        $label = Label::findOne('01900000-0000-0003-0000-000000000001');
+        $label = Label::findOne('01900000-0000-7003-8000-000000000001');
         $extra = $label->extraFields();
 
         verify($extra)->arrayContains('project');
@@ -436,7 +436,7 @@ class LabelTest extends Unit
     public function testReorderLabelMoveDown(): void
     {
         // Open=1, Closed=2, InProgress=3; move Closed (index 2) to index 1
-        $closed = Label::findOne('01900000-0000-0003-0000-000000000002');
+        $closed = Label::findOne('01900000-0000-7003-8000-000000000002');
         verify($closed->index)->equals(2);
 
         $result = $closed->reorder(1);
@@ -446,7 +446,7 @@ class LabelTest extends Unit
         verify($closed->index)->equals(1);
 
         // Open should have shifted from 1 to 2
-        $open = Label::findOne('01900000-0000-0003-0000-000000000001');
+        $open = Label::findOne('01900000-0000-7003-8000-000000000001');
         $open->refresh();
         verify($open->index)->equals(2);
     }
@@ -481,7 +481,7 @@ class LabelTest extends Unit
 
     public function testBeforeValidatePassesWhenNotNewProject(): void
     {
-        $label = Label::findOne('01900000-0000-0003-0000-000000000003'); // Existing label
+        $label = Label::findOne('01900000-0000-7003-8000-000000000003'); // Existing label
 
         $_GET['project_id'] = $label->project_id;
         $label->name = 'Updated Name';

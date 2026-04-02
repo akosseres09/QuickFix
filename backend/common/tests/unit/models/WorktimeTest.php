@@ -78,7 +78,7 @@ class WorktimeTest extends Unit
     public function testMinutesSpentMustBePositive(): void
     {
         $worktime = new Worktime([
-            'issue_id'      => '01900000-0000-0004-0000-000000000001',
+            'issue_id'      => '01900000-0000-7004-8000-000000000001',
             'minutes_spent' => 0,
             'logged_at'     => '2024-01-15',
         ]);
@@ -91,7 +91,7 @@ class WorktimeTest extends Unit
     public function testMinutesSpentMinIsOne(): void
     {
         $worktime = new Worktime([
-            'issue_id'      => '01900000-0000-0004-0000-000000000001',
+            'issue_id'      => '01900000-0000-7004-8000-000000000001',
             'minutes_spent' => 1,
             'logged_at'     => '2024-01-15',
         ]);
@@ -102,7 +102,7 @@ class WorktimeTest extends Unit
     public function testMinutesSpentMustBeInteger(): void
     {
         $worktime = new Worktime([
-            'issue_id'      => '01900000-0000-0004-0000-000000000001',
+            'issue_id'      => '01900000-0000-7004-8000-000000000001',
             'minutes_spent' => 'abc',
             'logged_at'     => '2024-01-15',
         ]);
@@ -115,7 +115,7 @@ class WorktimeTest extends Unit
     public function testLoggedAtMustBeValidDate(): void
     {
         $worktime = new Worktime([
-            'issue_id'      => '01900000-0000-0004-0000-000000000001',
+            'issue_id'      => '01900000-0000-7004-8000-000000000001',
             'minutes_spent' => 60,
             'logged_at'     => 'not-a-date',
         ]);
@@ -128,7 +128,7 @@ class WorktimeTest extends Unit
     public function testLoggedAtFormatMustBeYmd(): void
     {
         $worktime = new Worktime([
-            'issue_id'      => '01900000-0000-0004-0000-000000000001',
+            'issue_id'      => '01900000-0000-7004-8000-000000000001',
             'minutes_spent' => 60,
             'logged_at'     => '15/01/2024', // wrong format
         ]);
@@ -162,7 +162,7 @@ class WorktimeTest extends Unit
     public function testValidDataPassesValidation(): void
     {
         $worktime = new Worktime([
-            'issue_id'      => '01900000-0000-0004-0000-000000000001',
+            'issue_id'      => '01900000-0000-7004-8000-000000000001',
             'minutes_spent' => 120,
             'logged_at'     => '2024-03-20',
             'description'   => 'Some work description.',
@@ -180,7 +180,7 @@ class WorktimeTest extends Unit
         $this->loginFixtureUser();
 
         $worktime = new Worktime([
-            'issue_id'      => '01900000-0000-0004-0000-000000000001',
+            'issue_id'      => '01900000-0000-7004-8000-000000000001',
             'minutes_spent' => 45,
             'logged_at'     => '2024-05-10',
             'description'   => 'New entry',
@@ -211,7 +211,7 @@ class WorktimeTest extends Unit
 
     public function testBeforeSaveReturnsEarlyWhenItExists(): void
     {
-        $worktime = Worktime::findOne('01900000-0000-0006-0000-000000000001');
+        $worktime = Worktime::findOne('01900000-0000-7006-8000-000000000001');
 
         $worktime->minutes_spent = 100; // change something to trigger update
         verify($worktime->beforeSave(false))->true();
@@ -223,18 +223,18 @@ class WorktimeTest extends Unit
 
     public function testFindFixtureWorktimes(): void
     {
-        $wt1 = Worktime::findOne('01900000-0000-0006-0000-000000000001');
+        $wt1 = Worktime::findOne('01900000-0000-7006-8000-000000000001');
         verify($wt1)->notNull();
         verify($wt1->minutes_spent)->equals(90);
         verify($wt1->logged_at)->equals('2024-01-15');
         verify($wt1->description)->equals('Investigated root cause and implemented fix.');
 
-        $wt2 = Worktime::findOne('01900000-0000-0006-0000-000000000002');
+        $wt2 = Worktime::findOne('01900000-0000-7006-8000-000000000002');
         verify($wt2)->notNull();
         verify($wt2->minutes_spent)->equals(30);
         verify($wt2->logged_at)->equals('2024-01-16');
 
-        $wt3 = Worktime::findOne('01900000-0000-0006-0000-000000000003');
+        $wt3 = Worktime::findOne('01900000-0000-7006-8000-000000000003');
         verify($wt3)->notNull();
         verify($wt3->minutes_spent)->equals(1);
         verify($wt3->description)->equals('');
@@ -246,24 +246,24 @@ class WorktimeTest extends Unit
 
     public function testGetIssue(): void
     {
-        $worktime = Worktime::findOne('01900000-0000-0006-0000-000000000001');
+        $worktime = Worktime::findOne('01900000-0000-7006-8000-000000000001');
         verify($worktime->issue)->notNull();
         verify($worktime->issue->issue_key)->equals('TEST-1');
     }
 
     public function testGetCreator(): void
     {
-        $worktime = Worktime::findOne('01900000-0000-0006-0000-000000000001');
+        $worktime = Worktime::findOne('01900000-0000-7006-8000-000000000001');
         verify($worktime->creator)->notNull();
         verify($worktime->creator->username)->equals('bayer.hudson');
     }
 
     public function testGetUpdator(): void
     {
-        $wt1 = Worktime::findOne('01900000-0000-0006-0000-000000000001');
+        $wt1 = Worktime::findOne('01900000-0000-7006-8000-000000000001');
         verify($wt1->updator)->null();
 
-        $wt2 = Worktime::findOne('01900000-0000-0006-0000-000000000002');
+        $wt2 = Worktime::findOne('01900000-0000-7006-8000-000000000002');
         verify($wt2->updator)->notNull();
         verify($wt2->updator->username)->equals('jane.doe');
     }
@@ -274,7 +274,7 @@ class WorktimeTest extends Unit
 
     public function testFields(): void
     {
-        $worktime = Worktime::findOne('01900000-0000-0006-0000-000000000001');
+        $worktime = Worktime::findOne('01900000-0000-7006-8000-000000000001');
         $fields = $worktime->fields();
         verify($fields)->arrayContains('id');
 
@@ -304,7 +304,7 @@ class WorktimeTest extends Unit
 
     public function testExtraFields(): void
     {
-        $worktime = Worktime::findOne('01900000-0000-0006-0000-000000000001');
+        $worktime = Worktime::findOne('01900000-0000-7006-8000-000000000001');
         $extra = $worktime->extraFields();
         verify($extra)->arrayContains('issue');
         verify($extra)->arrayContains('creator');

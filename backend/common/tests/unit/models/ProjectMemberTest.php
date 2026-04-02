@@ -70,8 +70,8 @@ class ProjectMemberTest extends Unit
     public function testRoleMustBeInList(): void
     {
         $member = new ProjectMember([
-            'project_id' => '01900000-0000-0002-0000-000000000001',
-            'user_id'    => '01900000-0000-0000-0000-000000000001',
+            'project_id' => '01900000-0000-7002-8000-000000000001',
+            'user_id'    => '01900000-0000-7000-8000-000000000001',
             'role'       => 'emperor',
         ]);
 
@@ -91,8 +91,8 @@ class ProjectMemberTest extends Unit
     public function testDuplicateUserInProjectFails(): void
     {
         $member = new ProjectMember([
-            'project_id' => '01900000-0000-0002-0000-000000000001',
-            'user_id'    => '01900000-0000-0000-0000-000000000001', // already owner
+            'project_id' => '01900000-0000-7002-8000-000000000001',
+            'user_id'    => '01900000-0000-7000-8000-000000000001', // already owner
         ]);
 
         verify($member->validate())->false();
@@ -105,7 +105,7 @@ class ProjectMemberTest extends Unit
     {
         $member = new ProjectMember([
             'project_id' => '00000000-0000-0000-0000-000000000099',
-            'user_id'    => '01900000-0000-0000-0000-000000000001',
+            'user_id'    => '01900000-0000-7000-8000-000000000001',
         ]);
 
         verify($member->validate())->false();
@@ -116,7 +116,7 @@ class ProjectMemberTest extends Unit
     public function testUserIdMustExist(): void
     {
         $member = new ProjectMember([
-            'project_id' => '01900000-0000-0002-0000-000000000001',
+            'project_id' => '01900000-0000-7002-8000-000000000001',
             'user_id'    => '00000000-0000-0000-0000-000000000099',
         ]);
 
@@ -129,8 +129,8 @@ class ProjectMemberTest extends Unit
     {
         foreach (RoleManager::ROLE_LIST as $role) {
             $member = new ProjectMember([
-                'project_id' => '01900000-0000-0002-0000-000000000001',
-                'user_id'    => '01900000-0000-0000-0000-000000000003',
+                'project_id' => '01900000-0000-7002-8000-000000000001',
+                'user_id'    => '01900000-0000-7000-8000-000000000003',
                 'role'       => $role,
             ]);
 
@@ -142,8 +142,8 @@ class ProjectMemberTest extends Unit
     {
         // admin.user is not a member of TEST project yet
         $member = new ProjectMember([
-            'project_id' => '01900000-0000-0002-0000-000000000001',
-            'user_id'    => '01900000-0000-0000-0000-000000000003',
+            'project_id' => '01900000-0000-7002-8000-000000000001',
+            'user_id'    => '01900000-0000-7000-8000-000000000003',
             'role'       => RoleManager::ROLE_ADMIN,
         ]);
 
@@ -158,7 +158,7 @@ class ProjectMemberTest extends Unit
     {
         $member = new ProjectMember([
             'project_id' => '00000000-0000-0000-0000-000000000099', // non-existent project
-            'user_id'    => '01900000-0000-0000-0000-000000000003',
+            'user_id'    => '01900000-0000-7000-8000-000000000003',
             'role'       => RoleManager::ROLE_ADMIN,
         ]);
 
@@ -173,7 +173,7 @@ class ProjectMemberTest extends Unit
     {
         unset($_GET['project_id']);
 
-        $member = ProjectMember::findOne('01900000-0000-0008-0000-000000000001');
+        $member = ProjectMember::findOne('01900000-0000-7008-8000-000000000001');
         verify($member->validate())->true();
     }
 
@@ -187,8 +187,8 @@ class ProjectMemberTest extends Unit
         $this->loginFixtureUser();
 
         $member = new ProjectMember([
-            'project_id' => '01900000-0000-0002-0000-000000000001',
-            'user_id'    => '01900000-0000-0000-0000-000000000003',
+            'project_id' => '01900000-0000-7002-8000-000000000001',
+            'user_id'    => '01900000-0000-7000-8000-000000000003',
             'role'       => RoleManager::ROLE_ADMIN,
         ]);
 
@@ -206,12 +206,12 @@ class ProjectMemberTest extends Unit
 
     public function testFindFixtureMembers(): void
     {
-        $owner = ProjectMember::findOne('01900000-0000-0008-0000-000000000001');
+        $owner = ProjectMember::findOne('01900000-0000-7008-8000-000000000001');
         verify($owner)->notNull();
         verify($owner->role)->equals(RoleManager::ROLE_OWNER);
-        verify($owner->project_id)->equals('01900000-0000-0002-0000-000000000001');
+        verify($owner->project_id)->equals('01900000-0000-7002-8000-000000000001');
 
-        $member = ProjectMember::findOne('01900000-0000-0008-0000-000000000002');
+        $member = ProjectMember::findOne('01900000-0000-7008-8000-000000000002');
         verify($member)->notNull();
         verify($member->role)->equals(RoleManager::ROLE_MEMBER);
     }
@@ -254,27 +254,27 @@ class ProjectMemberTest extends Unit
 
     public function testGetProject(): void
     {
-        $member = ProjectMember::findOne('01900000-0000-0008-0000-000000000001');
+        $member = ProjectMember::findOne('01900000-0000-7008-8000-000000000001');
         verify($member->project)->notNull();
         verify($member->project->key)->equals('TEST');
     }
 
     public function testGetUser(): void
     {
-        $member = ProjectMember::findOne('01900000-0000-0008-0000-000000000001');
+        $member = ProjectMember::findOne('01900000-0000-7008-8000-000000000001');
         verify($member->user)->notNull();
         verify($member->user->username)->equals('bayer.hudson');
     }
 
     public function testGetCreator(): void
     {
-        $member = ProjectMember::findOne('01900000-0000-0008-0000-000000000001');
+        $member = ProjectMember::findOne('01900000-0000-7008-8000-000000000001');
         verify($member->creator)->notNull();
     }
 
     public function testGetUpdator(): void
     {
-        $member = ProjectMember::findOne('01900000-0000-0008-0000-000000000001');
+        $member = ProjectMember::findOne('01900000-0000-7008-8000-000000000001');
         verify($member->updator)->null(); // No updated_by in fixture
     }
 
@@ -294,7 +294,7 @@ class ProjectMemberTest extends Unit
 
     public function testFields(): void
     {
-        $member = ProjectMember::findOne('01900000-0000-0008-0000-000000000001');
+        $member = ProjectMember::findOne('01900000-0000-7008-8000-000000000001');
         $fields = $member->fields();
         verify($fields)->arrayContains('id');
         verify($fields)->arrayContains('role');
@@ -306,7 +306,7 @@ class ProjectMemberTest extends Unit
 
     public function testExtraFields(): void
     {
-        $member = ProjectMember::findOne('01900000-0000-0008-0000-000000000001');
+        $member = ProjectMember::findOne('01900000-0000-7008-8000-000000000001');
         $extra = $member->extraFields();
         verify($extra)->arrayContains('project');
         verify($extra)->arrayContains('user');

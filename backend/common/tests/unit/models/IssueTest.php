@@ -58,7 +58,7 @@ class IssueTest extends Unit
 
     protected function _before()
     {
-        $_GET['project_id'] = '01900000-0000-0002-0000-000000000001';
+        $_GET['project_id'] = '01900000-0000-7002-8000-000000000001';
         parent::_before();
     }
 
@@ -85,7 +85,7 @@ class IssueTest extends Unit
     {
         $issue = new Issue([
             'title'        => str_repeat('a', 256),
-            'status_label' => '01900000-0000-0003-0000-000000000001',
+            'status_label' => '01900000-0000-7003-8000-000000000001',
         ]);
 
         verify($issue->validate())->false();
@@ -96,7 +96,7 @@ class IssueTest extends Unit
     {
         $issue = new Issue([
             'title'        => 'Test',
-            'status_label' => '01900000-0000-0003-0000-000000000001',
+            'status_label' => '01900000-0000-7003-8000-000000000001',
             'type'         => 99,
         ]);
 
@@ -108,7 +108,7 @@ class IssueTest extends Unit
     {
         $issue = new Issue([
             'title'        => 'Test',
-            'status_label' => '01900000-0000-0003-0000-000000000001',
+            'status_label' => '01900000-0000-7003-8000-000000000001',
             'priority'     => 99,
         ]);
 
@@ -132,7 +132,7 @@ class IssueTest extends Unit
         $_GET['project_id'] = '00000000-0000-0000-0000-000000000099';
         $issue = new Issue([
             'title'        => 'FK Test',
-            'status_label' => '01900000-0000-0003-0000-000000000001',
+            'status_label' => '01900000-0000-7003-8000-000000000001',
         ]);
 
         verify($issue->validate())->false();
@@ -154,7 +154,7 @@ class IssueTest extends Unit
     {
         $issue = new Issue([
             'title'        => 'Bool Test',
-            'status_label' => '01900000-0000-0003-0000-000000000001',
+            'status_label' => '01900000-0000-7003-8000-000000000001',
             'is_archived'  => true,
             'is_draft'     => true,
         ]);
@@ -166,8 +166,8 @@ class IssueTest extends Unit
     {
         $issue = new Issue([
             'title'        => 'A valid issue',
-            'status_label' => '01900000-0000-0003-0000-000000000001',
-            'created_by'   => '01900000-0000-0000-0000-000000000001',
+            'status_label' => '01900000-0000-7003-8000-000000000001',
+            'created_by'   => '01900000-0000-7000-8000-000000000001',
         ]);
 
         verify($issue->validate())->true();
@@ -183,7 +183,7 @@ class IssueTest extends Unit
 
         $issue = new Issue([
             'title'        => 'New Issue',
-            'status_label' => '01900000-0000-0003-0000-000000000001',
+            'status_label' => '01900000-0000-7003-8000-000000000001',
             'type'         => Issue::TYPE_FEATURE,
             'priority'     => Issue::PRIORITY_LOW,
             'issue_key'      => 'SHOULD-BE-IGNORED',
@@ -209,7 +209,7 @@ class IssueTest extends Unit
         verify($bug->type)->equals(Issue::TYPE_BUG);
         verify($bug->priority)->equals(Issue::PRIORITY_HIGH);
         verify($bug->is_draft)->false();
-        verify($bug->assigned_to)->equals('01900000-0000-0000-0000-000000000002');
+        verify($bug->assigned_to)->equals('01900000-0000-7000-8000-000000000002');
 
         $feature = Issue::findOne(['issue_key' => 'TEST-2']);
         verify($feature)->notNull();
@@ -269,8 +269,8 @@ class IssueTest extends Unit
         $issue = Issue::findOne(['issue_key' => 'TEST-1']);
 
         // Public project - org members can access
-        verify($issue->canAccess('01900000-0000-0000-0000-000000000001'))->true();
-        verify($issue->canAccess('01900000-0000-0000-0000-000000000002'))->true();
+        verify($issue->canAccess('01900000-0000-7000-8000-000000000001'))->true();
+        verify($issue->canAccess('01900000-0000-7000-8000-000000000002'))->true();
     }
 
     // -------------------------------------------------------------------------
@@ -475,7 +475,7 @@ class IssueTest extends Unit
         $issue = Issue::findOne(['issue_key' => 'TEST-1']);
         $issue->populateRelation('project', null);
 
-        verify($issue->canAccess('01900000-0000-0000-0000-000000000001'))->false();
+        verify($issue->canAccess('01900000-0000-7000-8000-000000000001'))->false();
     }
 
     // -------------------------------------------------------------------------
@@ -488,7 +488,7 @@ class IssueTest extends Unit
 
         $issue = new Issue([
             'title'        => 'No Project',
-            'status_label' => '01900000-0000-0003-0000-000000000001',
+            'status_label' => '01900000-0000-7003-8000-000000000001',
         ]);
 
         verify($issue->validate())->false();
@@ -499,7 +499,7 @@ class IssueTest extends Unit
     {
         $issue = new Issue([
             'title'        => 'Invalid Parent',
-            'status_label' => '01900000-0000-0003-0000-000000000001',
+            'status_label' => '01900000-0000-7003-8000-000000000001',
         ]);
 
         $issue->on(ActiveRecord::EVENT_BEFORE_VALIDATE, function ($event) {

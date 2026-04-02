@@ -57,7 +57,7 @@ class ProjectTest extends Unit
 
     protected function _before()
     {
-        $_GET['organization_id'] = '01900000-0000-0001-0000-000000000001';
+        $_GET['organization_id'] = '01900000-0000-7001-8000-000000000001';
         parent::_before();
     }
 
@@ -93,7 +93,7 @@ class ProjectTest extends Unit
         $project = new Project([
             'name'            => 'Long Key Project',
             'key'             => 'TOOLONGKEYX', // max is 10
-            'owner_id'        => '01900000-0000-0000-0000-000000000001',
+            'owner_id'        => '01900000-0000-7001-8000-000000000001',
         ]);
 
         verify($project->validate())->false();
@@ -105,7 +105,7 @@ class ProjectTest extends Unit
         $project = new Project([
             'name'            => 'Bad Key Project',
             'key'             => 'lower',
-            'owner_id'        => '01900000-0000-0000-0000-000000000001',
+            'owner_id'        => '01900000-0000-7001-8000-000000000001',
         ]);
 
         verify($project->validate())->false();
@@ -117,7 +117,7 @@ class ProjectTest extends Unit
         $project = new Project([
             'name'            => 'Valid Key',
             'key'             => 'ABC-123_X',
-            'owner_id'        => '01900000-0000-0000-0000-000000000001',
+            'owner_id'        => '01900000-0000-7001-8000-000000000001',
         ]);
 
         verify($project->validate(['key']))->true();
@@ -128,7 +128,7 @@ class ProjectTest extends Unit
         $project = new Project([
             'name'            => 'Duplicate Key',
             'key'             => 'TEST', // already exists
-            'owner_id'        => '01900000-0000-0000-0000-000000000001',
+            'owner_id'        => '01900000-0000-7001-8000-000000000001',
         ]);
 
         verify($project->validate())->false();
@@ -140,7 +140,7 @@ class ProjectTest extends Unit
         $project = new Project([
             'name'            => 'Bad Status',
             'key'             => 'BADST',
-            'owner_id'        => '01900000-0000-0000-0000-000000000001',
+            'owner_id'        => '01900000-0000-7001-8000-000000000001',
             'status'          => 'invalid_status',
         ]);
 
@@ -153,7 +153,7 @@ class ProjectTest extends Unit
         $project = new Project([
             'name'            => 'Bad Visibility',
             'key'             => 'BADVIS',
-            'owner_id'        => '01900000-0000-0000-0000-000000000001',
+            'owner_id'        => '01900000-0000-7001-8000-000000000001',
             'visibility'      => 'secret',
         ]);
 
@@ -166,7 +166,7 @@ class ProjectTest extends Unit
         $project = new Project([
             'name'            => 'Bad Priority',
             'key'             => 'BADPRI',
-            'owner_id'        => '01900000-0000-0000-0000-000000000001',
+            'owner_id'        => '01900000-0000-7001-8000-000000000001',
             'priority'        => 99,
         ]);
 
@@ -202,7 +202,7 @@ class ProjectTest extends Unit
         $project = new Project([
             'name'            => 'New Valid Project',
             'key'             => 'NEWPROJ',
-            'owner_id'        => '01900000-0000-0000-0000-000000000001',
+            'owner_id'        => '01900000-0000-7000-8000-000000000001',
         ]);
 
         verify($project->validate())->true();
@@ -219,7 +219,7 @@ class ProjectTest extends Unit
         $project = new Project([
             'name' => 'UUID Project',
             'key'  => 'UUIDP',
-            'owner_id' => '01900000-0000-0000-0000-000000000001',
+            'owner_id' => '01900000-0000-7000-8000-000000000001',
         ]);
 
         $saved = $project->save();
@@ -283,8 +283,8 @@ class ProjectTest extends Unit
         $project = Project::findOne(['key' => 'TEST']);
 
         // bayer.hudson is owner, jane.doe is org member
-        verify($project->canAccess('01900000-0000-0000-0000-000000000001'))->true();
-        verify($project->canAccess('01900000-0000-0000-0000-000000000002'))->true();
+        verify($project->canAccess('01900000-0000-7000-8000-000000000001'))->true();
+        verify($project->canAccess('01900000-0000-7000-8000-000000000002'))->true();
     }
 
     public function testCanAccessPrivateProjectOnlyOwner(): void
@@ -292,9 +292,9 @@ class ProjectTest extends Unit
         $project = Project::findOne(['key' => 'PRIV']);
 
         // Owner has access
-        verify($project->canAccess('01900000-0000-0000-0000-000000000001'))->true();
+        verify($project->canAccess('01900000-0000-7000-8000-000000000001'))->true();
         // Non-owner does not
-        verify($project->canAccess('01900000-0000-0000-0000-000000000002'))->false();
+        verify($project->canAccess('01900000-0000-7000-8000-000000000002'))->false();
     }
 
     public function testCanAccessTeamProjectOnlyMembers(): void
@@ -302,9 +302,9 @@ class ProjectTest extends Unit
         $project = Project::findOne(['key' => 'TEAM']);
 
         // Owner is a project member
-        verify($project->canAccess('01900000-0000-0000-0000-000000000001'))->true();
+        verify($project->canAccess('01900000-0000-7000-8000-000000000001'))->true();
         // jane.doe is a team project member  
-        verify($project->canAccess('01900000-0000-0000-0000-000000000002'))->true();
+        verify($project->canAccess('01900000-0000-7000-8000-000000000002'))->true();
     }
 
     public function testCannotAccessProject(): void
@@ -312,11 +312,11 @@ class ProjectTest extends Unit
         $project = new Project([
             'name' => 'No Access Project',
             'key'  => 'NOACC',
-            'owner_id' => '01900000-0000-0000-0000-000000000002',
+            'owner_id' => '01900000-0000-7000-8000-000000000002',
             'visibility' => 'None', // invalid visibility to ensure no access
         ]);
 
-        verify($project->canAccess('01900000-0000-0000-0000-000000000001'))->false();
+        verify($project->canAccess('01900000-0000-7000-8000-000000000001'))->false();
     }
     // -------------------------------------------------------------------------
     // Relations
@@ -380,8 +380,8 @@ class ProjectTest extends Unit
 
     public function testGetKeyToIdCacheKey(): void
     {
-        $key = Project::getKeyToIdCacheKey('01900000-0000-0001-0000-000000000001', 'TEST');
-        verify($key)->equals('project_key_to_id_01900000-0000-0001-0000-000000000001_TEST');
+        $key = Project::getKeyToIdCacheKey('01900000-0000-7000-8000-000000000001', 'TEST');
+        verify($key)->equals('project_key_to_id_01900000-0000-7000-8000-000000000001_TEST');
     }
 
     public function testGetVisibilities(): void
@@ -574,9 +574,9 @@ class ProjectTest extends Unit
         $project = Project::findOne(['key' => 'TEST']); // PUBLIC
 
         // bayer.hudson is org owner → org member → project member
-        verify($project->isMember('01900000-0000-0000-0000-000000000001'))->true();
+        verify($project->isMember('01900000-0000-7000-8000-000000000001'))->true();
         // jane.doe is org member
-        verify($project->isMember('01900000-0000-0000-0000-000000000002'))->true();
+        verify($project->isMember('01900000-0000-7000-8000-000000000002'))->true();
         // random unknown user is not
         verify($project->isMember('00000000-0000-0000-0000-000000000099'))->false();
     }
@@ -586,11 +586,11 @@ class ProjectTest extends Unit
         $project = Project::findOne(['key' => 'TEAM']); // TEAM
 
         // bayer.hudson is a stored project member
-        verify($project->isMember('01900000-0000-0000-0000-000000000001'))->true();
+        verify($project->isMember('01900000-0000-7000-8000-000000000001'))->true();
         // jane.doe is a stored project member
-        verify($project->isMember('01900000-0000-0000-0000-000000000002'))->true();
+        verify($project->isMember('01900000-0000-7000-8000-000000000002'))->true();
         // admin.user is NOT a stored project member of TEAM
-        verify($project->isMember('01900000-0000-0000-0000-000000000003'))->false();
+        verify($project->isMember('01900000-0000-7000-8000-000000000003'))->false();
     }
 
     public function testIsMemberAdminForPublicProject(): void
@@ -598,9 +598,9 @@ class ProjectTest extends Unit
         $project = Project::findOne(['key' => 'TEST']); // PUBLIC
 
         // admin.user has ADMIN role in test-org → org-level admin
-        verify($project->isMemberAdmin('01900000-0000-0000-0000-000000000003'))->true();
+        verify($project->isMemberAdmin('01900000-0000-7000-8000-000000000003'))->true();
         // jane.doe has MEMBER role → not admin
-        verify($project->isMemberAdmin('01900000-0000-0000-0000-000000000002'))->false();
+        verify($project->isMemberAdmin('01900000-0000-7000-8000-000000000002'))->false();
     }
 
     public function testIsMemberAdminForNonExistentProject(): void
@@ -608,25 +608,25 @@ class ProjectTest extends Unit
         $project = new Project([
             'name' => 'Nonexistent Project',
             'key'  => 'NONEXIST',
-            'owner_id' => '01900000-0000-0000-0000-000000000001',
+            'owner_id' => '01900000-0000-7000-8000-000000000001',
             'visibility' => Project::VISIBILITY_TEAM,
         ]);
 
-        verify($project->isMemberAdmin('01900000-0000-0000-0000-000000000003'))->false();
+        verify($project->isMemberAdmin('01900000-0000-7000-8000-000000000003'))->false();
     }
 
     public function testIsMemberAdminWhenProjectAdmin(): void
     {
         $projectMember = ProjectMember::findOne([
-            'project_id' => '01900000-0000-0002-0000-000000000001', // TEST project
-            'user_id'    => '01900000-0000-0000-0000-000000000002', // jane.doe
+            'project_id' => '01900000-0000-7002-8000-000000000001', // TEST project
+            'user_id'    => '01900000-0000-7000-8000-000000000002', // jane.doe
         ]);
 
         $projectMember->role = RoleManager::ROLE_ADMIN;
         $projectMember->save(false);
 
-        $project = Project::findOne(['id' => '01900000-0000-0002-0000-000000000001']); // TEST project
-        verify($project->isMemberAdmin('01900000-0000-0000-0000-000000000002'))->true();
+        $project = Project::findOne(['id' => '01900000-0000-7002-8000-000000000001']); // TEST project
+        verify($project->isMemberAdmin('01900000-0000-7000-8000-000000000002'))->true();
     }
 
     // -------------------------------------------------------------------------
@@ -640,7 +640,7 @@ class ProjectTest extends Unit
         $project = new Project([
             'name'     => 'No Org ID',
             'key'      => 'NOORGID',
-            'owner_id' => '01900000-0000-0000-0000-000000000001',
+            'owner_id' => '01900000-0000-7000-8000-000000000001',
         ]);
 
         verify($project->validate())->false();
@@ -671,7 +671,7 @@ class ProjectTest extends Unit
         $project = new Project([
             'name'     => 'Invalid BeforeSave',
             'key'      => 'BADSAVE',
-            'owner_id' => '01900000-0000-0000-0000-000000000001',
+            'owner_id' => '01900000-0000-7000-8000-000000000001',
         ]);
 
         $project->on(Project::EVENT_BEFORE_INSERT, function ($event) {
@@ -708,7 +708,7 @@ class ProjectTest extends Unit
         $project = new Project([
             'name' => 'No Membership',
             'key'  => 'NOMEM',
-            'owner_id' => '01900000-0000-0000-0000-000000000001',
+            'owner_id' => '01900000-0000-7000-8000-000000000001',
         ]);
 
         Event::on(ProjectMember::class, ProjectMember::EVENT_BEFORE_INSERT, function ($event) {

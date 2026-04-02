@@ -232,7 +232,7 @@ class OrganizationInvitationTest extends Unit
         $invitation = new OrganizationInvitation([
             'email'           => 'invited@example.com',
             'role'            => RoleManager::ROLE_MEMBER,
-            'organization_id' => '01900000-0000-0001-0000-000000000001',
+            'organization_id' => '01900000-0000-7001-8000-000000000001',
         ]);
 
         verify($invitation->validate())->false();
@@ -246,7 +246,7 @@ class OrganizationInvitationTest extends Unit
         $invitation = new OrganizationInvitation([
             'email'           => 'accepted@example.com',
             'role'            => RoleManager::ROLE_MEMBER,
-            'organization_id' => '01900000-0000-0001-0000-000000000001',
+            'organization_id' => '01900000-0000-7001-8000-000000000001',
         ]);
 
         verify($invitation->validate())->false();
@@ -260,7 +260,7 @@ class OrganizationInvitationTest extends Unit
         $invitation = new OrganizationInvitation([
             'email'           => 'revoked@example.com',
             'role'            => RoleManager::ROLE_MEMBER,
-            'organization_id' => '01900000-0000-0001-0000-000000000001',
+            'organization_id' => '01900000-0000-7001-8000-000000000001',
         ]);
 
         verify($invitation->validate())->true();
@@ -275,20 +275,20 @@ class OrganizationInvitationTest extends Unit
     public function testFindPendingInvitation(): void
     {
         $invitation = OrganizationInvitation::find()
-            ->where(['id' => '01900000-0000-0009-0000-000000000001'])
+            ->where(['id' => '01900000-0000-7009-8000-000000000001'])
             ->one();
 
         verify($invitation)->notNull();
         verify($invitation->email)->equals('invited@example.com');
         verify($invitation->status)->equals(OrganizationInvitation::STATUS_PENDING);
         verify($invitation->role)->equals(RoleManager::ROLE_MEMBER);
-        verify($invitation->organization_id)->equals('01900000-0000-0001-0000-000000000001');
+        verify($invitation->organization_id)->equals('01900000-0000-7001-8000-000000000001');
     }
 
     public function testFindAcceptedInvitation(): void
     {
         $invitation = OrganizationInvitation::find()
-            ->where(['id' => '01900000-0000-0009-0000-000000000002'])
+            ->where(['id' => '01900000-0000-7009-8000-000000000002'])
             ->one();
 
         verify($invitation)->notNull();
@@ -299,7 +299,7 @@ class OrganizationInvitationTest extends Unit
     public function testFindExpiredInvitation(): void
     {
         $invitation = OrganizationInvitation::find()
-            ->where(['id' => '01900000-0000-0009-0000-000000000003'])
+            ->where(['id' => '01900000-0000-7009-8000-000000000003'])
             ->one();
 
         verify($invitation)->notNull();
@@ -311,7 +311,7 @@ class OrganizationInvitationTest extends Unit
     public function testFindRevokedInvitation(): void
     {
         $invitation = OrganizationInvitation::find()
-            ->where(['id' => '01900000-0000-0009-0000-000000000004'])
+            ->where(['id' => '01900000-0000-7009-8000-000000000004'])
             ->one();
 
         verify($invitation)->notNull();
@@ -325,17 +325,17 @@ class OrganizationInvitationTest extends Unit
     public function testIsPending(): void
     {
         $pending = OrganizationInvitation::find()
-            ->where(['id' => '01900000-0000-0009-0000-000000000001'])
+            ->where(['id' => '01900000-0000-7009-8000-000000000001'])
             ->one();
         verify($pending->isPending())->true();
 
         $accepted = OrganizationInvitation::find()
-            ->where(['id' => '01900000-0000-0009-0000-000000000002'])
+            ->where(['id' => '01900000-0000-7009-8000-000000000002'])
             ->one();
         verify($accepted->isPending())->false();
 
         $revoked = OrganizationInvitation::find()
-            ->where(['id' => '01900000-0000-0009-0000-000000000004'])
+            ->where(['id' => '01900000-0000-7009-8000-000000000004'])
             ->one();
         verify($revoked->isPending())->false();
     }
@@ -344,13 +344,13 @@ class OrganizationInvitationTest extends Unit
     {
         // Far-future expiry — not expired
         $pending = OrganizationInvitation::find()
-            ->where(['id' => '01900000-0000-0009-0000-000000000001'])
+            ->where(['id' => '01900000-0000-7009-8000-000000000001'])
             ->one();
         verify($pending->isExpired())->false();
 
         // Already-expired timestamp
         $expired = OrganizationInvitation::find()
-            ->where(['id' => '01900000-0000-0009-0000-000000000003'])
+            ->where(['id' => '01900000-0000-7009-8000-000000000003'])
             ->one();
         verify($expired->isExpired())->true();
     }
@@ -362,7 +362,7 @@ class OrganizationInvitationTest extends Unit
     public function testGetInviter(): void
     {
         $invitation = OrganizationInvitation::find()
-            ->where(['id' => '01900000-0000-0009-0000-000000000001'])
+            ->where(['id' => '01900000-0000-7009-8000-000000000001'])
             ->one();
 
         verify($invitation->inviter)->notNull();
@@ -372,7 +372,7 @@ class OrganizationInvitationTest extends Unit
     public function testGetOrganization(): void
     {
         $invitation = OrganizationInvitation::find()
-            ->where(['id' => '01900000-0000-0009-0000-000000000001'])
+            ->where(['id' => '01900000-0000-7009-8000-000000000001'])
             ->one();
 
         verify($invitation->organization)->notNull();
@@ -412,7 +412,7 @@ class OrganizationInvitationTest extends Unit
     public function testFields(): void
     {
         $invitation = OrganizationInvitation::find()
-            ->where(['id' => '01900000-0000-0009-0000-000000000001'])
+            ->where(['id' => '01900000-0000-7009-8000-000000000001'])
             ->one();
 
         $fields = $invitation->fields();
@@ -442,7 +442,7 @@ class OrganizationInvitationTest extends Unit
     public function testExtraFields(): void
     {
         $invitation = OrganizationInvitation::find()
-            ->where(['id' => '01900000-0000-0009-0000-000000000001'])
+            ->where(['id' => '01900000-0000-7009-8000-000000000001'])
             ->one();
 
         $extra = $invitation->extraFields();
@@ -487,7 +487,7 @@ class OrganizationInvitationTest extends Unit
     {
         $invitation = new OrganizationInvitation([
             'email' => 'fail@example.com',
-            'organization_id' => '01900000-0000-0001-0000-000000000001',
+            'organization_id' => '01900000-0000-7009-8000-000000000001',
             'role' => RoleManager::ROLE_MEMBER,
         ]);
 
@@ -506,7 +506,7 @@ class OrganizationInvitationTest extends Unit
 
     public function testNotInsertForBeforeSave(): void
     {
-        $invitation = OrganizationInvitation::findOne('01900000-0000-0009-0000-000000000005');
+        $invitation = OrganizationInvitation::findOne('01900000-0000-7009-8000-000000000005');
         verify($invitation)->notNull();
 
         $originalId = $invitation->id;
@@ -523,7 +523,7 @@ class OrganizationInvitationTest extends Unit
 
     public function testUserNotFoundInAfterSave(): void
     {
-        $orgInv = OrganizationInvitation::findOne(['id' => '01900000-0000-0009-0000-000000000001']);
+        $orgInv = OrganizationInvitation::findOne(['id' => '01900000-0000-7009-8000-000000000001']);
 
         $orgInv->status = OrganizationInvitation::STATUS_ACCEPTED;
 
@@ -536,14 +536,14 @@ class OrganizationInvitationTest extends Unit
     public function testCreateOrganizationMemberCalledOnAccept(): void
     {
 
-        $orgInv = OrganizationInvitation::findOne(['id' => '01900000-0000-0009-0000-000000000005']);
+        $orgInv = OrganizationInvitation::findOne(['id' => '01900000-0000-7009-8000-000000000005']);
         $originalStatus = $orgInv->status;
         $orgInv->status = OrganizationInvitation::STATUS_ACCEPTED;
 
         // We expect this to succeed without exception, which means createOrganizationMember was called and found the user
         verify($orgInv->save())->true();
 
-        $updatedInv = OrganizationInvitation::findOne(['id' => '01900000-0000-0009-0000-000000000005']);
+        $updatedInv = OrganizationInvitation::findOne(['id' => '01900000-0000-7009-8000-000000000005']);
         verify($updatedInv->status)->notEquals($originalStatus); // Status should have been updated to accepted);
         verify($updatedInv->status)->equals(OrganizationInvitation::STATUS_ACCEPTED);
 
@@ -559,7 +559,7 @@ class OrganizationInvitationTest extends Unit
 
     public function testCreateOrganizationMemberTransactionFailsWhenOwnerCanNotBeSaved(): void
     {
-        $orgInv = OrganizationInvitation::findOne(['id' => '01900000-0000-0009-0000-000000000005']);
+        $orgInv = OrganizationInvitation::findOne(['id' => '01900000-0000-7009-8000-000000000005']);
 
         $orgInv->status = OrganizationInvitation::STATUS_ACCEPTED;
 

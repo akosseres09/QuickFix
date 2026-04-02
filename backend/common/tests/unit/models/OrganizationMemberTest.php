@@ -48,7 +48,7 @@ class OrganizationMemberTest extends Unit
     public function testUserIdIsRequired(): void
     {
         $member = new OrganizationMember();
-        $member->organization_id = '01900000-0000-0001-0000-000000000001';
+        $member->organization_id = '01900000-0000-7009-8000-000000000001';
 
         verify($member->validate())->false();
         verify($member->errors)->arrayHasKey('user_id');
@@ -58,8 +58,8 @@ class OrganizationMemberTest extends Unit
     public function testRoleMustBeInList(): void
     {
         $member = new OrganizationMember([
-            'organization_id' => '01900000-0000-0001-0000-000000000001',
-            'user_id'         => '01900000-0000-0000-0000-000000000001',
+            'organization_id' => '01900000-0000-7001-8000-000000000001',
+            'user_id'         => '01900000-0000-7000-8000-000000000001',
             'role'            => 'superadmin', // not in RoleManager::ROLE_LIST
         ]);
 
@@ -71,7 +71,7 @@ class OrganizationMemberTest extends Unit
 
     public function testDefaultRoleIsMember(): void
     {
-        $_GET['organization_id'] = '01900000-0000-0001-0000-000000000001';
+        $_GET['organization_id'] = '01900000-0000-7001-8000-000000000001';
         $member = new OrganizationMember();
         $member->validate();
 
@@ -83,8 +83,8 @@ class OrganizationMemberTest extends Unit
     public function testDuplicateUserInOrgFails(): void
     {
         $member = new OrganizationMember([
-            'organization_id' => '01900000-0000-0001-0000-000000000001',
-            'user_id'         => '01900000-0000-0000-0000-000000000001', // already owner
+            'organization_id' => '01900000-0000-7001-8000-000000000001',
+            'user_id'         => '01900000-0000-7000-8000-000000000001', // already owner
         ]);
 
         verify($member->validate())->false();
@@ -96,7 +96,7 @@ class OrganizationMemberTest extends Unit
     {
         $member = new OrganizationMember([
             'organization_id' => '00000000-0000-0000-0000-000000000099',
-            'user_id'         => '01900000-0000-0000-0000-000000000001',
+            'user_id'         => '01900000-0000-7000-8000-000000000001',
         ]);
 
         verify($member->validate())->false();
@@ -107,7 +107,7 @@ class OrganizationMemberTest extends Unit
     public function testUserIdMustExist(): void
     {
         $member = new OrganizationMember([
-            'organization_id' => '01900000-0000-0001-0000-000000000001',
+            'organization_id' => '01900000-0000-7001-8000-000000000001',
             'user_id'         => '00000000-0000-0000-0000-000000000099',
         ]);
 
@@ -120,8 +120,8 @@ class OrganizationMemberTest extends Unit
     {
         foreach (RoleManager::ROLE_LIST as $role) {
             $member = new OrganizationMember([
-                'organization_id' => '01900000-0000-0001-0000-000000000002',
-                'user_id'         => '01900000-0000-0000-0000-000000000001',
+                'organization_id' => '01900000-0000-7001-8000-000000000002',
+                'user_id'         => '01900000-0000-7000-8000-000000000001',
                 'role'            => $role,
             ]);
 
@@ -137,10 +137,10 @@ class OrganizationMemberTest extends Unit
     {
         $this->loginFixtureUser();
 
-        $_GET['organization_id'] = '01900000-0000-0001-0000-000000000002';
+        $_GET['organization_id'] = '01900000-0000-7001-8000-000000000002';
 
         $member = new OrganizationMember([
-            'user_id' => '01900000-0000-0000-0000-000000000001',
+            'user_id' => '01900000-0000-7000-8000-000000000001',
             'role'    => RoleManager::ROLE_MEMBER,
         ]);
 
@@ -158,7 +158,7 @@ class OrganizationMemberTest extends Unit
     {
         $this->loginFixtureUser();
 
-        $member = OrganizationMember::findOne('01900000-0000-0007-0000-000000000002');
+        $member = OrganizationMember::findOne('01900000-0000-7007-8000-000000000002');
         $originalId = $member->id;
 
         $member->role = RoleManager::ROLE_ADMIN;
@@ -173,16 +173,16 @@ class OrganizationMemberTest extends Unit
 
     public function testFindFixtureMembers(): void
     {
-        $owner = OrganizationMember::findOne('01900000-0000-0007-0000-000000000001');
+        $owner = OrganizationMember::findOne('01900000-0000-7007-8000-000000000001');
         verify($owner)->notNull();
         verify($owner->role)->equals(RoleManager::ROLE_OWNER);
-        verify($owner->user_id)->equals('01900000-0000-0000-0000-000000000001');
+        verify($owner->user_id)->equals('01900000-0000-7000-8000-000000000001');
 
-        $member = OrganizationMember::findOne('01900000-0000-0007-0000-000000000002');
+        $member = OrganizationMember::findOne('01900000-0000-7007-8000-000000000002');
         verify($member)->notNull();
         verify($member->role)->equals(RoleManager::ROLE_MEMBER);
 
-        $admin = OrganizationMember::findOne('01900000-0000-0007-0000-000000000004');
+        $admin = OrganizationMember::findOne('01900000-0000-7007-8000-000000000004');
         verify($admin)->notNull();
         verify($admin->role)->equals(RoleManager::ROLE_ADMIN);
     }
@@ -193,28 +193,28 @@ class OrganizationMemberTest extends Unit
 
     public function testGetUser(): void
     {
-        $member = OrganizationMember::findOne('01900000-0000-0007-0000-000000000001');
+        $member = OrganizationMember::findOne('01900000-0000-7007-8000-000000000001');
         verify($member->user)->notNull();
         verify($member->user->username)->equals('bayer.hudson');
     }
 
     public function testGetOrganization(): void
     {
-        $member = OrganizationMember::findOne('01900000-0000-0007-0000-000000000001');
+        $member = OrganizationMember::findOne('01900000-0000-7007-8000-000000000001');
         verify($member->organization)->notNull();
         verify($member->organization->slug)->equals('test-org');
     }
 
     public function testGetCreator(): void
     {
-        $member = OrganizationMember::findOne('01900000-0000-0007-0000-000000000001');
+        $member = OrganizationMember::findOne('01900000-0000-7007-8000-000000000001');
         verify($member->creator)->notNull();
         verify($member->creator->username)->equals('bayer.hudson');
     }
 
     public function testGetUpdator(): void
     {
-        $member = OrganizationMember::findOne('01900000-0000-0007-0000-000000000001');
+        $member = OrganizationMember::findOne('01900000-0000-7007-8000-000000000001');
         verify($member->updator)->null(); // No updated_by in fixture
     }
 
@@ -224,7 +224,7 @@ class OrganizationMemberTest extends Unit
 
     public function testFields(): void
     {
-        $member = OrganizationMember::findOne('01900000-0000-0007-0000-000000000001');
+        $member = OrganizationMember::findOne('01900000-0000-7007-8000-000000000001');
         $fields = $member->fields();
 
         verify($fields)->arrayContains('id');
@@ -251,7 +251,7 @@ class OrganizationMemberTest extends Unit
 
     public function testExtraFields(): void
     {
-        $member = OrganizationMember::findOne('01900000-0000-0007-0000-000000000001');
+        $member = OrganizationMember::findOne('01900000-0000-7007-8000-000000000001');
         $extra = $member->extraFields();
 
         verify($extra)->arrayContains('organization');
@@ -266,10 +266,10 @@ class OrganizationMemberTest extends Unit
 
     public function testBeforeValidateReadsOrganizationIdFromRequest(): void
     {
-        $_GET['organization_id'] = '01900000-0000-0001-0000-000000000001';
+        $_GET['organization_id'] = '01900000-0000-7001-8000-000000000001';
 
         $member = new OrganizationMember([
-            'user_id' => '01900000-0000-0000-0000-000000000002',
+            'user_id' => '01900000-0000-7000-8000-000000000002',
         ]);
 
         // Should validate by reading organization_id from GET
@@ -282,7 +282,7 @@ class OrganizationMemberTest extends Unit
     public function testBeforeValidateFailsWhenOrganizationIdMissingFromRequest(): void
     {
         $member = new OrganizationMember([
-            'user_id' => '01900000-0000-0000-0000-000000000001',
+            'user_id' => '01900000-0000-7000-8000-000000000001',
         ]);
 
         verify($member->validate())->false();

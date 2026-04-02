@@ -102,7 +102,7 @@ class OrganizationTest extends Unit
 
         // owner_id is set manually so the FK validator passes; the slug rule
         // must still produce an error.
-        $org->owner_id = '01900000-0000-0000-0000-000000000001';
+        $org->owner_id = '01900000-0000-7000-8000-000000000001';
 
         verify($org->validate())->false();
         verify($org->errors)->arrayHasKey('slug');
@@ -114,7 +114,7 @@ class OrganizationTest extends Unit
         $org = new Organization([
             'name'     => 'Test Organization',
             'slug'     => 'unique-slug',
-            'owner_id' => '01900000-0000-0000-0000-000000000001',
+            'owner_id' => '01900000-0000-7000-8000-000000000001',
         ]);
 
         verify($org->validate())->false();
@@ -126,7 +126,7 @@ class OrganizationTest extends Unit
         $org = new Organization([
             'name'     => 'Another Organization',
             'slug'     => 'another-org',
-            'owner_id' => '01900000-0000-0000-0000-000000000001',
+            'owner_id' => '01900000-0000-7000-8000-000000000001',
         ]);
 
         verify($org->validate())->true();
@@ -207,7 +207,7 @@ class OrganizationTest extends Unit
 
     public function testBeforeSaveReturnsEarlyForExistingOrg(): void
     {
-        $org = Organization::findOne(['id' => '01900000-0000-0001-0000-000000000001']);
+        $org = Organization::findOne(['id' => '01900000-0000-7001-8000-000000000001']);
 
         verify($org->save())->true();
     }
