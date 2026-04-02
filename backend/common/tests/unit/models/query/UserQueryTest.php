@@ -86,7 +86,7 @@ class UserQueryTest extends Unit
     public function testByIdReturnsMatchingUser(): void
     {
         $result = User::find()
-            ->byId('01900000-0000-0000-0000-000000000001')
+            ->byId('01900000-0000-7000-8000-000000000001')
             ->one();
 
         verify($result)->notNull();

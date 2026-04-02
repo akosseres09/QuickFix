@@ -43,7 +43,7 @@ class ProjectQueryTest extends Unit
     public function testByIdReturnsMatchingProject(): void
     {
         $result = Project::find()
-            ->byId('01900000-0000-0002-0000-000000000001')
+            ->byId('01900000-0000-7002-8000-000000000001')
             ->one();
 
         verify($result)->notNull();
@@ -66,13 +66,13 @@ class ProjectQueryTest extends Unit
     public function testByOrganizationIdReturnsAllProjects(): void
     {
         $results = Project::find()
-            ->byOrganizationId('01900000-0000-0001-0000-000000000001')
+            ->byOrganizationId('01900000-0000-7001-8000-000000000001')
             ->all();
 
         // All 3 fixture projects belong to org1
         verify($results)->notEmpty();
         foreach ($results as $project) {
-            verify($project->organization_id)->equals('01900000-0000-0001-0000-000000000001');
+            verify($project->organization_id)->equals('01900000-0000-7001-8000-000000000001');
         }
     }
 
@@ -142,13 +142,13 @@ class ProjectQueryTest extends Unit
     public function testByOwnerReturnsProjectsForGivenOwner(): void
     {
         $results = Project::find()
-            ->byOwner('01900000-0000-0000-0000-000000000001')
+            ->byOwner('01900000-0000-7000-8000-000000000001')
             ->all();
 
         // All 3 projects are owned by user 1
         verify($results)->notEmpty();
         foreach ($results as $project) {
-            verify($project->owner_id)->equals('01900000-0000-0000-0000-000000000001');
+            verify($project->owner_id)->equals('01900000-0000-7000-8000-000000000001');
         }
     }
 
@@ -172,7 +172,7 @@ class ProjectQueryTest extends Unit
             ->one();
 
         verify($result)->notNull();
-        verify($result->id)->equals('01900000-0000-0002-0000-000000000001');
+        verify($result->id)->equals('01900000-0000-7002-8000-000000000001');
     }
 
     public function testByKeyReturnsNullForUnknownKey(): void
@@ -201,7 +201,7 @@ class ProjectQueryTest extends Unit
     public function testByKeyOrIdFindsProjectById(): void
     {
         $result = Project::find()
-            ->byKeyOrId('01900000-0000-0002-0000-000000000001')
+            ->byKeyOrId('01900000-0000-7002-8000-000000000001')
             ->one();
 
         verify($result)->notNull();
@@ -305,13 +305,13 @@ class ProjectQueryTest extends Unit
     public function testChainingByOrganizationIdAndActive(): void
     {
         $results = Project::find()
-            ->byOrganizationId('01900000-0000-0001-0000-000000000001')
+            ->byOrganizationId('01900000-0000-7001-8000-000000000001')
             ->active()
             ->all();
 
         verify($results)->notEmpty();
         foreach ($results as $project) {
-            verify($project->organization_id)->equals('01900000-0000-0001-0000-000000000001');
+            verify($project->organization_id)->equals('01900000-0000-7001-8000-000000000001');
             verify($project->status)->equals(Project::STATUS_ACTIVE);
         }
     }
@@ -319,13 +319,13 @@ class ProjectQueryTest extends Unit
     public function testChainingByOwnerAndPublic(): void
     {
         $results = Project::find()
-            ->byOwner('01900000-0000-0000-0000-000000000001')
+            ->byOwner('01900000-0000-7000-8000-000000000001')
             ->public()
             ->all();
 
         verify($results)->notEmpty();
         foreach ($results as $project) {
-            verify($project->owner_id)->equals('01900000-0000-0000-0000-000000000001');
+            verify($project->owner_id)->equals('01900000-0000-7000-8000-000000000001');
             verify($project->visibility)->equals(Project::VISIBILITY_PUBLIC);
         }
     }

@@ -52,7 +52,7 @@ class WorktimeQueryTest extends Unit
     public function testByIdReturnsMatchingRecord(): void
     {
         $result = Worktime::find()
-            ->byId('01900000-0000-0006-0000-000000000001')
+            ->byId('01900000-0000-7006-8000-000000000001')
             ->one();
 
         verify($result)->notNull();
@@ -75,24 +75,24 @@ class WorktimeQueryTest extends Unit
     public function testByIssueIdReturnsTwoRecordsForFirstIssue(): void
     {
         $results = Worktime::find()
-            ->byIssueId('01900000-0000-0004-0000-000000000001')
+            ->byIssueId('01900000-0000-7004-8000-000000000001')
             ->all();
 
         verify($results)->notEmpty();
         foreach ($results as $worktime) {
-            verify($worktime->issue_id)->equals('01900000-0000-0004-0000-000000000001');
+            verify($worktime->issue_id)->equals('01900000-0000-7004-8000-000000000001');
         }
     }
 
     public function testByIssueIdReturnsSingleRecordForSecondIssue(): void
     {
         $results = Worktime::find()
-            ->byIssueId('01900000-0000-0004-0000-000000000002')
+            ->byIssueId('01900000-0000-7004-8000-000000000002')
             ->all();
 
         verify($results)->notEmpty();
         foreach ($results as $worktime) {
-            verify($worktime->issue_id)->equals('01900000-0000-0004-0000-000000000002');
+            verify($worktime->issue_id)->equals('01900000-0000-7004-8000-000000000002');
         }
     }
 
@@ -113,12 +113,12 @@ class WorktimeQueryTest extends Unit
     {
         // All 3 worktime records are in project TEST (project1)
         $results = Worktime::find()
-            ->byProjectId('01900000-0000-0002-0000-000000000001')
+            ->byProjectId('01900000-0000-7002-8000-000000000001')
             ->all();
 
         verify($results)->notEmpty();
         foreach ($results as $worktime) {
-            verify($worktime->issue->project_id)->equals('01900000-0000-0002-0000-000000000001');
+            verify($worktime->issue->project_id)->equals('01900000-0000-7002-8000-000000000001');
         }
     }
 
@@ -126,7 +126,7 @@ class WorktimeQueryTest extends Unit
     {
         // Project PRIV (project2) has no issues with worktimes
         $results = Worktime::find()
-            ->byProjectId('01900000-0000-0002-0000-000000000002')
+            ->byProjectId('01900000-0000-7002-8000-000000000002')
             ->all();
 
         verify($results)->empty();
@@ -140,12 +140,12 @@ class WorktimeQueryTest extends Unit
     {
         // user1 logged worktime on records 1 and 3
         $results = Worktime::find()
-            ->byCreatedBy('01900000-0000-0000-0000-000000000001')
+            ->byCreatedBy('01900000-0000-7000-8000-000000000001')
             ->all();
 
         verify($results)->notEmpty();
         foreach ($results as $worktime) {
-            verify($worktime->created_by)->equals('01900000-0000-0000-0000-000000000001');
+            verify($worktime->created_by)->equals('01900000-0000-7000-8000-000000000001');
         }
     }
 
@@ -153,12 +153,12 @@ class WorktimeQueryTest extends Unit
     {
         // user2 logged worktime on record 2
         $results = Worktime::find()
-            ->byCreatedBy('01900000-0000-0000-0000-000000000002')
+            ->byCreatedBy('01900000-0000-7000-8000-000000000002')
             ->all();
 
         verify($results)->notEmpty();
         foreach ($results as $worktime) {
-            verify($worktime->created_by)->equals('01900000-0000-0000-0000-000000000002');
+            verify($worktime->created_by)->equals('01900000-0000-7000-8000-000000000002');
         }
     }
 
@@ -179,12 +179,12 @@ class WorktimeQueryTest extends Unit
     {
         // All 3 worktime records belong to issues in projects under org1
         $results = Worktime::find()
-            ->byOrganizationId('01900000-0000-0001-0000-000000000001')
+            ->byOrganizationId('01900000-0000-7001-8000-000000000001')
             ->all();
 
         verify($results)->notEmpty();
         foreach ($results as $worktime) {
-            verify($worktime->issue->project->organization_id)->equals('01900000-0000-0001-0000-000000000001');
+            verify($worktime->issue->project->organization_id)->equals('01900000-0000-7001-8000-000000000001');
         }
     }
 
@@ -192,7 +192,7 @@ class WorktimeQueryTest extends Unit
     {
         // org2 has no projects with issues
         $results = Worktime::find()
-            ->byOrganizationId('01900000-0000-0001-0000-000000000002')
+            ->byOrganizationId('01900000-0000-7001-8000-000000000002')
             ->all();
 
         verify($results)->empty();
@@ -205,8 +205,8 @@ class WorktimeQueryTest extends Unit
     public function testChainingByIssueIdAndByCreatedBy(): void
     {
         $result = Worktime::find()
-            ->byIssueId('01900000-0000-0004-0000-000000000001')
-            ->byCreatedBy('01900000-0000-0000-0000-000000000002')
+            ->byIssueId('01900000-0000-7004-8000-000000000001')
+            ->byCreatedBy('01900000-0000-7000-8000-000000000002')
             ->one();
 
         verify($result)->notNull();
@@ -216,14 +216,14 @@ class WorktimeQueryTest extends Unit
     public function testChainingByProjectIdAndByCreatedBy(): void
     {
         $results = Worktime::find()
-            ->byProjectId('01900000-0000-0002-0000-000000000001')
-            ->byCreatedBy('01900000-0000-0000-0000-000000000001')
+            ->byProjectId('01900000-0000-7002-8000-000000000001')
+            ->byCreatedBy('01900000-0000-7000-8000-000000000001')
             ->all();
 
         verify($results)->notEmpty();
         foreach ($results as $worktime) {
-            verify($worktime->issue->project_id)->equals('01900000-0000-0002-0000-000000000001');
-            verify($worktime->created_by)->equals('01900000-0000-0000-0000-000000000001');
+            verify($worktime->issue->project_id)->equals('01900000-0000-7002-8000-000000000001');
+            verify($worktime->created_by)->equals('01900000-0000-7000-8000-000000000001');
         }
     }
 }
