@@ -487,7 +487,7 @@ class OrganizationInvitationTest extends Unit
     {
         $invitation = new OrganizationInvitation([
             'email' => 'fail@example.com',
-            'organization_id' => '01900000-0000-7009-8000-000000000001',
+            'organization_id' => '01900000-0000-7001-8000-000000000001',
             'role' => RoleManager::ROLE_MEMBER,
         ]);
 

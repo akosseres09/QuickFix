@@ -355,7 +355,7 @@ class RefreshTokenHandlerTraitTest extends Unit
     public function testCreateRefreshTokenCreatesNewWhenNoneExists()
     {
         // User 3 has no token in the fixture → new token should be created
-        $userId = '01900000-0000-0000-0000-000000000003';
+        $userId = '01900000-0000-7000-8000-000000000003';
         $handler = new TestRefreshTokenHandler();
 
         $result = $handler->handlerCreateRefreshToken($userId);
@@ -374,7 +374,7 @@ class RefreshTokenHandlerTraitTest extends Unit
     public function testCreateRefreshTokenReturnsExistingValidToken()
     {
         // User 1 already has a valid token in the fixture for 127.0.0.1
-        $userId = '01900000-0000-0000-0000-000000000001';
+        $userId = '01900000-0000-7000-8000-000000000001';
         $existingToken = 'valid-refresh-token-000000000000';
         $handler = new TestRefreshTokenHandler();
 
@@ -387,7 +387,7 @@ class RefreshTokenHandlerTraitTest extends Unit
     public function testCreateRefreshTokenUpdatesExpiredToken()
     {
         // User 2 has an expired token in the fixture for 127.0.0.1
-        $userId = '01900000-0000-0000-0000-000000000002';
+        $userId = '01900000-0000-7000-8000-000000000002';
         $oldToken = 'expired-refresh-token-000000000001';
         $handler = new TestRefreshTokenHandler();
 
@@ -403,7 +403,7 @@ class RefreshTokenHandlerTraitTest extends Unit
 
     public function testCreateRefreshTokenUsesCustomExpiry()
     {
-        $userId = '01900000-0000-0000-0000-000000000003';
+        $userId = '01900000-0000-7000-8000-000000000003';
         $handler = new TestRefreshTokenHandler();
         $customExpiry = 3600;
 

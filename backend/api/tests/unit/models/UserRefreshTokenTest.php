@@ -63,7 +63,7 @@ class UserRefreshTokenTest extends Unit
     public function testTimestampsShouldBeIntegers(): void
     {
         $model = new UserRefreshToken([
-            'user_id' => '01900000-0000-0000-0000-000000000001',
+            'user_id' => '01900000-0000-7000-8000-000000000001',
             'token' => 'test-token',
             'expires_at' => 'not-an-integer',
             'created_at' => 'also-not-an-integer',
@@ -78,7 +78,7 @@ class UserRefreshTokenTest extends Unit
     public function testIpAddressMaxLength(): void
     {
         $model = new UserRefreshToken([
-            'user_id' => '01900000-0000-0000-0000-000000000001',
+            'user_id' => '01900000-0000-7000-8000-000000000001',
             'token' => 'test-token',
             'expires_at' => time() + 3600,
             'ip' => str_repeat('1', 46), // 46 chars, exceeds max of 45
@@ -92,7 +92,7 @@ class UserRefreshTokenTest extends Unit
     {
         $existingToken = $this->tester->grabFixture('user_refresh_token', 'valid_token');
         $model = new UserRefreshToken([
-            'user_id' => '01900000-0000-0000-0000-000000000001',
+            'user_id' => '01900000-0000-7000-8000-000000000001',
             'token' => $existingToken['token'], // duplicate token
             'expires_at' => time() + 3600,
         ]);
@@ -104,7 +104,7 @@ class UserRefreshTokenTest extends Unit
     public function testUserAgentMustBeString(): void
     {
         $model = new UserRefreshToken([
-            'user_id' => '01900000-0000-0000-0000-000000000001',
+            'user_id' => '01900000-0000-7000-8000-000000000001',
             'token' => 'test-token',
             'expires_at' => time() + 3600,
             'user_agent' => ['not', 'a', 'string'], // invalid user agent
@@ -161,7 +161,7 @@ class UserRefreshTokenTest extends Unit
     public function testBeforeSaveFailsWhenParentBeforeSaveFails(): void
     {
         $token = new UserRefreshToken([
-            'user_id' => '01900000-0000-0000-0000-000000000001',
+            'user_id' => '01900000-0000-7000-8000-000000000001',
             'token' => 'test-token',
             'expires_at' => time() + 3600,
         ]);
@@ -190,7 +190,7 @@ class UserRefreshTokenTest extends Unit
     public function testBeforeSaveGeneratesIdOnInsert(): void
     {
         $token = new UserRefreshToken([
-            'user_id' => '01900000-0000-0000-0000-000000000001',
+            'user_id' => '01900000-0000-7000-8000-000000000001',
             'token' => 'new-test-token',
             'expires_at' => time() + 3600,
         ]);
@@ -206,7 +206,7 @@ class UserRefreshTokenTest extends Unit
         $token = UserRefreshToken::findOne(['token' => 'valid-refresh-token-000000000000']);
         $user = $token->user;
         $this->assertInstanceOf(User::class, $user);
-        $this->assertSame('01900000-0000-0000-0000-000000000001', $user->id);
+        $this->assertSame('01900000-0000-7000-8000-000000000001', $user->id);
     }
 
     // getters and methods

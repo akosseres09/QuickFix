@@ -30,18 +30,18 @@ class PermissionServiceTest extends Unit
     // Fixture IDs (aligned with common/tests/_data/)
     // ---------------------------------------------------------------------------
 
-    private const USER1_ID    = '01900000-0000-0000-0000-000000000001'; // org1 owner
-    private const USER2_ID    = '01900000-0000-0000-0000-000000000002'; // org1 member
-    private const USER3_ID    = '01900000-0000-0000-0000-000000000003'; // org1 admin, org2 owner
-    private const USER4_ID    = '01900000-0000-0000-0000-000000000004'; // not a member of any org
-    private const ORG1_ID     = '01900000-0000-0001-0000-000000000001'; // slug: test-org
-    private const ORG2_ID     = '01900000-0000-0001-0000-000000000002'; // slug: second-org
-    private const PROJ1_ID    = '01900000-0000-0002-0000-000000000001'; // public,  key: TEST
-    private const PROJ2_ID    = '01900000-0000-0002-0000-000000000002'; // private, key: PRIV
-    private const PROJ3_ID    = '01900000-0000-0002-0000-000000000003'; // team,    key: TEAM
-    private const ISSUE1_ID   = '01900000-0000-0004-0000-000000000001'; // in proj1
-    private const COMMENT1_ID = '01900000-0000-0005-0000-000000000001'; // issue1, created_by user2
-    private const COMMENT2_ID = '01900000-0000-0005-0000-000000000002'; // issue1, created_by user1
+    private const USER1_ID    = '01900000-0000-7000-8000-000000000001'; // org1 owner
+    private const USER2_ID    = '01900000-0000-7000-8000-000000000002'; // org1 member
+    private const USER3_ID    = '01900000-0000-7000-8000-000000000003'; // org1 admin, org2 owner
+    private const USER4_ID    = '01900000-0000-7000-8000-000000000004'; // not a member of any org
+    private const ORG1_ID     = '01900000-0000-7001-8000-000000000001'; // slug: test-org
+    private const ORG2_ID     = '01900000-0000-7001-8000-000000000002'; // slug: second-org
+    private const PROJ1_ID    = '01900000-0000-7002-8000-000000000001'; // public,  key: TEST
+    private const PROJ2_ID    = '01900000-0000-7002-8000-000000000002'; // private, key: PRIV
+    private const PROJ3_ID    = '01900000-0000-7002-8000-000000000003'; // team,    key: TEAM
+    private const ISSUE1_ID   = '01900000-0000-7004-8000-000000000001'; // in proj1
+    private const COMMENT1_ID = '01900000-0000-7005-8000-000000000001'; // issue1, created_by user2
+    private const COMMENT2_ID = '01900000-0000-7005-8000-000000000002'; // issue1, created_by user1
 
     // ---------------------------------------------------------------------------
     // Fixtures
