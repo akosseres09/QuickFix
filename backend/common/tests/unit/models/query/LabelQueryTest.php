@@ -42,7 +42,7 @@ class LabelQueryTest extends Unit
     public function testByIdReturnsMatchingLabel(): void
     {
         $result = Label::find()
-            ->byId('01900000-0000-0003-0000-000000000001')
+            ->byId('01900000-0000-7003-8000-000000000001')
             ->one();
 
         verify($result)->notNull();
@@ -66,12 +66,12 @@ class LabelQueryTest extends Unit
     {
         // Project TEST (project1) has 3 labels
         $results = Label::find()
-            ->byProjectId('01900000-0000-0002-0000-000000000001')
+            ->byProjectId('01900000-0000-7002-8000-000000000001')
             ->all();
 
         verify($results)->notEmpty();
         foreach ($results as $label) {
-            verify($label->project_id)->equals('01900000-0000-0002-0000-000000000001');
+            verify($label->project_id)->equals('01900000-0000-7002-8000-000000000001');
         }
     }
 
@@ -79,12 +79,12 @@ class LabelQueryTest extends Unit
     {
         // Project PRIV (project2) has 2 labels
         $results = Label::find()
-            ->byProjectId('01900000-0000-0002-0000-000000000002')
+            ->byProjectId('01900000-0000-7002-8000-000000000002')
             ->all();
 
         verify($results)->notEmpty();
         foreach ($results as $label) {
-            verify($label->project_id)->equals('01900000-0000-0002-0000-000000000002');
+            verify($label->project_id)->equals('01900000-0000-7002-8000-000000000002');
         }
     }
 
@@ -106,10 +106,10 @@ class LabelQueryTest extends Unit
         // allForProject returns labels with project_id = X OR project_id IS NULL.
         // Fixture has no system labels (project_id = NULL), so result equals byProjectId.
         $results = Label::find()
-            ->allForProject('01900000-0000-0002-0000-000000000001')
+            ->allForProject('01900000-0000-7002-8000-000000000001')
             ->all();
 
-        $allowed = ['01900000-0000-0002-0000-000000000001', null];
+        $allowed = ['01900000-0000-7002-8000-000000000001', null];
         verify($results)->notEmpty();
         foreach ($results as $label) {
             verify($allowed)->arrayContains($label->project_id);
@@ -120,7 +120,7 @@ class LabelQueryTest extends Unit
     {
         // Project 3 (TEAM) has no labels in fixtures
         $results = Label::find()
-            ->allForProject('01900000-0000-0002-0000-000000000003')
+            ->allForProject('01900000-0000-7002-8000-000000000003')
             ->all();
 
         verify($results)->notEmpty();
@@ -207,19 +207,19 @@ class LabelQueryTest extends Unit
     public function testChainingByProjectIdAndByLabel(): void
     {
         $result = Label::find()
-            ->byProjectId('01900000-0000-0002-0000-000000000001')
+            ->byProjectId('01900000-0000-7002-8000-000000000001')
             ->byLabel('In Progress')
             ->one();
 
         verify($result)->notNull();
-        verify($result->id)->equals('01900000-0000-0003-0000-000000000003');
+        verify($result->id)->equals('01900000-0000-7003-8000-000000000003');
     }
 
     public function testChainingByIdAndByProjectId(): void
     {
         $result = Label::find()
-            ->byProjectId('01900000-0000-0002-0000-000000000001')
-            ->byId('01900000-0000-0003-0000-000000000004')
+            ->byProjectId('01900000-0000-7002-8000-000000000001')
+            ->byId('01900000-0000-7003-8000-000000000004')
             ->one();
 
         verify($result)->notNull();
