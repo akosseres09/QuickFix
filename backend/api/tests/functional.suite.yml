@@ -5,4 +5,7 @@ modules:
   enabled:
     - Yii2:
         configFile: "config/codeception-functional.php"
+    - REST:
+        depends: Yii2
+        shortDebug: true
     - \Codeception\Module\Asserts
