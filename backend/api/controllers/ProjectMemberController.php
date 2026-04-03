@@ -42,7 +42,7 @@ class ProjectMemberController extends BaseRestController
         $projectId = Yii::$app->request->get('project_id');
 
         if (!$projectId) {
-            return;
+            throw new BadRequestHttpException('Project ID is required.');
         }
 
         switch ($action) {

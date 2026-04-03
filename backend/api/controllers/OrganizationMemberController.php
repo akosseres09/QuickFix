@@ -44,7 +44,7 @@ class OrganizationMemberController extends BaseRestController
         $orgId = Yii::$app->request->get('organization_id');
 
         if (!$orgId) {
-            return;
+            throw new BadRequestHttpException('Organization ID is required!');
         }
 
         switch ($action) {

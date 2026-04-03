@@ -12,6 +12,8 @@ use common\fixtures\ProjectMemberFixture;
 use common\fixtures\UserFixture;
 use common\models\UserRole;
 use Yii;
+use yii\base\Application;
+use yii\base\Event;
 
 class OrganizationControllerTest extends Unit
 {
@@ -338,5 +340,51 @@ class OrganizationControllerTest extends Unit
         $json = $this->grabJson();
         $this->assertFalse($json['success']);
         $this->assertStringContainsString('You do not have permission to delete this organization.', $json['error']['message']);
+    }
+
+    public function testFindModelReturnsBadRequestForMissingOrganizationId(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+
+        Event::on(Application::class, Application::EVENT_BEFORE_ACTION, function ($event) {
+            $request = Yii::$app->getRequest();
+
+            $params = $request->getQueryParams();
+            unset($params['id']); // Remove the 'id' parameter to simulate missing organization ID
+            $request->setQueryParams($params);
+        });
+
+        try {
+            $this->tester->sendAjaxGetRequest('/organization/' . self::ORG_SLUG);
+            $this->tester->seeResponseCodeIs(400);
+            $json = $this->grabJson();
+            $this->assertFalse($json['success']);
+            $this->assertStringContainsString('Organization ID is required!', $json['error']['message']);
+        } finally {
+            Event::off(Application::class, Application::EVENT_BEFORE_ACTION);
+        }
+    }
+
+    public function testFindModelReturnsNotFoundForNonExistentOrganization(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+
+        Event::on(Application::class, Application::EVENT_BEFORE_ACTION, function ($event) {
+            $request = Yii::$app->getRequest();
+
+            $params = $request->getQueryParams();
+            $params['id'] = '01900000-0000-7001-8000-000000000099'; // Set to a non-existent organization ID
+            $request->setQueryParams($params);
+        });
+
+        try {
+            $this->tester->sendAjaxGetRequest('/organization/' . self::ORG_ID);
+            $this->tester->seeResponseCodeIs(404);
+            $json = $this->grabJson();
+            $this->assertFalse($json['success']);
+            $this->assertStringContainsString('The requested organization is not found!', $json['error']['message']);
+        } finally {
+            Event::off(Application::class, Application::EVENT_BEFORE_ACTION);
+        }
     }
 }

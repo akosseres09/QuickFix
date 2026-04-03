@@ -345,4 +345,27 @@ class OrganizationMemberControllerTest extends Unit
         $this->assertFalse($json['success']);
         $this->assertStringContainsString('You do not have permission to manage organization members.', $json['error']['message']);
     }
+
+    public function testCheckAccessReturnsBadRequestOnIndexWhenOrganizationIdIsMissing(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+
+        Event::on(Application::class, Application::EVENT_BEFORE_ACTION, function ($event) {
+            $request = Yii::$app->getRequest();
+
+            $params = $request->getQueryParams();
+            unset($params['organization_id']);
+            $request->setQueryParams($params);
+        });
+
+        try {
+            $this->tester->sendAjaxGetRequest('/' . self::ORG_ID . '/member');
+            $this->tester->seeResponseCodeIs(400);
+            $json = $this->grabJson();
+            $this->assertFalse($json['success']);
+            $this->assertStringContainsString('Organization ID is required!', $json['error']['message']);
+        } finally {
+            Event::off(Application::class, Application::EVENT_BEFORE_ACTION);
+        }
+    }
 }

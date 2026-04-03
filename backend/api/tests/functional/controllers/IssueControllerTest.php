@@ -15,6 +15,7 @@ use common\fixtures\UserFixture;
 use common\models\Issue;
 use common\models\UserRole;
 use Yii;
+use yii\base\Application;
 use yii\base\Event;
 
 class IssueControllerTest extends Unit
@@ -399,11 +400,204 @@ class IssueControllerTest extends Unit
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
 
         // slug + key
-        $this->tester->sendAjaxGetRequest('/' . self::ORG_SLUG . '/' . self::PROJECT_KEY . '/issue/' . self::ISSUE_ID_1);
+        $this->tester->sendAjaxGetRequest($this->issueUrl('/' . self::ISSUE_ID_1));
         $this->tester->seeResponseCodeIs(200);
 
         // uuid + uuid
-        $this->tester->sendAjaxGetRequest('/' . self::ORG_ID . '/' . self::PROJECT_ID . '/issue/' . self::ISSUE_ID_1);
+        $this->tester->sendAjaxGetRequest($this->issueUrl('/' . self::ISSUE_ID_1));
         $this->tester->seeResponseCodeIs(200);
+    }
+
+    // =========================================================================
+    // findModel BadRequest scenarios
+    // =========================================================================
+
+    public function testViewThrowsBadRequestWhenProjectIdMissing(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+
+        Event::on(Application::class, Application::EVENT_BEFORE_ACTION, function ($event) {
+            $request = Yii::$app->getRequest();
+
+            $params = $request->getQueryParams();
+            unset($params['project_id']);
+            $request->setQueryParams($params);
+        });
+
+        try {
+            $this->tester->sendAjaxGetRequest($this->issueUrl('/' . self::ISSUE_ID_1));
+
+            $this->tester->seeResponseCodeIs(400);
+            $json = $this->grabJson();
+            $this->assertFalse($json['success']);
+            $this->assertStringContainsString('Project ID is required', $json['error']['message']);
+        } finally {
+            Event::off(Application::class, Application::EVENT_BEFORE_ACTION);
+        }
+    }
+
+    public function testViewThrowsBadRequestWhenOrganizationIdMissing(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+
+        Event::on(Application::class, Application::EVENT_BEFORE_ACTION, function ($event) {
+            $request = Yii::$app->getRequest();
+
+            $params = $request->getQueryParams();
+            unset($params['organization_id']);
+            $request->setQueryParams($params);
+        });
+
+        try {
+            $this->tester->sendAjaxGetRequest($this->issueUrl('/' . self::ISSUE_ID_1));
+
+            $this->tester->seeResponseCodeIs(400);
+            $json = $this->grabJson();
+            $this->assertFalse($json['success']);
+            $this->assertStringContainsString('Organization ID is required', $json['error']['message']);
+        } finally {
+            Event::off(Application::class, Application::EVENT_BEFORE_ACTION);
+        }
+    }
+
+    public function testViewThrowsBadRequestWhenProjectNotFound(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+        $fakeProjectId = '01900000-0000-7002-8000-999999999999';
+
+        Event::on(Application::class, Application::EVENT_BEFORE_ACTION, function ($event) use ($fakeProjectId) {
+            $request = Yii::$app->getRequest();
+
+            $params = $request->getQueryParams();
+            $params['project_id'] = $fakeProjectId;
+            $request->setQueryParams($params);
+        });
+
+        try {
+            $this->tester->sendAjaxGetRequest($this->issueUrl('/' . self::ISSUE_ID_1));
+            $json = $this->grabJson();
+            $this->tester->seeResponseCodeIs(400);
+            $this->assertFalse($json['success']);
+            $this->assertStringContainsString('Project not found for the given project_id and organization_id', $json['error']['message']);
+        } finally {
+            Event::off(Application::class, Application::EVENT_BEFORE_ACTION);
+        }
+    }
+
+    // =========================================================================
+    // actionStats BadRequest and Forbidden scenarios
+    // =========================================================================
+
+    public function testStatsThrowsBadRequestWhenProjectIdMissing(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+
+        Event::on(Application::class, Application::EVENT_BEFORE_ACTION, function ($event) {
+            $request = Yii::$app->getRequest();
+
+            $params = $request->getQueryParams();
+            unset($params['project_id']);
+            $request->setQueryParams($params);
+        });
+
+        try {
+            $this->tester->sendAjaxGetRequest($this->issueUrl('/stats'));
+            $json = $this->grabJson();
+            $this->tester->seeResponseCodeIs(400);
+            $this->assertFalse($json['success']);
+            $this->assertStringContainsString('Project and Organization IDs are required', $json['error']['message']);
+        } finally {
+            Event::off(Application::class, Application::EVENT_BEFORE_ACTION);
+        }
+    }
+
+    public function testStatsThrowsForbiddenWhenUserCannotViewProject(): void
+    {
+        $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
+        $this->tester->sendAjaxGetRequest($this->issueUrl('/stats'));
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('You do not have permission to view issues in this project.', $json['error']['message']);
+    }
+
+    public function testStatsThrowsNotFoundWhenProjectNotFound(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+        $fakeProjectId = '01900000-0000-7002-8000-999999999999';
+
+        Event::on(Application::class, Application::EVENT_BEFORE_ACTION, function ($event) use ($fakeProjectId) {
+            $request = Yii::$app->getRequest();
+
+            $params = $request->getQueryParams();
+            $params['project_id'] = $fakeProjectId;
+            $request->setQueryParams($params);
+        });
+
+        try {
+            $this->tester->sendAjaxGetRequest($this->issueUrl('/stats'));
+            $this->tester->seeResponseCodeIs(404);
+            $json = $this->grabJson();
+            $this->assertFalse($json['success']);
+            $this->assertStringContainsString('Project not found for the given project ID and organization ID.', $json['error']['message']);
+        } finally {
+            Event::off(Application::class, Application::EVENT_BEFORE_ACTION);
+        }
+    }
+
+    public function testStatsReturnsForbiddenForMemberWithoutViewPermission(): void
+    {
+        $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
+        $this->tester->sendAjaxGetRequest($this->issueUrl('/stats'));
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('You do not have permission to view issues in this project.', $json['error']['message']);
+    }
+
+    // =========================================================================
+    // actionClose and actionOpen Exception handling
+    // =========================================================================
+
+    public function testCloseIssueHandlesExceptionGracefully(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+
+        Event::on(Issue::class, Issue::EVENT_BEFORE_UPDATE, function ($event) {
+            throw new \Exception('Database error simulation');
+        });
+
+        try {
+            $this->tester->sendAjaxPostRequest($this->issueUrl('/' . self::ISSUE_ID_1 . '/close'), []);
+
+            $this->tester->seeResponseCodeIs(500);
+            $json = $this->grabJson();
+            $this->assertFalse($json['success']);
+            $this->assertStringContainsString('Failed to close the issue', $json['error']['message']);
+        } finally {
+            Event::off(Issue::class, Issue::EVENT_BEFORE_UPDATE);
+        }
+    }
+
+    public function testOpenIssueHandlesExceptionGracefully(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+
+        // Create a mock Event handler that will throw an exception during openIssue
+        Event::on(Issue::class, Issue::EVENT_BEFORE_UPDATE, function ($event) {
+            throw new \Exception('Database error simulation');
+        });
+
+        try {
+            $this->tester->sendAjaxPostRequest($this->issueUrl('/' . self::ISSUE_ID_1 . '/open'), []);
+            $this->tester->seeResponseCodeIs(500);
+            $json = $this->grabJson();
+            $this->assertFalse($json['success']);
+            $this->assertStringContainsString('Failed to open the issue', $json['error']['message']);
+        } finally {
+            Event::off(Issue::class, Issue::EVENT_BEFORE_UPDATE);
+        }
     }
 }

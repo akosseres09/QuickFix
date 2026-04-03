@@ -309,4 +309,56 @@ class ProjectMemberControllerTest extends Unit
         $json = $this->grabJson();
         $this->assertTrue($json['success']);
     }
+
+    // =========================================================================
+    // CheckAccess
+    // =========================================================================
+
+    public function testCheckAccessReturnsBadRequestWhenProjectIdIsMissing(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+
+        Event::on(Application::class, Application::EVENT_BEFORE_ACTION, function ($event) {
+            $request = Yii::$app->getRequest();
+
+            $params = $request->getQueryParams();
+            unset($params['project_id']);
+            $request->setQueryParams($params);
+        });
+
+        $this->tester->sendAjaxGetRequest('/' . self::ORG_ID . '/' . self::PROJECT_KEY . '/member');
+
+        try {
+            $this->tester->seeResponseCodeIs(400);
+            $json = $this->grabJson();
+            $this->assertFalse($json['success']);
+            $this->assertStringContainsString('Project ID is required', $json['error']['message']);
+        } finally {
+            Event::off(Application::class, Application::EVENT_BEFORE_ACTION);
+        }
+    }
+
+    public function testCheckAccessReturnsForbiddenWhenUserLacksPermissionForIndexAndView(): void
+    {
+        $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
+        $this->tester->sendAjaxGetRequest($this->memberUrl());
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('You do not have permission to view project members', $json['error']['message']);
+    }
+
+    public function testCheckAccessReturnsForbiddenWhenUserLacksPermissionForCreateUpdateDelete(): void
+    {
+        $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
+        $this->tester->sendAjaxRequest('PUT', $this->memberUrl('/' . self::PM_ID_MEMBER), [
+            'role' => 'admin',
+        ]);
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('You do not have permission to manage project members', $json['error']['message']);
+    }
 }

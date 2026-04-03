@@ -56,8 +56,12 @@ class IssueController extends BaseRestController
         }
 
         $project = Project::find()->byOrganizationId($organizationId)->byId($projectId)->one();
-        if (!$project || !PermissionService::canViewProject($project, Yii::$app->user->id)) {
-            throw new ForbiddenHttpException('Access denied.');
+        if (!$project) {
+            throw new NotFoundHttpException('Project not found for the given project ID and organization ID.');
+        }
+
+        if (!PermissionService::canViewProject($project, Yii::$app->user->id)) {
+            throw new ForbiddenHttpException('You do not have permission to view issues in this project.');
         }
 
         $today = mktime(0, 0, 0);

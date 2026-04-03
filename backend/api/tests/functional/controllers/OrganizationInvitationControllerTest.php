@@ -274,4 +274,25 @@ class OrganizationInvitationControllerTest extends Unit
         $this->assertFalse($json['success']);
         $this->assertStringContainsString('Organization invitation has expired.', $json['error']['message']);
     }
+
+    public function testFindModelReturnsForbiddenForNonPendingInvitationOnUpdateDelete(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+
+        // Try to accept an already accepted invitation
+        $this->tester->sendAjaxRequest('PUT', '/invitation/' . '01900000-0000-7009-8000-000000000008', [
+            'status' => 'accepted',
+        ]);
+        $json = $this->grabJson();
+        $this->tester->seeResponseCodeIs(403);
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('Only pending invitations can be updated or deleted.', $json['error']['message']);
+
+        // Try to delete an already revoked invitation
+        $this->tester->sendAjaxRequest('DELETE', '/invitation/' . '01900000-0000-7009-8000-000000000008');
+        $json = $this->grabJson();
+        $this->tester->seeResponseCodeIs(403);
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('Only pending invitations can be updated or deleted.', $json['error']['message']);
+    }
 }
