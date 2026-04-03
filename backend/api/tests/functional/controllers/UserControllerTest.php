@@ -64,7 +64,7 @@ class UserControllerTest extends Unit
     // AUTH: 401 when no Bearer token
     // =========================================================================
 
-    public function testViewReturns401WithoutAuth(): void
+    public function testViewReturnsUnauthorizedWithoutAuth(): void
     {
         $this->tester->sendAjaxGetRequest('/user/' . self::OWNER_ID);
         $this->tester->seeResponseCodeIs(401);
@@ -107,7 +107,7 @@ class UserControllerTest extends Unit
         $this->assertEquals(self::OWNER_ID, $json['data']['id']);
     }
 
-    public function testViewReturns404ForNonExistentUser(): void
+    public function testViewReturnsNotFoundForNonExistentUser(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxGetRequest('/user/01900000-0000-0000-0000-999999999999');
@@ -115,7 +115,7 @@ class UserControllerTest extends Unit
         $this->tester->seeResponseCodeIs(404);
     }
 
-    public function testViewReturns404ForNonExistentUsername(): void
+    public function testViewReturnsNotFoundForNonExistentUsername(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxGetRequest('/user/no-such-username');
@@ -166,7 +166,7 @@ class UserControllerTest extends Unit
         $this->assertTrue($json['success']);
     }
 
-    public function testUpdateReturns404ForNonExistentUser(): void
+    public function testUpdateReturnsNotFoundForNonExistentUser(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxRequest('PUT', '/user/01900000-0000-0000-0000-999999999999', [
@@ -192,7 +192,7 @@ class UserControllerTest extends Unit
     // Upload Profile Picture  POST /user/<id>/upload-profile-picture
     // =========================================================================
 
-    public function testUploadProfilePictureReturns400WithNoFile(): void
+    public function testUploadProfilePictureReturnsBadRequestWithNoFile(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxPostRequest('/user/' . self::OWNER_ID . '/upload-profile-picture', []);
@@ -200,7 +200,7 @@ class UserControllerTest extends Unit
         $this->tester->seeResponseCodeIs(400);
     }
 
-    public function testUploadProfilePictureReturns403ForOtherUser(): void
+    public function testUploadProfilePictureReturnsForbiddenForOtherUser(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxPostRequest('/user/' . self::MEMBER_ID . '/upload-profile-picture', []);
@@ -208,7 +208,7 @@ class UserControllerTest extends Unit
         $this->tester->seeResponseCodeIs(403);
     }
 
-    public function testUploadProfilePictureReturns400WhenFileTooLarge(): void
+    public function testUploadProfilePictureReturnsBadRequestWhenFileTooLarge(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $fake = $this->getFakeFilePayload('image/jpeg', 6 * 1024 * 1024 + 1);
@@ -226,7 +226,7 @@ class UserControllerTest extends Unit
         $this->assertStringContainsString('5MB', $json['error']['message']);
     }
 
-    public function testUploadProfilePictureReturns400WhenInvalidMimeType(): void
+    public function testUploadProfilePictureReturnsBadRequestWhenInvalidMimeType(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $fake = $this->getFakeFilePayload('application/pdf', 1024);
@@ -244,7 +244,7 @@ class UserControllerTest extends Unit
         $this->assertStringContainsString('Invalid file type', $json['error']['message']);
     }
 
-    public function testUploadProfilePictureReturns500WhenCloudinaryFails(): void
+    public function testUploadProfilePictureReturnsServerErrorWhenCloudinaryFails(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $fake = $this->getFakeFilePayload('image/jpeg', 1024);
@@ -355,7 +355,7 @@ class UserControllerTest extends Unit
     // Permission checks: checkAccess
     // =========================================================================
 
-    public function testUpdateReturns403WhenUpdatingOtherUser(): void
+    public function testUpdateReturnsForbiddenWhenUpdatingOtherUser(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxRequest('PUT', '/user/' . self::MEMBER_ID, [
@@ -368,7 +368,7 @@ class UserControllerTest extends Unit
         $this->assertStringContainsString('You do not have permission to update this user.', $json['error']['message']);
     }
 
-    public function testDeleteReturns403WhenDeletingOtherUser(): void
+    public function testDeleteReturnsForbiddenWhenDeletingOtherUser(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxRequest('DELETE', '/user/' . self::MEMBER_ID);

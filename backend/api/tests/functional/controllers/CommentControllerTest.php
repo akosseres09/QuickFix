@@ -86,13 +86,13 @@ class CommentControllerTest extends Unit
     // AUTH: 401 when no Bearer token
     // =========================================================================
 
-    public function testIndexReturns401WithoutAuth(): void
+    public function testIndexReturnsUnauthorizedWithoutAuth(): void
     {
         $this->tester->sendAjaxGetRequest($this->commentUrl());
         $this->tester->seeResponseCodeIs(401);
     }
 
-    public function testViewReturns401WithoutAuth(): void
+    public function testViewReturnsUnauthorizedWithoutAuth(): void
     {
         $this->tester->sendAjaxGetRequest($this->commentUrl('/' . self::COMMENT_ID_1));
         $this->tester->seeResponseCodeIs(401);
@@ -151,7 +151,7 @@ class CommentControllerTest extends Unit
         $this->assertEquals(self::COMMENT_ID_1, $json['data']['id']);
     }
 
-    public function testViewReturns404ForNonExistentComment(): void
+    public function testViewReturnsNotFoundForNonExistentComment(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxGetRequest($this->commentUrl('/01900000-0000-0005-0000-999999999999'));
@@ -207,7 +207,7 @@ class CommentControllerTest extends Unit
         $this->assertEquals('Updated by owner', $json['data']['content']);
     }
 
-    public function testUpdateReturns404ForNonExistentComment(): void
+    public function testUpdateReturnsNotFoundForNonExistentComment(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxRequest('PUT', $this->commentUrl('/01900000-0000-0005-0000-999999999999'), [
@@ -230,7 +230,7 @@ class CommentControllerTest extends Unit
         $this->tester->seeResponseCodeIs(204);
     }
 
-    public function testDeleteReturns404ForNonExistentComment(): void
+    public function testDeleteReturnsNotFoundForNonExistentComment(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxRequest('DELETE', $this->commentUrl('/01900000-0000-0005-0000-999999999999'));
@@ -250,7 +250,7 @@ class CommentControllerTest extends Unit
         $this->tester->seeResponseCodeIs(403);
     }
 
-    public function testIndexReturns403ForOutsider(): void
+    public function testIndexReturnsForbiddenForOutsider(): void
     {
         $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
         $this->tester->sendAjaxGetRequest($this->commentUrl());
@@ -261,7 +261,7 @@ class CommentControllerTest extends Unit
         $this->assertStringContainsString('You do not have permission to view comments.', $json['error']['message']);
     }
 
-    public function testCreateReturns403ForOutsider(): void
+    public function testCreateReturnsForbiddenForOutsider(): void
     {
         $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
         $this->tester->sendAjaxPostRequest($this->commentUrl(), [
@@ -275,7 +275,7 @@ class CommentControllerTest extends Unit
         $this->assertStringContainsString('You do not have permission to create comments.', $json['error']['message']);
     }
 
-    public function testUpdateReturns403ForOutsider(): void
+    public function testUpdateReturnsForbiddenForOutsider(): void
     {
         $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
         $this->tester->sendAjaxRequest('PUT', $this->commentUrl('/' . self::COMMENT_ID_1), [
@@ -287,7 +287,7 @@ class CommentControllerTest extends Unit
         $this->assertFalse($json['success']);
     }
 
-    public function testDeleteReturns403ForOutsider(): void
+    public function testDeleteReturnsForbiddenForOutsider(): void
     {
         $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
         $this->tester->sendAjaxRequest('DELETE', $this->commentUrl('/' . self::COMMENT_ID_1));
@@ -356,7 +356,7 @@ class CommentControllerTest extends Unit
         $this->tester->seeResponseCodeIs(404);
     }
 
-    public function testFindModelReturns404WhenOrganizationIdMissing(): void
+    public function testFindModelReturnsNotFoundWhenOrganizationIdMissing(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         // Attempt to access comment with missing org slug in URL
@@ -378,7 +378,7 @@ class CommentControllerTest extends Unit
         }
     }
 
-    public function testFindModelReturns404WhenProjectIdMissing(): void
+    public function testFindModelReturnsNotFoundWhenProjectIdMissing(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         // Attempt to access comment with missing project slug in URL
@@ -400,7 +400,7 @@ class CommentControllerTest extends Unit
         }
     }
 
-    public function testFindModelReturns404WhenIssueIdMissing(): void
+    public function testFindModelReturnsNotFoundWhenIssueIdMissing(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         // Attempt to access comment with missing issue slug in URL
@@ -422,7 +422,7 @@ class CommentControllerTest extends Unit
         }
     }
 
-    public function testFindModelReturns404WhenCommentIsNotFound(): void
+    public function testFindModelReturnsNotFoundWhenCommentIsNotFound(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         // Attempt to access comment with missing issue slug in URL

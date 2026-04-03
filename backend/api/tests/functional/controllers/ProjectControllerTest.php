@@ -75,13 +75,13 @@ class ProjectControllerTest extends Unit
     // AUTH: 401 when no Bearer token
     // =========================================================================
 
-    public function testIndexReturns401WithoutAuth(): void
+    public function testIndexReturnsUnauthorizedWithoutAuth(): void
     {
         $this->tester->sendAjaxGetRequest('/' . self::ORG_SLUG . '/project');
         $this->tester->seeResponseCodeIs(401);
     }
 
-    public function testViewReturns401WithoutAuth(): void
+    public function testViewReturnsUnauthorizedWithoutAuth(): void
     {
         $this->tester->sendAjaxGetRequest('/' . self::ORG_SLUG . '/project/' . self::PROJECT_KEY);
         $this->tester->seeResponseCodeIs(401);
@@ -113,7 +113,7 @@ class ProjectControllerTest extends Unit
         $this->assertTrue($json['success']);
     }
 
-    public function testIndexReturns403ForOutsider(): void
+    public function testIndexReturnsForbiddenForOutsider(): void
     {
         $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
         $this->tester->sendAjaxGetRequest('/' . self::ORG_SLUG . '/project');
@@ -150,7 +150,7 @@ class ProjectControllerTest extends Unit
         $this->assertEquals(self::PROJECT_ID, $json['data']['id']);
     }
 
-    public function testViewReturns404ForNonExistentProject(): void
+    public function testViewReturnsNotFoundForNonExistentProject(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxGetRequest('/' . self::ORG_SLUG . '/project/NON-EXISTENT');
@@ -158,7 +158,7 @@ class ProjectControllerTest extends Unit
         $this->tester->seeResponseCodeIs(404);
     }
 
-    public function testViewReturns403WhenThereIsNoPermission(): void
+    public function testViewReturnsForbiddenWhenThereIsNoPermission(): void
     {
         $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
         $this->tester->sendAjaxGetRequest('/' . self::ORG_SLUG . '/project/' . self::PRIVATE_PROJECT_KEY);
@@ -200,7 +200,7 @@ class ProjectControllerTest extends Unit
         $this->assertFalse($json['success']);
     }
 
-    public function testCreateProjectReturns403WhenThereIsNoPermission(): void
+    public function testCreateProjectReturnsForbiddenWhenThereIsNoPermission(): void
     {
         $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
         $this->tester->sendAjaxPostRequest('/' . self::ORG_SLUG . '/project', [
@@ -234,7 +234,7 @@ class ProjectControllerTest extends Unit
         $this->assertEquals('Updated Project Name', $json['data']['name']);
     }
 
-    public function testUpdateReturns404ForNonExistentProject(): void
+    public function testUpdateReturnsNotFoundForNonExistentProject(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxRequest('PUT', '/' . self::ORG_SLUG . '/project/NOPE', [
@@ -245,7 +245,7 @@ class ProjectControllerTest extends Unit
     }
 
 
-    public function testUpdateReturns403WhenThereIsNoPermission(): void
+    public function testUpdateReturnsForbiddenWhenThereIsNoPermission(): void
     {
         $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
         $this->tester->sendAjaxRequest('PUT', '/' . self::ORG_SLUG . '/project/' . self::PRIVATE_PROJECT_KEY, [
@@ -270,7 +270,7 @@ class ProjectControllerTest extends Unit
         $this->tester->seeResponseCodeIs(204);
     }
 
-    public function testDeleteReturns404ForNonExistentProject(): void
+    public function testDeleteReturnsNotFoundForNonExistentProject(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxRequest('DELETE', '/' . self::ORG_SLUG . '/project/NOPE');
@@ -278,7 +278,7 @@ class ProjectControllerTest extends Unit
         $this->tester->seeResponseCodeIs(404);
     }
 
-    public function testDeleteReturns403WhenThereIsNoPermission(): void
+    public function testDeleteReturnsForbiddenWhenThereIsNoPermission(): void
     {
         $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
         $this->tester->sendAjaxRequest('DELETE', '/' . self::ORG_SLUG . '/project/' . self::PRIVATE_PROJECT_KEY);

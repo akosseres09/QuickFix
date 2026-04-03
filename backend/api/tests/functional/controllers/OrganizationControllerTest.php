@@ -72,19 +72,19 @@ class OrganizationControllerTest extends Unit
     // AUTH: 401 when no Bearer token
     // =========================================================================
 
-    public function testIndexReturns401WithoutAuth(): void
+    public function testIndexReturnsUnauthorizedWithoutAuth(): void
     {
         $this->tester->sendAjaxGetRequest('/organization');
         $this->tester->seeResponseCodeIs(401);
     }
 
-    public function testViewReturns401WithoutAuth(): void
+    public function testViewReturnsUnauthorizedWithoutAuth(): void
     {
         $this->tester->sendAjaxGetRequest('/organization/' . self::ORG_SLUG);
         $this->tester->seeResponseCodeIs(401);
     }
 
-    public function testCreateReturns401WithoutAuth(): void
+    public function testCreateReturnsUnauthorizedWithoutAuth(): void
     {
         $this->tester->sendAjaxPostRequest('/organization', ['name' => 'Test']);
         $this->tester->seeResponseCodeIs(401);
@@ -136,7 +136,7 @@ class OrganizationControllerTest extends Unit
         $this->assertEquals(self::ORG_ID, $json['data']['id']);
     }
 
-    public function testViewReturns404ForNonExistentSlug(): void
+    public function testViewReturnsNotFoundForNonExistentSlug(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxGetRequest('/organization/non-existent-slug');
@@ -203,7 +203,7 @@ class OrganizationControllerTest extends Unit
         $this->assertEquals('Updated Organization Name', $json['data']['name']);
     }
 
-    public function testUpdateReturns404ForNonExistentOrg(): void
+    public function testUpdateReturnsNotFoundForNonExistentOrg(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxRequest('PUT', '/organization/non-existent-org', [
@@ -225,7 +225,7 @@ class OrganizationControllerTest extends Unit
         $this->tester->seeResponseCodeIs(204);
     }
 
-    public function testDeleteReturns404ForNonExistentOrg(): void
+    public function testDeleteReturnsNotFoundForNonExistentOrg(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxRequest('DELETE', '/organization/non-existent-org');
@@ -258,7 +258,7 @@ class OrganizationControllerTest extends Unit
     // Permission checks: checkAccess
     // =========================================================================
 
-    public function testViewReturns403ForOutsider(): void
+    public function testViewReturnsForbiddenForOutsider(): void
     {
         $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
         $this->tester->sendAjaxGetRequest('/organization/' . self::ORG_SLUG);
@@ -269,7 +269,7 @@ class OrganizationControllerTest extends Unit
         $this->assertStringContainsString('You do not have permission to view this organization.', $json['error']['message']);
     }
 
-    public function testUpdateReturns403ForMember(): void
+    public function testUpdateReturnsForbiddenForMember(): void
     {
         $this->loginAs(self::MEMBER_ID, UserRole::USER, self::MEMBER_EMAIL);
         $this->tester->sendAjaxRequest('PUT', '/organization/' . self::ORG_SLUG, [
@@ -282,7 +282,7 @@ class OrganizationControllerTest extends Unit
         $this->assertStringContainsString('You do not have permission to update this organization.', $json['error']['message']);
     }
 
-    public function testUpdateReturns403ForOutsider(): void
+    public function testUpdateReturnsForbiddenForOutsider(): void
     {
         $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
         $this->tester->sendAjaxRequest('PUT', '/organization/' . self::ORG_SLUG, [
@@ -295,7 +295,7 @@ class OrganizationControllerTest extends Unit
         $this->assertStringContainsString('You do not have permission to update this organization.', $json['error']['message']);
     }
 
-    public function testDeleteReturns403ForMember(): void
+    public function testDeleteReturnsForbiddenForMember(): void
     {
         $this->loginAs(self::MEMBER_ID, UserRole::USER, self::MEMBER_EMAIL);
         $this->tester->sendAjaxRequest('DELETE', '/organization/' . self::ORG_SLUG);
@@ -306,7 +306,7 @@ class OrganizationControllerTest extends Unit
         $this->assertStringContainsString('You do not have permission to delete this organization.', $json['error']['message']);
     }
 
-    public function testDeleteReturns403ForOutsider(): void
+    public function testDeleteReturnsForbiddenForOutsider(): void
     {
         $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
         $this->tester->sendAjaxRequest('DELETE', '/organization/' . self::ORG_SLUG);
@@ -329,7 +329,7 @@ class OrganizationControllerTest extends Unit
         $this->assertTrue($json['success']);
     }
 
-    public function testDeleteReturns403ForAdmin(): void
+    public function testDeleteReturnsForbiddenForAdmin(): void
     {
         $this->loginAs(self::ADMIN_ID, UserRole::USER, self::ADMIN_EMAIL);
         $this->tester->sendAjaxRequest('DELETE', '/organization/' . self::ORG_SLUG);

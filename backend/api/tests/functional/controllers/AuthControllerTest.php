@@ -94,7 +94,7 @@ class AuthControllerTest extends Unit
         $this->tester->seeCookie('refresh-token');
     }
 
-    public function testLoginReturns401ForWrongPassword(): void
+    public function testLoginReturnsUnauthorizedForWrongPassword(): void
     {
         $this->tester->sendAjaxPostRequest('/auth/login', [
             'email'    => self::ACTIVE_USER_EMAIL,
@@ -104,7 +104,7 @@ class AuthControllerTest extends Unit
         $this->tester->seeResponseCodeIs(401);
     }
 
-    public function testLoginReturns401ForNonExistentEmail(): void
+    public function testLoginReturnsUnauthorizedForNonExistentEmail(): void
     {
         $this->tester->sendAjaxPostRequest('/auth/login', [
             'email'    => 'nobody@example.com',
@@ -114,7 +114,7 @@ class AuthControllerTest extends Unit
         $this->tester->seeResponseCodeIs(401);
     }
 
-    public function testLoginReturns400WhenEmailMissing(): void
+    public function testLoginReturnsBadRequestWhenEmailMissing(): void
     {
         $this->tester->sendAjaxPostRequest('/auth/login', [
             'password' => self::ACTIVE_USER_PASSWORD,
@@ -123,7 +123,7 @@ class AuthControllerTest extends Unit
         $this->tester->seeResponseCodeIs(400);
     }
 
-    public function testLoginReturns400WhenPasswordMissing(): void
+    public function testLoginReturnsBadRequestWhenPasswordMissing(): void
     {
         $this->tester->sendAjaxPostRequest('/auth/login', [
             'email' => self::ACTIVE_USER_EMAIL,
@@ -148,14 +148,14 @@ class AuthControllerTest extends Unit
         $this->assertNotEmpty($json['data']['access_token']);
     }
 
-    public function testRefreshReturns400WhenNoCookiePresent(): void
+    public function testRefreshReturnsBadRequestWhenNoCookiePresent(): void
     {
         $this->tester->sendAjaxGetRequest('/auth/refresh');
 
         $this->tester->seeResponseCodeIs(400);
     }
 
-    public function testRefreshReturns400WithUnknownToken(): void
+    public function testRefreshReturnsBadRequestWithUnknownToken(): void
     {
         $this->tester->setCookie('refresh-token', 'non-existent-token-xyz');
         $this->tester->sendAjaxGetRequest('/auth/refresh');
@@ -209,7 +209,7 @@ class AuthControllerTest extends Unit
         $this->assertTrue($json['success']);
     }
 
-    public function testLogoutReturns400WhenNoCookiePresent(): void
+    public function testLogoutReturnsBadRequestWhenNoCookiePresent(): void
     {
         $user = User::findOne(['email' => self::ACTIVE_USER_EMAIL]);
         $this->loginUser($user->id, $user->getRole(), $user->email);
@@ -238,14 +238,14 @@ class AuthControllerTest extends Unit
         $this->assertArrayHasKey('role', $json['data']);
     }
 
-    public function testMeReturns401WithNoAuthorizationHeader(): void
+    public function testMeReturnsUnauthorizedWithNoAuthorizationHeader(): void
     {
         $this->tester->sendAjaxGetRequest('/auth/me');
 
         $this->tester->seeResponseCodeIs(401);
     }
 
-    public function testMeReturns401WithInvalidToken(): void
+    public function testMeReturnsUnauthorizedWithInvalidToken(): void
     {
         $this->tester->haveHttpHeader('Authorization', 'Bearer invalid.token.here');
         $this->tester->sendAjaxGetRequest('/auth/me');
@@ -273,7 +273,7 @@ class AuthControllerTest extends Unit
         $this->assertArrayHasKey('email', $json['data']);
     }
 
-    public function testPermissionsReturns401WithNoToken(): void
+    public function testPermissionsReturnsUnauthorizedWithNoToken(): void
     {
         $this->tester->sendAjaxGetRequest('/auth/permissions');
 
@@ -356,14 +356,14 @@ class AuthControllerTest extends Unit
         $this->assertTrue($json['data']['success']);
     }
 
-    public function testVerifyReturns400WhenTokenMissing(): void
+    public function testVerifyReturnsBadRequestWhenTokenMissing(): void
     {
         $this->tester->sendAjaxPostRequest('/auth/verify', []);
 
         $this->tester->seeResponseCodeIs(400);
     }
 
-    public function testVerifyReturns404ForUnknownToken(): void
+    public function testVerifyReturnsNotFoundForUnknownToken(): void
     {
         $this->tester->sendAjaxPostRequest('/auth/verify', [
             'token' => 'completely-invalid-token-xyz',
@@ -388,14 +388,14 @@ class AuthControllerTest extends Unit
         $this->assertTrue($json['data']['success']);
     }
 
-    public function testResendVerificationEmailReturns400WhenEmailMissing(): void
+    public function testResendVerificationEmailReturnsBadRequestWhenEmailMissing(): void
     {
         $this->tester->sendAjaxPostRequest('/auth/resend-verification-email', []);
 
         $this->tester->seeResponseCodeIs(400);
     }
 
-    public function testResendVerificationEmailReturns404ForActiveUser(): void
+    public function testResendVerificationEmailReturnsNotFoundForActiveUser(): void
     {
         // Active user should not receive a resend – only inactive accounts apply
         $this->tester->sendAjaxPostRequest('/auth/resend-verification-email', [
@@ -405,7 +405,7 @@ class AuthControllerTest extends Unit
         $this->tester->seeResponseCodeIs(404);
     }
 
-    public function testResendVerificationEmailReturns404ForUnknownEmail(): void
+    public function testResendVerificationEmailReturnsNotFoundForUnknownEmail(): void
     {
         $this->tester->sendAjaxPostRequest('/auth/resend-verification-email', [
             'email' => 'nobody@unknown.com',
@@ -430,7 +430,7 @@ class AuthControllerTest extends Unit
         $this->assertTrue($json['data']['success']);
     }
 
-    public function testResetPasswordReturns404ForUnknownEmail(): void
+    public function testResetPasswordReturnsNotFoundForUnknownEmail(): void
     {
         $this->tester->sendAjaxPostRequest('/auth/reset-password', [
             'email' => 'nobody@unknown.com',
@@ -453,7 +453,7 @@ class AuthControllerTest extends Unit
         $this->assertTrue($json['data']['success']);
     }
 
-    public function testResetPasswordReturns400WithNoToken(): void
+    public function testResetPasswordReturnsBadRequestWithNoToken(): void
     {
         $this->tester->sendAjaxPostRequest('/auth/reset-password', [
             'password' => 'NewPassword123!',
@@ -462,7 +462,7 @@ class AuthControllerTest extends Unit
         $this->tester->seeResponseCodeIs(400);
     }
 
-    public function testResetPasswordReturns404WithUnknownToken(): void
+    public function testResetPasswordReturnsNotFoundWithUnknownToken(): void
     {
         $this->tester->sendAjaxPostRequest('/auth/reset-password', [
             'token'    => 'invalid-reset-token-xyz',
@@ -472,7 +472,7 @@ class AuthControllerTest extends Unit
         $this->tester->seeResponseCodeIs(404);
     }
 
-    public function testResetPasswordReturns400WhenNewPasswordMissing(): void
+    public function testResetPasswordReturnsBadRequestWhenNewPasswordMissing(): void
     {
         $this->tester->sendAjaxPostRequest('/auth/reset-password', [
             'token' => self::ACTIVE_USER_RESET_TOKEN,

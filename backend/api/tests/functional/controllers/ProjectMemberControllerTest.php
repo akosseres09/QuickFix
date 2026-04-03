@@ -78,7 +78,7 @@ class ProjectMemberControllerTest extends Unit
     // AUTH: 401 when no Bearer token
     // =========================================================================
 
-    public function testIndexReturns401WithoutAuth(): void
+    public function testIndexReturnsUnauthorizedWithoutAuth(): void
     {
         $this->tester->sendAjaxGetRequest($this->memberUrl());
         $this->tester->seeResponseCodeIs(401);
@@ -158,7 +158,7 @@ class ProjectMemberControllerTest extends Unit
         $this->assertEquals(self::PM_ID_OWNER, $json['data']['id']);
     }
 
-    public function testViewReturns404ForNonExistentMember(): void
+    public function testViewReturnsNotFoundForNonExistentMember(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxGetRequest($this->memberUrl('/01900000-0000-0008-0000-999999999999'));
@@ -182,7 +182,7 @@ class ProjectMemberControllerTest extends Unit
         $this->assertTrue($json['success']);
     }
 
-    public function testUpdateReturns404ForNonExistentMember(): void
+    public function testUpdateReturnsNotFoundForNonExistentMember(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxRequest('PUT', $this->memberUrl('/01900000-0000-0008-0000-999999999999'), [
@@ -204,7 +204,7 @@ class ProjectMemberControllerTest extends Unit
         $this->tester->seeResponseCodeIs(204);
     }
 
-    public function testDeleteReturns404ForNonExistentMember(): void
+    public function testDeleteReturnsNotFoundForNonExistentMember(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxRequest('DELETE', $this->memberUrl('/01900000-0000-0008-0000-999999999999'));
@@ -216,7 +216,7 @@ class ProjectMemberControllerTest extends Unit
     // findModel requires organization_id and project_id
     // =========================================================================
 
-    public function testViewWithNonExistentProjectReturns404(): void
+    public function testViewWithNonExistentProjectReturnsNotFound(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxGetRequest('/' . self::ORG_SLUG . '/NON-EXISTENT/member/' . self::PM_ID_OWNER);
@@ -224,7 +224,7 @@ class ProjectMemberControllerTest extends Unit
         $this->tester->seeResponseCodeIs(404);
     }
 
-    public function testFindModelFailsWith400WhenOrganizationIdIsMissing(): void
+    public function testFindModelReturnsBadRequestWhenOrganizationIdIsMissing(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
 
@@ -248,7 +248,7 @@ class ProjectMemberControllerTest extends Unit
         }
     }
 
-    public function testFindModelFailsWith400WhenProjectIdIsMissing(): void
+    public function testFindModelReturnsBadRequestWhenProjectIdIsMissing(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
 
@@ -272,7 +272,7 @@ class ProjectMemberControllerTest extends Unit
         }
     }
 
-    public function testFindModelFailsWith404WhenProjectIsNotFound(): void
+    public function testFindModelReturnsNotFoundWhenProjectIsNotFound(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
 

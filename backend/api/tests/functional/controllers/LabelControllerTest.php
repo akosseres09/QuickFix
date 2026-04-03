@@ -11,8 +11,11 @@ use common\fixtures\OrganizationMemberFixture;
 use common\fixtures\ProjectFixture;
 use common\fixtures\ProjectMemberFixture;
 use common\fixtures\UserFixture;
+use common\models\Label;
 use common\models\UserRole;
 use Yii;
+use yii\base\Application;
+use yii\base\Event;
 
 class LabelControllerTest extends Unit
 {
@@ -79,7 +82,7 @@ class LabelControllerTest extends Unit
     // AUTH: 401 when no Bearer token
     // =========================================================================
 
-    public function testIndexReturns401WithoutAuth(): void
+    public function testIndexReturnsUnauthorizedWithoutAuth(): void
     {
         $this->tester->sendAjaxGetRequest($this->labelUrl());
         $this->tester->seeResponseCodeIs(401);
@@ -99,6 +102,30 @@ class LabelControllerTest extends Unit
         $this->assertTrue($json['success']);
         $this->assertArrayHasKey('data', $json);
         $this->assertArrayNotHasKey('_meta', $json);
+    }
+
+    public function testIndexReturnsBadRequestWhenProjectIdIsMissing(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+
+        Event::on(Application::class, Application::EVENT_BEFORE_ACTION, function ($event) {
+            $request = Yii::$app->getRequest();
+
+            $params = $request->getQueryParams();
+            unset($params['project_id']);
+            $request->setQueryParams($params);
+        });
+
+        try {
+            $this->tester->sendAjaxGetRequest($this->labelUrl());
+
+            $this->tester->seeResponseCodeIs(400);
+            $json = $this->grabJson();
+            $this->assertFalse($json['success']);
+            $this->assertStringContainsString('Project ID is required.', $json['error']['message']);
+        } finally {
+            Event::off(Application::class, Application::EVENT_BEFORE_ACTION);
+        }
     }
 
     // =========================================================================
@@ -151,7 +178,7 @@ class LabelControllerTest extends Unit
         $this->assertEquals('Working On It', $json['data']['name']);
     }
 
-    public function testUpdateLabelReturns404ForNonExistent(): void
+    public function testUpdateLabelReturnsNotFoundForNonExistent(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxRequest('PUT', $this->labelUrl('/01900000-0000-0003-0000-999999999999'), [
@@ -173,7 +200,7 @@ class LabelControllerTest extends Unit
         $this->tester->seeResponseCodeIs(204);
     }
 
-    public function testDeleteLabelReturns404ForNonExistent(): void
+    public function testDeleteLabelReturnsNotFoundForNonExistent(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxRequest('DELETE', $this->labelUrl('/01900000-0000-0003-0000-999999999999'));
@@ -197,7 +224,7 @@ class LabelControllerTest extends Unit
         $this->assertTrue($json['success']);
     }
 
-    public function testReorderLabelReturns400ForMissingIndex(): void
+    public function testReorderLabelReturnsBadRequestForMissingIndex(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxPostRequest($this->labelUrl('/' . self::LABEL_IN_PROGRESS . '/reorder'), []);
@@ -205,7 +232,7 @@ class LabelControllerTest extends Unit
         $this->tester->seeResponseCodeIs(400);
     }
 
-    public function testReorderLabelReturns400ForInvalidIndex(): void
+    public function testReorderLabelReturnsBadRequestForInvalidIndex(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxPostRequest($this->labelUrl('/' . self::LABEL_IN_PROGRESS . '/reorder'), [
@@ -215,7 +242,7 @@ class LabelControllerTest extends Unit
         $this->tester->seeResponseCodeIs(400);
     }
 
-    public function testReorderLabelReturns400ForIndexTooHigh(): void
+    public function testReorderLabelReturnsBadRequestForIndexTooHigh(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxPostRequest($this->labelUrl('/' . self::LABEL_IN_PROGRESS . '/reorder'), [
@@ -225,14 +252,40 @@ class LabelControllerTest extends Unit
         $this->tester->seeResponseCodeIs(400);
     }
 
-    public function testReorderReturns404ForNonExistentLabel(): void
+    public function testReorderLabelReturnsConflictWhenSaveFails(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
-        $this->tester->sendAjaxPostRequest($this->labelUrl('/01900000-0000-0003-0000-999999999999/reorder'), [
+        // Attempt to reorder a label that belongs to a different project to trigger save failure
+
+        Event::on(Label::class, Label::EVENT_BEFORE_UPDATE, function ($event) {
+            $event->isValid = false; // Prevent the label from being saved to simulate a failure
+        });
+
+        try {
+            $this->tester->sendAjaxPostRequest($this->labelUrl('/' . self::LABEL_IN_PROGRESS . '/reorder'), [
+                'new_index' => 1,
+            ]);
+
+            $this->tester->seeResponseCodeIs(409);
+            $json = $this->grabJson();
+            $this->assertFalse($json['success']);
+            $this->assertStringContainsString('Failed to reorder label.', $json['error']['message']);
+        } finally {
+            Event::off(Label::class, Label::EVENT_BEFORE_UPDATE); // Clean up the event handler
+        }
+    }
+
+    public function testReorderLabelReturnsForbiddenForOutsider(): void
+    {
+        $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
+        $this->tester->sendAjaxPostRequest($this->labelUrl('/' . self::LABEL_IN_PROGRESS . '/reorder'), [
             'new_index' => 1,
         ]);
 
-        $this->tester->seeResponseCodeIs(404);
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('You do not have permission to manage labels in this project.', $json['error']['message']);
     }
 
     // =========================================================================
@@ -271,5 +324,107 @@ class LabelControllerTest extends Unit
         $this->tester->seeResponseCodeIs(200);
         $json = $this->grabJson();
         $this->assertTrue($json['success']);
+    }
+
+    // =========================================================================
+    // FindModel
+    // =========================================================================
+
+    public function testFindModelReturnsBadRequestWhenOrganizationIdMissing(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+
+        Event::on(Application::class, Application::EVENT_BEFORE_ACTION, function ($event) {
+            $request = Yii::$app->getRequest();
+
+            $params = $request->getQueryParams();
+            unset($params['organization_id']);
+            $request->setQueryParams($params);
+        });
+
+        try {
+            $this->tester->sendAjaxRequest(
+                'PUT',
+                '/' . self::ORG_ID . '/' . self::PROJECT_ID . '/label/' . self::LABEL_IN_PROGRESS,
+                []
+            );
+
+            $this->tester->seeResponseCodeIs(400);
+            $json = $this->grabJson();
+            $this->assertFalse($json['success']);
+            $this->assertStringContainsString('Organization ID is required.', $json['error']['message']);
+        } finally {
+            Event::off(Application::class, Application::EVENT_BEFORE_ACTION);
+        }
+    }
+
+    public function testFindModelReturnsBadRequestWhenProjectIdMissing(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+
+        Event::on(Application::class, Application::EVENT_BEFORE_ACTION, function ($event) {
+            $request = Yii::$app->getRequest();
+
+            $params = $request->getQueryParams();
+            unset($params['project_id']);
+            $request->setQueryParams($params);
+        });
+
+        try {
+            $this->tester->sendAjaxRequest(
+                'PUT',
+                '/' . self::ORG_ID . '/' . self::PROJECT_ID . '/label/' . self::LABEL_IN_PROGRESS,
+                []
+            );
+
+            $this->tester->seeResponseCodeIs(400);
+            $json = $this->grabJson();
+            $this->assertFalse($json['success']);
+            $this->assertStringContainsString('Project ID is required.', $json['error']['message']);
+        } finally {
+            Event::off(Application::class, Application::EVENT_BEFORE_ACTION);
+        }
+    }
+
+    public function testFindModelReturnsNotFoundWhenProjectDoesNotExist(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+
+        Event::on(Application::class, Application::EVENT_BEFORE_ACTION, function ($event) {
+            $request = Yii::$app->getRequest();
+
+            $params = $request->getQueryParams();
+            $params['project_id'] = '01900000-0000-7002-8000-999999999999'; // Non-existent project ID
+            $request->setQueryParams($params);
+        });
+
+        try {
+            $this->tester->sendAjaxRequest(
+                'PUT',
+                '/' . self::ORG_ID . '/' . self::PROJECT_ID . '/label/01900000-0000-0003-0000-999999999999',
+                []
+            );
+            $this->tester->seeResponseCodeIs(404);
+            $json = $this->grabJson();
+            $this->assertFalse($json['success']);
+            $this->assertStringContainsString('Requested project not found!', $json['error']['message']);
+        } finally {
+            Event::off(Application::class, Application::EVENT_BEFORE_ACTION);
+        }
+    }
+
+    public function testFindModelReturnsNotFoundWhenLabelIsNotFound(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+        $this->tester->sendAjaxRequest(
+            'PUT',
+            '/' . self::ORG_ID . '/' . self::PROJECT_ID . '/label/01900000-0000-0003-0000-999999999999',
+            []
+        );
+
+        $this->tester->seeResponseCodeIs(404);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('The requested label does not exist.', $json['error']['message']);
     }
 }

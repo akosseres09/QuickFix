@@ -88,13 +88,13 @@ class IssueControllerTest extends Unit
     // AUTH: 401 when no Bearer token
     // =========================================================================
 
-    public function testIndexReturns401WithoutAuth(): void
+    public function testIndexReturnsUnauthorizedWithoutAuth(): void
     {
         $this->tester->sendAjaxGetRequest($this->issueUrl());
         $this->tester->seeResponseCodeIs(401);
     }
 
-    public function testViewReturns401WithoutAuth(): void
+    public function testViewReturnsUnauthorizedWithoutAuth(): void
     {
         $this->tester->sendAjaxGetRequest($this->issueUrl('/' . self::ISSUE_ID_1));
         $this->tester->seeResponseCodeIs(401);
@@ -141,7 +141,7 @@ class IssueControllerTest extends Unit
         $this->assertEquals(self::ISSUE_ID_1, $json['data']['id']);
     }
 
-    public function testViewReturns404ForNonExistentIssue(): void
+    public function testViewReturnsNotFoundForNonExistentIssue(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxGetRequest($this->issueUrl('/01900000-0000-0004-0000-999999999999'));
@@ -202,7 +202,7 @@ class IssueControllerTest extends Unit
         $this->assertEquals('Updated issue title', $json['data']['title']);
     }
 
-    public function testUpdateReturns404ForNonExistentIssue(): void
+    public function testUpdateReturnsNotFoundForNonExistentIssue(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxRequest('PUT', $this->issueUrl('/01900000-0000-0004-0000-999999999999'), [
@@ -224,7 +224,7 @@ class IssueControllerTest extends Unit
         $this->tester->seeResponseCodeIs(204);
     }
 
-    public function testDeleteReturns404ForNonExistentIssue(): void
+    public function testDeleteReturnsNotFoundForNonExistentIssue(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxRequest('DELETE', $this->issueUrl('/01900000-0000-0004-0000-999999999999'));
@@ -246,7 +246,7 @@ class IssueControllerTest extends Unit
         $this->assertTrue($json['success']);
     }
 
-    public function testCloseReturns404ForNonExistentIssue(): void
+    public function testCloseReturnsNotFoundForNonExistentIssue(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxPostRequest($this->issueUrl('/01900000-0000-0004-0000-999999999999/close'), []);
@@ -291,7 +291,7 @@ class IssueControllerTest extends Unit
         $this->assertArrayHasKey('trend', $json['data']);
     }
 
-    public function testStatsReturns401WithoutAuth(): void
+    public function testStatsReturnsUnauthorizedWithoutAuth(): void
     {
         $this->tester->sendAjaxGetRequest($this->issueUrl('/stats'));
         $this->tester->seeResponseCodeIs(401);
@@ -310,7 +310,7 @@ class IssueControllerTest extends Unit
         $this->assertFalse($json['success']);
     }
 
-    public function testIndexReturns403ForOutsider(): void
+    public function testIndexReturnsForbiddenForOutsider(): void
     {
         $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
         $this->tester->sendAjaxGetRequest($this->issueUrl());
@@ -321,7 +321,7 @@ class IssueControllerTest extends Unit
         $this->assertStringContainsString('You do not have permission to view issues in this project.', $json['error']['message']);
     }
 
-    public function testCreateReturns403ForOutsider(): void
+    public function testCreateReturnsForbiddenForOutsider(): void
     {
         $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
         $this->tester->sendAjaxPostRequest($this->issueUrl(), [
@@ -336,7 +336,7 @@ class IssueControllerTest extends Unit
         $this->assertStringContainsString('You do not have permission to create issues in this project.', $json['error']['message']);
     }
 
-    public function testUpdateReturns403ForOutsider(): void
+    public function testUpdateReturnsForbiddenForOutsider(): void
     {
         $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
         $this->tester->sendAjaxRequest('PUT', $this->issueUrl('/' . self::ISSUE_ID_1), [
@@ -348,7 +348,7 @@ class IssueControllerTest extends Unit
         $this->assertFalse($json['success']);
     }
 
-    public function testDeleteReturns403ForOutsider(): void
+    public function testDeleteReturnsForbiddenForOutsider(): void
     {
         $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
         $this->tester->sendAjaxRequest('DELETE', $this->issueUrl('/' . self::ISSUE_ID_1));
@@ -358,7 +358,7 @@ class IssueControllerTest extends Unit
         $this->assertFalse($json['success']);
     }
 
-    public function testCloseReturns403ForOutsider(): void
+    public function testCloseReturnsForbiddenForOutsider(): void
     {
         $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
         $this->tester->sendAjaxPostRequest($this->issueUrl('/' . self::ISSUE_ID_1 . '/close'), []);
@@ -369,7 +369,7 @@ class IssueControllerTest extends Unit
         $this->assertStringContainsString('You do not have permission to close this issue.', $json['error']['message']);
     }
 
-    public function testOpenReturns403ForOutsider(): void
+    public function testOpenReturnsForbiddenForOutsider(): void
     {
         $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
         $this->tester->sendAjaxPostRequest($this->issueUrl('/' . self::ISSUE_ID_1 . '/open'), []);
@@ -380,7 +380,7 @@ class IssueControllerTest extends Unit
         $this->assertStringContainsString('You do not have permission to open this issue.', $json['error']['message']);
     }
 
-    public function testDeleteReturns403ForMember(): void
+    public function testDeleteReturnsForbiddenForMember(): void
     {
         $this->loginAs(self::MEMBER_ID, UserRole::USER, self::MEMBER_EMAIL);
         $this->tester->sendAjaxRequest('DELETE', $this->issueUrl('/' . self::ISSUE_ID_1));

@@ -46,10 +46,7 @@ class LabelController extends BaseRestController
     public function actionReorder($id)
     {
         $label = $this->findModel($id);
-
-        if (!$label) {
-            throw new NotFoundHttpException('The requested label does not exist.');
-        }
+        $this->checkAccess('reorder', $label);
 
         $newIndex = Yii::$app->request->post('new_index');
         if ($newIndex === null || !is_numeric($newIndex)) {
@@ -73,16 +70,11 @@ class LabelController extends BaseRestController
         $projectId = Yii::$app->request->get('project_id');
 
         if (!$projectId) {
-            return;
+            throw new BadRequestHttpException('Project ID is required.');
         }
 
         switch ($action) {
             case 'index':
-            case 'view':
-                if (!PermissionService::canDoInProject($projectId, $userId, Permissions::PROJECT_VIEW)) {
-                    throw new ForbiddenHttpException('You do not have permission to view labels in this project.');
-                }
-                break;
             case 'create':
             case 'update':
             case 'delete':

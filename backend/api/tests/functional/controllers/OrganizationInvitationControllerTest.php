@@ -72,7 +72,7 @@ class OrganizationInvitationControllerTest extends Unit
     // AUTH: 401 when no Bearer token
     // =========================================================================
 
-    public function testIndexReturns401WithoutAuth(): void
+    public function testIndexReturnsUnauthorizedWithoutAuth(): void
     {
         $this->tester->sendAjaxGetRequest('/invitation');
         $this->tester->seeResponseCodeIs(401);
@@ -110,7 +110,7 @@ class OrganizationInvitationControllerTest extends Unit
         $this->assertEquals(self::OUTSIDER_INV_ID, $json['data']['id']);
     }
 
-    public function testViewReturns404WhenEmailDoesNotMatch(): void
+    public function testViewReturnsNotFoundWhenEmailDoesNotMatch(): void
     {
         // Owner's email does not match the pending invitation (invited@example.com)
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
@@ -119,7 +119,7 @@ class OrganizationInvitationControllerTest extends Unit
         $this->tester->seeResponseCodeIs(404);
     }
 
-    public function testViewReturns400ForInvalidIdFormat(): void
+    public function testViewReturnsBadRequestForInvalidIdFormat(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxGetRequest('/invitation/not-a-uuid');
@@ -127,7 +127,7 @@ class OrganizationInvitationControllerTest extends Unit
         $this->tester->seeResponseCodeIs(400);
     }
 
-    public function testViewReturns403ForExpiredInvitation(): void
+    public function testViewReturnsForbiddenForExpiredInvitation(): void
     {
         // Expired invitation email = expired@example.com, but we need an account
         // matching that email. Since we don't have one, this will return 404
@@ -160,7 +160,7 @@ class OrganizationInvitationControllerTest extends Unit
         $this->assertStringContainsString('You do not have permission to manage this organization invitation.', $json['error']['message']);
     }
 
-    public function testUpdateReturns404ForNonExistentInvitation(): void
+    public function testUpdateReturnsNotFoundForNonExistentInvitation(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxRequest('PUT', '/invitation/01900000-0000-7009-8000-999999999999', [
@@ -185,7 +185,7 @@ class OrganizationInvitationControllerTest extends Unit
         $this->assertStringContainsString('You do not have permission to manage this organization invitation.', $json['error']['message']);
     }
 
-    public function testDeleteReturns404ForNonExistentInvitation(): void
+    public function testDeleteReturnsNotFoundForNonExistentInvitation(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxRequest('DELETE', '/invitation/01900000-0000-7009-8000-999999999999');
@@ -249,7 +249,7 @@ class OrganizationInvitationControllerTest extends Unit
     // Permission checks: outsider cannot create invitations
     // =========================================================================
 
-    public function testCreateInvitationReturns403ForOutsider(): void
+    public function testCreateInvitationReturnsForbiddenForOutsider(): void
     {
         $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
         $this->tester->sendAjaxPostRequest('/invitation', [

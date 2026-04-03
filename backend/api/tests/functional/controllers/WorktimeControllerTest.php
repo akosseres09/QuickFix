@@ -85,7 +85,7 @@ class WorktimeControllerTest extends Unit
     // AUTH: 401 when no Bearer token
     // =========================================================================
 
-    public function testIndexReturns401WithoutAuth(): void
+    public function testIndexReturnsUnauthorizedWithoutAuth(): void
     {
         $this->tester->sendAjaxGetRequest($this->worktimeUrl());
         $this->tester->seeResponseCodeIs(401);
@@ -159,7 +159,7 @@ class WorktimeControllerTest extends Unit
         $this->assertTrue($json['success']);
     }
 
-    public function testUpdateReturns404ForNonExistentWorktime(): void
+    public function testUpdateReturnsNotFoundForNonExistentWorktime(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxRequest('PUT', $this->worktimeUrl('/01900000-0000-0006-0000-999999999999'), [
@@ -169,7 +169,7 @@ class WorktimeControllerTest extends Unit
         $this->tester->seeResponseCodeIs(404);
     }
 
-    public function testUpdateFindModelReturns400WhenOrganizationIdMissing(): void
+    public function testUpdateFindModelReturnsBadRequestWhenOrganizationIdMissing(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
 
@@ -207,7 +207,7 @@ class WorktimeControllerTest extends Unit
         $this->tester->seeResponseCodeIs(204);
     }
 
-    public function testDeleteReturns404ForNonExistentWorktime(): void
+    public function testDeleteReturnsNotFoundForNonExistentWorktime(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxRequest('DELETE', $this->worktimeUrl('/01900000-0000-0006-0000-999999999999'));
@@ -254,7 +254,7 @@ class WorktimeControllerTest extends Unit
         $this->assertTrue($json['success']);
     }
 
-    public function testStatsReturns400ForInvalidDateFormat(): void
+    public function testStatsReturnsBadRequestForInvalidDateFormat(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxGetRequest($this->worktimeUrl('/stats') . '?start_date=not-a-date');
@@ -265,7 +265,7 @@ class WorktimeControllerTest extends Unit
         $this->tester->seeResponseCodeIs(400);
     }
 
-    public function testStatsReturns404ForNonExistentProject(): void
+    public function testStatsReturnsNotFoundForNonExistentProject(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
 
@@ -287,7 +287,7 @@ class WorktimeControllerTest extends Unit
         }
     }
 
-    public function testStatsReturns404ForMissingOrganizationId(): void
+    public function testStatsReturnsBadRequestForMissingOrganizationId(): void
     {
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
 
@@ -331,7 +331,7 @@ class WorktimeControllerTest extends Unit
     // Permission checks: outsider cannot access worktime
     // =========================================================================
 
-    public function testIndexReturns403ForOutsider(): void
+    public function testIndexReturnsForbiddenForOutsider(): void
     {
         $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
         $this->tester->sendAjaxGetRequest($this->worktimeUrl());
@@ -342,7 +342,7 @@ class WorktimeControllerTest extends Unit
         $this->assertStringContainsString('You do not have permission to view worktime entries.', $json['error']['message']);
     }
 
-    public function testCreateReturns403ForOutsider(): void
+    public function testCreateReturnsForbiddenForOutsider(): void
     {
         $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
         $this->tester->sendAjaxPostRequest($this->worktimeUrl(), [
@@ -358,7 +358,7 @@ class WorktimeControllerTest extends Unit
         $this->assertStringContainsString('You do not have permission to create worktime entries.', $json['error']['message']);
     }
 
-    public function testStatsReturns403ForOutsider(): void
+    public function testStatsReturnsForbiddenForOutsider(): void
     {
         $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
         $this->tester->sendAjaxGetRequest($this->worktimeUrl('/stats'));
@@ -369,7 +369,7 @@ class WorktimeControllerTest extends Unit
         $this->assertStringContainsString('You do not have permission to view worktime stats.', $json['error']['message']);
     }
 
-    public function testUpdateReturns403ForOutsider(): void
+    public function testUpdateReturnsForbiddenForOutsider(): void
     {
         $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
         $this->tester->sendAjaxRequest('PUT', $this->worktimeUrl('/' . self::WORKTIME_ID_1), [
@@ -382,7 +382,7 @@ class WorktimeControllerTest extends Unit
         $this->assertStringContainsString('You do not have permission to update this worktime entry.', $json['error']['message']);
     }
 
-    public function testDeleteReturns403ForOutsider(): void
+    public function testDeleteReturnsForbiddenForOutsider(): void
     {
         $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
         $this->tester->sendAjaxRequest('DELETE', $this->worktimeUrl('/' . self::WORKTIME_ID_1));
