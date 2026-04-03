@@ -9,6 +9,7 @@ use common\models\OrganizationMember;
 use common\models\Project;
 use common\models\ProjectMember;
 use common\models\UserRole;
+use common\models\Worktime;
 use Yii;
 
 class PermissionService
@@ -153,13 +154,55 @@ class PermissionService
     }
 
     // -------------------------------------------------------------------------
+    // Organization-level authorization helpers
+    // -------------------------------------------------------------------------
+
+    /**
+     * Generic org-scoped permission check.
+     */
+    public static function canDoInOrganization(string $orgId, string $userId, Permissions $permission): bool
+    {
+        $permissions = self::getOrganizationPermissions($orgId, $userId);
+        return self::orgCan($permissions, $orgId, $permission);
+    }
+
+    public static function canViewOrganization(string $orgId, string $userId): bool
+    {
+        return self::canDoInOrganization($orgId, $userId, Permissions::ORG_VIEW);
+    }
+
+    public static function canUpdateOrganization(string $orgId, string $userId): bool
+    {
+        return self::canDoInOrganization($orgId, $userId, Permissions::ORG_UPDATE);
+    }
+
+    public static function canDeleteOrganization(string $orgId, string $userId): bool
+    {
+        return self::canDoInOrganization($orgId, $userId, Permissions::ORG_DELETE);
+    }
+
+    public static function canViewOrgMembers(string $orgId, string $userId): bool
+    {
+        return self::canDoInOrganization($orgId, $userId, Permissions::ORG_MEMBERS_VIEW);
+    }
+
+    public static function canManageOrgMembers(string $orgId, string $userId): bool
+    {
+        return self::canDoInOrganization($orgId, $userId, Permissions::ORG_MEMBERS_MANAGE);
+    }
+
+    public static function canInviteOrgMember(string $orgId, string $userId): bool
+    {
+        return self::canDoInOrganization($orgId, $userId, Permissions::ORG_MEMBER_INVITE);
+    }
+
+    // -------------------------------------------------------------------------
     // Resource-level authorization helpers
     // -------------------------------------------------------------------------
 
     public static function canCreateProject(string $orgId, string $userId): bool
     {
-        $permissions = self::getOrganizationPermissions($orgId, $userId);
-        return in_array(Permissions::PROJECT_CREATE->value, $permissions['org'][$orgId] ?? []);
+        return self::canDoInOrganization($orgId, $userId, Permissions::PROJECT_CREATE);
     }
 
     public static function canViewProject(Project $project, string $userId): bool
@@ -233,6 +276,74 @@ class PermissionService
 
         return self::projectCan($permissions, $projectId, Permissions::COMMENT_UPDATE_ANY)
             || $comment->created_by === $userId;
+    }
+
+    // -------------------------------------------------------------------------
+    // Project member authorization helpers
+    // -------------------------------------------------------------------------
+
+    public static function canViewProjectMembers(string $projectId, string $userId): bool
+    {
+        return self::canDoInProject($projectId, $userId, Permissions::PROJECT_MEMBERS_VIEW);
+    }
+
+    public static function canManageProjectMembers(string $projectId, string $userId): bool
+    {
+        return self::canDoInProject($projectId, $userId, Permissions::PROJECT_MEMBERS_MANAGE);
+    }
+
+    // -------------------------------------------------------------------------
+    // Worktime authorization helpers
+    // -------------------------------------------------------------------------
+
+    public static function canViewWorktime(string $orgId, string $userId): bool
+    {
+        return self::canDoInOrganization($orgId, $userId, Permissions::WORKTIME_VIEW);
+    }
+
+    public static function canCreateWorktime(string $orgId, string $userId): bool
+    {
+        return self::canDoInOrganization($orgId, $userId, Permissions::WORKTIME_CREATE);
+    }
+
+    public static function canUpdateWorktime(Worktime $worktime, string $userId): bool
+    {
+        if ($worktime->created_by === $userId) {
+            return true;
+        }
+        $projectId = $worktime->issue->project_id;
+        return self::canDoInProject($projectId, $userId, Permissions::WORKTIME_UPDATE_ANY);
+    }
+
+    public static function canDeleteWorktime(Worktime $worktime, string $userId): bool
+    {
+        if ($worktime->created_by === $userId) {
+            return true;
+        }
+        $projectId = $worktime->issue->project_id;
+        return self::canDoInProject($projectId, $userId, Permissions::WORKTIME_DELETE_ANY);
+    }
+
+    // -------------------------------------------------------------------------
+    // User authorization helpers
+    // -------------------------------------------------------------------------
+
+    public static function canUpdateUser(string $targetUserId, string $requestingUserId): bool
+    {
+        if ($targetUserId === $requestingUserId) {
+            return true;
+        }
+        $user = Yii::$app->user->identity;
+        return $user && UserRole::tryFrom((int)$user->is_admin) === UserRole::ADMIN;
+    }
+
+    public static function canDeleteUser(string $targetUserId, string $requestingUserId): bool
+    {
+        if ($targetUserId === $requestingUserId) {
+            return true;
+        }
+        $user = Yii::$app->user->identity;
+        return $user && UserRole::tryFrom((int)$user->is_admin) === UserRole::ADMIN;
     }
 
     /**
@@ -393,6 +504,14 @@ class PermissionService
         }
 
         return $query->asArray()->all();
+    }
+
+    /**
+     * Checks a permission against the structured org permissions array.
+     */
+    private static function orgCan(array $permissions, string $orgId, Permissions $permission): bool
+    {
+        return in_array($permission->value, $permissions['org'][$orgId] ?? []);
     }
 
     /**

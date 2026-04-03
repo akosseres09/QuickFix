@@ -2,6 +2,7 @@
 
 namespace api\controllers;
 
+use api\components\permissions\PermissionService;
 use common\models\OrganizationInvitation;
 use common\models\search\OrganizationInvitationSearch;
 use Symfony\Component\Uid\Uuid;
@@ -36,6 +37,20 @@ class OrganizationInvitationController extends BaseRestController
         $actions['update']['findModel'] = [$this, 'findModel'];
 
         return $actions;
+    }
+
+    public function checkAccess($action, $model = null, $params = [])
+    {
+        $userId = Yii::$app->user->id;
+        $orgId = Yii::$app->request->get('organization_id');
+
+        switch ($action) {
+            case 'create':
+                if ($orgId && !PermissionService::canInviteOrgMember($orgId, $userId)) {
+                    throw new ForbiddenHttpException('You do not have permission to send invitations for this organization.');
+                }
+                break;
+        }
     }
 
     public function findModel($id)

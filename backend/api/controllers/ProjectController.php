@@ -45,35 +45,35 @@ class ProjectController extends BaseRestController
      */
     public function checkAccess($action, $model = null, $params = [])
     {
-        // create action has no model
         $userId = Yii::$app->user->id;
         $organizationId = Yii::$app->request->get('organization_id');
 
-        if ($action === 'create') {
-            if (!PermissionService::canCreateProject($organizationId, $userId)) {
-                throw new ForbiddenHttpException('You do not have permission to create a project in this organization.');
-            }
-        }
-
-        // For view action, check if user has project view permission
-        if ($action === 'view') {
-            if (!PermissionService::canViewProject($model, $userId)) {
-                throw new ForbiddenHttpException('You do not have permission to access this project.');
-            }
-        }
-
-        // For update action, check project update permission
-        if ($action === 'update') {
-            if (!PermissionService::canUpdateProject($model, $userId)) {
-                throw new ForbiddenHttpException('You do not have permission to update this project.');
-            }
-        }
-
-        // For delete action, check project delete permission
-        if ($action === 'delete') {
-            if (!PermissionService::canDeleteProject($model, $userId)) {
-                throw new ForbiddenHttpException('You do not have permission to delete this project.');
-            }
+        switch ($action) {
+            case 'index':
+                if ($organizationId && !PermissionService::canViewOrganization($organizationId, $userId)) {
+                    throw new ForbiddenHttpException('You do not have permission to view projects in this organization.');
+                }
+                break;
+            case 'create':
+                if (!PermissionService::canCreateProject($organizationId, $userId)) {
+                    throw new ForbiddenHttpException('You do not have permission to create a project in this organization.');
+                }
+                break;
+            case 'view':
+                if ($model && !PermissionService::canViewProject($model, $userId)) {
+                    throw new ForbiddenHttpException('You do not have permission to access this project.');
+                }
+                break;
+            case 'update':
+                if ($model && !PermissionService::canUpdateProject($model, $userId)) {
+                    throw new ForbiddenHttpException('You do not have permission to update this project.');
+                }
+                break;
+            case 'delete':
+                if ($model && !PermissionService::canDeleteProject($model, $userId)) {
+                    throw new ForbiddenHttpException('You do not have permission to delete this project.');
+                }
+                break;
         }
     }
 
