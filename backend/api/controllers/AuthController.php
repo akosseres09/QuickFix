@@ -22,6 +22,8 @@ use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\web\UnauthorizedHttpException;
 use Lcobucci\JWT\Configuration;
+use yii\helpers\ArrayHelper;
+use yii\web\ServerErrorHttpException;
 
 class AuthController extends Controller
 {
@@ -169,9 +171,6 @@ class AuthController extends Controller
     public function actionMe(): array
     {
         $user = Yii::$app->user->identity;
-        if (!$user) {
-            throw new UnauthorizedHttpException('User not authenticated.');
-        }
 
         $role = UserRole::tryFrom((int)$user->is_admin);
         return ResponseMaker::asSuccess([
@@ -195,7 +194,7 @@ class AuthController extends Controller
         $permissions = PermissionService::getBasePermissions($role);
 
         if ($orgId) {
-            $permissions = ArrayMergerHelper::mergePermissions(
+            $permissions = ArrayHelper::merge(
                 $permissions,
                 PermissionService::getOrganizationPermissions($orgId, $user->id),
                 PermissionService::getAllProjectPermissions($orgId, $user->id)
@@ -204,7 +203,7 @@ class AuthController extends Controller
 
         if ($projId) {
             $projectPermissions = PermissionService::getProjectPermissions($projId, $user->id);
-            $permissions = ArrayMergerHelper::mergePermissions($permissions, $projectPermissions);
+            $permissions = ArrayHelper::merge($permissions, $projectPermissions);
         }
 
         return ResponseMaker::asSuccess([
@@ -257,7 +256,7 @@ class AuthController extends Controller
             ]);
         }
 
-        throw new BadRequestHttpException('Failed to verify user.', 430);
+        throw new ServerErrorHttpException('Failed to verify user.');
     }
 
     public function actionResendVerificationEmail(): array
@@ -290,7 +289,7 @@ class AuthController extends Controller
             ]);
         }
 
-        throw new BadRequestHttpException('Failed to resend verification email.', 430);
+        throw new ServerErrorHttpException('Failed to resend verification email.');
     }
 
     public function actionResetPassword(): array
@@ -326,7 +325,7 @@ class AuthController extends Controller
                 ]);
             }
 
-            throw new BadRequestHttpException('Failed to send password reset email.', 430);
+            throw new ServerErrorHttpException('Failed to send password reset email.');
         }
 
         if (!$token) {
@@ -357,6 +356,6 @@ class AuthController extends Controller
             ]);
         }
 
-        throw new BadRequestHttpException('Failed to reset password.', 430);
+        throw new ServerErrorHttpException('Failed to reset password.');
     }
 }

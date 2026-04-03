@@ -17,9 +17,9 @@ return [
         'email'        => 'nicole.paucek@schultz.info',
         'status'       => UserStatus::ACTIVE->value,
         'is_admin'     => UserRole::USER->value,
-        'created_at'   => 1402312317,
-        'updated_at'   => 1402312317,
-        'password_reset_token_expires_at' => 1802312317
+        'created_at'   => time() - 60 * 60 * 24 * 30,
+        'updated_at'   => time() - 60 * 60 * 24 * 15,
+        'password_reset_token_expires_at' => time() + 60 * 60, // Set to expire in 1 hour
     ],
     [
         'id'           => '01900000-0000-7000-8000-000000000002',
@@ -28,15 +28,15 @@ return [
         'last_name'    => 'Doe',
         'auth_key'     => 'testAuthKey222222222222222222222',
         'verification_token'    => 'testVerificationToken22222222222222222222',
-        'email_verification_token_expires_at' => 1893456000, // far-future (year 2029)
+        'email_verification_token_expires_at' => time() + 60 * 60 * 24 * 7, // Set to expire in 7 days
         // password_0
         'password_hash'         => '$2y$13$EjaPFBnZOQsHdGuHI.xvhuDp1fHpo8hKRSk6yshqa9c5EG8s3C3lO',
         'password_reset_token'  => 'ExzkCOaYc1L8IOBs4wdTGGbgNiG3Wz1I_1402312318',
         'email'        => 'jane.doe@example.com',
         'status'       => UserStatus::INACTIVE->value,
         'is_admin'     => UserRole::USER->value,
-        'created_at'   => 1402312317,
-        'updated_at'   => 1402312317,
+        'created_at'   => time() - 60 * 60 * 24 * 30,
+        'updated_at'   => time() - 60 * 60 * 24 * 15,
     ],
     [
         'id'           => '01900000-0000-7000-8000-000000000003',
@@ -50,8 +50,8 @@ return [
         'email'        => 'admin@example.com',
         'status'       => UserStatus::ACTIVE->value,
         'is_admin'     => UserRole::ADMIN->value,
-        'created_at'   => 1402312317,
-        'updated_at'   => 1402312317,
+        'created_at'   => time() - 60 * 60 * 24 * 30,
+        'updated_at'   => time() - 60 * 60 * 24 * 15,
     ],
     [
         'id'           => '01900000-0000-7000-8000-000000000004',
@@ -65,9 +65,9 @@ return [
         'email'        => 'deleted@example.com',
         'status'       => UserStatus::DELETED->value,
         'is_admin'     => UserRole::USER->value,
-        'created_at'   => 1402312317,
-        'updated_at'   => 1402312317,
-        'deleted_at'   => 1402312400,
+        'created_at'   => time() - 60 * 60 * 24 * 30,
+        'updated_at'   => time() - 60 * 60 * 24 * 15,
+        'deleted_at'   => time() - 60 * 60 * 24 * 10,
     ],
     [
         'id'           => '01900000-0000-7000-8000-000000000005',
@@ -82,8 +82,8 @@ return [
         'email'        => 'not.part.of.any.organization@example.com',
         'status'       => UserStatus::ACTIVE->value,
         'is_admin'     => UserRole::USER->value,
-        'created_at'   => 1402312317,
-        'updated_at'   => 1402312317,
+        'created_at'   => time() - 60 * 60 * 24 * 30,
+        'updated_at'   => time() - 60 * 60 * 24 * 15,
     ],
     [
         'id'           => '01900000-0000-7000-8000-000000000006',
@@ -99,8 +99,8 @@ return [
         'email'        => 'expired.password.token@example.com',
         'status'       => UserStatus::ACTIVE->value,
         'is_admin'     => UserRole::USER->value,
-        'created_at'   => 1402312317,
-        'updated_at'   => 1402312317,
+        'created_at'   => time() - 60 * 60 * 24 * 30,
+        'updated_at'   => time() - 60 * 60 * 24 * 15,
     ],
     [
         'id'           => '01900000-0000-7000-8000-000000000007',
@@ -115,7 +115,24 @@ return [
         'email'        => 'active.member@example.com',
         'status'       => UserStatus::ACTIVE->value,
         'is_admin'     => UserRole::USER->value,
-        'created_at'   => 1402312317,
-        'updated_at'   => 1402312317,
-    ]
+        'created_at'   => time() - 60 * 60 * 24 * 30,
+        'updated_at'   => time() - 60 * 60 * 24 * 15,
+    ],
+    [
+        'id'           => '01900000-0000-7000-8000-000000000008',
+        'username'     => 'expired.verification.token',
+        'first_name'   => 'Expired',
+        'last_name'    => 'VerificationToken',
+        'auth_key'     => 'HP187Mvq7Mmm3CTU80dLkGmni_FUH_AB',
+        // password_0
+        'password_hash'         => '$2y$13$EjaPFBnZOQsHdGuHI.xvhuDp1fHpo8hKRSk6yshqa9c5EG8s3C3lO',
+        'password_reset_token'  => null,
+        'verification_token'    => 'expiredVerificationToken1234567890',
+        'email_verification_token_expires_at' => time() - 3600, // Set token to expired
+        'email'        => 'expired.verification.token@example.com',
+        'status'       => UserStatus::INACTIVE->value,
+        'is_admin'     => UserRole::USER->value,
+        'created_at'   => time() - 60 * 60 * 24 * 30,
+        'updated_at'   => time() - 60 * 60 * 24 * 15,
+    ],
 ];

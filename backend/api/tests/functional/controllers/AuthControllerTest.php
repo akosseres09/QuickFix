@@ -5,11 +5,17 @@ namespace api\tests\functional\controllers;
 use api\components\traits\AccessTokenHandler;
 use Codeception\Test\Unit;
 use api\tests\FunctionalTester;
+use common\fixtures\OrganizationFixture;
+use common\fixtures\OrganizationMemberFixture;
+use common\fixtures\ProjectFixture;
+use common\fixtures\ProjectMemberFixture;
 use common\fixtures\UserFixture;
 use common\fixtures\UserRefreshTokenFixture;
 use common\models\User;
 use common\models\UserRole;
 use Yii;
+use yii\base\Application;
+use yii\base\Event;
 
 class AuthControllerTest extends Unit
 {
@@ -45,6 +51,10 @@ class AuthControllerTest extends Unit
         return [
             'user'             => UserFixture::class,
             'user_refresh_tokens' => UserRefreshTokenFixture::class,
+            'project' => ProjectFixture::class,
+            'project_members' => ProjectMemberFixture::class,
+            'organization' => OrganizationFixture::class,
+            'organization_members' => OrganizationMemberFixture::class,
         ];
     }
 
@@ -280,6 +290,26 @@ class AuthControllerTest extends Unit
         $this->tester->seeResponseCodeIs(401);
     }
 
+    public function testPermissionsReturnsProjectAndOrganizationPermissions(): void
+    {
+        $token = $this->loginAndGetToken();
+
+        $this->tester->haveHttpHeader('Authorization', 'Bearer ' . $token);
+        $this->tester->sendAjaxGetRequest(
+            '/auth/permissions',
+            ['projectId' => '01900000-0000-7002-8000-000000000001', 'organizationId' => '01900000-0000-7001-8000-000000000001']
+        );
+
+        $this->tester->seeResponseCodeIs(200);
+        $json = $this->grabJson();
+        $this->assertTrue($json['success']);
+        $this->assertArrayHasKey('permissions', $json['data']);
+        $this->assertNotEmpty($json['data']['permissions']);
+        $this->assertArrayHasKey('base', $json['data']['permissions']);
+        $this->assertArrayHasKey('project', $json['data']['permissions']);
+        $this->assertArrayHasKey('org', $json['data']['permissions']);
+    }
+
     // ---------------------------------------------------------------------------
     // actionSignup  POST /auth/signup
     // ---------------------------------------------------------------------------
@@ -372,6 +402,40 @@ class AuthControllerTest extends Unit
         $this->tester->seeResponseCodeIs(404);
     }
 
+    public function testVerifyReturnsBadRequestWhenTokenIsExpired(): void
+    {
+        // Assuming the fixture token is set to expire in the past
+        $this->tester->sendAjaxPostRequest('/auth/verify', [
+            'token' => 'expiredVerificationToken1234567890',
+        ]);
+
+        $json = $this->grabJson();
+        $this->tester->seeResponseCodeIs(400);
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('Verification token has expired.', $json['error']['message']);
+    }
+
+    public function testVerifyReturnsBadRequestWhenUserIsNotUpdated(): void
+    {
+        // Assuming the fixture token is set to expire in the past
+        Event::on(User::class, User::EVENT_BEFORE_UPDATE, function ($event) {
+            $event->isValid = false; // Simulate a failure during user update
+        });
+
+        try {
+            $this->tester->sendAjaxPostRequest('/auth/verify', [
+                'token' => self::INACTIVE_USER_VERIFY_TOKEN,
+            ]);
+
+            $json = $this->grabJson();
+            $this->tester->seeResponseCodeIs(500);
+            $this->assertFalse($json['success']);
+            $this->assertStringContainsString('Failed to verify user.', $json['error']['message']);
+        } finally {
+            Event::off(User::class, User::EVENT_BEFORE_UPDATE); // Clean up the event handler
+        }
+    }
+
     // ---------------------------------------------------------------------------
     // actionResendVerificationEmail  POST /auth/resend-verification-email
     // ---------------------------------------------------------------------------
@@ -386,6 +450,27 @@ class AuthControllerTest extends Unit
         $json = $this->grabJson();
         $this->assertTrue($json['success']);
         $this->assertTrue($json['data']['success']);
+    }
+
+    public function testResendVerificationEmailFailsForInactiveUserWhenNotUpdated(): void
+    {
+        Event::on(User::class, User::EVENT_BEFORE_UPDATE, function ($event) {
+            $event->isValid = false; // Simulate a failure during user update
+        });
+
+        try {
+            $this->tester->sendAjaxPostRequest('/auth/resend-verification-email', [
+                'email' => self::INACTIVE_USER_EMAIL,
+            ]);
+
+
+            $this->tester->seeResponseCodeIs(500);
+            $json = $this->grabJson();
+            $this->assertFalse($json['success']);
+            $this->assertStringContainsString('Failed to resend verification email.', $json['error']['message']);
+        } finally {
+            Event::off(User::class, User::EVENT_BEFORE_UPDATE); // Clean up the event handler
+        }
     }
 
     public function testResendVerificationEmailReturnsBadRequestWhenEmailMissing(): void
@@ -430,6 +515,26 @@ class AuthControllerTest extends Unit
         $this->assertTrue($json['data']['success']);
     }
 
+    public function testResetPasswordEmailSendFailsForKnownActiveUserWhenNotUpdated(): void
+    {
+        Event::on(User::class, User::EVENT_BEFORE_UPDATE, function ($event) {
+            $event->isValid = false; // Simulate a failure during user update
+        });
+
+        try {
+            $this->tester->sendAjaxPostRequest('/auth/reset-password', [
+                'email' => self::ACTIVE_USER_EMAIL,
+            ]);
+
+            $this->tester->seeResponseCodeIs(500);
+            $json = $this->grabJson();
+            $this->assertFalse($json['success']);
+            $this->assertStringContainsString('Failed to send password reset email.', $json['error']['message']);
+        } finally {
+            Event::off(User::class, User::EVENT_BEFORE_UPDATE); // Clean up the event handler
+        }
+    }
+
     public function testResetPasswordReturnsNotFoundForUnknownEmail(): void
     {
         $this->tester->sendAjaxPostRequest('/auth/reset-password', [
@@ -453,6 +558,27 @@ class AuthControllerTest extends Unit
         $this->assertTrue($json['data']['success']);
     }
 
+    public function testResetPasswordFailsForKnownActiveUserWhenNotUpdated(): void
+    {
+        Event::on(User::class, User::EVENT_BEFORE_UPDATE, function ($event) {
+            $event->isValid = false; // Simulate a failure during user update
+        });
+
+        try {
+            $this->tester->sendAjaxPostRequest('/auth/reset-password', [
+                'token'    => self::ACTIVE_USER_RESET_TOKEN,
+                'password' => 'NewPassword123!',
+            ]);
+
+            $this->tester->seeResponseCodeIs(500);
+            $json = $this->grabJson();
+            $this->assertFalse($json['success']);
+            $this->assertStringContainsString('Failed to reset password.', $json['error']['message']);
+        } finally {
+            Event::off(User::class, User::EVENT_BEFORE_UPDATE); // Clean up the event handler
+        }
+    }
+
     public function testResetPasswordReturnsBadRequestWithNoToken(): void
     {
         $this->tester->sendAjaxPostRequest('/auth/reset-password', [
@@ -470,6 +596,19 @@ class AuthControllerTest extends Unit
         ]);
 
         $this->tester->seeResponseCodeIs(404);
+    }
+
+    public function testResetPasswordReturnsBadRequestWithValidButExpiredToken(): void
+    {
+        $this->tester->sendAjaxPostRequest('/auth/reset-password', [
+            'token'    => 'expiredToken1234567890',
+            'password' => 'NewPassword123!',
+        ]);
+
+        $this->tester->seeResponseCodeIs(400);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('Password reset token has expired.', $json['error']['message']);
     }
 
     public function testResetPasswordReturnsBadRequestWhenNewPasswordMissing(): void
