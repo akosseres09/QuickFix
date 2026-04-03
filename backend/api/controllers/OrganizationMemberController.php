@@ -2,6 +2,7 @@
 
 namespace api\controllers;
 
+use api\components\permissions\PermissionService;
 use common\models\OrganizationMember;
 use common\models\search\OrganizationMemberSearch;
 use Symfony\Component\Uid\Uuid;
