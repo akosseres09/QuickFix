@@ -161,6 +161,48 @@ class LabelControllerTest extends Unit
         $this->assertFalse($json['success']);
     }
 
+    public function testCreateLabelReturnsNotFoundForNonExistentProject(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+
+        Event::on(Application::class, Application::EVENT_BEFORE_ACTION, function ($event) {
+            $request = Yii::$app->getRequest();
+
+            $params = $request->getQueryParams();
+            $params['project_id'] = '01900000-0000-9999-8000-000000000000'; // Non-existent project ID
+            $request->setQueryParams($params);
+        });
+
+        try {
+            $this->tester->sendAjaxPostRequest($this->labelUrl(), [
+                'name'       => 'Testing',
+                'color'      => '#abcdef',
+                'project_id' => self::PROJECT_ID,
+            ]);
+
+            $this->tester->seeResponseCodeIs(404);
+            $json = $this->grabJson();
+            $this->tester->assertStringContainsString('Requested project not found!', $json['error']['message']);
+        } finally {
+            Event::off(Application::class, Application::EVENT_BEFORE_ACTION);
+        }
+    }
+
+    public function testCreateLabelReturnsForbiddenForOutsider(): void
+    {
+        $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
+        $this->tester->sendAjaxPostRequest($this->labelUrl(), [
+            'name'       => 'Unauthorized',
+            'color'      => '#000000',
+            'project_id' => self::PROJECT_ID,
+        ]);
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('You do not have permission to create labels in this project.', $json['error']['message']);
+    }
+
     // =========================================================================
     // UPDATE  PUT /<org>/<project>/label/<id>
     // =========================================================================

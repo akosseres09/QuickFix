@@ -76,10 +76,18 @@ class LabelController extends BaseRestController
         switch ($action) {
             case 'index':
             case 'create':
+                $project = Project::find()->byId($projectId)->one();
+                if (!$project) {
+                    throw new NotFoundHttpException('Requested project not found!');
+                }
+                if (!PermissionService::canDoInOrganization($project->organization_id, $userId, Permissions::ORG_VIEW)) {
+                    throw new ForbiddenHttpException('You do not have permission to create labels in this project.');
+                }
+                break;
             case 'update':
             case 'delete':
             case 'reorder':
-                if (!PermissionService::canDoInProject($projectId, $userId, Permissions::PROJECT_UPDATE)) {
+                if (!PermissionService::canDoInOrganization($model->project->organization_id, $userId, Permissions::ORG_VIEW)) {
                     throw new ForbiddenHttpException('You do not have permission to manage labels in this project.');
                 }
                 break;
