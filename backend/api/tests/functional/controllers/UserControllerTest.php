@@ -25,9 +25,9 @@ class UserControllerTest extends Unit
     private const OWNER_EMAIL   = 'nicole.paucek@schultz.info';
     private const OWNER_USERNAME = 'bayer.hudson';
 
-    private const MEMBER_ID     = '01900000-0000-7000-8000-000000000002';
-    private const MEMBER_EMAIL  = 'jane.doe@example.com';
-    private const MEMBER_USERNAME = 'jane.doe';
+    private const MEMBER_ID     = '01900000-0000-7000-8000-000000000007';
+    private const MEMBER_EMAIL  = 'active.member@example.com';
+    private const MEMBER_USERNAME = 'active.member';
 
     private const ADMIN_ID      = '01900000-0000-7000-8000-000000000003';
     private const ADMIN_EMAIL   = 'admin@example.com';
@@ -349,5 +349,73 @@ class UserControllerTest extends Unit
         $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
         $this->tester->sendAjaxGetRequest('/user/' . self::OWNER_ID);
         $this->tester->seeResponseCodeIs(200);
+    }
+
+    // =========================================================================
+    // Permission checks: checkAccess
+    // =========================================================================
+
+    public function testUpdateReturns403WhenUpdatingOtherUser(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+        $this->tester->sendAjaxRequest('PUT', '/user/' . self::MEMBER_ID, [
+            'first_name' => 'Unauthorized',
+        ]);
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('You do not have permission to update this user.', $json['error']['message']);
+    }
+
+    public function testDeleteReturns403WhenDeletingOtherUser(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+        $this->tester->sendAjaxRequest('DELETE', '/user/' . self::MEMBER_ID);
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('You do not have permission to delete this user.', $json['error']['message']);
+    }
+
+    public function testAdminCanUpdateOtherUser(): void
+    {
+        $this->loginAs(self::ADMIN_ID, UserRole::ADMIN, self::ADMIN_EMAIL);
+        $this->tester->sendAjaxRequest('PUT', '/user/' . self::MEMBER_ID, [
+            'first_name' => 'AdminUpdated',
+        ]);
+
+        $this->tester->seeResponseCodeIs(200);
+        $json = $this->grabJson();
+        $this->assertTrue($json['success']);
+    }
+
+    public function testAdminCanDeleteOtherUser(): void
+    {
+        $this->loginAs(self::ADMIN_ID, UserRole::ADMIN, self::ADMIN_EMAIL);
+        $this->tester->sendAjaxRequest('DELETE', '/user/' . self::MEMBER_ID);
+
+        $this->tester->seeResponseCodeIs(204);
+    }
+
+    public function testUpdateOwnUserSucceeds(): void
+    {
+        $this->loginAs(self::MEMBER_ID, UserRole::USER, self::MEMBER_EMAIL);
+        $this->tester->sendAjaxRequest('PUT', '/user/' . self::MEMBER_ID, [
+            'first_name' => 'SelfUpdated',
+        ]);
+
+        $this->tester->seeResponseCodeIs(200);
+        $json = $this->grabJson();
+        $this->assertTrue($json['success']);
+    }
+
+    public function testDeleteOwnUserSucceeds(): void
+    {
+        $this->loginAs(self::MEMBER_ID, UserRole::USER, self::MEMBER_EMAIL);
+        $this->tester->sendAjaxRequest('DELETE', '/user/' . self::MEMBER_ID);
+
+        $this->tester->seeResponseCodeIs(204);
     }
 }

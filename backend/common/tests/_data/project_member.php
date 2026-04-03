@@ -55,4 +55,14 @@ return [
         'updated_by' => null,
         'updated_at' => null,
     ],
+    [
+        'id'         => '01900000-0000-7008-8000-000000000006',
+        'project_id' => '01900000-0000-7002-8000-000000000001',
+        'user_id'    => '01900000-0000-7000-8000-000000000007',
+        'role'       => RoleManager::ROLE_MEMBER,
+        'created_at' => 1402312317,
+        'created_by' => '01900000-0000-7000-8000-000000000001',
+        'updated_by' => null,
+        'updated_at' => null,
+    ],
 ];

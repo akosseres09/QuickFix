@@ -31,8 +31,8 @@ class OrganizationControllerTest extends Unit
     private const OWNER_EMAIL     = 'nicole.paucek@schultz.info';
     private const ADMIN_ID        = '01900000-0000-7000-8000-000000000003'; // admin in ORG
     private const ADMIN_EMAIL     = 'admin@example.com';
-    private const MEMBER_ID       = '01900000-0000-7000-8000-000000000002'; // member in ORG
-    private const MEMBER_EMAIL    = 'jane.doe@example.com';
+    private const MEMBER_ID    = '01900000-0000-7000-8000-000000000007';
+    private const MEMBER_EMAIL = 'active.member@example.com';
     private const OUTSIDER_ID     = '01900000-0000-7000-8000-000000000005'; // not in any org
     private const OUTSIDER_EMAIL  = 'not.part.of.any.organization@example.com';
 
@@ -252,5 +252,91 @@ class OrganizationControllerTest extends Unit
         $idJson = $this->grabJson();
 
         $this->assertEquals($slugJson['data']['id'], $idJson['data']['id']);
+    }
+
+    // =========================================================================
+    // Permission checks: checkAccess
+    // =========================================================================
+
+    public function testViewReturns403ForOutsider(): void
+    {
+        $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
+        $this->tester->sendAjaxGetRequest('/organization/' . self::ORG_SLUG);
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('You do not have permission to view this organization.', $json['error']['message']);
+    }
+
+    public function testUpdateReturns403ForMember(): void
+    {
+        $this->loginAs(self::MEMBER_ID, UserRole::USER, self::MEMBER_EMAIL);
+        $this->tester->sendAjaxRequest('PUT', '/organization/' . self::ORG_SLUG, [
+            'name' => 'Unauthorized Update',
+        ]);
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('You do not have permission to update this organization.', $json['error']['message']);
+    }
+
+    public function testUpdateReturns403ForOutsider(): void
+    {
+        $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
+        $this->tester->sendAjaxRequest('PUT', '/organization/' . self::ORG_SLUG, [
+            'name' => 'Unauthorized Update',
+        ]);
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('You do not have permission to update this organization.', $json['error']['message']);
+    }
+
+    public function testDeleteReturns403ForMember(): void
+    {
+        $this->loginAs(self::MEMBER_ID, UserRole::USER, self::MEMBER_EMAIL);
+        $this->tester->sendAjaxRequest('DELETE', '/organization/' . self::ORG_SLUG);
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('You do not have permission to delete this organization.', $json['error']['message']);
+    }
+
+    public function testDeleteReturns403ForOutsider(): void
+    {
+        $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
+        $this->tester->sendAjaxRequest('DELETE', '/organization/' . self::ORG_SLUG);
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('You do not have permission to delete this organization.', $json['error']['message']);
+    }
+
+    public function testUpdateSucceedsForAdmin(): void
+    {
+        $this->loginAs(self::ADMIN_ID, UserRole::USER, self::ADMIN_EMAIL);
+        $this->tester->sendAjaxRequest('PUT', '/organization/' . self::ORG_SLUG, [
+            'name' => 'Admin Updated Name',
+        ]);
+
+        $this->tester->seeResponseCodeIs(200);
+        $json = $this->grabJson();
+        $this->assertTrue($json['success']);
+    }
+
+    public function testDeleteReturns403ForAdmin(): void
+    {
+        $this->loginAs(self::ADMIN_ID, UserRole::USER, self::ADMIN_EMAIL);
+        $this->tester->sendAjaxRequest('DELETE', '/organization/' . self::ORG_SLUG);
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('You do not have permission to delete this organization.', $json['error']['message']);
     }
 }

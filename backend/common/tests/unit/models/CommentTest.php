@@ -183,7 +183,7 @@ class CommentTest extends Unit
     {
         $comment = Comment::findOne('01900000-0000-7005-8000-000000000001');
         verify($comment->creator)->notNull();
-        verify($comment->creator->username)->equals('jane.doe');
+        verify($comment->creator->username)->equals('active.member');
     }
 
     public function testGetUpdator(): void

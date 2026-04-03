@@ -37,8 +37,8 @@ class CommentControllerTest extends Unit
 
     private const OWNER_ID     = '01900000-0000-7000-8000-000000000001';
     private const OWNER_EMAIL  = 'nicole.paucek@schultz.info';
-    private const MEMBER_ID    = '01900000-0000-7000-8000-000000000002';
-    private const MEMBER_EMAIL = 'jane.doe@example.com';
+    private const MEMBER_ID    = '01900000-0000-7000-8000-000000000007';
+    private const MEMBER_EMAIL = 'active.member@example.com';
     private const OUTSIDER_ID  = '01900000-0000-7000-8000-000000000005';
     private const OUTSIDER_EMAIL = 'not.part.of.any.organization@example.com';
 
@@ -248,6 +248,98 @@ class CommentControllerTest extends Unit
         $this->tester->sendAjaxGetRequest($this->commentUrl('/' . self::COMMENT_ID_1));
 
         $this->tester->seeResponseCodeIs(403);
+    }
+
+    public function testIndexReturns403ForOutsider(): void
+    {
+        $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
+        $this->tester->sendAjaxGetRequest($this->commentUrl());
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('You do not have permission to view comments.', $json['error']['message']);
+    }
+
+    public function testCreateReturns403ForOutsider(): void
+    {
+        $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
+        $this->tester->sendAjaxPostRequest($this->commentUrl(), [
+            'content'  => 'Unauthorized comment',
+            'issue_id' => self::ISSUE_ID,
+        ]);
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('You do not have permission to create comments.', $json['error']['message']);
+    }
+
+    public function testUpdateReturns403ForOutsider(): void
+    {
+        $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
+        $this->tester->sendAjaxRequest('PUT', $this->commentUrl('/' . self::COMMENT_ID_1), [
+            'content' => 'Unauthorized update',
+        ]);
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+    }
+
+    public function testDeleteReturns403ForOutsider(): void
+    {
+        $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
+        $this->tester->sendAjaxRequest('DELETE', $this->commentUrl('/' . self::COMMENT_ID_1));
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+    }
+
+    public function testMemberCanUpdateOwnComment(): void
+    {
+        // Comment 1 belongs to MEMBER
+        $this->loginAs(self::MEMBER_ID, UserRole::USER, self::MEMBER_EMAIL);
+        $this->tester->sendAjaxRequest('PUT', $this->commentUrl('/' . self::COMMENT_ID_1), [
+            'content' => 'Updated by member',
+        ]);
+
+        $this->tester->seeResponseCodeIs(200);
+        $json = $this->grabJson();
+        $this->assertTrue($json['success']);
+        $this->assertEquals('Updated by member', $json['data']['content']);
+    }
+
+    public function testMemberCanDeleteOwnComment(): void
+    {
+        // Comment 1 belongs to MEMBER
+        $this->loginAs(self::MEMBER_ID, UserRole::USER, self::MEMBER_EMAIL);
+        $this->tester->sendAjaxRequest('DELETE', $this->commentUrl('/' . self::COMMENT_ID_1));
+
+        $this->tester->seeResponseCodeIs(204);
+    }
+
+    public function testOwnerCanDeleteAnyComment(): void
+    {
+        // Comment 1 belongs to MEMBER, but OWNER has COMMENT_DELETE_ANY
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+        $this->tester->sendAjaxRequest('DELETE', $this->commentUrl('/' . self::COMMENT_ID_1));
+
+        $this->tester->seeResponseCodeIs(204);
+    }
+
+    public function testOwnerCanUpdateAnyComment(): void
+    {
+        // Comment 1 belongs to MEMBER, but OWNER has COMMENT_UPDATE_ANY
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+        $this->tester->sendAjaxRequest('PUT', $this->commentUrl('/' . self::COMMENT_ID_1), [
+            'content' => 'Updated by owner on member comment',
+        ]);
+
+        $this->tester->seeResponseCodeIs(200);
+        $json = $this->grabJson();
+        $this->assertTrue($json['success']);
     }
 
     // =========================================================================

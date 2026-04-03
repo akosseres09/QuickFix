@@ -34,8 +34,8 @@ class ProjectControllerTest extends Unit
 
     private const OWNER_ID          = '01900000-0000-7000-8000-000000000001';
     private const OWNER_EMAIL       = 'nicole.paucek@schultz.info';
-    private const MEMBER_ID         = '01900000-0000-7000-8000-000000000002';
-    private const MEMBER_EMAIL      = 'jane.doe@example.com';
+    private const MEMBER_ID    = '01900000-0000-7000-8000-000000000007';
+    private const MEMBER_EMAIL = 'active.member@example.com';
     private const OUTSIDER_ID       = '01900000-0000-7000-8000-000000000005';
     private const OUTSIDER_EMAIL    = 'not.part.of.any.organization@example.com';
 
@@ -111,6 +111,17 @@ class ProjectControllerTest extends Unit
         $this->tester->seeResponseCodeIs(200);
         $json = $this->grabJson();
         $this->assertTrue($json['success']);
+    }
+
+    public function testIndexReturns403ForOutsider(): void
+    {
+        $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
+        $this->tester->sendAjaxGetRequest('/' . self::ORG_SLUG . '/project');
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('You do not have permission to view projects in this organization.', $json['error']['message']);
     }
 
     // =========================================================================

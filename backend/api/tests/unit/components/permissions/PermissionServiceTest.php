@@ -34,13 +34,14 @@ class PermissionServiceTest extends Unit
     private const USER2_ID    = '01900000-0000-7000-8000-000000000002'; // org1 member
     private const USER3_ID    = '01900000-0000-7000-8000-000000000003'; // org1 admin, org2 owner
     private const USER4_ID    = '01900000-0000-7000-8000-000000000004'; // not a member of any org
+    private const USER7_ID    = '01900000-0000-7000-8000-000000000007'; // not a member of any org
     private const ORG1_ID     = '01900000-0000-7001-8000-000000000001'; // slug: test-org
     private const ORG2_ID     = '01900000-0000-7001-8000-000000000002'; // slug: second-org
     private const PROJ1_ID    = '01900000-0000-7002-8000-000000000001'; // public,  key: TEST
     private const PROJ2_ID    = '01900000-0000-7002-8000-000000000002'; // private, key: PRIV
     private const PROJ3_ID    = '01900000-0000-7002-8000-000000000003'; // team,    key: TEAM
     private const ISSUE1_ID   = '01900000-0000-7004-8000-000000000001'; // in proj1
-    private const COMMENT1_ID = '01900000-0000-7005-8000-000000000001'; // issue1, created_by user2
+    private const COMMENT1_ID = '01900000-0000-7005-8000-000000000001'; // issue1, created_by user7
     private const COMMENT2_ID = '01900000-0000-7005-8000-000000000002'; // issue1, created_by user1
 
     // ---------------------------------------------------------------------------
@@ -689,16 +690,16 @@ class PermissionServiceTest extends Unit
 
     public function testCanDeleteCommentViaOwnership()
     {
-        // user2 is a project member (no COMMENT_DELETE_ANY), but "owns" this comment
+        // user7 is a project member (no COMMENT_DELETE_ANY), but "owns" this comment
         $comment = Comment::findOne(self::COMMENT1_ID);
-        $this->assertTrue(PermissionService::canDeleteComment($comment, self::USER2_ID));
+        $this->assertTrue(PermissionService::canDeleteComment($comment, self::USER7_ID));
     }
 
     public function testCannotDeleteCommentWithoutPermissionOrOwnership()
     {
-        // COMMENT2_ID is created_by USER1_ID, so USER2 is neither the owner nor has COMMENT_DELETE_ANY
+        // COMMENT2_ID is created_by USER1_ID, so USER7 is neither the owner nor has COMMENT_DELETE_ANY
         $comment = Comment::findOne(self::COMMENT2_ID);
-        $this->assertFalse(PermissionService::canDeleteComment($comment, self::USER2_ID));
+        $this->assertFalse(PermissionService::canDeleteComment($comment, self::USER7_ID));
     }
 
     public function testCanUpdateCommentViaUpdateAnyPermission()
@@ -712,7 +713,7 @@ class PermissionServiceTest extends Unit
     {
         // user2 is a project member (no COMMENT_UPDATE_ANY), but "owns" this comment
         $comment = Comment::findOne(self::COMMENT1_ID);
-        $this->assertTrue(PermissionService::canUpdateComment($comment, self::USER2_ID));
+        $this->assertTrue(PermissionService::canUpdateComment($comment, self::USER7_ID));
     }
 
     public function testCannotUpdateCommentWithoutPermissionOrOwnership()

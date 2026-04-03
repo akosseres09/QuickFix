@@ -101,5 +101,21 @@ return [
         'is_admin'     => UserRole::USER->value,
         'created_at'   => 1402312317,
         'updated_at'   => 1402312317,
+    ],
+    [
+        'id'           => '01900000-0000-7000-8000-000000000007',
+        'username'     => 'active.member',
+        'first_name'   => 'Active',
+        'last_name'    => 'Member',
+        'auth_key'     => 'HP187Mvq7Mmm3CTU80dLkGmni_FUH_lQ',
+        // password_0
+        'password_hash'         => '$2y$13$EjaPFBnZOQsHdGuHI.xvhuDp1fHpo8hKRSk6yshqa9c5EG8s3C3lO',
+        'password_reset_token'  => null,
+        'verification_token'    => null,
+        'email'        => 'active.member@example.com',
+        'status'       => UserStatus::ACTIVE->value,
+        'is_admin'     => UserRole::USER->value,
+        'created_at'   => 1402312317,
+        'updated_at'   => 1402312317,
     ]
 ];

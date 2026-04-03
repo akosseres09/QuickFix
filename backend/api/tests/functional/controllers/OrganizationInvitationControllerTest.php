@@ -230,4 +230,23 @@ class OrganizationInvitationControllerTest extends Unit
         $this->tester->sendAjaxGetRequest('/invitation');
         $this->tester->seeResponseCodeIs(200);
     }
+
+    // =========================================================================
+    // Permission checks: outsider cannot create invitations
+    // =========================================================================
+
+    public function testCreateInvitationReturns403ForOutsider(): void
+    {
+        $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
+        $this->tester->sendAjaxPostRequest('/invitation', [
+            'organization_id' => self::ORG_ID,
+            'email'           => 'unauthorized@example.com',
+            'role'            => 'member',
+        ]);
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('You do not have permission to send invitations for this organization.', $json['error']['message']);
+    }
 }

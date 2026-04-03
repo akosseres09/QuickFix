@@ -29,11 +29,13 @@ class ProjectMemberControllerTest extends Unit
     private const PROJECT_ID        = '01900000-0000-7002-8000-000000000001';
 
     private const PM_ID_OWNER       = '01900000-0000-7008-8000-000000000001';
-    private const PM_ID_MEMBER      = '01900000-0000-7008-8000-000000000002';
+    private const PM_ID_MEMBER      = '01900000-0000-7008-8000-000000000006';
 
     private const OWNER_ID          = '01900000-0000-7000-8000-000000000001';
     private const OWNER_EMAIL       = 'nicole.paucek@schultz.info';
-    private const MEMBER_ID         = '01900000-0000-7000-8000-000000000002';
+    private const MEMBER_ID         = '01900000-0000-7000-8000-000000000007';
+    private const OUTSIDER_ID       = '01900000-0000-7000-8000-000000000005';
+    private const OUTSIDER_EMAIL    = 'not.part.of.any.organization@example.com';
 
     // ── Fixtures ─────────────────────────────────────────────────────────────
 

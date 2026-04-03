@@ -30,9 +30,11 @@ class OrganizationMemberControllerTest extends Unit
     private const OWNER_ID         = '01900000-0000-7000-8000-000000000001';
     private const OWNER_EMAIL      = 'nicole.paucek@schultz.info';
     private const OWNER_USERNAME   = 'bayer.hudson';
-    private const MEMBER_ID        = '01900000-0000-7000-8000-000000000002';
-    private const MEMBER_EMAIL     = 'jane.doe@example.com';
-    private const MEMBER_USERNAME  = 'jane.doe';
+    private const MEMBER_ID    = '01900000-0000-7000-8000-000000000007';
+    private const MEMBER_EMAIL = 'active.member@example.com';
+    private const MEMBER_USERNAME  = 'active.member';
+    private const OUTSIDER_ID      = '01900000-0000-7000-8000-000000000005';
+    private const OUTSIDER_EMAIL   = 'not.part.of.any.organization@example.com';
 
     // ── Fixtures ─────────────────────────────────────────────────────────────
 
@@ -268,5 +270,79 @@ class OrganizationMemberControllerTest extends Unit
         } finally {
             Event::off(Application::class, Application::EVENT_BEFORE_ACTION);
         }
+    }
+
+    // =========================================================================
+    // Permission checks: outsider cannot access org members
+    // =========================================================================
+
+    public function testIndexReturns403ForOutsider(): void
+    {
+        $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
+        $this->tester->sendAjaxGetRequest($this->memberUrl());
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('You do not have permission to view organization members.', $json['error']['message']);
+    }
+
+    public function testViewReturns403ForOutsider(): void
+    {
+        $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
+        $this->tester->sendAjaxGetRequest($this->memberUrl('/' . self::ORG_MEMBER_ID_1));
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('You do not have permission to view organization members.', $json['error']['message']);
+    }
+
+    public function testUpdateReturns403ForMember(): void
+    {
+        $this->loginAs(self::MEMBER_ID, UserRole::USER, self::MEMBER_EMAIL);
+        $this->tester->sendAjaxRequest('PUT', $this->memberUrl('/' . self::ORG_MEMBER_ID_2), [
+            'role' => 'admin',
+        ]);
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('You do not have permission to manage organization members.', $json['error']['message']);
+    }
+
+    public function testUpdateReturns403ForOutsider(): void
+    {
+        $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
+        $this->tester->sendAjaxRequest('PUT', $this->memberUrl('/' . self::ORG_MEMBER_ID_2), [
+            'role' => 'admin',
+        ]);
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('You do not have permission to manage organization members.', $json['error']['message']);
+    }
+
+    public function testDeleteReturns403ForMember(): void
+    {
+        $this->loginAs(self::MEMBER_ID, UserRole::USER, self::MEMBER_EMAIL);
+        $this->tester->sendAjaxRequest('DELETE', $this->memberUrl('/' . self::ORG_MEMBER_ID_2));
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('You do not have permission to manage organization members.', $json['error']['message']);
+    }
+
+    public function testDeleteReturns403ForOutsider(): void
+    {
+        $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
+        $this->tester->sendAjaxRequest('DELETE', $this->memberUrl('/' . self::ORG_MEMBER_ID_2));
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('You do not have permission to manage organization members.', $json['error']['message']);
     }
 }

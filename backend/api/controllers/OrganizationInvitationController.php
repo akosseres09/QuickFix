@@ -44,6 +44,10 @@ class OrganizationInvitationController extends BaseRestController
         $userId = Yii::$app->user->id;
         $orgId = Yii::$app->request->get('organization_id');
 
+        if ($orgId === null) {
+            $orgId = Yii::$app->request->post('organization_id');
+        }
+
         switch ($action) {
             case 'create':
                 if ($orgId && !PermissionService::canInviteOrgMember($orgId, $userId)) {

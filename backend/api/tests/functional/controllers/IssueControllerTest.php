@@ -40,6 +40,8 @@ class IssueControllerTest extends Unit
 
     private const OWNER_ID     = '01900000-0000-7000-8000-000000000001';
     private const OWNER_EMAIL  = 'nicole.paucek@schultz.info';
+    private const MEMBER_ID    = '01900000-0000-7000-8000-000000000007';
+    private const MEMBER_EMAIL = 'active.member@example.com';
     private const OUTSIDER_ID  = '01900000-0000-7000-8000-000000000005';
     private const OUTSIDER_EMAIL = 'not.part.of.any.organization@example.com';
 
@@ -304,6 +306,86 @@ class IssueControllerTest extends Unit
         $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
         $this->tester->sendAjaxGetRequest($this->issueUrl('/' . self::ISSUE_ID_1));
 
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+    }
+
+    public function testIndexReturns403ForOutsider(): void
+    {
+        $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
+        $this->tester->sendAjaxGetRequest($this->issueUrl());
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('You do not have permission to view issues in this project.', $json['error']['message']);
+    }
+
+    public function testCreateReturns403ForOutsider(): void
+    {
+        $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
+        $this->tester->sendAjaxPostRequest($this->issueUrl(), [
+            'title'        => 'Unauthorized issue',
+            'status_label' => self::LABEL_OPEN_ID,
+            'project_id'   => self::PROJECT_ID,
+        ]);
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('You do not have permission to create issues in this project.', $json['error']['message']);
+    }
+
+    public function testUpdateReturns403ForOutsider(): void
+    {
+        $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
+        $this->tester->sendAjaxRequest('PUT', $this->issueUrl('/' . self::ISSUE_ID_1), [
+            'title' => 'Unauthorized update',
+        ]);
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+    }
+
+    public function testDeleteReturns403ForOutsider(): void
+    {
+        $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
+        $this->tester->sendAjaxRequest('DELETE', $this->issueUrl('/' . self::ISSUE_ID_1));
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+    }
+
+    public function testCloseReturns403ForOutsider(): void
+    {
+        $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
+        $this->tester->sendAjaxPostRequest($this->issueUrl('/' . self::ISSUE_ID_1 . '/close'), []);
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('You do not have permission to close this issue.', $json['error']['message']);
+    }
+
+    public function testOpenReturns403ForOutsider(): void
+    {
+        $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
+        $this->tester->sendAjaxPostRequest($this->issueUrl('/' . self::ISSUE_ID_1 . '/open'), []);
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('You do not have permission to open this issue.', $json['error']['message']);
+    }
+
+    public function testDeleteReturns403ForMember(): void
+    {
+        $this->loginAs(self::MEMBER_ID, UserRole::USER, self::MEMBER_EMAIL);
+        $this->tester->sendAjaxRequest('DELETE', $this->issueUrl('/' . self::ISSUE_ID_1));
+
+        $this->tester->seeResponseCodeIs(403);
         $json = $this->grabJson();
         $this->assertFalse($json['success']);
     }
