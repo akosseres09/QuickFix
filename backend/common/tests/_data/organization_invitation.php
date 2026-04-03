@@ -63,5 +63,27 @@ return [
         'expires_at'      => 1893456000,
         'created_at'      => 1402312317,
         'updated_at'      => 1402312400,
+    ],
+    [
+        'id'              => '01900000-0000-7009-8000-000000000006',
+        'organization_id' => '01900000-0000-7001-8000-000000000001',
+        'inviter_id'      => '01900000-0000-7000-8000-000000000001',
+        'email'           => 'nicole.paucek@schultz.info',
+        'role'            => RoleManager::ROLE_MEMBER,
+        'status'          => OrganizationInvitation::STATUS_PENDING,
+        'expires_at'      => 1893456000,
+        'created_at'      => 1402312317,
+        'updated_at'      => 1402312400,
+    ],
+    [
+        'id'              => '01900000-0000-7009-8000-000000000007',
+        'organization_id' => '01900000-0000-7001-8000-000000000001',
+        'inviter_id'      => '01900000-0000-7000-8000-000000000001',
+        'email'           => 'nicole.paucek@schultz.info',
+        'role'            => RoleManager::ROLE_MEMBER,
+        'status'          => OrganizationInvitation::STATUS_PENDING,
+        'expires_at'      => time() - 3600,
+        'created_at'      => time() - 7200,
+        'updated_at'      => time() - 3600,
     ]
 ];

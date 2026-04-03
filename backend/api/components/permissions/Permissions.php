@@ -16,6 +16,7 @@ enum Permissions: string
     case ORG_MEMBERS_VIEW = 'organization.member.view';
     case ORG_MEMBERS_MANAGE = 'organization.member.manage';
     case ORG_MEMBER_INVITE = 'organization.member.invite';
+    case ORG_MEMBER_INVITE_MANAGE = 'organization.member.invite.manage';
 
         // --- PROJECT PERMISSIONS ---
     case PROJECT_CREATE = 'project.create';

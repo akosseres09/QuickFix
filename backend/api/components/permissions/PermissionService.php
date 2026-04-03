@@ -196,6 +196,11 @@ class PermissionService
         return self::canDoInOrganization($orgId, $userId, Permissions::ORG_MEMBER_INVITE);
     }
 
+    public static function canManageOrgInvitation(string $orgId, string $userId): bool
+    {
+        return self::canDoInOrganization($orgId, $userId, Permissions::ORG_MEMBER_INVITE_MANAGE);
+    }
+
     // -------------------------------------------------------------------------
     // Resource-level authorization helpers
     // -------------------------------------------------------------------------
@@ -408,6 +413,7 @@ class PermissionService
                 Permissions::ORG_UPDATE->value,
                 Permissions::ORG_MEMBERS_MANAGE->value,
                 Permissions::ORG_MEMBER_INVITE->value,
+                Permissions::ORG_MEMBER_INVITE_MANAGE->value,
                 Permissions::PROJECT_CREATE->value,
             ]);
         }

@@ -147,16 +147,17 @@ class OrganizationInvitationControllerTest extends Unit
     // UPDATE  PUT /invitation/<id> (accept invitation — only pending allowed)
     // =========================================================================
 
-    public function testUpdatePendingInvitationSucceeds(): void
+    public function testUpdatePendingInvitationFailsForOutsider(): void
     {
         $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
         $this->tester->sendAjaxRequest('PUT', '/invitation/' . self::OUTSIDER_INV_ID, [
             'status' => 'accepted',
         ]);
 
-        $this->tester->seeResponseCodeIs(200);
+        $this->tester->seeResponseCodeIs(403);
         $json = $this->grabJson();
-        $this->assertTrue($json['success']);
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('You do not have permission to manage this organization invitation.', $json['error']['message']);
     }
 
     public function testUpdateReturns404ForNonExistentInvitation(): void
@@ -173,12 +174,15 @@ class OrganizationInvitationControllerTest extends Unit
     // DELETE  DELETE /invitation/<id> (only pending allowed)
     // =========================================================================
 
-    public function testDeletePendingInvitationSucceeds(): void
+    public function testDeletePendingInvitationFailsForOutsider(): void
     {
         $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
         $this->tester->sendAjaxRequest('DELETE', '/invitation/' . self::OUTSIDER_INV_ID);
 
-        $this->tester->seeResponseCodeIs(204);
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('You do not have permission to manage this organization invitation.', $json['error']['message']);
     }
 
     public function testDeleteReturns404ForNonExistentInvitation(): void
@@ -188,6 +192,16 @@ class OrganizationInvitationControllerTest extends Unit
 
         $this->tester->seeResponseCodeIs(404);
     }
+
+    public function testDeleteSucceedsForPendingInvitation(): void
+    {
+        // First create a new invitation to ensure we have a pending one to delete
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+        $this->tester->sendAjaxRequest('DELETE', '/invitation/' . '01900000-0000-7009-8000-000000000006');
+
+        $this->tester->seeResponseCodeIs(204);
+    }
+
 
     // =========================================================================
     // CREATE  POST /invitation
@@ -248,5 +262,16 @@ class OrganizationInvitationControllerTest extends Unit
         $json = $this->grabJson();
         $this->assertFalse($json['success']);
         $this->assertStringContainsString('You do not have permission to send invitations for this organization.', $json['error']['message']);
+    }
+
+    public function testFindModelReturnsNotFoundForExpiredInvitation(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+        $this->tester->sendAjaxGetRequest('/invitation/' . '01900000-0000-7009-8000-000000000007');
+
+        $json = $this->grabJson();
+        $this->tester->seeResponseCodeIs(404);
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('Organization invitation has expired.', $json['error']['message']);
     }
 }

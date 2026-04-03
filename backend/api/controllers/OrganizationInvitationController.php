@@ -54,6 +54,12 @@ class OrganizationInvitationController extends BaseRestController
                     throw new ForbiddenHttpException('You do not have permission to send invitations for this organization.');
                 }
                 break;
+            case 'update':
+            case 'delete':
+                if (!PermissionService::canManageOrgInvitation($model->organization_id, $userId)) {
+                    throw new ForbiddenHttpException('You do not have permission to manage this organization invitation.');
+                }
+                break;
         }
     }
 
@@ -75,7 +81,7 @@ class OrganizationInvitationController extends BaseRestController
         }
 
         if ($inv->isExpired()) {
-            throw new ForbiddenHttpException('Organization invitation has expired.');
+            throw new NotFoundHttpException('Organization invitation has expired.');
         }
 
         if (in_array($action, $actionsRequiringPendingStatus) && !$inv->isPending()) {
