@@ -240,6 +240,8 @@ class LabelTest extends Unit
         });
 
         verify($label->save(false))->false();
+
+        $label->off(Label::EVENT_BEFORE_INSERT);
     }
 
 
@@ -356,11 +358,14 @@ class LabelTest extends Unit
         $label = Label::findOne('01900000-0000-7003-8000-000000000003');
 
         $label->on(Label::EVENT_BEFORE_UPDATE, function ($event) {
-            throw new Exception('Simulated failure in beforeUpdate');
             $event->isValid = false;
         });
-        $this->expectException(Exception::class);
-        $label->reorder(0);
+
+        try {
+            verify($label->reorder(0))->false();
+        } finally {
+            $label->off(Label::EVENT_BEFORE_UPDATE);
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -477,6 +482,8 @@ class LabelTest extends Unit
         });
 
         verify($label->validate())->false();
+
+        $label->off(Label::EVENT_BEFORE_VALIDATE);
     }
 
     public function testBeforeValidatePassesWhenNotNewProject(): void

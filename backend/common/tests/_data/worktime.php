@@ -11,7 +11,7 @@ return [
         'minutes_spent'  => 90,
         'description'    => 'Investigated root cause and implemented fix.',
         'logged_at'      => '2024-01-15',
-        'created_at'     => 1402312317,
+        'created_at'     => time() - 60 * 60 * 24 * 30,
         'updated_at'     => null,
     ],
     [
@@ -22,8 +22,8 @@ return [
         'minutes_spent'  => 30,
         'description'    => 'Code review and testing.',
         'logged_at'      => '2024-01-16',
-        'created_at'     => 1402312400,
-        'updated_at'     => 1402312500,
+        'created_at'     => time() - 60 * 60 * 24 * 2,
+        'updated_at'     => time() - 60 * 60 * 24 * 1,
     ],
     [
         'id'             => '01900000-0000-7006-8000-000000000003',
@@ -33,7 +33,7 @@ return [
         'minutes_spent'  => 1,
         'description'    => '',
         'logged_at'      => '2024-02-01',
-        'created_at'     => 1402312317,
+        'created_at'     => time() - 60 * 60 * 24 * 3,
         'updated_at'     => null,
     ],
 ];

@@ -17,8 +17,8 @@ return [
         'created_by'   => '01900000-0000-7000-8000-000000000001',
         'updated_by'   => '01900000-0000-7000-8000-000000000001',
         'assigned_to'  => '01900000-0000-7000-8000-000000000002',
-        'created_at'   => 1402312317,
-        'updated_at'   => 1402312317,
+        'created_at'   => time() - 60 * 60 * 24 * 5, // Created 5 days ago
+        'updated_at'   => time() - 60 * 60 * 24 * 1, // Updated 1 day ago
         'closed_at'    => null,
         'due_date'     => null,
         'is_archived'  => false,
@@ -36,10 +36,10 @@ return [
         'created_by'   => '01900000-0000-7000-8000-000000000001',
         'updated_by'   => '01900000-0000-7000-8000-000000000001',
         'assigned_to'  => null,
-        'created_at'   => 1402312317,
-        'updated_at'   => 1402312317,
-        'closed_at'    => 1402312400,
-        'due_date'     => 1402398717,
+        'created_at'   => time() - 60 * 60 * 24 * 2, // Created 2 days ago
+        'updated_at'   => time() - 60 * 60 * 24 * 1,
+        'closed_at'    => null,
+        'due_date'     => null,
         'is_archived'  => false,
         'is_draft'     => true,
     ],
@@ -55,9 +55,28 @@ return [
         'created_by'   => '01900000-0000-7000-8000-000000000001',
         'updated_by'   => null,
         'assigned_to'  => '01900000-0000-7000-8000-000000000001',
-        'created_at'   => 1402312317,
+        'created_at'   => time() - 60 * 60 * 24 * 15, // Created 15 days ago
         'updated_at'   => null,
         'closed_at'    => null,
+        'due_date'     => null,
+        'is_archived'  => true,
+        'is_draft'     => false,
+    ],
+    [
+        'id'           => '01900000-0000-7004-8000-000000000004',
+        'project_id'   => '01900000-0000-7002-8000-000000000001',
+        'issue_key'    => 'TEST-4',
+        'title'        => 'Database migration task 2',
+        'description'  => '',
+        'type'         => Issue::TYPE_TASK,
+        'status_label' => '01900000-0000-7003-8000-000000000002', // Closed
+        'priority'     => Issue::PRIORITY_CRITICAL,
+        'created_by'   => '01900000-0000-7000-8000-000000000001',
+        'updated_by'   => null,
+        'assigned_to'  => '01900000-0000-7000-8000-000000000001',
+        'created_at'   => time() - 60 * 60 * 24 * 10, // Created 10 days ago
+        'updated_at'   => null,
+        'closed_at'    => time() - 60 * 60 * 24 * 3, // Closed 3 days ago
         'due_date'     => null,
         'is_archived'  => true,
         'is_draft'     => false,

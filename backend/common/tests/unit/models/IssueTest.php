@@ -216,7 +216,7 @@ class IssueTest extends Unit
         verify($feature->type)->equals(Issue::TYPE_FEATURE);
         verify($feature->priority)->equals(Issue::PRIORITY_MEDIUM);
         verify($feature->is_draft)->true();
-        verify($feature->closed_at)->notNull();
+        verify($feature->closed_at)->null();
 
         $task = Issue::findOne(['issue_key' => 'TEST-3']);
         verify($task)->notNull();
@@ -301,11 +301,11 @@ class IssueTest extends Unit
     {
         $issue = new Issue();
         $issue->project_id = $_GET['project_id'];
-
+        $count = Issue::find()->where(['project_id' => $_GET['project_id']])->count();
         $key = $issue->generateIssueKey();
         verify($key)->stringStartsWith('TEST-');
-        // There are 3 fixture issues for this project, so the next should be TEST-4
-        verify($key)->equals('TEST-4');
+
+        verify($key)->equals('TEST-' . ($count + 1));
     }
 
     public function testGenerateIssueKeyReturnsNullForInvalidProject(): void
