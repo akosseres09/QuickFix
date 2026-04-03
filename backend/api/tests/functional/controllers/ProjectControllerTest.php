@@ -12,6 +12,8 @@ use common\fixtures\ProjectMemberFixture;
 use common\fixtures\UserFixture;
 use common\models\UserRole;
 use Yii;
+use yii\base\Application;
+use yii\base\Event;
 
 class ProjectControllerTest extends Unit
 {
@@ -145,15 +147,15 @@ class ProjectControllerTest extends Unit
         $this->tester->seeResponseCodeIs(404);
     }
 
-    public function testViewReturnsForbiddenForUnauthorizedUser(): void
+    public function testViewReturns403WhenThereIsNoPermission(): void
     {
         $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
         $this->tester->sendAjaxGetRequest('/' . self::ORG_SLUG . '/project/' . self::PRIVATE_PROJECT_KEY);
 
-        $code = (int) $this->tester->grabPageSource() ? 403 : 404;
-        // outsider should not see a private project — either 403 or 404
-        $responseCode = $this->grabJson();
-        $this->assertFalse($responseCode['success']);
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->tester->assertStringContainsString('You do not have permission to access this project.', $json['error']['message']);
+        $this->assertFalse($json['success']);
     }
 
     // =========================================================================
@@ -187,6 +189,23 @@ class ProjectControllerTest extends Unit
         $this->assertFalse($json['success']);
     }
 
+    public function testCreateProjectReturns403WhenThereIsNoPermission(): void
+    {
+        $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
+        $this->tester->sendAjaxPostRequest('/' . self::ORG_SLUG . '/project', [
+            'name'            => 'New Test Project',
+            'key'             => 'NTP',
+            'description'     => 'A project created in tests',
+            'organization_id' => self::ORG_ID,
+            'owner_id'        => self::OWNER_ID,
+        ]);
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->tester->assertStringContainsString('You do not have permission to create a project in this organization.', $json['error']['message']);
+        $this->assertFalse($json['success']);
+    }
+
     // =========================================================================
     // UPDATE  PUT /<org>/project/<key>
     // =========================================================================
@@ -214,6 +233,20 @@ class ProjectControllerTest extends Unit
         $this->tester->seeResponseCodeIs(404);
     }
 
+
+    public function testUpdateReturns403WhenThereIsNoPermission(): void
+    {
+        $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
+        $this->tester->sendAjaxRequest('PUT', '/' . self::ORG_SLUG . '/project/' . self::PRIVATE_PROJECT_KEY, [
+            'name' => 'X',
+        ]);
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->tester->assertStringContainsString('You do not have permission to update this project.', $json['error']['message']);
+        $this->assertFalse($json['success']);
+    }
+
     // =========================================================================
     // DELETE  DELETE /<org>/project/<key>
     // =========================================================================
@@ -232,6 +265,17 @@ class ProjectControllerTest extends Unit
         $this->tester->sendAjaxRequest('DELETE', '/' . self::ORG_SLUG . '/project/NOPE');
 
         $this->tester->seeResponseCodeIs(404);
+    }
+
+    public function testDeleteReturns403WhenThereIsNoPermission(): void
+    {
+        $this->loginAs(self::OUTSIDER_ID, UserRole::USER, self::OUTSIDER_EMAIL);
+        $this->tester->sendAjaxRequest('DELETE', '/' . self::ORG_SLUG . '/project/' . self::PRIVATE_PROJECT_KEY);
+
+        $this->tester->seeResponseCodeIs(403);
+        $json = $this->grabJson();
+        $this->tester->assertStringContainsString('You do not have permission to delete this project.', $json['error']['message']);
+        $this->assertFalse($json['success']);
     }
 
     // =========================================================================
@@ -278,5 +322,80 @@ class ProjectControllerTest extends Unit
         // uuid + uuid
         $this->tester->sendAjaxGetRequest('/' . self::ORG_ID . '/project/' . self::PROJECT_ID);
         $this->tester->seeResponseCodeIs(200);
+    }
+
+    // =========================================================================
+    // FindModel
+    // =========================================================================
+
+    public function testFindModelReturnsNotFoundWhenOrganizationIdMissing(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+
+        Event::on(Application::class, Application::EVENT_BEFORE_ACTION, function () {
+            $request = Yii::$app->getRequest();
+
+            $params = $request->getQueryParams();
+            unset($params['organization_id']);
+            $request->setQueryParams($params);
+        });
+
+        try {
+            $this->tester->sendAjaxGetRequest('/' . self::ORG_ID . '/project/' . self::PROJECT_ID);
+
+            $this->tester->seeResponseCodeIs(404);
+            $json = $this->grabJson();
+            $this->assertFalse($json['success']);
+            $this->assertStringContainsString('Organization ID is required', $json['error']['message']);
+        } finally {
+            Event::off(Application::class, Application::EVENT_BEFORE_ACTION);
+        }
+    }
+
+    public function testFindModelReturnsNotFoundWhenProjectIdMissing(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+
+        Event::on(Application::class, Application::EVENT_BEFORE_ACTION, function () {
+            $request = Yii::$app->getRequest();
+
+            $params = $request->getQueryParams();
+            unset($params['id']);
+            $request->setQueryParams($params);
+        });
+
+
+        try {
+            $this->tester->sendAjaxGetRequest('/' . self::ORG_ID . '/project/' . self::PROJECT_ID);
+            $this->tester->seeResponseCodeIs(404);
+            $json = $this->grabJson();
+            $this->assertFalse($json['success']);
+            $this->assertStringContainsString('Project ID is required', $json['error']['message']);
+        } finally {
+            Event::off(Application::class, Application::EVENT_BEFORE_ACTION);
+        }
+    }
+
+    public function testFindModelReturnsNotFoundWhenProjectDoesNotExist(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+
+        Event::on(Application::class, Application::EVENT_BEFORE_ACTION, function () {
+            $request = Yii::$app->getRequest();
+
+            $params = $request->getQueryParams();
+            $params['id'] = '01900000-0000-7002-8000-000000000099';
+            $request->setQueryParams($params);
+        });
+
+        try {
+            $this->tester->sendAjaxGetRequest('/' . self::ORG_ID . '/project/' . self::PROJECT_ID);
+            $this->tester->seeResponseCodeIs(404);
+            $json = $this->grabJson();
+            $this->assertFalse($json['success']);
+            $this->assertStringContainsString('Project not found!', $json['error']['message']);
+        } finally {
+            Event::off(Application::class, Application::EVENT_BEFORE_ACTION);
+        }
     }
 }

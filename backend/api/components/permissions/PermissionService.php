@@ -156,6 +156,12 @@ class PermissionService
     // Resource-level authorization helpers
     // -------------------------------------------------------------------------
 
+    public static function canCreateProject(string $orgId, string $userId): bool
+    {
+        $permissions = self::getOrganizationPermissions($orgId, $userId);
+        return in_array(Permissions::PROJECT_CREATE->value, $permissions['org'][$orgId] ?? []);
+    }
+
     public static function canViewProject(Project $project, string $userId): bool
     {
         $permissions = self::getProjectPermissions($project->id, $userId);

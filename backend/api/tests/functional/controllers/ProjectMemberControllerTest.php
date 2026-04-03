@@ -12,6 +12,8 @@ use common\fixtures\ProjectMemberFixture;
 use common\fixtures\UserFixture;
 use common\models\UserRole;
 use Yii;
+use yii\base\Application;
+use yii\base\Event;
 
 class ProjectMemberControllerTest extends Unit
 {
@@ -218,6 +220,78 @@ class ProjectMemberControllerTest extends Unit
         $this->tester->sendAjaxGetRequest('/' . self::ORG_SLUG . '/NON-EXISTENT/member/' . self::PM_ID_OWNER);
 
         $this->tester->seeResponseCodeIs(404);
+    }
+
+    public function testFindModelFailsWith400WhenOrganizationIdIsMissing(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+
+        Event::on(Application::class, Application::EVENT_BEFORE_ACTION, function ($event) {
+            $request = Yii::$app->getRequest();
+
+            $params = $request->getQueryParams();
+            unset($params['organization_id']);
+            $request->setQueryParams($params);
+        });
+
+        $this->tester->sendAjaxGetRequest('/' . self::ORG_ID . '/' . self::PROJECT_KEY . '/member/' . self::PM_ID_OWNER);
+
+        try {
+            $this->tester->seeResponseCodeIs(400);
+            $json = $this->grabJson();
+            $this->assertFalse($json['success']);
+            $this->assertStringContainsString('Organization ID is required', $json['error']['message']);
+        } finally {
+            Event::off(Application::class, Application::EVENT_BEFORE_ACTION);
+        }
+    }
+
+    public function testFindModelFailsWith400WhenProjectIdIsMissing(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+
+        Event::on(Application::class, Application::EVENT_BEFORE_ACTION, function ($event) {
+            $request = Yii::$app->getRequest();
+
+            $params = $request->getQueryParams();
+            unset($params['project_id']);
+            $request->setQueryParams($params);
+        });
+
+        $this->tester->sendAjaxGetRequest('/' . self::ORG_ID . '/' . self::PROJECT_KEY . '/member/' . self::PM_ID_OWNER);
+
+        try {
+            $this->tester->seeResponseCodeIs(400);
+            $json = $this->grabJson();
+            $this->assertFalse($json['success']);
+            $this->assertStringContainsString('Project ID is required', $json['error']['message']);
+        } finally {
+            Event::off(Application::class, Application::EVENT_BEFORE_ACTION);
+        }
+    }
+
+    public function testFindModelFailsWith404WhenProjectIsNotFound(): void
+    {
+        $this->loginAs(self::OWNER_ID, UserRole::USER, self::OWNER_EMAIL);
+
+        Event::on(Application::class, Application::EVENT_BEFORE_ACTION, function ($event) {
+            $request = Yii::$app->getRequest();
+
+            $params = $request->getQueryParams();
+            $params['project_id'] = '01900000-0000-7002-8000-000000000999'; // Non-existent project ID
+            $request->setQueryParams($params);
+        });
+
+        $this->tester->sendAjaxGetRequest('/' . self::ORG_ID . '/' . self::PROJECT_KEY . '/member/' . self::PM_ID_OWNER);
+
+        try {
+            $this->tester->seeResponseCodeIs(404);
+            $json = $this->grabJson();
+            $this->assertFalse($json['success']);
+            $this->assertStringContainsString('Project does not exist in the specified organization.', $json['error']['message']);
+        } finally {
+            Event::off(Application::class, Application::EVENT_BEFORE_ACTION);
+        }
     }
 
     // =========================================================================

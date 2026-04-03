@@ -45,15 +45,14 @@ class ProjectController extends BaseRestController
      */
     public function checkAccess($action, $model = null, $params = [])
     {
-        if ($model === null) {
-            return;
-        }
-
+        // create action has no model
         $userId = Yii::$app->user->id;
+        $organizationId = Yii::$app->request->get('organization_id');
 
-        // For create action, no model exists yet
         if ($action === 'create') {
-            return;
+            if (!PermissionService::canCreateProject($organizationId, $userId)) {
+                throw new ForbiddenHttpException('You do not have permission to create a project in this organization.');
+            }
         }
 
         // For view action, check if user has project view permission
@@ -103,15 +102,5 @@ class ProjectController extends BaseRestController
         }
 
         return $project;
-    }
-
-    /**
-     * Check if current user has permission to update the project
-     */
-    protected function checkOwnership(Project $project): void
-    {
-        if (!PermissionService::canUpdateProject($project, Yii::$app->user->id)) {
-            throw new ForbiddenHttpException('You do not have permission to perform this action.');
-        }
     }
 }
