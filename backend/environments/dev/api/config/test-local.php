@@ -5,8 +5,8 @@ return [
         'db' => [
             'class' => \yii\db\Connection::class,
             'dsn' => 'pgsql:host=db;dbname=quickfix_test',
-            'username' => '', // fill in with your username
-            'password' => '', // fill in with your password
+            'username' => 'quickfix_test_user', // fill in with your username
+            'password' => 'quickfix_test_password', // fill in with your password
             'charset' => 'utf8',
         ],
         'jwt' => function () {
