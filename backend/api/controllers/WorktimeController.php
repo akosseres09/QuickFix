@@ -2,7 +2,7 @@
 
 namespace api\controllers;
 
-use api\components\permissions\PermissionService;
+use api\components\permissions\WorktimePermissionService;
 use common\models\Project;
 use common\models\search\WorktimeSearch;
 use common\models\Worktime;
@@ -47,22 +47,22 @@ class WorktimeController extends BaseRestController
 
         switch ($action) {
             case 'index':
-                if ($orgId && !PermissionService::canViewWorktime($orgId, $userId)) {
+                if ($orgId && !WorktimePermissionService::canViewWorktime($orgId, $userId)) {
                     throw new ForbiddenHttpException('You do not have permission to view worktime entries.');
                 }
                 break;
             case 'create':
-                if ($orgId && !PermissionService::canCreateWorktime($orgId, $userId)) {
+                if ($orgId && !WorktimePermissionService::canCreateWorktime($orgId, $userId)) {
                     throw new ForbiddenHttpException('You do not have permission to create worktime entries.');
                 }
                 break;
             case 'update':
-                if ($model instanceof Worktime && !PermissionService::canUpdateWorktime($model, $userId)) {
+                if ($model instanceof Worktime && !WorktimePermissionService::canUpdateWorktime($model, $userId)) {
                     throw new ForbiddenHttpException('You do not have permission to update this worktime entry.');
                 }
                 break;
             case 'delete':
-                if ($model instanceof Worktime && !PermissionService::canDeleteWorktime($model, $userId)) {
+                if ($model instanceof Worktime && !WorktimePermissionService::canDeleteWorktime($model, $userId)) {
                     throw new ForbiddenHttpException('You do not have permission to delete this worktime entry.');
                 }
                 break;
@@ -76,7 +76,7 @@ class WorktimeController extends BaseRestController
             throw new BadRequestHttpException('Organization ID is required.');
         }
 
-        if (!PermissionService::canViewWorktime($organizationId, Yii::$app->user->id)) {
+        if (!WorktimePermissionService::canViewWorktime($organizationId, Yii::$app->user->id)) {
             throw new ForbiddenHttpException('You do not have permission to view worktime stats.');
         }
 

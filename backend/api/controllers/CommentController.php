@@ -3,7 +3,8 @@
 namespace api\controllers;
 
 use api\components\permissions\Permissions;
-use api\components\permissions\PermissionService;
+use api\components\permissions\CommentPermissionService;
+use api\components\permissions\ProjectPermissionService;
 use common\models\Comment;
 use common\models\Project;
 use common\models\search\CommentSearch;
@@ -46,27 +47,27 @@ class CommentController extends BaseRestController
 
         switch ($action) {
             case 'index':
-                if ($projectId && !PermissionService::canDoInProject($projectId, $userId, Permissions::ISSUE_VIEW)) {
+                if ($projectId && !ProjectPermissionService::canDoInProject($projectId, $userId, Permissions::ISSUE_VIEW)) {
                     throw new ForbiddenHttpException('You do not have permission to view comments.');
                 }
                 break;
             case 'create':
-                if ($projectId && !PermissionService::canCreateComment($projectId, $userId)) {
+                if ($projectId && !CommentPermissionService::canCreateComment($projectId, $userId)) {
                     throw new ForbiddenHttpException('You do not have permission to create comments.');
                 }
                 break;
             case 'view':
-                if ($model instanceof Comment && !PermissionService::canViewComment($model, $userId)) {
+                if ($model instanceof Comment && !CommentPermissionService::canViewComment($model, $userId)) {
                     throw new ForbiddenHttpException('You do not have permission to view this comment.');
                 }
                 break;
             case 'update':
-                if ($model instanceof Comment && !PermissionService::canUpdateComment($model, $userId)) {
+                if ($model instanceof Comment && !CommentPermissionService::canUpdateComment($model, $userId)) {
                     throw new ForbiddenHttpException('You do not have permission to update this comment.');
                 }
                 break;
             case 'delete':
-                if ($model instanceof Comment && !PermissionService::canDeleteComment($model, $userId)) {
+                if ($model instanceof Comment && !CommentPermissionService::canDeleteComment($model, $userId)) {
                     throw new ForbiddenHttpException('You do not have permission to delete this comment.');
                 }
                 break;

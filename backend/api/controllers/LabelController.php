@@ -3,7 +3,7 @@
 namespace api\controllers;
 
 use api\components\permissions\Permissions;
-use api\components\permissions\PermissionService;
+use api\components\permissions\OrganizationPermissionService;
 use common\models\Label;
 use common\models\Project;
 use common\models\search\LabelSearch;
@@ -80,14 +80,14 @@ class LabelController extends BaseRestController
                 if (!$project) {
                     throw new NotFoundHttpException('Requested project not found!');
                 }
-                if (!PermissionService::canDoInOrganization($project->organization_id, $userId, Permissions::ORG_VIEW)) {
+                if (!OrganizationPermissionService::canDoInOrganization($project->organization_id, $userId, Permissions::ORG_VIEW)) {
                     throw new ForbiddenHttpException('You do not have permission to create labels in this project.');
                 }
                 break;
             case 'update':
             case 'delete':
             case 'reorder':
-                if (!PermissionService::canDoInOrganization($model->project->organization_id, $userId, Permissions::ORG_VIEW)) {
+                if (!OrganizationPermissionService::canDoInOrganization($model->project->organization_id, $userId, Permissions::ORG_VIEW)) {
                     throw new ForbiddenHttpException('You do not have permission to manage labels in this project.');
                 }
                 break;

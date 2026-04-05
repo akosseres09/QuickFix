@@ -2,7 +2,7 @@
 
 namespace api\controllers;
 
-use api\components\permissions\PermissionService;
+use api\components\permissions\OrganizationPermissionService;
 use common\models\OrganizationInvitation;
 use common\models\search\OrganizationInvitationSearch;
 use Symfony\Component\Uid\Uuid;
@@ -50,13 +50,13 @@ class OrganizationInvitationController extends BaseRestController
 
         switch ($action) {
             case 'create':
-                if ($orgId && !PermissionService::canInviteOrgMember($orgId, $userId)) {
+                if ($orgId && !OrganizationPermissionService::canInviteOrgMember($orgId, $userId)) {
                     throw new ForbiddenHttpException('You do not have permission to send invitations for this organization.');
                 }
                 break;
             case 'update':
             case 'delete':
-                if (!PermissionService::canManageOrgInvitation($model->organization_id, $userId)) {
+                if (!OrganizationPermissionService::canManageOrgInvitation($model->organization_id, $userId)) {
                     throw new ForbiddenHttpException('You do not have permission to manage this organization invitation.');
                 }
                 break;

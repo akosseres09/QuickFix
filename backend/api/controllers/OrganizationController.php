@@ -2,7 +2,7 @@
 
 namespace api\controllers;
 
-use api\components\permissions\PermissionService;
+use api\components\permissions\OrganizationPermissionService;
 use common\models\Organization;
 use common\models\search\OrganizationSearch;
 use Yii;
@@ -47,17 +47,17 @@ class OrganizationController extends BaseRestController
 
         switch ($action) {
             case 'view':
-                if ($model && !PermissionService::canViewOrganization($model->id, $userId)) {
+                if ($model && !OrganizationPermissionService::canViewOrganization($model->id, $userId)) {
                     throw new ForbiddenHttpException('You do not have permission to view this organization.');
                 }
                 break;
             case 'update':
-                if ($model && !PermissionService::canUpdateOrganization($model->id, $userId)) {
+                if ($model && !OrganizationPermissionService::canUpdateOrganization($model->id, $userId)) {
                     throw new ForbiddenHttpException('You do not have permission to update this organization.');
                 }
                 break;
             case 'delete':
-                if ($model && !PermissionService::canDeleteOrganization($model->id, $userId)) {
+                if ($model && !OrganizationPermissionService::canDeleteOrganization($model->id, $userId)) {
                     throw new ForbiddenHttpException('You do not have permission to delete this organization.');
                 }
                 break;

@@ -2,7 +2,8 @@
 
 namespace api\controllers;
 
-use api\components\permissions\PermissionService;
+use api\components\permissions\OrganizationPermissionService;
+use api\components\permissions\ProjectPermissionService;
 use Yii;
 use api\components\ResponseMaker;
 use api\components\traits\AccessTokenHandler;
@@ -191,18 +192,18 @@ class AuthController extends Controller
         $projId = Yii::$app->request->get('projectId');
 
         $role = $user->getRole();
-        $permissions = PermissionService::getBasePermissions($role);
+        $permissions = OrganizationPermissionService::getBasePermissions($role);
 
         if ($orgId) {
             $permissions = ArrayHelper::merge(
                 $permissions,
-                PermissionService::getOrganizationPermissions($orgId, $user->id),
-                PermissionService::getAllProjectPermissions($orgId, $user->id)
+                OrganizationPermissionService::getOrganizationPermissions($orgId, $user->id),
+                ProjectPermissionService::getAllProjectPermissions($orgId, $user->id)
             );
         }
 
         if ($projId) {
-            $projectPermissions = PermissionService::getProjectPermissions($projId, $user->id);
+            $projectPermissions = ProjectPermissionService::getProjectPermissions($projId, $user->id);
             $permissions = ArrayHelper::merge($permissions, $projectPermissions);
         }
 

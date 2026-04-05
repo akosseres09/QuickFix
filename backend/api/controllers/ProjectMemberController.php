@@ -2,7 +2,7 @@
 
 namespace api\controllers;
 
-use api\components\permissions\PermissionService;
+use api\components\permissions\ProjectPermissionService;
 use common\models\Project;
 use common\models\ProjectMember;
 use common\models\search\ProjectMemberSearch;
@@ -48,14 +48,14 @@ class ProjectMemberController extends BaseRestController
         switch ($action) {
             case 'index':
             case 'view':
-                if (!PermissionService::canViewProjectMembers($projectId, $userId)) {
+                if (!ProjectPermissionService::canViewProjectMembers($projectId, $userId)) {
                     throw new ForbiddenHttpException('You do not have permission to view project members.');
                 }
                 break;
             case 'create':
             case 'update':
             case 'delete':
-                if (!PermissionService::canManageProjectMembers($projectId, $userId)) {
+                if (!ProjectPermissionService::canManageProjectMembers($projectId, $userId)) {
                     throw new ForbiddenHttpException('You do not have permission to manage project members.');
                 }
                 break;

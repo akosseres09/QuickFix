@@ -2,7 +2,7 @@
 
 namespace api\controllers;
 
-use api\components\permissions\PermissionService;
+use api\components\permissions\OrganizationPermissionService;
 use common\models\OrganizationMember;
 use common\models\search\OrganizationMemberSearch;
 use Symfony\Component\Uid\Uuid;
@@ -50,13 +50,13 @@ class OrganizationMemberController extends BaseRestController
         switch ($action) {
             case 'index':
             case 'view':
-                if (!PermissionService::canViewOrgMembers($orgId, $userId)) {
+                if (!OrganizationPermissionService::canViewOrgMembers($orgId, $userId)) {
                     throw new ForbiddenHttpException('You do not have permission to view organization members.');
                 }
                 break;
             case 'update':
             case 'delete':
-                if (!PermissionService::canManageOrgMembers($orgId, $userId)) {
+                if (!OrganizationPermissionService::canManageOrgMembers($orgId, $userId)) {
                     throw new ForbiddenHttpException('You do not have permission to manage organization members.');
                 }
                 break;
