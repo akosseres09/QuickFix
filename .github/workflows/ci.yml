@@ -32,13 +32,13 @@ jobs:
         run: npm run test:shared
 
       - name: Run Auth Component Tests
-        run: npm run test:auth
+        run: npm run test:components:auth
 
       - name: Run Layout Component Tests
-        run: npm run test:layout
+        run: npm run test:components:layout
 
       - name: Run Common Component Tests
-        run: npm run test:common
+        run: npm run test:components:common
 
   backend-tests:
     name: Backend Tests

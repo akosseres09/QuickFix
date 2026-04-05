@@ -25,6 +25,11 @@ $config['components']['cache'] = [
     'class' => \yii\caching\FileCache::class,
 ];
 
+// Replace Redis queue with a synchronous in-process implementation.
+$config['components']['queue'] = [
+    'class' => \yii\queue\sync\Queue::class,
+];
+
 // Required by yii\web\User::login() → yii\web\Request cookie handling.
 $config['components']['request']['cookieValidationKey'] = 'test-cookie-validation-key';
 

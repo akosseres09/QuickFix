@@ -5,6 +5,7 @@ use yii\redis\Connection;
 
 
 return [
+    'bootstrap' => ['log', 'queue'],
     'components' => [
         'db' => [
             'class' => \yii\db\Connection::class,
@@ -13,14 +14,20 @@ return [
             'password' => '', // fill in with your password
             'charset' => 'utf8',
         ],
+        'redis' => [
+            'class' => Connection::class,
+            'hostname' => 'redis',
+            'port' => 6379,
+            'database' => 0,
+        ],
         'cache' => [
             'class' => Cache::class,
-            'redis' => [
-                'class' => Connection::class,
-                'hostname' => 'redis',
-                'port' => 6379,
-                'database' => 0,
-            ]
+            'redis' => 'redis',
+        ],
+        'queue' => [
+            'class' => \yii\queue\redis\Queue::class,
+            'redis' => 'redis',
+            'channel' => 'queue',
         ],
         'mailer' => [
             'class' => \yii\symfonymailer\Mailer::class,
