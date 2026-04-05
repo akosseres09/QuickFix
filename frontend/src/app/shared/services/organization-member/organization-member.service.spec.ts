@@ -65,7 +65,7 @@ describe('OrganizationMemberService', () => {
                 } as PaginatedResponse<OrganizationMember>,
                 {
                     headers: {
-                        'X-Cursor': 'cursor-abc',
+                        'X-Next-Cursor': 'cursor-abc',
                         'X-Has-More': 'true',
                     },
                 }

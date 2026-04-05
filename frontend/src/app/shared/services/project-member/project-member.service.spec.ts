@@ -66,7 +66,7 @@ describe('ProjectMemberService', () => {
                 } as PaginatedResponse<ProjectMember>,
                 {
                     headers: {
-                        'X-Cursor': 'cursor-abc',
+                        'X-Next-Cursor': 'cursor-abc',
                         'X-Has-More': 'true',
                     },
                 }
