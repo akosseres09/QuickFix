@@ -78,13 +78,13 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
-    - name: Wait for Postgres
-      run: |
-        for i in {1..10}; do
-          pg_isready -h postgres -p 5432 && break
-          echo "Waiting for postgres..."
-          sleep 2
-        done
+      - name: Wait for Postgres
+        run: |
+          for i in {1..10}; do
+            pg_isready -h db -p 5432 && break
+            echo "Waiting for postgres..."
+            sleep 2
+          done
 
       - name: Setup Yii2 for testing
         run: php init --env=Development --overwrite=All --delete=All
