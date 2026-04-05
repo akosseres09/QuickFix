@@ -28,8 +28,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run tests
-        run: npx ng test --watch=false --browsers=ChromeHeadless
+      - name: Run Shared Tests
+        run: npm run test:shared
+
+      - name: Run Auth Component Tests
+        run: npm run test:auth
+
+      - name: Run Layout Component Tests
+        run: npm run test:layout
+
+      - name: Run Common Component Tests
+        run: npm run test:common
 
   backend-tests:
     name: Backend Tests
