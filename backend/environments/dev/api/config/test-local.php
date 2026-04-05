@@ -4,7 +4,7 @@ return [
     'components' => [
         'db' => [
             'class' => \yii\db\Connection::class,
-            'dsn' => 'pgsql:host=db;dbname=quickfix_test',
+            'dsn' => 'pgsql:host=127.0.0.1;dbname=quickfix_test',
             'username' => 'quickfix_test_user', // fill in with your username
             'password' => 'quickfix_test_password', // fill in with your password
             'charset' => 'utf8',
