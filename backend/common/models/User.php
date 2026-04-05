@@ -3,27 +3,14 @@
 namespace common\models;
 
 use api\models\UserRefreshToken;
+use common\components\services\JwtValidationService;
 use common\components\behaviors\InvalidateCacheBehavior;
 use common\models\query\UserQuery;
-use Lcobucci\JWT\UnencryptedToken;
+use common\models\UserRole;
+use common\models\UserStatus;
 use Symfony\Component\Uid\Uuid;
-use Throwable;
 use Yii;
 use yii\web\IdentityInterface;
-
-enum UserRole: int
-{
-    case ADMIN = 1;
-    case USER = 0;
-};
-
-enum UserStatus: int
-{
-    case DELETED = 0;
-    case INACTIVE = 9;
-    case ACTIVE = 10;
-};
-
 
 /**
  * User model
@@ -206,25 +193,16 @@ class User extends BaseModel implements IdentityInterface
      */
     public static function findIdentityByAccessToken($token, $type = null)
     {
-        try {
-            $config = Yii::$app->get('jwt');
+        // Resolve the service and pass in the global dependency once
+        $jwtConfig = Yii::$app->get('jwt');
+        $service = new JwtValidationService($jwtConfig);
 
-            $parsedToken = $config->parser()->parse($token);
-            assert($parsedToken instanceof UnencryptedToken);
-
-            $constraints = $config->validationConstraints();
-
-            if (!$config->validator()->validate($parsedToken, ...$constraints)) {
-                return null;
-            }
-
-            $userId = $parsedToken->claims()->get('uid');
-
-            return static::findIdentity($userId);
-        } catch (Throwable $e) {
-            Yii::error('Error parsing access token: ' . $e->getMessage(), __METHOD__);
+        $userId = $service->getUserIdFromToken($token);
+        if ($userId === null) {
             return null;
         }
+
+        return static::findIdentity($userId);
     }
 
     /**
@@ -454,6 +432,11 @@ class User extends BaseModel implements IdentityInterface
         $this->password_reset_token_expires_at = null;
     }
 
+    public function setEmailTokenExpireDate(): void
+    {
+        $this->email_verification_token_expires_at = time() + self::TOKEN_EXPIRE;
+    }
+
     public function setProfilePictureUrl(): void
     {
         $url = $this->generateProfilePictureUrl();
@@ -462,7 +445,7 @@ class User extends BaseModel implements IdentityInterface
 
     public function generateProfilePictureUrl(): string
     {
-        $fullName = $this->getFullName();
+        $fullName = trim($this->getFullName());
         if ($fullName) {
             return 'https://ui-avatars.com/api/?name=' . urlencode($fullName) . '&background=random&size=256';
         }

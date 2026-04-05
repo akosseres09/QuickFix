@@ -164,23 +164,4 @@ class ProjectQuery extends ActiveQuery
     {
         return $this->orderBy(['name' => SORT_ASC]);
     }
-
-    /**
-     * Filter projects with end date in the future
-     * @return ProjectQuery
-     */
-    public function upcoming(): ProjectQuery
-    {
-        return $this->andWhere(['>', 'end_date', date('Y-m-d')]);
-    }
-
-    /**
-     * Filter projects with end date in the past
-     * @return ProjectQuery
-     */
-    public function overdue(): ProjectQuery
-    {
-        return $this->andWhere(['<', 'end_date', date('Y-m-d')])
-            ->andWhere(['!=', 'status', Project::STATUS_COMPLETED]);
-    }
 }

@@ -8,7 +8,6 @@ export const permissionGuard: CanActivateFn = (route, state) => {
     const authService = inject(AuthService);
     const snackbarService = inject(SnackbarService);
     const router = inject(Router);
-    const isDirectNavigation = !router.lastSuccessfulNavigation;
 
     const permission = route.data['permission'];
     if (!permission) {
@@ -38,6 +37,7 @@ export const permissionGuard: CanActivateFn = (route, state) => {
     };
 
     const denied = () => {
+        const isDirectNavigation = !router.lastSuccessfulNavigation;
         snackbarService.error("You don't have permission to access this page.");
         return isDirectNavigation ? router.createUrlTree(['/organizations']) : false;
     };

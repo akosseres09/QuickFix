@@ -2,7 +2,9 @@
 
 namespace api\controllers;
 
-use api\components\permissions\PermissionService;
+use api\components\permissions\Permissions;
+use api\components\permissions\IssuePermissionService;
+use api\components\permissions\ProjectPermissionService;
 use common\models\Issue;
 use common\models\Label;
 use common\models\Project;
@@ -55,8 +57,12 @@ class IssueController extends BaseRestController
         }
 
         $project = Project::find()->byOrganizationId($organizationId)->byId($projectId)->one();
-        if (!$project || !PermissionService::canViewProject($project, Yii::$app->user->id)) {
-            throw new ForbiddenHttpException('Access denied.');
+        if (!$project) {
+            throw new NotFoundHttpException('Project not found for the given project ID and organization ID.');
+        }
+
+        if (!ProjectPermissionService::canViewProject($project, Yii::$app->user->id)) {
+            throw new ForbiddenHttpException('You do not have permission to view issues in this project.');
         }
 
         $today = mktime(0, 0, 0);
@@ -187,6 +193,10 @@ class IssueController extends BaseRestController
         /** @var Issue $issue */
         $issue = $this->findModel($id);
 
+        if (!IssuePermissionService::canUpdateIssue($issue, Yii::$app->user->id)) {
+            throw new ForbiddenHttpException('You do not have permission to close this issue.');
+        }
+
         try {
             $issue->closeIssue();
             $issue->save();
@@ -200,6 +210,10 @@ class IssueController extends BaseRestController
     public function actionOpen($id): Issue
     {
         $issue = $this->findModel($id);
+
+        if (!IssuePermissionService::canUpdateIssue($issue, Yii::$app->user->id)) {
+            throw new ForbiddenHttpException('You do not have permission to open this issue.');
+        }
 
         try {
             $issue->openIssue();
@@ -217,25 +231,34 @@ class IssueController extends BaseRestController
     public function checkAccess($action, $model = null, $params = [])
     {
         $userId = Yii::$app->user->id;
+        $projectId = Yii::$app->request->get('project_id');
 
-        if ($model instanceof Issue) {
-            switch ($action) {
-                case 'view':
-                    if (!PermissionService::canViewIssue($model, $userId)) {
-                        throw new ForbiddenHttpException('You do not have permission to view this issue.');
-                    }
-                    break;
-                case 'update':
-                    if (!PermissionService::canUpdateIssue($model, $userId)) {
-                        throw new ForbiddenHttpException('You do not have permission to update this issue.');
-                    }
-                    break;
-                case 'delete':
-                    if (!PermissionService::canDeleteIssue($model, $userId)) {
-                        throw new ForbiddenHttpException('You do not have permission to delete this issue.');
-                    }
-                    break;
-            }
+        switch ($action) {
+            case 'index':
+                if ($projectId && !ProjectPermissionService::canDoInProject($projectId, $userId, Permissions::ISSUE_VIEW)) {
+                    throw new ForbiddenHttpException('You do not have permission to view issues in this project.');
+                }
+                break;
+            case 'create':
+                if ($projectId && !IssuePermissionService::canCreateIssue($projectId, $userId)) {
+                    throw new ForbiddenHttpException('You do not have permission to create issues in this project.');
+                }
+                break;
+            case 'view':
+                if ($model instanceof Issue && !IssuePermissionService::canViewIssue($model, $userId)) {
+                    throw new ForbiddenHttpException('You do not have permission to view this issue.');
+                }
+                break;
+            case 'update':
+                if ($model instanceof Issue && !IssuePermissionService::canUpdateIssue($model, $userId)) {
+                    throw new ForbiddenHttpException('You do not have permission to update this issue.');
+                }
+                break;
+            case 'delete':
+                if ($model instanceof Issue && !IssuePermissionService::canDeleteIssue($model, $userId)) {
+                    throw new ForbiddenHttpException('You do not have permission to delete this issue.');
+                }
+                break;
         }
     }
 

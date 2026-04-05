@@ -9,7 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
-import { applyValidationErrors } from '../../shared/utils/formErrorHandler';
+import { applyValidationErrors } from '../../shared/utils/formErrorHandler/formErrorHandler';
 
 @Component({
     selector: 'app-request-password-reset-email',

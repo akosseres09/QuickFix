@@ -99,7 +99,7 @@ trait RefreshTokenHandlerTrait
      *    ['token' => string, 'expiresInSeconds' => int, 'ip' => string, 'agent' => string ]
      * @return UserRefreshToken
      */
-    private function updateExistingRefreshToken(UserRefreshToken $credential, array $credentialOptions): UserRefreshToken
+    protected function updateExistingRefreshToken(UserRefreshToken $credential, array $credentialOptions): UserRefreshToken
     {
         if ($credential->isRevoked()) {
             throw new UnauthorizedHttpException('Refresh token is revoked.');
@@ -125,7 +125,7 @@ trait RefreshTokenHandlerTrait
      *    ['token' => string, 'expiresInSeconds' => int, 'ip' => string, 'agent' => string ]
      * @return UserRefreshToken
      */
-    private function createNewRefreshToken(string $credential, array $credentialOptions): UserRefreshToken
+    protected function createNewRefreshToken(string $credential, array $credentialOptions): UserRefreshToken
     {
         $refreshToken = new UserRefreshToken([
             'user_id' => $credential,
@@ -151,7 +151,7 @@ trait RefreshTokenHandlerTrait
      *    ['token' => string, 'expiresInSeconds' => int ]
      * @return UserRefreshToken
      */
-    private function updateRefreshTokenExpiry(UserRefreshToken $refreshToken, array $tokenOptions)
+    protected function updateRefreshTokenExpiry(UserRefreshToken $refreshToken, array $tokenOptions)
     {
         $refreshToken->token = $tokenOptions['token'];
         $refreshToken->expires_at = time() + $tokenOptions['expiresInSeconds'];

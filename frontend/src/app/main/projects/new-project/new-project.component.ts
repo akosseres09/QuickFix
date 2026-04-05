@@ -8,7 +8,7 @@ import { ProjectService } from '../../../shared/services/project/project.service
 import { Project } from '../../../shared/model/Project';
 import { finalize } from 'rxjs';
 import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
-import { applyValidationErrors } from '../../../shared/utils/formErrorHandler';
+import { applyValidationErrors } from '../../../shared/utils/formErrorHandler/formErrorHandler';
 
 @Component({
     selector: 'app-new',

@@ -2,11 +2,12 @@
 
 namespace api\controllers;
 
-use api\filters\OrganizationSlugTranslatorFilter;
+use api\components\permissions\OrganizationPermissionService;
 use common\models\Organization;
 use common\models\search\OrganizationSearch;
 use Yii;
 use yii\web\BadRequestHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 
 class OrganizationController extends BaseRestController
@@ -22,7 +23,6 @@ class OrganizationController extends BaseRestController
         $behaviors["organizationTranslator"]['actions'] = ['view', 'update', 'delete'];
 
         return $behaviors;
-
     }
 
     public function actions(): array
@@ -39,6 +39,29 @@ class OrganizationController extends BaseRestController
         $actions['delete']['findModel'] = [$this, 'findModel'];
 
         return $actions;
+    }
+
+    public function checkAccess($action, $model = null, $params = [])
+    {
+        $userId = Yii::$app->user->id;
+
+        switch ($action) {
+            case 'view':
+                if ($model && !OrganizationPermissionService::canViewOrganization($model->id, $userId)) {
+                    throw new ForbiddenHttpException('You do not have permission to view this organization.');
+                }
+                break;
+            case 'update':
+                if ($model && !OrganizationPermissionService::canUpdateOrganization($model->id, $userId)) {
+                    throw new ForbiddenHttpException('You do not have permission to update this organization.');
+                }
+                break;
+            case 'delete':
+                if ($model && !OrganizationPermissionService::canDeleteOrganization($model->id, $userId)) {
+                    throw new ForbiddenHttpException('You do not have permission to delete this organization.');
+                }
+                break;
+        }
     }
 
     public function findModel($id)

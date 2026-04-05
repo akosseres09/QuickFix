@@ -201,13 +201,15 @@ class Label extends BaseModel
             }
 
             $this->index = $newIndex;
-            $this->save(false, ['index']);
+            if (!$this->save(false, ['index'])) {
+                throw new Exception('Failed to reorder label.');
+            }
 
             $transaction->commit();
             return true;
         } catch (Exception $e) {
             $transaction->rollBack();
-            throw $e;
+            return false;
         }
     }
 }

@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router, RouterStateSnapshot } from '@angular/router';
 import { catchError, map, of } from 'rxjs';
-import { decodeToken } from '../../utils/jwtDecoder';
+import { decodeToken } from '../../utils/jwtDecoder/jwtDecoder';
 import { AuthService } from '../../services/auth/auth.service';
 import { SnackbarService } from '../../services/snackbar/snackbar.service';
 import { InvitationTokenPayload } from '../../constants/token/InvitationTokenPayload';

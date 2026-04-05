@@ -43,3 +43,4 @@ phpunit.phar
 /backend/web/robots.txt
 /backend
 /frontend
+/common/runtime

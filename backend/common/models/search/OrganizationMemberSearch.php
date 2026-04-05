@@ -66,7 +66,7 @@ class OrganizationMemberSearch extends OrganizationMember implements SearchInter
 
             $lastModel = end($models);
 
-            $headers->set('X-Cursor', $lastModel->id);
+            $headers->set('X-Next-Cursor', $lastModel->id);
             $headers->set('X-Has-More', $hasMore);
         } else {
             $headers->set('X-Has-More', 'false');

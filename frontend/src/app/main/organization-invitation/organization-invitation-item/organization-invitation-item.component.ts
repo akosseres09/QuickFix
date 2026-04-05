@@ -8,7 +8,7 @@ import {
     OrganizationInvitation,
     OrganizationInvitationStatus,
 } from '../../../shared/model/OrganizationInvitation';
-import { decodeToken } from '../../../shared/utils/jwtDecoder';
+import { decodeToken } from '../../../shared/utils/jwtDecoder/jwtDecoder';
 import { InvitationTokenPayload } from '../../../shared/constants/token/InvitationTokenPayload';
 import { Router } from '@angular/router';
 

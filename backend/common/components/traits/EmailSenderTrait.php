@@ -14,11 +14,11 @@ trait EmailSenderTrait
      * @param string $subject
      * @param string $template the base name of the email template (without -html or -text suffix)
      * @param array $data
-     * @return bool whether the email was sent successfully
+     * @return mixed the result of the queue push operation
      */
-    public function queueEmail(string $to, string $subject, string $template, array $data): void
+    public function queueEmail(string $to, string $subject, string $template, array $data): mixed
     {
-        Yii::$app->queue->push(new EmailJob([
+        return Yii::$app->queue->push(new EmailJob([
             'to' => $to,
             'subject' => $subject,
             'template' => $template,

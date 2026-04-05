@@ -167,7 +167,6 @@ class OrganizationInvitation extends BaseModel
             }
 
             $this->createOrganizationMember($userId);
-            $this->createProjectMemberForPublicProjects($userId);
         }
     }
 
@@ -266,57 +265,6 @@ class OrganizationInvitation extends BaseModel
             $errors = json_encode($member->getErrors());
             Yii::error("Failed to create org member. Errors: " . $errors, __METHOD__);
             throw new \yii\db\Exception("Transaction aborted: Could not save Organization Member. " . $errors);
-        }
-    }
-
-    /**
-     * Creates ProjectMember records for all public projects in the organization 
-     * that the user is not already a member of.
-     * 
-     * Used by [[OrganizationInvitatio::afterSave()]] after accepting an invitation, 
-     * to ensure that new members are added to all public projects in the org automatically.
-     */
-    private function createProjectMemberForPublicProjects($userId)
-    {
-        $existingProjectIds = ProjectMember::find()
-            ->select('project_id')
-            ->byUser($userId);
-
-        $publicProjectIds = Project::find()
-            ->select('id')
-            ->byOrganizationId($this->organization_id)
-            ->byVisibility(Project::VISIBILITY_PUBLIC)
-            ->andWhere(['not in', 'id', $existingProjectIds])
-            ->column();
-
-        if (empty($publicProjectIds)) {
-            return;
-        }
-
-        $rows = [];
-        $time = time();
-
-        foreach ($publicProjectIds as $projectId) {
-            $rows[] = [
-                Uuid::v7()->toString(),
-                $projectId,
-                $userId,
-                RoleManager::ROLE_MEMBER,
-                $time,
-            ];
-        }
-
-        try {
-            Yii::$app->db->createCommand()
-                ->batchInsert(
-                    ProjectMember::tableName(),
-                    ['id', 'project_id', 'user_id', 'role', 'created_at'],
-                    $rows
-                )
-                ->execute();
-        } catch (\Exception $e) {
-            Yii::error("Failed to create project members for public projects. Error: " . $e->getMessage(), __METHOD__);
-            throw new \yii\db\Exception("Transaction aborted: Could not save Project Members for public projects. " . $e->getMessage());
         }
     }
 }

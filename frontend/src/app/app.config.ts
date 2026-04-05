@@ -9,9 +9,9 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 
 import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { authInterceptor } from './shared/interceptor/auth/auth.interceptor';
-import { caseInterceptor } from './shared/interceptor/case/case.interceptor';
-import { responseInterceptor } from './shared/interceptor/response/response.interceptor';
+import { authInterceptor } from './shared/interceptors/auth/auth.interceptor';
+import { caseInterceptor } from './shared/interceptors/case/case.interceptor';
+import { responseInterceptor } from './shared/interceptors/response/response.interceptor';
 
 export const appConfig: ApplicationConfig = {
     providers: [

@@ -5,7 +5,7 @@ import { map } from 'rxjs/internal/operators/map';
 import { catchError } from 'rxjs/internal/operators/catchError';
 import { EMPTY } from 'rxjs';
 
-export const permissionResolver: ResolveFn<void> = (route) => {
+export const permissionResolver: ResolveFn<boolean> = (route) => {
     const authService = inject(AuthService);
 
     // Crawl up to find params from parent segments
@@ -22,11 +22,12 @@ export const permissionResolver: ResolveFn<void> = (route) => {
     return authService.fetchPermissions(orgId, projectId).pipe(
         map((response: any) => {
             authService.setPermissionsFromResponse(response);
+            return true;
         }),
         catchError(() => {
             // Permission fetch failed — clear stale permissions so guards deny correctly
             authService.setPermissionsFromResponse(null);
-            return EMPTY;
+            return [false];
         })
     );
 };

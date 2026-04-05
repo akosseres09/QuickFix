@@ -4,6 +4,7 @@ namespace api\models;
 
 use api\models\query\UserRefreshTokenQuery;
 use common\models\User;
+use Symfony\Component\Uid\Uuid;
 use Yii;
 use yii\db\ActiveRecord;
 
@@ -72,13 +73,17 @@ class UserRefreshToken extends ActiveRecord
      */
     public function beforeSave($insert)
     {
-        if (parent::beforeSave($insert)) {
-            if ($insert && empty($this->id)) {
-                $this->id = Yii::$app->security->generateRandomString(36);
-            }
-            return true;
+        if (!parent::beforeSave($insert)) {
+            return false;
         }
-        return false;
+
+        if (!$insert) return true;
+
+        if (empty($this->id)) {
+            $this->id = Uuid::v7()->toString();
+        }
+
+        return true;
     }
 
     public static function find(): UserRefreshTokenQuery

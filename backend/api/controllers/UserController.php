@@ -2,6 +2,7 @@
 
 namespace api\controllers;
 
+use api\components\permissions\UserPermissionService;
 use Yii;
 use api\components\CloudinaryService;
 use api\components\ResponseMaker;
@@ -35,6 +36,24 @@ class UserController extends BaseRestController
         $actions["delete"]["findModel"] = [$this, "findModel"];
 
         return $actions;
+    }
+
+    public function checkAccess($action, $model = null, $params = [])
+    {
+        $userId = Yii::$app->user->id;
+
+        switch ($action) {
+            case 'update':
+                if ($model && !UserPermissionService::canUpdateUser($model->id, $userId)) {
+                    throw new ForbiddenHttpException('You do not have permission to update this user.');
+                }
+                break;
+            case 'delete':
+                if ($model && !UserPermissionService::canDeleteUser($model->id, $userId)) {
+                    throw new ForbiddenHttpException('You do not have permission to delete this user.');
+                }
+                break;
+        }
     }
 
     public function actionUploadProfilePicture(string $id): array

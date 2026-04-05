@@ -2,7 +2,8 @@
 
 namespace api\controllers;
 
-use api\components\permissions\PermissionService;
+use api\components\permissions\OrganizationPermissionService;
+use api\components\permissions\ProjectPermissionService;
 use Yii;
 use api\components\ResponseMaker;
 use api\components\traits\AccessTokenHandler;
@@ -22,6 +23,8 @@ use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\web\UnauthorizedHttpException;
 use Lcobucci\JWT\Configuration;
+use yii\helpers\ArrayHelper;
+use yii\web\ServerErrorHttpException;
 
 class AuthController extends Controller
 {
@@ -133,13 +136,17 @@ class AuthController extends Controller
         }
 
         if (!$refreshToken->isValid()) {
-            $refreshToken = $this->createRefreshToken($refreshToken);
+            Yii::$app->response->cookies->remove('refresh-token');
+            throw new UnauthorizedHttpException('Session expired. Please log in again.');
         }
 
         $user = $refreshToken->user;
-        if (!$user) {
-            throw new BadRequestHttpException('Invalid user.');
+        if (!$user || $user->status !== UserStatus::ACTIVE->value) {
+            Yii::$app->response->cookies->remove('refresh-token');
+            throw new UnauthorizedHttpException('Account inactive or disabled.');
         }
+
+        $this->addToCookie($refreshToken->token);
 
         $role = UserRole::tryFrom((int)$user->is_admin);
         $token = $this->createAccessToken($user->id, $role, $user->email);
@@ -165,9 +172,6 @@ class AuthController extends Controller
     public function actionMe(): array
     {
         $user = Yii::$app->user->identity;
-        if (!$user) {
-            throw new UnauthorizedHttpException('User not authenticated.');
-        }
 
         $role = UserRole::tryFrom((int)$user->is_admin);
         return ResponseMaker::asSuccess([
@@ -188,19 +192,19 @@ class AuthController extends Controller
         $projId = Yii::$app->request->get('projectId');
 
         $role = $user->getRole();
-        $permissions = PermissionService::getBasePermissions($role);
+        $permissions = OrganizationPermissionService::getBasePermissions($role);
 
         if ($orgId) {
-            $permissions = ArrayMergerHelper::mergePermissions(
+            $permissions = ArrayHelper::merge(
                 $permissions,
-                PermissionService::getOrganizationPermissions($orgId, $user->id),
-                PermissionService::getAllProjectPermissions($orgId, $user->id)
+                OrganizationPermissionService::getOrganizationPermissions($orgId, $user->id),
+                ProjectPermissionService::getAllProjectPermissions($orgId, $user->id)
             );
         }
 
         if ($projId) {
-            $projectPermissions = PermissionService::getProjectPermissions($projId, $user->id);
-            $permissions = ArrayMergerHelper::mergePermissions($permissions, $projectPermissions);
+            $projectPermissions = ProjectPermissionService::getProjectPermissions($projId, $user->id);
+            $permissions = ArrayHelper::merge($permissions, $projectPermissions);
         }
 
         return ResponseMaker::asSuccess([
@@ -253,7 +257,7 @@ class AuthController extends Controller
             ]);
         }
 
-        throw new BadRequestHttpException('Failed to verify user.', 430);
+        throw new ServerErrorHttpException('Failed to verify user.');
     }
 
     public function actionResendVerificationEmail(): array
@@ -286,7 +290,7 @@ class AuthController extends Controller
             ]);
         }
 
-        throw new BadRequestHttpException('Failed to resend verification email.', 430);
+        throw new ServerErrorHttpException('Failed to resend verification email.');
     }
 
     public function actionResetPassword(): array
@@ -322,7 +326,7 @@ class AuthController extends Controller
                 ]);
             }
 
-            throw new BadRequestHttpException('Failed to send password reset email.', 430);
+            throw new ServerErrorHttpException('Failed to send password reset email.');
         }
 
         if (!$token) {
@@ -353,6 +357,6 @@ class AuthController extends Controller
             ]);
         }
 
-        throw new BadRequestHttpException('Failed to reset password.', 430);
+        throw new ServerErrorHttpException('Failed to reset password.');
     }
 }

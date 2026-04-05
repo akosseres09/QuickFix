@@ -2,6 +2,7 @@
 
 namespace common\models\forms;
 
+use common\components\traits\EmailSenderTrait;
 use Yii;
 use yii\base\Model;
 use common\models\User;
@@ -13,7 +14,7 @@ use common\models\UserStatus;
 class PasswordResetRequestForm extends Model
 {
     public $email;
-
+    use EmailSenderTrait;
 
     /**
      * {@inheritdoc}
@@ -37,7 +38,7 @@ class PasswordResetRequestForm extends Model
     /**
      * Sends an email with a link, for resetting the password.
      *
-     * @return bool whether the email was send
+     * @return bool whether the email was sent
      */
     public function sendEmail()
     {
@@ -58,15 +59,13 @@ class PasswordResetRequestForm extends Model
             }
         }
 
-        return Yii::$app
-            ->mailer
-            ->compose(
-                ['html' => 'passwordResetToken-html', 'text' => 'passwordResetToken-text'],
-                ['user' => $user]
-            )
-            ->setFrom([Yii::$app->params['supportEmail'] => Yii::$app->name . ' robot'])
-            ->setTo($this->email)
-            ->setSubject('Password reset for ' . Yii::$app->name)
-            ->send();
+        $this->queueEmail(
+            $this->email,
+            'Password reset for ' . Yii::$app->name,
+            'passwordResetToken',
+            ['user' => $user]
+        );
+
+        return true;
     }
 }

@@ -17,7 +17,7 @@ import { SnackbarService } from '../../../shared/services/snackbar/snackbar.serv
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DialogService } from '../../../shared/services/dialog/dialog.service';
 import { finalize } from 'rxjs';
-import { applyValidationErrors } from '../../../shared/utils/formErrorHandler';
+import { applyValidationErrors } from '../../../shared/utils/formErrorHandler/formErrorHandler';
 
 @Component({
     selector: 'app-edit',

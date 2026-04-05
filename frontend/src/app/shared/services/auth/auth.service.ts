@@ -5,7 +5,7 @@ import { environment } from '../../../../environments/environment';
 import { Claims, UserClaims } from '../../constants/user/Claims';
 import { UserPayloadToken } from '../../constants/token/UserTokenPayload';
 import { SignupData } from '../../constants/user/SignupData';
-import { decodeToken } from '../../utils/jwtDecoder';
+import { decodeToken } from '../../utils/jwtDecoder/jwtDecoder';
 import { UserRole } from '../../model/User';
 
 @Injectable({

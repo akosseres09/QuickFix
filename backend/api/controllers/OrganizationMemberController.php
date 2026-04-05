@@ -2,11 +2,13 @@
 
 namespace api\controllers;
 
+use api\components\permissions\OrganizationPermissionService;
 use common\models\OrganizationMember;
 use common\models\search\OrganizationMemberSearch;
 use Symfony\Component\Uid\Uuid;
 use Yii;
 use yii\web\BadRequestHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 
 class OrganizationMemberController extends BaseRestController
@@ -34,6 +36,31 @@ class OrganizationMemberController extends BaseRestController
         $actions['delete']['findModel'] = [$this, 'findModel'];
 
         return $actions;
+    }
+
+    public function checkAccess($action, $model = null, $params = [])
+    {
+        $userId = Yii::$app->user->id;
+        $orgId = Yii::$app->request->get('organization_id');
+
+        if (!$orgId) {
+            throw new BadRequestHttpException('Organization ID is required!');
+        }
+
+        switch ($action) {
+            case 'index':
+            case 'view':
+                if (!OrganizationPermissionService::canViewOrgMembers($orgId, $userId)) {
+                    throw new ForbiddenHttpException('You do not have permission to view organization members.');
+                }
+                break;
+            case 'update':
+            case 'delete':
+                if (!OrganizationPermissionService::canManageOrgMembers($orgId, $userId)) {
+                    throw new ForbiddenHttpException('You do not have permission to manage organization members.');
+                }
+                break;
+        }
     }
 
     public function findModel($id)

@@ -1,0 +1,21 @@
+namespace: api\tests
+actor_suffix: Tester
+paths:
+  tests: tests
+  output: tests/_output
+  data: tests/_data
+  support: tests/_support
+bootstrap: _bootstrap.php
+settings:
+  colors: true
+  memory_limit: 1024M
+coverage:
+  enabled: true
+  crap4j: coverage.xml
+  include:
+    - "components/*"
+    - "models/*"
+    - "controllers/*"
+exclude:
+  - "tests/*"
+  - ../vendor/*

@@ -1,6 +1,7 @@
 {
     "compileOnSave": false,
     "compilerOptions": {
+        "rootDir": "./src",
         "outDir": "./dist/out-tsc",
         "strict": true,
         "noImplicitOverride": true,
@@ -15,7 +16,8 @@
         "importHelpers": true,
         "target": "ES2022",
         "module": "ES2022",
-        "typeRoots": ["node_modules/@types"]
+        "typeRoots": ["node_modules/@types"],
+        "types": ["jasmine", "node"]
     },
     "angularCompilerOptions": {
         "enableI18nLegacyMessageIdFormat": false,

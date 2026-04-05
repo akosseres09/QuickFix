@@ -2,11 +2,13 @@
 
 namespace api\controllers;
 
+use api\components\permissions\ProjectPermissionService;
 use common\models\Project;
 use common\models\ProjectMember;
 use common\models\search\ProjectMemberSearch;
 use Yii;
 use yii\web\BadRequestHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 
 class ProjectMemberController extends BaseRestController
@@ -32,6 +34,32 @@ class ProjectMemberController extends BaseRestController
         $actions['delete']['findModel'] = [$this, 'findModel'];
 
         return $actions;
+    }
+
+    public function checkAccess($action, $model = null, $params = [])
+    {
+        $userId = Yii::$app->user->id;
+        $projectId = Yii::$app->request->get('project_id');
+
+        if (!$projectId) {
+            throw new BadRequestHttpException('Project ID is required.');
+        }
+
+        switch ($action) {
+            case 'index':
+            case 'view':
+                if (!ProjectPermissionService::canViewProjectMembers($projectId, $userId)) {
+                    throw new ForbiddenHttpException('You do not have permission to view project members.');
+                }
+                break;
+            case 'create':
+            case 'update':
+            case 'delete':
+                if (!ProjectPermissionService::canManageProjectMembers($projectId, $userId)) {
+                    throw new ForbiddenHttpException('You do not have permission to manage project members.');
+                }
+                break;
+        }
     }
 
     public function findModel($id)

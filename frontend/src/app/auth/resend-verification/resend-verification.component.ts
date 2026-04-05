@@ -10,7 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { finalize } from 'rxjs';
 import { MatIconModule } from '@angular/material/icon';
-import { applyValidationErrors } from '../../shared/utils/formErrorHandler';
+import { applyValidationErrors } from '../../shared/utils/formErrorHandler/formErrorHandler';
 
 @Component({
     selector: 'app-resend-verification',

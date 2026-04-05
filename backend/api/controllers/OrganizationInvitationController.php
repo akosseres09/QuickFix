@@ -2,6 +2,7 @@
 
 namespace api\controllers;
 
+use api\components\permissions\OrganizationPermissionService;
 use common\models\OrganizationInvitation;
 use common\models\search\OrganizationInvitationSearch;
 use Symfony\Component\Uid\Uuid;
@@ -38,6 +39,30 @@ class OrganizationInvitationController extends BaseRestController
         return $actions;
     }
 
+    public function checkAccess($action, $model = null, $params = [])
+    {
+        $userId = Yii::$app->user->id;
+        $orgId = Yii::$app->request->get('organization_id');
+
+        if ($orgId === null) {
+            $orgId = Yii::$app->request->post('organization_id');
+        }
+
+        switch ($action) {
+            case 'create':
+                if ($orgId && !OrganizationPermissionService::canInviteOrgMember($orgId, $userId)) {
+                    throw new ForbiddenHttpException('You do not have permission to send invitations for this organization.');
+                }
+                break;
+            case 'update':
+            case 'delete':
+                if (!OrganizationPermissionService::canManageOrgInvitation($model->organization_id, $userId)) {
+                    throw new ForbiddenHttpException('You do not have permission to manage this organization invitation.');
+                }
+                break;
+        }
+    }
+
     public function findModel($id)
     {
         $query = OrganizationInvitation::find();
@@ -56,7 +81,7 @@ class OrganizationInvitationController extends BaseRestController
         }
 
         if ($inv->isExpired()) {
-            throw new ForbiddenHttpException('Organization invitation has expired.');
+            throw new NotFoundHttpException('Organization invitation has expired.');
         }
 
         if (in_array($action, $actionsRequiringPendingStatus) && !$inv->isPending()) {

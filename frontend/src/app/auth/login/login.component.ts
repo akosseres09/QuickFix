@@ -17,7 +17,7 @@ import { SnackbarService } from '../../shared/services/snackbar/snackbar.service
 import { OrganizationInvitationService } from '../../shared/services/organization-invitation/organization-invitation.service';
 import { finalize } from 'rxjs';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { applyValidationErrors } from '../../shared/utils/formErrorHandler';
+import { applyValidationErrors } from '../../shared/utils/formErrorHandler/formErrorHandler';
 
 @Component({
     selector: 'app-login',
