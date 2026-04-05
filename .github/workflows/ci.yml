@@ -35,7 +35,7 @@ jobs:
         run: npm run test:components:auth
 
       - name: Run Layout Component Tests
-        run: npm run test:components:layout
+        run: npm run test:components:layouts
 
       - name: Run Common Component Tests
         run: npm run test:components:common
@@ -59,8 +59,8 @@ jobs:
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-timeout 3s
+          --health-retries 3
 
     steps:
       - uses: actions/checkout@v4
