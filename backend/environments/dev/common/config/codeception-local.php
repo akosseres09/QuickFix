@@ -1,16 +1,36 @@
 <?php
 
-return yii\helpers\ArrayHelper::merge(
+use yii\helpers\ArrayHelper;
+
+$config = ArrayHelper::merge(
     require __DIR__ . '/main.php',
     require __DIR__ . '/main-local.php',
     require __DIR__ . '/test.php',
     require __DIR__ . '/test-local.php',
-    [
-        'components' => [
-            'request' => [
-                // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
-                'cookieValidationKey' => '',
-            ],
-        ],
-    ]
 );
+
+// Merge params separately to avoid crashing when params-local.php doesn't exist.
+$params = require __DIR__ . '/params.php';
+if (is_file(__DIR__ . '/params-local.php')) {
+    $params = ArrayHelper::merge($params, require __DIR__ . '/params-local.php');
+}
+$config['params'] = $params;
+
+// Remove services that require Redis/Queue daemon from bootstrap so tests
+// run without external services.
+$config['bootstrap'] = ['log'];
+
+// Replace Redis cache with a file-based implementation.
+$config['components']['cache'] = [
+    'class' => \yii\caching\FileCache::class,
+];
+
+// Replace Redis queue with a synchronous in-process implementation.
+$config['components']['queue'] = [
+    'class' => \yii\queue\sync\Queue::class,
+];
+
+// Required by yii\web\User::login() → yii\web\Request cookie handling.
+$config['components']['request']['cookieValidationKey'] = 'test-cookie-validation-key';
+
+return $config;
