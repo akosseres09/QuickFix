@@ -1,25 +1,8 @@
 #!/bin/bash
+source ./documentation/scripts/progress.sh
+source ./documentation/scripts/directory-check.sh
 
-progress_bar() {
-    local progress=$1
-    local total=$2
-    local width=50
-
-    local percent=$((progress * 100 / total))
-    local filled=$((progress * width / total))
-    local empty=$((width - filled))
-
-    printf "\r["
-    printf "%0.s#" $(seq 1 $filled)
-    printf "%0.s-" $(seq 1 $empty)
-    printf "] %d%% (%d/%d)" "$percent" "$progress" "$total"
-}
-
-currentDir=$(pwd)
-if [[ ! "$currentDir" =~ QuickFix/frontend ]]; then
-    echo "Error: Please run this script from the 'QuickFix/frontend' directory."
-    exit 1
-fi
+check_directory
 
 echo "Generating dependency graphs for all services in 'src/app/shared/services'..."
 
