@@ -10,6 +10,7 @@
     "documentation:auth:graph": "npx depcruise src --focus \"^src/app/auth\" --output-type dot | dot -T svg > ./documentation/auth/dependency-graph.svg",
     "documentation:layouts:graph": "npx depcruise src --focus \"^src/app/layouts\" --output-type dot | dot -T svg > ./documentation/layouts/dependency-graph.svg",
     "documentation:services:graph": "npx depcruise src --focus \"^src/app/shared/services\" --output-type dot | dot -T svg > ./documentation/services/dependency-graph.svg",
+    "documentation:services:all:graph": "chmod u+x ./documentation/service-graph.sh && ./documentation/service-graph.sh",
     "test:services": "ng test --include='src/app/shared/services/**/*.service.spec.ts' --watch=false --browsers=ChromeHeadless",
     "test:guards": "ng test --include='src/app/shared/guards/**/*.guard.spec.ts' --watch=false --browsers=ChromeHeadless",
     "test:interceptors": "ng test --include='src/app/shared/interceptor/**/*.interceptor.spec.ts' --watch=false --browsers=ChromeHeadless",

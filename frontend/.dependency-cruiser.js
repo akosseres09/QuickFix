@@ -13,6 +13,6 @@ module.exports = {
         },
 
         // collapse subfolders by regex (keeping your existing setup)
-        collapse: '^src/app/(auth|common|layouts)/.*',
+        collapse: '^src/app/(auth|common|layouts|main)/.*',
     },
 };
