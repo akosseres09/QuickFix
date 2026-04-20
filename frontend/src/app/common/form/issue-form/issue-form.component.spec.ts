@@ -6,7 +6,7 @@ import { of } from 'rxjs';
 import { IssueFormComponent } from './issue-form.component';
 import { AuthService } from '../../../shared/services/auth/auth.service';
 import { ProjectMemberService } from '../../../shared/services/project-member/project-member.service';
-import { LabelService } from '../../../shared/services/label.service';
+import { LabelService } from '../../../shared/services/label/label.service';
 import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
 import { IssueType, IssuePriority } from '../../../shared/model/Issue';
 import { TextEditorComponent } from '../../text-editor/text-editor.component';

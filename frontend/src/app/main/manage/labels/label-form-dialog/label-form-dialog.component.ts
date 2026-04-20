@@ -9,7 +9,7 @@ import {
     viewChild,
 } from '@angular/core';
 import { DialogService } from '../../../../shared/services/dialog/dialog.service';
-import { LabelService } from '../../../../shared/services/label.service';
+import { LabelService } from '../../../../shared/services/label/label.service';
 import { Label } from '../../../../shared/model/Label';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';

@@ -1,10 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { environment } from '../../../environments/environment';
-import { Label } from '../model/Label';
-import { ApiQueryParams } from '../constants/api/ApiQueryParams';
-import { ParamsHandler } from '../utils/paramsHandler/paramsHandler';
-import { PaginatedResponse } from '../constants/api/PaginatedResponse';
+import { environment } from '../../../../environments/environment';
+import { Label } from '../../model/Label';
+import { ApiQueryParams } from '../../constants/api/ApiQueryParams';
+import { ParamsHandler } from '../../utils/paramsHandler/paramsHandler';
+import { PaginatedResponse } from '../../constants/api/PaginatedResponse';
 import { Observable } from 'rxjs';
 
 @Injectable({
