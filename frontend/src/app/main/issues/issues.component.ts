@@ -25,7 +25,7 @@ import { FilterService } from '../../shared/services/filter/filter.service';
 import { ListState } from '../../shared/constants/table/ListState';
 import { ListStateService } from '../../shared/services/list-state/list-state.service';
 import { Label } from '../../shared/model/Label';
-import { LabelService } from '../../shared/services/label.service';
+import { LabelService } from '../../shared/services/label/label.service';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { IssuePermissions } from '../../shared/constants/user/Permissions';
 import { BadgeComponent } from '../../common/badge/badge.component';

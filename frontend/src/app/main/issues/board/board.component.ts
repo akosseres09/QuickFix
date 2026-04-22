@@ -10,7 +10,7 @@ import {
 } from '@angular/cdk/drag-drop';
 import { Issue } from '../../../shared/model/Issue';
 import { IssueService } from '../../../shared/services/issue/issue.service';
-import { LabelService } from '../../../shared/services/label.service';
+import { LabelService } from '../../../shared/services/label/label.service';
 import { Label } from '../../../shared/model/Label';
 import { SnackbarService } from '../../../shared/services/snackbar/snackbar.service';
 import { BoardColumnComponent } from './board-column/board-column.component';

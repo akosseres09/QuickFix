@@ -27,8 +27,8 @@ import { ProjectMemberService } from '../../../shared/services/project-member/pr
 import { AuthService } from '../../../shared/services/auth/auth.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
-import { debounceTime, distinctUntilChanged, finalize, Subject, switchMap } from 'rxjs';
-import { LabelService } from '../../../shared/services/label.service';
+import { debounceTime, finalize, Subject, switchMap } from 'rxjs';
+import { LabelService } from '../../../shared/services/label/label.service';
 import { Label } from '../../../shared/model/Label';
 import { BadgeComponent } from '../../badge/badge.component';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';

@@ -1,5 +1,5 @@
 import { Component, computed, inject, input, OnInit, signal, viewChild } from '@angular/core';
-import { LabelService } from '../../../shared/services/label.service';
+import { LabelService } from '../../../shared/services/label/label.service';
 import { FixStatusNames, Label } from '../../../shared/model/Label';
 import { TableComponent } from '../../../common/table/table.component';
 import { DisplayedColumnService } from '../../../shared/services/displayed-column/displayed-column.service';

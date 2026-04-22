@@ -3,8 +3,8 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideHttpClient } from '@angular/common/http';
 
 import { LabelService } from './label.service';
-import { Label } from '../model/Label';
-import { PaginatedResponse } from '../constants/api/PaginatedResponse';
+import { Label } from '../../model/Label';
+import { PaginatedResponse } from '../../constants/api/PaginatedResponse';
 
 const ORG = 'org-1';
 const PROJECT = 'proj-1';

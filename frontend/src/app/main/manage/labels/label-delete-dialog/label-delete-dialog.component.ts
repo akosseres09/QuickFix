@@ -7,7 +7,7 @@ import {
     TemplateRef,
     viewChild,
 } from '@angular/core';
-import { LabelService } from '../../../../shared/services/label.service';
+import { LabelService } from '../../../../shared/services/label/label.service';
 import { DialogService } from '../../../../shared/services/dialog/dialog.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SnackbarService } from '../../../../shared/services/snackbar/snackbar.service';
